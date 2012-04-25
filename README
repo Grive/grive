@@ -1,0 +1,17 @@
+The first version of grive:
+
+This is a very experimental version. It just download all the files in your google drive
+in the current directory.
+
+This is compiled in Fedora 16 x64. You need the following libraries to run:
+json-c, libcurl, libstdc++
+
+To run it, first run "grive -a", it will print out a URL to the console. Open the URL in
+a browser with your google account sign in, and authorize the app. It should display an
+authenication code.
+
+Run "grive -c 'auth code here'", the app will display a refresh code. Set this code to
+an environment variable:
+export GR_REFRESH_CODE='your code here'
+
+Now run "grive" and it will download all your google drive files in the current directory.
