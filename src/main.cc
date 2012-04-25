@@ -36,7 +36,7 @@ int main( int argc, char **argv )
 			case 'a' :
 			{
 				std::cout << 
-					OAuth2::MakeAuthURL( "472848141496.apps.googleusercontent.com" ) << std::endl ;
+					OAuth2::MakeAuthURL( "22314510474.apps.googleusercontent.com" ) << std::endl ;
 				return 0 ;
 			}
 			

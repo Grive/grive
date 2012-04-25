@@ -27,8 +27,8 @@
 namespace gr {
 
 const std::string token_url		= "https://accounts.google.com/o/oauth2/token" ;
-const std::string client_id		= "472848141496.apps.googleusercontent.com" ;
-const std::string client_secret	= "hmBLwnBSU24Wombgjbffs6DS" ;
+const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
+const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 OAuth2::OAuth2( const std::string& refresh_code ) :
 	m_refresh( refresh_code )
