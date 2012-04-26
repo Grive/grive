@@ -40,7 +40,6 @@ namespace gr
 
 	Json ReadConfig()
 	{
-		std::cout << ConfigFilename() << std::endl ;
 		std::ifstream ifile( ConfigFilename().c_str() ) ;
 		
 		if ( ifile )

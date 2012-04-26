@@ -33,6 +33,12 @@ namespace gr
 		const std::string&	filename,
 		const Headers& 		hdr = Headers() ) ;
 	
+	void HttpGetFile(
+		const std::string&	url,
+		const std::string&	filename,
+		std::string&		md5sum,
+		const Headers& 		hdr = Headers() ) ;
+	
 	std::string HttpPostData(
 		const std::string&	url,
 		const std::string&	data,

@@ -19,9 +19,12 @@
 
 #include "HTTP.hh"
 
+#include "Download.hh"
+
+// dependent libraries
 #include <curl/curl.h>
+
 #include <cassert>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <streambuf>
@@ -49,15 +52,6 @@ std::size_t WriteCallback( char *data, size_t size, size_t nmemb, std::string *r
 	std::size_t count = size * nmemb ;
 	resp->append( data, count ) ;
 	return count ;
-}
-
-// libcurl callback to write to a file
-std::size_t DownloadCallback( char *data, size_t size, size_t nmemb, std::streambuf *file )
-{
-	assert( file != 0 ) ;
-	assert( data != 0 ) ;
-	
-	return file->sputn( data, size * nmemb ) ;
 }
 
 CURL* InitCurl( const std::string& url, std::string *resp, const Headers& hdr )
@@ -122,15 +116,21 @@ void HttpGetFile(
 	const std::string&	filename,
 	const Headers& 		hdr )
 {
-	std::ofstream file( filename.c_str(), std::ios::binary | std::ios::out ) ;
-	if ( !file )
-		throw std::runtime_error( "cannot open file " + filename + " for writing" ) ;
-
+	Download dl( filename, Download::NoChecksum() ) ;
+		
 	CURL *curl = InitCurl( url, 0, hdr ) ;
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	DownloadCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		file.rdbuf() ) ;
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Download::Callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		&dl ) ;
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 	DoCurl( curl ) ;
+}
+
+void HttpGetFile(
+	const std::string&	url,
+	const std::string&	filename,
+	std::string&		md5sum,
+	const Headers& 		hdr )
+{
 }
 
 std::string HttpPostData( const std::string& url, const std::string& data, const Headers& hdr )
