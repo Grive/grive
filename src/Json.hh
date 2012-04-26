@@ -34,11 +34,17 @@ public :
 	typedef std::vector<Json>			Array ;
 
 public :
-	Json( const std::string& str ) ;
+	template <typename T>
+	explicit Json( const T& val ) ;
+	
+	Json() ;
 	Json( const Json& rhs ) ;
 	~Json( ) ;
 	
+	static Json Parse( const std::string& str ) ;
+	
 	Json operator[]( const std::string& key ) const ;
+	Json operator[]( const std::size_t& idx ) const ;
 	Json& operator=( const Json& rhs ) ;
 	
 	void Swap( Json& other ) ;
@@ -50,6 +56,7 @@ public :
 	bool Is() const ;
 	
 	bool Has( const std::string& key ) const ;
+	void Add( const std::string& key, const Json& json ) ;
 	
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
 
@@ -59,6 +66,9 @@ public :
 	
 private :
 	Json( struct json_object *json ) ;
+	
+	struct NotOwned {} ;
+	Json( struct json_object *json, NotOwned ) ;
 	
 private :
 	struct json_object	*m_json ;

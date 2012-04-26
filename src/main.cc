@@ -19,14 +19,54 @@
 
 #include "OAuth2.hh"
 #include "Drive.hh"
+#include "Json.hh"
 
+#include <cassert>
 #include <cstdlib>
-
+#include <fstream>
 #include <iostream>
+#include <iterator>
+
+namespace gr
+{
+	const std::string& ConfigFilename()
+	{
+		static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
+		static const std::string filename =
+			(env_cfg != 0) ? env_cfg : std::string( ::getenv( "HOME") ) + "/.grive" ;
+
+		return filename ;
+	}
+
+	Json ReadConfig()
+	{
+		std::cout << ConfigFilename() << std::endl ;
+		std::ifstream ifile( ConfigFilename().c_str() ) ;
+		
+		if ( ifile )
+		{
+			std::string cfg_str(
+				(std::istreambuf_iterator<char>( ifile )),
+				(std::istreambuf_iterator<char>()) ) ;
+			
+			return Json::Parse( cfg_str ) ;
+		}
+		else
+			return Json() ;
+	}
+	
+	void SaveConfig( const Json& config )
+	{
+		std::ofstream ofile( ConfigFilename().c_str() ) ;
+		ofile << config ;
+	}
+}
 
 int main( int argc, char **argv )
 {
 	using namespace gr ;
+
+	Json config = ReadConfig() ;
 	
 	int c ;
 	while ((c = getopt (argc, argv, "ac:")) != -1)
@@ -35,24 +75,31 @@ int main( int argc, char **argv )
 		{
 			case 'a' :
 			{
-				std::cout << 
-					OAuth2::MakeAuthURL( "22314510474.apps.googleusercontent.com" ) << std::endl ;
-				return 0 ;
-			}
-			
-			case 'c' :
-			{
+				std::cout
+					<< "Please go to this URL and enter the code:\n"
+					<< OAuth2::MakeAuthURL( "22314510474.apps.googleusercontent.com" )
+					<< std::endl ;
+				
+				std::string code ;
+				std::cin >> code ;
+				
 				OAuth2 token ;
-				token.Auth( optarg ) ;
+				token.Auth( code ) ;
 				
 				// print the refresh token an exist
-				std::cout << token.RefreshToken() << std::endl ;
-				return 0 ;
+				std::cout << "got refresh token: " << token.RefreshToken() << std::endl ;
+
+				// save to config
+				config.Add( "refresh_token", Json( token.RefreshToken() ) ) ;
+				assert( config["refresh_token"].As<std::string>() == token.RefreshToken() ) ;
+				SaveConfig( config ) ;
+				
+				break ;
 			}
 		}
 	}
 	
-	OAuth2 token( getenv( "GR_REFRESH_CODE" ) ) ;
+	OAuth2 token( config["refresh_token"].As<std::string>() ) ;
 	Drive drive( token ) ;
 	
 	return 0 ;

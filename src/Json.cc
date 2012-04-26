@@ -23,16 +23,43 @@
 #include <json/linkhash.h>
 
 #include <cassert>
-#include <ostream>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 namespace gr {
 
-Json::Json( const std::string& str ) :
-	m_json( ::json_tokener_parse( str.c_str() ) )
+Json::Json( ) :
+	m_json( ::json_object_new_object() )
 {
 	if ( m_json == 0 )
+		throw std::runtime_error( "cannot create json object" ) ;
+}
+
+template <>
+Json::Json( const std::string& str ) :
+	m_json( ::json_object_new_string( str.c_str() ) )
+{
+	if ( m_json == 0 )
+		throw std::runtime_error( "cannot create json string \"" + str + "\"" ) ;
+
+	// paranoid check
+	assert( ::json_object_get_string( m_json ) == str ) ;
+}
+
+Json Json::Parse( const std::string& str )
+{
+	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
+	if ( json == 0 )
 		throw std::runtime_error( "json parse error" ) ;
+	
+	return Json( json, NotOwned() ) ;
+}
+
+Json::Json( struct json_object *json, NotOwned ) :
+	m_json( json )
+{
+	assert( json != 0 ) ;
 }
 
 Json::Json( struct json_object *json ) :
@@ -80,10 +107,34 @@ Json Json::operator[]( const std::string& key ) const
 	return Json( j ) ;
 }
 
+Json Json::operator[]( const std::size_t& idx ) const
+{
+	assert( m_json != 0 ) ;
+
+	struct json_object *j = ::json_object_array_get_idx( m_json, idx ) ;
+	if ( j == 0 )
+	{
+		std::ostringstream ss ;
+		ss << "index " << idx << " is not found in array" ;
+		throw std::runtime_error( ss.str() ) ;
+	}
+	
+	return Json( j ) ;
+}
+
 bool Json::Has( const std::string& key ) const
 {
 	assert( m_json != 0 ) ;
 	return ::json_object_object_get( m_json, key.c_str() ) != 0 ;
+}
+
+void Json::Add( const std::string& key, const Json& json )
+{
+	assert( m_json != 0 ) ;
+	assert( json.m_json != 0 ) ;
+	
+	::json_object_get( json.m_json ) ;
+	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
 }
 
 template <>

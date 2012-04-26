@@ -34,7 +34,7 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
-	Json resp( HttpGet( "https://docs.google.com/feeds/default/private/full?alt=json", m_http_hdr ) ) ;
+	Json resp = Json::Parse(HttpGet( "https://docs.google.com/feeds/default/private/full?alt=json", m_http_hdr )) ;
 
 /*	Json::Object map = resp["feed"]["id"].As<Json::Object>() ;
 	for ( Json::Object::iterator i = map.begin() ; i != map.end() ; ++i )

@@ -49,7 +49,7 @@ void OAuth2::Auth( const std::string& auth_code )
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
-	Json resp( HttpPostData( token_url, post ) ) ;
+	Json resp = Json::Parse( HttpPostData( token_url, post ) ) ;
 	m_access	= resp["access_token"].As<std::string>() ;
 	m_refresh	= resp["refresh_token"].As<std::string>() ;
 }
@@ -78,7 +78,7 @@ void OAuth2::Refresh( )
 		"&client_secret="	+ client_secret +
 		"&grant_type=refresh_token" ;
 
-	Json resp( HttpPostData( token_url, post ) ) ;
+	Json resp = Json::Parse( HttpPostData( token_url, post ) ) ;
 	m_access	= resp["access_token"].As<std::string>() ;
 }
 
