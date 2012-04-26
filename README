@@ -4,14 +4,15 @@ This is a very experimental version. It just download all the files in your goog
 in the current directory.
 
 This is compiled in Fedora 16 x64. You need the following libraries to run:
-json-c, libcurl, libstdc++
+json-c, libcurl, libstdc++ and openssl.
 
-To run it, first run "grive -a", it will print out a URL to the console. Open the URL in
-a browser with your google account sign in, and authorize the app. It should display an
-authenication code.
+For the first time running grive, you should use the "-a" argument to grant
+permission to grive to access to your Google Drive. An URL should be printed.
+Go to the page. You will need to login to your google account if you haven't
+done so. After granting the permission to grive, the browser will show you
+an authenication code. Copy-and-paste that to the standard input of grive.
 
-Run "grive -c 'auth code here'", the app will display a refresh code. Set this code to
-an environment variable:
-export GR_REFRESH_CODE='your code here'
+If everything works fine, grive will create a .grive file in your home directory.
+It will also start downloading files from your Google Drive to your current directory.
 
-Now run "grive" and it will download all your google drive files in the current directory.
+Enjoy!
