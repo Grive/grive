@@ -21,6 +21,8 @@
 
 #include "protocol/Json.hh"
 
+#include <cassert>
+
 // OS specific library
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -33,22 +35,20 @@ namespace gr {
 Collection::Collection( const Json& entry ) :
 	m_title		( entry["title"]["$t"].As<std::string>() ),
 	m_href		( entry["link"].FindInArray( "rel", "self" )["href"].As<std::string>() ),
-	m_parent	( Parent( entry ) )
+	m_parent	( 0 )
 {
-	std::cout << "title: " << m_title << " {" << m_parent << "}" << std::endl ;
 }
 
 Collection::Collection(
 	const std::string& title,
-	const std::string& href,
-	const std::string& parent ) :
+	const std::string& href ) :
 	m_title	( title ),
 	m_href	( href ),
-	m_parent( parent )
+	m_parent( 0 )
 {
 }
 
-std::string Collection::Parent( const Json& entry )
+std::string Collection::ParentHref( const Json& entry )
 {
 	Json node ;
 	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
@@ -65,13 +65,23 @@ const std::string& Collection::Title() const
 	return m_title ;
 }
 
-const std::string& Collection::Parent() const
+const Collection* Collection::Parent() const
+{
+	return m_parent ;
+}
+
+Collection* Collection::Parent()
 {
 	return m_parent ;
 }
 
 void Collection::AddChild( Collection *child )
 {
+	assert( child != 0 ) ;
+	assert( child->m_parent == 0 ) ;
+	assert( child != this ) ;
+
+	child->m_parent = this ;
 	m_child.push_back( child ) ;
 }
 
@@ -87,19 +97,26 @@ void Collection::Swap( Collection& coll )
 {
 	m_title.swap( coll.m_title ) ;
 	m_href.swap( coll.m_href ) ;
+	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
 }
 
 void Collection::CreateSubDir( const std::string& prefix )
 {
 	std::string dir = prefix + m_title ;
-	std::cout << dir << std::endl ;
 	mkdir( dir.c_str(), 0700 ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
-		(*i)->CreateSubDir( prefix + m_title + "/" ) ;		
+		assert( (*i)->m_parent == this ) ;
+		(*i)->CreateSubDir( prefix + m_title + "/" ) ;
 	}
+}
+
+std::string Collection::Path() const
+{
+	assert( m_parent != this ) ;
+	return m_parent != 0 ? (m_parent->Path() + "/" + m_title) : m_title ;
 }
 
 } // end of namespace

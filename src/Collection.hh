@@ -30,15 +30,18 @@ class Collection
 {
 public :
 	explicit Collection( const Json& entry ) ;
-	Collection( const std::string& title, const std::string& href, const std::string& parent ) ;
+	Collection( const std::string& title, const std::string& href ) ;
 	
 	// default copy ctor & op= are fine
 	
 	static bool IsCollection( const Json& entry ) ;
+	static std::string ParentHref( const Json& entry ) ;
 	
 	const std::string& Title() const ;
 	const std::string& Href() const ;
-	const std::string& Parent() const ;
+	const Collection* Parent() const ;
+	Collection* Parent() ;
+	std::string Path() const ;
 
 	void AddChild( Collection *child ) ;
 	
@@ -47,14 +50,11 @@ public :
 	void CreateSubDir( const std::string& prefix ) ;
 	
 private :
-	static std::string Parent( const Json& entry ) ;
-	
-private :
 	std::string					m_title ;
 	std::string					m_href ;
-	std::string					m_parent ;
 	
 	// not owned
+	Collection					*m_parent ;
 	std::vector<Collection*>	m_child ;
 } ;
 

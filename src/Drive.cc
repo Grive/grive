@@ -28,10 +28,11 @@
 
 // standard C++ library
 #include <algorithm>
+#include <cassert>
 #include <fstream>
 #include <iomanip>
+#include <map>
 #include <sstream>
-
 
 // for debugging only
 #include <iostream>
@@ -66,7 +67,7 @@ std::string MD5( std::streambuf *file )
 
 Drive::Drive( OAuth2& auth ) :
 	m_auth( auth ),
-	m_root( "", "https://docs.google.com/feeds/default/private/full/folder%3Aroot", "" )
+	m_root( ".", "https://docs.google.com/feeds/default/private/full/folder%3Aroot" )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
@@ -78,7 +79,10 @@ Drive::Drive( OAuth2& auth ) :
 	
 	for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
 	{
-// 		DownloadEntry( *i ) ;
+		if ( !Collection::IsCollection( *i ) )
+		{
+			UpdateFile( *i ) ;
+		}
 	}
 }
 
@@ -108,67 +112,91 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 		std::lower_bound(
 			m_coll.begin(),
 			m_coll.end(),
-			Collection( "", href, "" ),
+			Collection( "", href ),
 			SortCollectionByHref() ) ;
 	
-	 return it != m_coll.end() && it->Href() == href ? it : m_coll.end() ;
+	 return (it != m_coll.end() && it->Href() == href) ? it : m_coll.end() ;
 }
 
 void Drive::ConstructDirTree( const std::vector<Json>& entries )
 {
+	assert( m_coll.empty() ) ;
+	std::map<std::string, std::string> parent_href ;
+
 	// first, get all collections from the query result
 	for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
 	{
 		if ( Collection::IsCollection( *i ) )
+		{
 			m_coll.push_back( Collection( *i ) ) ;
+			parent_href.insert(
+				std::make_pair(
+					m_coll.back().Href(),
+					Collection::ParentHref( *i ) ) ) ;
+		}
 	}
+	assert( m_coll.size() == parent_href.size() ) ;
 	
 	// second, build up linkage between parent and child 
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
-		if ( i->Parent().empty() )
+		assert( parent_href.find( i->Href() ) != parent_href.end() ) ;
+		std::string parent = parent_href[i->Href()] ;
+		
+		if ( parent.empty() )
 			m_root.AddChild( &*i ) ;
 		else
 		{
-			FolderListIterator pit = FindFolder( i->Parent() ) ;
+			FolderListIterator pit = FindFolder( parent ) ;
 			if ( pit != m_coll.end() )
-				pit->AddChild( &*i ) ;
+			{
+				// it shouldn't happen, just in case
+				if ( &*i == &*pit )
+					std::cout
+						<< "the parent of folder " << i->Title()
+						<< " is itself. ignored" << std::endl ;
+				else
+					pit->AddChild( &*i ) ;
+			}
 		}
 	}
 	
 	// lastly, iterating from the root, create the directories in the local file system
-	m_root.CreateSubDir( "." ) ;
+	assert( m_root.Parent() == 0 ) ;
+	m_root.CreateSubDir( "" ) ;
 }
 
 std::string Drive::Parent( const Json& entry )
 {
 	Json node ;
-	return entry["link"].FindInArray( "ref", "http://schemas.google.com/docs/2007#parent", node ) ?
+	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
 		 node["href"].As<std::string>() : std::string() ;
 }
 
-void Drive::DownloadEntry( const Json& entry )
+void Drive::UpdateFile( const Json& entry )
 {
-// 	Json::Object map = entry.As<Json::Object>() ;
-// 	for ( Json::Object::iterator i = map.begin() ; i != map.end() ; ++i )
-// 	{
-// 		std::cout << i->first << "\t" << i->second.DataType() << std::endl ;
-// 	}
-	
-	Parent( entry ) ;
-	
 	// only handle uploaded files
 	if ( entry.Has( "docs$filename" ) )
 	{
 		// use title as the filename
 		std::string filename	= entry["docs$filename"]["$t"].As<std::string>() ;
 		std::string url			= entry["content"]["src"].As<std::string>() ;
+		std::string parent_href	= Parent( entry ) ;
 		
 		bool changed = true ;
+		std::string path = "./" + filename ;
+
+		// determine which folder the file belongs to
+		if ( !parent_href.empty() )
+		{
+			FolderListIterator pit = FindFolder( parent_href ) ;
+			if ( pit != m_coll.end() )
+				path = pit->Path() + "/" + filename ;
+		}
 		
 		// compare checksum first if file exists
-		std::ifstream ifile( filename.c_str(), std::ios::binary | std::ios::out ) ;
+		std::ifstream ifile( path.c_str(), std::ios::binary | std::ios::out ) ;
 		if ( ifile && entry.Has("docs$md5Checksum") )
 		{
 			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
@@ -179,10 +207,11 @@ void Drive::DownloadEntry( const Json& entry )
 				changed = false ;
 		}
 		
+		// if the checksum is different, file is changed and we need to download
 		if ( changed )
 		{
-std::cout << "downloading " << filename << std::endl ;
-			HttpGetFile( url, filename, m_http_hdr ) ;
+std::cout << "downloading " << path << std::endl ;
+			HttpGetFile( url, path, m_http_hdr ) ;
 		}
 	}
 }

@@ -40,7 +40,7 @@ public :
 	~Drive( ) ;
 
 private :
-	void DownloadEntry( const Json& entry ) ;
+	void UpdateFile( const Json& entry ) ;
 	std::string Parent( const Json& entry ) ;
 	
 	void ConstructDirTree( const std::vector<Json>& entries ) ;
