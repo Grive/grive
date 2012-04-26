@@ -4,8 +4,8 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
+	as published by the Free Software Foundation; version 2
+	of the License.
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,13 +19,16 @@
 
 #include "OAuth2.hh"
 #include "Drive.hh"
-#include "Json.hh"
+#include "protocol/Json.hh"
 
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+
+const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
+const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 namespace gr
 {
@@ -75,19 +78,20 @@ int main( int argc, char **argv )
 			case 'a' :
 			{
 				std::cout
-					<< "Please go to this URL and enter the code:\n"
-					<< OAuth2::MakeAuthURL( "22314510474.apps.googleusercontent.com" )
+					<< "-----------------------\n"
+					<< "Please go to this URL and get an authenication code:\n\n"
+					<< OAuth2::MakeAuthURL( client_id )
 					<< std::endl ;
 				
+				std::cout
+					<< "\n-----------------------\n"
+					<< "Please input the authenication code here" << std::endl ;
 				std::string code ;
 				std::cin >> code ;
 				
-				OAuth2 token ;
+				OAuth2 token( client_id, client_secret ) ;
 				token.Auth( code ) ;
 				
-				// print the refresh token an exist
-				std::cout << "got refresh token: " << token.RefreshToken() << std::endl ;
-
 				// save to config
 				config.Add( "refresh_token", Json( token.RefreshToken() ) ) ;
 				assert( config["refresh_token"].As<std::string>() == token.RefreshToken() ) ;
@@ -98,7 +102,7 @@ int main( int argc, char **argv )
 		}
 	}
 	
-	OAuth2 token( config["refresh_token"].As<std::string>() ) ;
+	OAuth2 token( config["refresh_token"].As<std::string>(), client_id, client_secret ) ;
 	Drive drive( token ) ;
 	
 	return 0 ;

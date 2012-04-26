@@ -4,8 +4,8 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
+	as published by the Free Software Foundation; version 2
+	of the License.
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,8 +18,9 @@
 */
 
 #include "OAuth2.hh"
-#include "HTTP.hh"
-#include "Json.hh"
+
+#include "protocol/HTTP.hh"
+#include "protocol/Json.hh"
 
 // for debugging
 #include <iostream>
@@ -27,25 +28,32 @@
 namespace gr {
 
 const std::string token_url		= "https://accounts.google.com/o/oauth2/token" ;
-const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
-const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
-OAuth2::OAuth2( const std::string& refresh_code ) :
-	m_refresh( refresh_code )
+OAuth2::OAuth2(
+	const std::string& refresh_code,
+	const std::string&	client_id,
+	const std::string&	client_secret ) :
+	m_refresh( refresh_code ),
+	m_client_id( client_id ),
+	m_client_secret( client_secret )
 {
 	Refresh( ) ;
 }
 
-OAuth2::OAuth2( )
+OAuth2::OAuth2(
+	const std::string&	client_id,
+	const std::string&	client_secret ) :
+	m_client_id( client_id ),
+	m_client_secret( client_secret )
 {
 }
 
-void OAuth2::Auth( const std::string& auth_code )
+void OAuth2::Auth( const std::string&	auth_code )
 {
 	std::string post =
 		"code="				+ auth_code +
-		"&client_id="		+ client_id +
-		"&client_secret="	+ client_secret +
+		"&client_id="		+ m_client_id +
+		"&client_secret="	+ m_client_secret +
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
@@ -74,8 +82,8 @@ void OAuth2::Refresh( )
 {
 	std::string post =
 		"refresh_token="	+ m_refresh +
-		"&client_id="		+ client_id +
-		"&client_secret="	+ client_secret +
+		"&client_id="		+ m_client_id +
+		"&client_secret="	+ m_client_secret +
 		"&grant_type=refresh_token" ;
 
 	Json resp = Json::Parse( HttpPostData( token_url, post ) ) ;
