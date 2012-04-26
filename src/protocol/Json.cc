@@ -4,7 +4,7 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; version 2
+	as published by the Free Software Foundation version 2
 	of the License.
 
 	This program is distributed in the hope that it will be useful,
@@ -59,7 +59,7 @@ Json Json::Parse( const std::string& str )
 Json::Json( struct json_object *json, NotOwned ) :
 	m_json( json )
 {
-	assert( json != 0 ) ;
+	assert( m_json != 0 ) ;
 }
 
 Json::Json( struct json_object *json ) :
@@ -79,7 +79,8 @@ Json::Json( const Json& rhs ) :
 Json::~Json( )
 {
 	assert( m_json != 0 ) ;
-	::json_object_put( m_json ) ;
+	if ( m_json != 0 )
+		::json_object_put( m_json ) ;
 }
 
 Json& Json::operator=( const Json& rhs )
@@ -215,5 +216,32 @@ bool Json::Is<Json::Array>() const
 	assert( m_json != 0 ) ;
 	return ::json_object_is_type( m_json, json_type_array ) ;
 }
+
+Json Json::FindInArray( const std::string& key, const std::string& value ) const
+{
+	std::size_t count = ::json_object_array_length( m_json ) ;
+	
+	for ( std::size_t i = 0 ; i < count ; ++i )
+	{
+		Json item( ::json_object_array_get_idx( m_json, i ) ) ;
+		if ( item.Has(key) && item[key].As<std::string>() == value )
+			return item ;
+	}
+	throw std::runtime_error( "cannot find " + key + " = " + value + " in array" ) ;
+}
+
+bool Json::FindInArray( const std::string& key, const std::string& value, Json& result ) const
+{
+	try
+	{
+		result = FindInArray( key, value ) ;
+		return true ;
+	}
+	catch ( std::runtime_error& )
+	{
+		return false ;
+	}
+}
+
 
 }

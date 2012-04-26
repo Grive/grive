@@ -4,7 +4,7 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; version 2
+	as published by the Free Software Foundation version 2
 	of the License.
 
 	This program is distributed in the hope that it will be useful,
@@ -23,17 +23,22 @@
 #include "protocol/Json.hh"
 #include "OAuth2.hh"
 
+// dependent libraries
 #include <openssl/evp.h>
 
+// standard C++ library
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 
+
 // for debugging only
 #include <iostream>
 
 namespace gr {
+
+const std::string root_url = "https://docs.google.com/feeds/default/private/full" ;
 
 std::string MD5( std::streambuf *file )
 {
@@ -60,24 +65,87 @@ std::string MD5( std::streambuf *file )
 }
 
 Drive::Drive( OAuth2& auth ) :
-	m_auth( auth )
+	m_auth( auth ),
+	m_root( "", "https://docs.google.com/feeds/default/private/full/folder%3Aroot", "" )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
-	Json resp = Json::Parse(HttpGet( "https://docs.google.com/feeds/default/private/full?alt=json", m_http_hdr )) ;
-
-/*	Json::Object map = resp["feed"]["id"].As<Json::Object>() ;
-	for ( Json::Object::iterator i = map.begin() ; i != map.end() ; ++i )
-	{
-		std::cout << i->first << "\t" << i->second.DataType() << std::endl ;
-	}*/
 	
-	Json::Array a = resp["feed"]["entry"].As<Json::Array>() ;
-	for ( Json::Array::iterator i = a.begin() ; i != a.end() ; ++i )
+	Json resp = Json::Parse(HttpGet( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
+	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
+	ConstructDirTree( entries ) ;
+	
+	for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
 	{
-		DownloadEntry( *i ) ;
+// 		DownloadEntry( *i ) ;
 	}
+}
+
+Drive::~Drive( )
+{
+}
+
+std::string Drive::Kind( const Json& entry )
+{
+	Json node ;
+	return entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node ) ?
+		node["label"].As<std::string>() : std::string() ;
+}
+
+struct SortCollectionByHref
+{
+	bool operator()( const Collection& c1, const Collection& c2 ) const
+	{
+		return c1.Href() < c2.Href() ;
+	}
+} ;
+
+Drive::FolderListIterator Drive::FindFolder( const std::string& href )
+{
+	// try to find the parent by its href
+	std::vector<Collection>::iterator it =
+		std::lower_bound(
+			m_coll.begin(),
+			m_coll.end(),
+			Collection( "", href, "" ),
+			SortCollectionByHref() ) ;
+	
+	 return it != m_coll.end() && it->Href() == href ? it : m_coll.end() ;
+}
+
+void Drive::ConstructDirTree( const std::vector<Json>& entries )
+{
+	// first, get all collections from the query result
+	for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
+	{
+		if ( Collection::IsCollection( *i ) )
+			m_coll.push_back( Collection( *i ) ) ;
+	}
+	
+	// second, build up linkage between parent and child 
+	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
+	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
+	{
+		if ( i->Parent().empty() )
+			m_root.AddChild( &*i ) ;
+		else
+		{
+			FolderListIterator pit = FindFolder( i->Parent() ) ;
+			if ( pit != m_coll.end() )
+				pit->AddChild( &*i ) ;
+		}
+	}
+	
+	// lastly, iterating from the root, create the directories in the local file system
+	m_root.CreateSubDir( "." ) ;
+}
+
+std::string Drive::Parent( const Json& entry )
+{
+	Json node ;
+	return entry["link"].FindInArray( "ref", "http://schemas.google.com/docs/2007#parent", node ) ?
+		 node["href"].As<std::string>() : std::string() ;
 }
 
 void Drive::DownloadEntry( const Json& entry )
@@ -87,6 +155,8 @@ void Drive::DownloadEntry( const Json& entry )
 // 	{
 // 		std::cout << i->first << "\t" << i->second.DataType() << std::endl ;
 // 	}
+	
+	Parent( entry ) ;
 	
 	// only handle uploaded files
 	if ( entry.Has( "docs$filename" ) )

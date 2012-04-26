@@ -20,27 +20,47 @@
 #pragma once
 
 #include <string>
-#include <fstream>
-
-#include <openssl/evp.h>
+#include <vector>
 
 namespace gr {
 
-class Download
+class Json ;
+
+class Collection
 {
 public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
+	explicit Collection( const Json& entry ) ;
+	Collection( const std::string& title, const std::string& href, const std::string& parent ) ;
 	
-	std::string Finish() const ;
+	// default copy ctor & op= are fine
 	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
+	static bool IsCollection( const Json& entry ) ;
+	
+	const std::string& Title() const ;
+	const std::string& Href() const ;
+	const std::string& Parent() const ;
+
+	void AddChild( Collection *child ) ;
+	
+	void Swap( Collection& coll ) ;
+
+	void CreateSubDir( const std::string& prefix ) ;
 	
 private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
+	static std::string Parent( const Json& entry ) ;
+	
+private :
+	std::string					m_title ;
+	std::string					m_href ;
+	std::string					m_parent ;
+	
+	// not owned
+	std::vector<Collection*>	m_child ;
 } ;
 
 } // end of namespace
+
+namespace std
+{
+	void swap( gr::Collection& c1, gr::Collection& c2 ) ;
+}

@@ -4,7 +4,7 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
+	as published by the Free Software Foundation version 2
 	of the License.
 
 	This program is distributed in the hope that it will be useful,
@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "Collection.hh"
+
 #include <string>
 #include <vector>
 
@@ -30,14 +32,29 @@ class Json ;
 class Drive
 {
 public :
+	typedef std::vector<Collection>				FolderList ;
+	typedef std::vector<Collection>::iterator	FolderListIterator ;
+
+public :
 	Drive( OAuth2& auth ) ;
+	~Drive( ) ;
 
 private :
 	void DownloadEntry( const Json& entry ) ;
+	std::string Parent( const Json& entry ) ;
+	
+	void ConstructDirTree( const std::vector<Json>& entries ) ;
+	
+	static std::string Kind( const Json& entry ) ;
+	
+	FolderListIterator FindFolder( const std::string& href ) ;
 	
 private :
 	OAuth2&						m_auth ;
 	std::vector<std::string>	m_http_hdr ;
+	
+	FolderList					m_coll ;
+	Collection					m_root ;
 } ;
 
 } // end of namespace

@@ -4,7 +4,7 @@
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; version 2
+	as published by the Free Software Foundation version 2
 	of the License.
 
 	This program is distributed in the hope that it will be useful,
@@ -57,6 +57,8 @@ public :
 	
 	bool Has( const std::string& key ) const ;
 	void Add( const std::string& key, const Json& json ) ;
+	Json FindInArray( const std::string& key, const std::string& value ) const ;
+	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
 	
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
 

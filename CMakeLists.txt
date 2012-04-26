@@ -8,6 +8,7 @@ add_executable( grive
 	src/main.cc
 	src/OAuth2.cc
 	src/Drive.cc
+	src/Collection.cc
 	src/protocol/HTTP.cc
 	src/protocol/Json.cc
 	src/protocol/Download.cc )
