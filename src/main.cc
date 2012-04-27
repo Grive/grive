@@ -17,8 +17,8 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "OAuth2.hh"
-#include "Drive.hh"
+#include "drive/Drive.hh"
+#include "protocol/OAuth2.hh"
 #include "protocol/Json.hh"
 
 #include <cassert>

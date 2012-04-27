@@ -21,7 +21,7 @@
 
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
-#include "OAuth2.hh"
+#include "protocol/OAuth2.hh"
 
 // dependent libraries
 #include <openssl/evp.h>

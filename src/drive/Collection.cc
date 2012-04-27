@@ -20,12 +20,9 @@
 #include "Collection.hh"
 
 #include "protocol/Json.hh"
+#include "util/OS.hh"
 
 #include <cassert>
-
-// OS specific library
-#include <sys/stat.h>
-#include <sys/types.h>
 
 // for debugging
 #include <iostream>
@@ -104,7 +101,8 @@ void Collection::Swap( Collection& coll )
 void Collection::CreateSubDir( const std::string& prefix )
 {
 	std::string dir = prefix + m_title ;
-	mkdir( dir.c_str(), 0700 ) ;
+// 	mkdir( dir.c_str(), 0700 ) ;
+	os::MakeDir( dir ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
