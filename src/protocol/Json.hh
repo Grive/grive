@@ -52,6 +52,14 @@ public :
 	template <typename T>
 	T As() const ;
 	
+	struct Proxy
+	{
+		const Json&	referring ;
+		explicit Proxy( const Json& j ) : referring( j ) { }
+		template <typename T> operator T() const { return referring.As<T>() ; }
+	} ;
+	Proxy As() const ;
+	
 	template <typename T>
 	bool Is() const ;
 	
