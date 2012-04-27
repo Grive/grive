@@ -17,18 +17,24 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "DateTimeTest.hh"
 
-#include <string>
+#include "util/DateTime.hh"
 
-namespace gr {
+namespace grut {
 
-class DateTime ;
+using namespace gr ;
 
-namespace os
+DateTimeTest::DateTimeTest( )
 {
-	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
 }
 
-} // end of namespaces
+void DateTimeTest::TestParseIso( )
+{
+	DateTime	subject( "2009-07-29T20:31:39.804Z" ) ;
+	struct tm tp = subject.Tm() ;
+	CPPUNIT_ASSERT( tp.tm_year == 109 ) ;
+	CPPUNIT_ASSERT( tp.tm_sec  == 39 ) ;
+}
+
+} // end of namespace grut

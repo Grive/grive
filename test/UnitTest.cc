@@ -17,18 +17,17 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include <cppunit/ui/text/TestRunner.h>
 
-#include <string>
+#include "util/DateTimeTest.hh"
 
-namespace gr {
-
-class DateTime ;
-
-namespace os
+int main( int argc, char **argv )
 {
-	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
-}
+	using namespace grut ;
 
-} // end of namespaces
+	CppUnit::TextUi::TestRunner runner;
+	runner.addTest( DateTimeTest::suite( ) ) ;
+	runner.run();
+  
+	return 0 ;
+}

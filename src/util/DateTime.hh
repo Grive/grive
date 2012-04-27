@@ -19,16 +19,25 @@
 
 #pragma once
 
+#include <ctime>
 #include <string>
 
 namespace gr {
 
-class DateTime ;
-
-namespace os
+class DateTime
 {
-	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
-}
+public :
+	DateTime( ) ;
+	explicit DateTime( const std::string& iso ) ;
 
-} // end of namespaces
+	std::time_t Sec( ) const ;
+	unsigned long USec( ) const ;
+
+	struct tm Tm() const ;
+	
+private :
+	std::time_t		m_sec ;
+	unsigned long	m_usec ;
+} ;
+
+} // end of namespace

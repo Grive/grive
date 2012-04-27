@@ -19,16 +19,23 @@
 
 #pragma once
 
-#include <string>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-namespace gr {
+namespace grut {
 
-class DateTime ;
-
-namespace os
+class DateTimeTest : public CppUnit::TestFixture
 {
-	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
-}
+public :
+	DateTimeTest( ) ;
 
-} // end of namespaces
+	// declare suit function
+	CPPUNIT_TEST_SUITE( DateTimeTest ) ;
+		CPPUNIT_TEST( TestParseIso ) ;
+	CPPUNIT_TEST_SUITE_END();
+
+private :
+	void TestParseIso( ) ;
+} ;
+
+} // end of namespace

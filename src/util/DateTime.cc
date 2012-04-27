@@ -17,18 +17,48 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "DateTime.hh"
 
-#include <string>
+#include <cstdlib>
+#include <iostream>
+
+#include <time.h>
 
 namespace gr {
 
-class DateTime ;
-
-namespace os
+DateTime::DateTime( ) :
+	m_sec	( 0 ),
+	m_usec	( 0 )
 {
-	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
 }
 
-} // end of namespaces
+DateTime::DateTime( const std::string& iso ) :
+	m_sec	( 0 ),
+	m_usec	( 0 )
+{
+	struct tm tp ;
+	const char *r = ::strptime( iso.c_str(), "%Y-%m-%dT%H:%M:%S.", &tp ) ;
+	
+	m_sec	= ::mktime( &tp ) ;
+	if ( r != 0 )
+		m_usec	= std::atoi( r ) * 1000 ;
+}
+
+struct tm DateTime::Tm() const
+{
+	struct tm tp ;
+	gmtime_r( &m_sec, &tp ) ;
+	return tp ;
+}
+
+std::time_t DateTime::Sec( ) const
+{
+	return m_sec ;
+}
+
+unsigned long DateTime::USec( ) const
+{
+	return m_usec ;
+}
+
+} // end of namespace
