@@ -21,6 +21,7 @@
 
 #include <ctime>
 #include <string>
+#include <iosfwd>
 
 namespace gr {
 
@@ -29,15 +30,19 @@ class DateTime
 public :
 	DateTime( ) ;
 	explicit DateTime( const std::string& iso ) ;
+	explicit DateTime( std::time_t sec, unsigned long nsec = 0 ) ;
 
 	std::time_t Sec( ) const ;
-	unsigned long USec( ) const ;
+	unsigned long NanoSec( ) const ;
 
 	struct tm Tm() const ;
+	struct timeval Tv() const ;
 	
 private :
 	std::time_t		m_sec ;
-	unsigned long	m_usec ;
+	unsigned long	m_nsec ;
 } ;
+
+std::ostream& operator<<( std::ostream& os, const DateTime& dt ) ;
 
 } // end of namespace

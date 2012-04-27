@@ -18,9 +18,13 @@
 */
 
 #include "OS.hh"
+#include "DateTime.hh"
+
+#include <stdexcept>
 
 // OS specific headers
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 
 namespace gr { namespace os {
@@ -28,6 +32,22 @@ namespace gr { namespace os {
 void MakeDir( const std::string& dir )
 {
 	mkdir( dir.c_str(), 0700 ) ;
+}
+
+DateTime FileMTime( const std::string& filename )
+{
+	struct stat s = {} ;
+	if ( ::stat( filename.c_str(), &s ) != 0 )
+		throw std::runtime_error( "cannot get file attribute of " + filename ) ;
+	
+	return DateTime( s.st_mtim.tv_sec, s.st_mtim.tv_nsec ) ;
+}
+
+void SetFileTime( const std::string& filename, const DateTime& t )
+{
+	struct timeval tvp[2] = { t.Tv(), t.Tv() } ;
+	if ( ::utimes( filename.c_str(), tvp ) != 0 )
+		throw std::runtime_error( "cannot set file time" ) ;
 }
 
 } } // end of namespaces

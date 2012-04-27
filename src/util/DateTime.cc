@@ -20,7 +20,9 @@
 #include "DateTime.hh"
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
+#include <iomanip>
 
 #include <time.h>
 
@@ -28,20 +30,32 @@ namespace gr {
 
 DateTime::DateTime( ) :
 	m_sec	( 0 ),
-	m_usec	( 0 )
+	m_nsec	( 0 )
 {
 }
 
 DateTime::DateTime( const std::string& iso ) :
 	m_sec	( 0 ),
-	m_usec	( 0 )
+	m_nsec	( 0 )
 {
-	struct tm tp ;
-	const char *r = ::strptime( iso.c_str(), "%Y-%m-%dT%H:%M:%S.", &tp ) ;
-	
-	m_sec	= ::mktime( &tp ) ;
-	if ( r != 0 )
-		m_usec	= std::atoi( r ) * 1000 ;
+	struct tm tp = {} ;
+	const char *r = ::strptime( iso.c_str(), "%Y-%m-%dT%H:%M:%S", &tp ) ;
+
+	// should be '.' followed by 3 digits and 'Z' (e.g. .123Z)
+	if ( r != 0 && r - iso.c_str() == 19 )
+	{
+		m_sec	= ::timegm( &tp ) ;
+
+		// at least 3 digits is OK. we don't care the Z
+		if ( *r == '.' && ::strlen( r+1 ) >= 3 )
+			m_nsec	= std::atoi( r+1 ) * 1000 * 1000 ;
+	}
+}
+
+DateTime::DateTime( std::time_t sec, unsigned long nsec ) :
+	m_sec	( sec ),
+	m_nsec	( nsec )
+{
 }
 
 struct tm DateTime::Tm() const
@@ -56,9 +70,26 @@ std::time_t DateTime::Sec( ) const
 	return m_sec ;
 }
 
-unsigned long DateTime::USec( ) const
+unsigned long DateTime::NanoSec( ) const
 {
-	return m_usec ;
+	return m_nsec ;
+}
+
+std::ostream& operator<<( std::ostream& os, const DateTime& dt )
+{
+	struct tm tp = dt.Tm() ;
+
+	char buf[40] ;
+	strftime( buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tp ) ;
+	return os << buf << '.' << std::setw( 3 ) << std::setfill('0') << dt.NanoSec()/1000000 << 'Z' ;
+}
+
+struct timeval DateTime::Tv() const
+{
+	timeval result ;
+	result.tv_sec	= m_sec ;
+	result.tv_usec	= m_nsec / 1000 ;
+	return result ;
 }
 
 } // end of namespace

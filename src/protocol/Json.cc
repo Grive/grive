@@ -138,6 +138,11 @@ void Json::Add( const std::string& key, const Json& json )
 	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
 }
 
+Json::Proxy Json::As() const
+{
+	return Proxy( *this ) ;
+}
+
 template <>
 std::string Json::As<std::string>() const
 {
@@ -242,6 +247,5 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 		return false ;
 	}
 }
-
 
 }

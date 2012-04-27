@@ -22,6 +22,8 @@
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
+#include "util/DateTime.hh"
+#include "util/OS.hh"
 
 // dependent libraries
 #include <openssl/evp.h>
@@ -180,10 +182,12 @@ void Drive::UpdateFile( const Json& entry )
 	if ( entry.Has( "docs$filename" ) )
 	{
 		// use title as the filename
-		std::string filename	= entry["docs$filename"]["$t"].As<std::string>() ;
-		std::string url			= entry["content"]["src"].As<std::string>() ;
+		std::string filename	= entry["docs$filename"]["$t"].As() ;
+		std::string url			= entry["content"]["src"].As() ;
 		std::string parent_href	= Parent( entry ) ;
 		
+		DateTime remote( entry["updated"]["$t"].As<std::string>() ) ;
+
 		bool changed = true ;
 		std::string path = "./" + filename ;
 
@@ -194,11 +198,16 @@ void Drive::UpdateFile( const Json& entry )
 			if ( pit != m_coll.end() )
 				path = pit->Path() + "/" + filename ;
 		}
+		DateTime local = os::FileMTime( path ) ;
+		
+		std::cout << "file time: " << entry["updated"]["$t"].As<std::string>() << " " << remote << " " << local << std::endl ;
 		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.c_str(), std::ios::binary | std::ios::out ) ;
 		if ( ifile && entry.Has("docs$md5Checksum") )
 		{
+			os::SetFileTime( path, remote ) ;
+			
 			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
 			std::string local_md5	= MD5( ifile.rdbuf() ) ;
 			

@@ -21,6 +21,8 @@
 
 #include "util/DateTime.hh"
 
+#include <cstring>
+
 namespace grut {
 
 using namespace gr ;
@@ -35,6 +37,27 @@ void DateTimeTest::TestParseIso( )
 	struct tm tp = subject.Tm() ;
 	CPPUNIT_ASSERT( tp.tm_year == 109 ) ;
 	CPPUNIT_ASSERT( tp.tm_sec  == 39 ) ;
+	CPPUNIT_ASSERT_EQUAL( 804000000UL, subject.NanoSec() ) ;
+}
+
+void DateTimeTest::TestParseNoMillisec( )
+{
+	DateTime	subject( "2009-07-29T20:31:39Z" ) ;
+	CPPUNIT_ASSERT_EQUAL( 0UL, subject.NanoSec() ) ;
+}
+
+void DateTimeTest::TestParseInvalid( )
+{
+	DateTime	subject( "abcdefg" ) ;
+	CPPUNIT_ASSERT_EQUAL( static_cast<time_t>(0), subject.Sec() ) ;
+	CPPUNIT_ASSERT_EQUAL( 0UL, subject.NanoSec() ) ;
+}
+
+void DateTimeTest::TestOffByOne( )
+{
+	DateTime	subject( "2008-12-21T02:48:53.940Z" ) ;
+	struct tm tp = subject.Tm() ;
+	CPPUNIT_ASSERT_EQUAL( 21, tp.tm_mday ) ;
 }
 
 } // end of namespace grut

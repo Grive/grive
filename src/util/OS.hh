@@ -28,7 +28,8 @@ class DateTime ;
 namespace os
 {
 	void MakeDir( const std::string& dir ) ;
-	DateTime FileMTime( const std::string& file ) ;
+	DateTime FileMTime( const std::string& filename ) ;
+	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 }
 
 } // end of namespaces

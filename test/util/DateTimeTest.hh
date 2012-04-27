@@ -32,10 +32,16 @@ public :
 	// declare suit function
 	CPPUNIT_TEST_SUITE( DateTimeTest ) ;
 		CPPUNIT_TEST( TestParseIso ) ;
+		CPPUNIT_TEST( TestParseNoMillisec ) ;
+		CPPUNIT_TEST( TestOffByOne ) ;
+		CPPUNIT_TEST( TestParseInvalid ) ;
 	CPPUNIT_TEST_SUITE_END();
 
 private :
 	void TestParseIso( ) ;
+	void TestParseNoMillisec( ) ;
+	void TestOffByOne( ) ;
+	void TestParseInvalid( ) ;
 } ;
 
 } // end of namespace
