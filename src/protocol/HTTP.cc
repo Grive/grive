@@ -31,19 +31,9 @@
 #include <sstream>
 #include <streambuf>
 
-namespace gr {
+namespace {
 
-HttpException::HttpException( int curl_code, int http_code, const char *err_buf )
-	: runtime_error( Format( curl_code, http_code, err_buf ) )
-{
-}
-
-std::string HttpException::Format( int curl_code, int http_code, const char *err_buf )
-{
-	std::ostringstream ss ;
-	ss << "CURL code = " << curl_code << " HTTP code = " << http_code << " (" << err_buf << ")" ;
-	return ss.str() ;
-}
+using namespace gr::http ;
 
 // libcurl callback to append to a string
 std::size_t WriteCallback( char *data, size_t size, size_t nmemb, std::string *resp )
@@ -109,16 +99,32 @@ void DoCurl( CURL *curl )
 	
 	if ( curl_code != CURLE_OK )
 	{
-		throw HttpException( curl_code, http_code, error_buf ) ;
+		throw Exception( curl_code, http_code, error_buf ) ;
 	}
 	else if (http_code >= 400 )
 	{
 		std::cout << "http error " << http_code << std::endl ;
-		throw HttpException( curl_code, http_code, error_buf ) ;
+		throw Exception( curl_code, http_code, error_buf ) ;
 	}
 }
 
-std::string HttpGet( const std::string& url, const Headers& hdr )
+} // end of local namespace
+
+namespace gr { namespace http {
+
+Exception::Exception( int curl_code, int http_code, const char *err_buf )
+	: runtime_error( Format( curl_code, http_code, err_buf ) )
+{
+}
+
+std::string Exception::Format( int curl_code, int http_code, const char *err_buf )
+{
+	std::ostringstream ss ;
+	ss << "CURL code = " << curl_code << " HTTP code = " << http_code << " (" << err_buf << ")" ;
+	return ss.str() ;
+}
+
+std::string Get( const std::string& url, const Headers& hdr )
 {
 	std::string resp ;
 	CURL *curl = InitCurl( url, &resp, hdr ) ;
@@ -127,7 +133,7 @@ std::string HttpGet( const std::string& url, const Headers& hdr )
 	return resp;
 }
 
-void HttpGetFile(
+void GetFile(
 	const std::string&	url,
 	const std::string&	filename,
 	const Headers& 		hdr )
@@ -141,7 +147,7 @@ void HttpGetFile(
 	DoCurl( curl ) ;
 }
 
-void HttpGetFile(
+void GetFile(
 	const std::string&	url,
 	const std::string&	filename,
 	std::string&		md5sum,
@@ -149,7 +155,7 @@ void HttpGetFile(
 {
 }
 
-std::string HttpPostData( const std::string& url, const std::string& data, const Headers& hdr )
+std::string PostData( const std::string& url, const std::string& data, const Headers& hdr )
 {
 	std::string resp ;
 	CURL *curl = InitCurl( url, &resp, hdr ) ;
@@ -164,13 +170,13 @@ std::string HttpPostData( const std::string& url, const std::string& data, const
 	return resp;
 }
 
-std::string HttpPostFile( const std::string& url, const std::string& filename, const Headers& hdr )
+std::string PostFile( const std::string& url, const std::string& filename, const Headers& hdr )
 {
 	std::string resp ;
 	return resp;
 }
 
-std::string HttpPut(
+std::string Put(
 	const std::string&	url,
 	const std::string&	data,
 	const Headers&		hdr )
@@ -216,4 +222,4 @@ std::string Unescape( const std::string& str )
 	return result ;
 }
 
-}
+} } // end of namespace

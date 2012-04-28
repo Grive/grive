@@ -22,19 +22,15 @@
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
+#include "util/Crypt.hh"
 #include "util/DateTime.hh"
 #include "util/OS.hh"
-
-// dependent libraries
-#include <openssl/evp.h>
 
 // standard C++ library
 #include <algorithm>
 #include <cassert>
 #include <fstream>
-#include <iomanip>
 #include <map>
-#include <sstream>
 
 // for debugging only
 #include <iostream>
@@ -42,30 +38,6 @@
 namespace gr {
 
 const std::string root_url = "https://docs.google.com/feeds/default/private/full" ;
-
-std::string MD5( std::streambuf *file )
-{
-	char buf[64 * 1024] ;
-	EVP_MD_CTX	md ;
-	EVP_MD_CTX_init( &md );
-	EVP_DigestInit_ex( &md, EVP_md5(), 0 ) ;
-	
-	std::size_t count = 0 ;
-	while ( (count = file->sgetn( buf, sizeof(buf) )) > 0 )
-	{
-		EVP_DigestUpdate( &md, buf, count ) ;
-	}
-	
-	unsigned int md5_size = EVP_MAX_MD_SIZE ;
-	unsigned char md5[EVP_MAX_MD_SIZE] ;
-	EVP_DigestFinal_ex( &md, md5, &md5_size ) ;
-	
-	std::ostringstream ss ;
-	for ( unsigned int i = 0 ; i < md5_size ; i++ )
-		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
-	
-	return ss.str() ;
-}
 
 Drive::Drive( OAuth2& auth ) :
 	m_auth( auth ),
@@ -75,7 +47,7 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
 	
-	Json resp = Json::Parse(HttpGet( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
+	Json resp = Json::Parse( http::Get( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
 	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
 	ConstructDirTree( entries ) ;
 	
@@ -182,8 +154,8 @@ void Drive::UpdateFile( const Json& entry )
 	if ( entry.Has( "docs$filename" ) )
 	{
 		// use title as the filename
-		std::string filename	= entry["docs$filename"]["$t"].As() ;
-		std::string url			= entry["content"]["src"].As() ;
+		std::string filename	= entry["docs$filename"]["$t"].Get() ;
+		std::string url			= entry["content"]["src"].Get() ;
 		std::string parent_href	= Parent( entry ) ;
 
 		bool changed = true ;
@@ -204,7 +176,7 @@ void Drive::UpdateFile( const Json& entry )
 		if ( ifile && entry.Has("docs$md5Checksum") )
 		{
 			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
-			std::string local_md5	= MD5( ifile.rdbuf() ) ;
+			std::string local_md5	= crypt::MD5( ifile.rdbuf() ) ;
 			
 			std::transform( remote_md5.begin(), remote_md5.end(), remote_md5.begin(), tolower ) ;
 			if ( local_md5 == remote_md5 )
@@ -221,7 +193,7 @@ void Drive::UpdateFile( const Json& entry )
 			if ( remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
-				HttpGetFile( url, path, m_http_hdr ) ;
+				http::GetFile( url, path, m_http_hdr ) ;
 				os::SetFileTime( path, remote ) ;
 			}
 			else
@@ -241,7 +213,7 @@ void Drive::UploadFile( const Json& entry )
 		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
 	std::cout << resume_link.As<std::string>() << std::endl ;
 
-	std::string resp = HttpPut( resume_link.As(), "" ) ;
+	std::string resp = http::Put( resume_link.Get(), "", m_http_hdr ) ;
 	
 	std::cout << "resp " << resp ;
 }

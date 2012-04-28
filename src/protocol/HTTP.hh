@@ -23,44 +23,46 @@
 #include <stdexcept>
 #include <vector>
 
-namespace gr
+namespace gr { namespace http
 {
 	typedef std::vector<std::string> Headers ;
 
-	std::string HttpGet( const std::string& url, const Headers& hdr = Headers() ) ;
-	void HttpGetFile(
+	std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
+	void GetFile(
 		const std::string&	url,
 		const std::string&	filename,
 		const Headers& 		hdr = Headers() ) ;
 	
-	void HttpGetFile(
+	void GetFile(
 		const std::string&	url,
 		const std::string&	filename,
 		std::string&		md5sum,
 		const Headers& 		hdr = Headers() ) ;
 	
-	std::string HttpPostData(
+	std::string PostData(
 		const std::string&	url,
 		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
-	std::string HttpPostFile(
+	std::string PostFile(
 		const std::string&	url,
 		const std::string& 	filename,
 		const Headers&		hdr = Headers() ) ;
 	
-	std::string HttpPut(
+	std::string Put(
 		const std::string&	url,
+		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
 	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 	
-	class HttpException : public std::runtime_error
+	class Exception : public std::runtime_error
 	{
 	public :
-		HttpException( int curl_code, int http_code, const char *err_buf ) ;
+		Exception( int curl_code, int http_code, const char *err_buf ) ;
 	
 	private :
 		static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
 	} ;
-}
+
+} } // end of namespace

@@ -16,6 +16,7 @@ add_executable( grive
 	src/protocol/HTTP.cc
 	src/protocol/Json.cc
 	src/protocol/OAuth2.cc
+	src/util/Crypt.cc
 	src/util/DateTime.cc
 	src/util/OS.cc
 )
