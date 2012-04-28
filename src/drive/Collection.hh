@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Function.hh"
+
 #include <string>
 #include <vector>
 
@@ -44,10 +46,15 @@ public :
 	std::string Path() const ;
 
 	void AddChild( Collection *child ) ;
+	void AddLeaf( const std::string& filename ) ;
 	
 	void Swap( Collection& coll ) ;
 
-	void CreateSubDir( const std::string& prefix ) ;
+	// traversing the tree
+	void CreateSubDir( const std::string& prefix = "." ) ;
+	void ForEachFile(
+		Function<void(const std::string&)>	callback,
+		const std::string& 					prefix = "." ) ;
 	
 private :
 	std::string					m_title ;
@@ -56,6 +63,8 @@ private :
 	// not owned
 	Collection					*m_parent ;
 	std::vector<Collection*>	m_child ;
+	
+	std::vector<std::string>	m_leaves ;
 } ;
 
 } // end of namespace

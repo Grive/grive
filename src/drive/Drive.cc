@@ -185,8 +185,6 @@ void Drive::UpdateFile( const Json& entry )
 		std::string filename	= entry["docs$filename"]["$t"].As() ;
 		std::string url			= entry["content"]["src"].As() ;
 		std::string parent_href	= Parent( entry ) ;
-		
-		DateTime remote( entry["updated"]["$t"].As<std::string>() ) ;
 
 		bool changed = true ;
 		std::string path = "./" + filename ;
@@ -198,16 +196,13 @@ void Drive::UpdateFile( const Json& entry )
 			if ( pit != m_coll.end() )
 				path = pit->Path() + "/" + filename ;
 		}
-		DateTime local = os::FileMTime( path ) ;
 		
-		std::cout << "file time: " << entry["updated"]["$t"].As<std::string>() << " " << remote << " " << local << std::endl ;
+//		std::cout << "file time: " << entry["updated"]["$t"].As<std::string>() << " " << remote << " " << local << std::endl ;
 		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.c_str(), std::ios::binary | std::ios::out ) ;
 		if ( ifile && entry.Has("docs$md5Checksum") )
 		{
-			os::SetFileTime( path, remote ) ;
-			
 			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
 			std::string local_md5	= MD5( ifile.rdbuf() ) ;
 			
@@ -216,13 +211,39 @@ void Drive::UpdateFile( const Json& entry )
 				changed = false ;
 		}
 		
-		// if the checksum is different, file is changed and we need to download
+		// if the checksum is different, file is changed and we need to update
 		if ( changed )
 		{
+			DateTime remote( entry["updated"]["$t"].As<std::string>() ) ;
+			DateTime local = ifile ? os::FileMTime( path ) : DateTime() ;
+			
+			// remote file is newer, download file
+			if ( remote > local )
+			{
 std::cout << "downloading " << path << std::endl ;
-			HttpGetFile( url, path, m_http_hdr ) ;
+				HttpGetFile( url, path, m_http_hdr ) ;
+				os::SetFileTime( path, remote ) ;
+			}
+			else
+			{
+std::cout << "local " << filename << " is newer" << std::endl ;
+				UploadFile( entry ) ;
+			}
 		}
 	}
+}
+
+void Drive::UploadFile( const Json& entry )
+{
+// 	std::cout << "entry:\n" << entry << std::endl ;
+	
+	Json resume_link = entry["link"].FindInArray( "rel",
+		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
+	std::cout << resume_link.As<std::string>() << std::endl ;
+
+	std::string resp = HttpPut( resume_link.As(), "" ) ;
+	
+	std::cout << "resp " << resp ;
 }
 
 } // end of namespace

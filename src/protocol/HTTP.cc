@@ -24,7 +24,9 @@
 // dependent libraries
 #include <curl/curl.h>
 
+#include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <streambuf>
@@ -51,6 +53,20 @@ std::size_t WriteCallback( char *data, size_t size, size_t nmemb, std::string *r
 	
 	std::size_t count = size * nmemb ;
 	resp->append( data, count ) ;
+	return count ;
+}
+
+size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+{
+	assert( ptr != 0 ) ;
+	assert( data != 0 ) ;
+
+	std::size_t count = std::min( size * nmemb, data->size() ) ;
+	if ( count > 0 )
+	{
+		std::memcpy( &(*data)[0], ptr, count ) ;
+		data->erase( 0, count ) ;
+	}
 	return count ;
 }
 
@@ -151,6 +167,25 @@ std::string HttpPostData( const std::string& url, const std::string& data, const
 std::string HttpPostFile( const std::string& url, const std::string& filename, const Headers& hdr )
 {
 	std::string resp ;
+	return resp;
+}
+
+std::string HttpPut(
+	const std::string&	url,
+	const std::string&	data,
+	const Headers&		hdr )
+{
+	std::string resp ;
+	CURL *curl = InitCurl( url, &resp, hdr ) ;
+
+	std::string put_data = data ;
+	
+	curl_easy_setopt(curl, CURLOPT_UPLOAD,			1);
+	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
+	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
+
+	DoCurl( curl ) ;
 	return resp;
 }
 

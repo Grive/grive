@@ -48,6 +48,10 @@ namespace gr
 		const std::string& 	filename,
 		const Headers&		hdr = Headers() ) ;
 	
+	std::string HttpPut(
+		const std::string&	url,
+		const Headers&		hdr = Headers() ) ;
+	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 	

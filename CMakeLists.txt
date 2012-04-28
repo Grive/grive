@@ -30,6 +30,7 @@ add_executable( unittest
 	test/UnitTest.cc
 	src/util/DateTime.cc
 	test/util/DateTimeTest.cc
+	test/util/FunctionTest.cc
 )
 
 target_link_libraries( unittest

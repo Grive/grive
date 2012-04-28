@@ -19,6 +19,7 @@
 
 #include "DateTime.hh"
 
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -53,8 +54,8 @@ DateTime::DateTime( const std::string& iso ) :
 }
 
 DateTime::DateTime( std::time_t sec, unsigned long nsec ) :
-	m_sec	( sec ),
-	m_nsec	( nsec )
+	m_sec	( sec + nsec / 1000000000 ),
+	m_nsec	( nsec % 1000000000 )
 {
 }
 
@@ -72,6 +73,7 @@ std::time_t DateTime::Sec( ) const
 
 unsigned long DateTime::NanoSec( ) const
 {
+	assert( m_nsec < 1000000000 ) ;
 	return m_nsec ;
 }
 
@@ -86,10 +88,45 @@ std::ostream& operator<<( std::ostream& os, const DateTime& dt )
 
 struct timeval DateTime::Tv() const
 {
+	assert( m_nsec < 1000000000 ) ;
+	
 	timeval result ;
 	result.tv_sec	= m_sec ;
 	result.tv_usec	= m_nsec / 1000 ;
 	return result ;
+}
+
+bool DateTime::operator==( const DateTime& dt ) const
+{
+	assert( m_nsec < 1000000000 ) ;
+	return m_sec == dt.m_sec && m_nsec == dt.m_nsec ;
+}
+
+bool DateTime::operator!=( const DateTime& dt ) const
+{
+	return !( *this == dt ) ;
+}
+
+bool DateTime::operator>( const DateTime& dt ) const
+{
+	assert( m_nsec < 1000000000 ) ;
+	assert( dt.m_nsec < 1000000000 ) ;
+	return m_sec == dt.m_sec ? m_nsec > dt.m_nsec : m_sec > dt.m_sec ;
+}
+
+bool DateTime::operator>=( const DateTime& dt ) const
+{
+	return ( *this > dt ) || ( *this == dt ) ;
+}
+
+bool DateTime::operator<( const DateTime& dt ) const
+{
+	return !( *this >= dt ) ;
+}
+
+bool DateTime::operator<=( const DateTime& dt ) const
+{
+	return !( *this > dt ) ;
 }
 
 } // end of namespace

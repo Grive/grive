@@ -82,6 +82,11 @@ void Collection::AddChild( Collection *child )
 	m_child.push_back( child ) ;
 }
 
+void Collection::AddLeaf( const std::string& filename )
+{
+	m_leaves.push_back( filename ) ;
+}
+
 bool Collection::IsCollection( const Json& entry )
 {
 	Json node ;
@@ -96,12 +101,12 @@ void Collection::Swap( Collection& coll )
 	m_href.swap( coll.m_href ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
+	m_leaves.swap( coll.m_leaves ) ;
 }
 
 void Collection::CreateSubDir( const std::string& prefix )
 {
 	std::string dir = prefix + m_title ;
-// 	mkdir( dir.c_str(), 0700 ) ;
 	os::MakeDir( dir ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
@@ -109,6 +114,12 @@ void Collection::CreateSubDir( const std::string& prefix )
 		assert( (*i)->m_parent == this ) ;
 		(*i)->CreateSubDir( prefix + m_title + "/" ) ;
 	}
+}
+
+void Collection::ForEachFile(
+	Function<void(const std::string&)>	callback,
+	const std::string& 					prefix )
+{
 }
 
 std::string Collection::Path() const
