@@ -56,9 +56,13 @@ public :
 	{
 		const Json&	referring ;
 		explicit Proxy( const Json& j ) : referring( j ) { }
-		template <typename T> operator T() const { return referring.As<T>() ; }
+		operator bool() const ;
+		operator int() const ;
+		operator Object() const ;
+		operator Array() const ;
+		operator std::string() const ;
 	} ;
-	Proxy As() const ;
+	Proxy Get() const ;
 	
 	template <typename T>
 	bool Is() const ;

@@ -24,26 +24,18 @@
 
 namespace grut {
 
-class DateTimeTest : public CppUnit::TestFixture
+class FunctionTest : public CppUnit::TestFixture
 {
 public :
-	DateTimeTest( ) ;
+	FunctionTest( ) ;
 
 	// declare suit function
-	CPPUNIT_TEST_SUITE( DateTimeTest ) ;
-		CPPUNIT_TEST( TestParseIso ) ;
-		CPPUNIT_TEST( TestParseNoMillisec ) ;
-		CPPUNIT_TEST( TestOffByOne ) ;
-		CPPUNIT_TEST( TestParseInvalid ) ;
-		CPPUNIT_TEST( TestCompare ) ;
+	CPPUNIT_TEST_SUITE( FunctionTest ) ;
+		CPPUNIT_TEST( TestRun ) ;
 	CPPUNIT_TEST_SUITE_END();
 
 private :
-	void TestParseIso( ) ;
-	void TestParseNoMillisec( ) ;
-	void TestOffByOne( ) ;
-	void TestParseInvalid( ) ;
-	void TestCompare( ) ;
+	void TestRun( ) ;
 } ;
 
 } // end of namespace

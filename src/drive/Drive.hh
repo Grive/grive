@@ -41,6 +41,7 @@ public :
 
 private :
 	void UpdateFile( const Json& entry ) ;
+	void UploadFile( const Json& entry ) ;
 	std::string Parent( const Json& entry ) ;
 	
 	void ConstructDirTree( const std::vector<Json>& entries ) ;

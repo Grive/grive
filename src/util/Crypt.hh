@@ -19,31 +19,14 @@
 
 #pragma once
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <string>
+#include <iosfwd>
 
-namespace grut {
+namespace gr {
 
-class DateTimeTest : public CppUnit::TestFixture
+namespace crypt
 {
-public :
-	DateTimeTest( ) ;
+	std::string MD5( std::streambuf *file ) ;
+}
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( DateTimeTest ) ;
-		CPPUNIT_TEST( TestParseIso ) ;
-		CPPUNIT_TEST( TestParseNoMillisec ) ;
-		CPPUNIT_TEST( TestOffByOne ) ;
-		CPPUNIT_TEST( TestParseInvalid ) ;
-		CPPUNIT_TEST( TestCompare ) ;
-	CPPUNIT_TEST_SUITE_END();
-
-private :
-	void TestParseIso( ) ;
-	void TestParseNoMillisec( ) ;
-	void TestOffByOne( ) ;
-	void TestParseInvalid( ) ;
-	void TestCompare( ) ;
-} ;
-
-} // end of namespace
+} // end of namespace gr

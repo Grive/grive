@@ -38,6 +38,13 @@ public :
 	struct tm Tm() const ;
 	struct timeval Tv() const ;
 	
+	bool operator==( const DateTime& dt ) const ;
+	bool operator!=( const DateTime& dt ) const ;
+	bool operator>( const DateTime& dt ) const ;
+	bool operator>=( const DateTime& dt ) const ;
+	bool operator<( const DateTime& dt ) const ;
+	bool operator<=( const DateTime& dt ) const ;
+	
 private :
 	std::time_t		m_sec ;
 	unsigned long	m_nsec ;

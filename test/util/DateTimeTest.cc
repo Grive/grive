@@ -60,4 +60,26 @@ void DateTimeTest::TestOffByOne( )
 	CPPUNIT_ASSERT_EQUAL( 21, tp.tm_mday ) ;
 }
 
+void DateTimeTest::TestCompare( )
+{
+	DateTime	s1( 1000, 2000 ), s2( 1001, 2000 ), s3( 1000, 2001 ), s4( 1001, 2000 ) ;
+	
+	CPPUNIT_ASSERT( s1 <  s3 ) ;
+	CPPUNIT_ASSERT( s1 <= s3 ) ;
+	CPPUNIT_ASSERT( s3 >  s1 ) ;
+	CPPUNIT_ASSERT( s3 >= s1 ) ;
+	
+	CPPUNIT_ASSERT( s1 <  s2 ) ;
+	CPPUNIT_ASSERT( s1 <= s2 ) ;
+	CPPUNIT_ASSERT( s2 >  s1 ) ;
+	CPPUNIT_ASSERT( s2 >= s1 ) ;
+	
+	CPPUNIT_ASSERT( s2 == s4 ) ;
+	CPPUNIT_ASSERT( s2 >= s4 ) ;
+	CPPUNIT_ASSERT( s2 <= s4 ) ;
+	CPPUNIT_ASSERT( s4 == s2 ) ;
+	CPPUNIT_ASSERT( s4 >= s2 ) ;
+	CPPUNIT_ASSERT( s4 <= s2 ) ;
+}
+
 } // end of namespace grut

@@ -138,9 +138,18 @@ void Json::Add( const std::string& key, const Json& json )
 	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
 }
 
-Json::Proxy Json::As() const
+template <>
+bool Json::As<bool>() const
 {
-	return Proxy( *this ) ;
+	assert( m_json != 0 ) ;
+	return ::json_object_get_boolean( m_json ) ;
+}
+
+template <>
+bool Json::Is<bool>() const
+{
+	assert( m_json != 0 ) ;
+	return ::json_object_is_type( m_json, json_type_boolean ) ;
 }
 
 template <>
@@ -246,6 +255,36 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 	{
 		return false ;
 	}
+}
+
+Json::Proxy Json::Get() const
+{
+	return Proxy( *this ) ;
+}
+
+Json::Proxy::operator bool() const
+{
+	return referring.As<bool>() ;
+}
+
+Json::Proxy::operator int() const
+{
+	return referring.As<int>() ;
+}
+
+Json::Proxy::operator Object() const
+{
+	return referring.As<Object>() ;
+}
+
+Json::Proxy::operator Array() const
+{
+	return referring.As<Array>() ;
+}
+
+Json::Proxy::operator std::string() const
+{
+	return referring.As<std::string>() ;
 }
 
 }

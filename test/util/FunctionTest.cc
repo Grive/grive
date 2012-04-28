@@ -17,33 +17,30 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "FunctionTest.hh"
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "util/Function.hh"
 
 namespace grut {
 
-class DateTimeTest : public CppUnit::TestFixture
+using namespace gr ;
+
+FunctionTest::FunctionTest( )
 {
-public :
-	DateTimeTest( ) ;
+}
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( DateTimeTest ) ;
-		CPPUNIT_TEST( TestParseIso ) ;
-		CPPUNIT_TEST( TestParseNoMillisec ) ;
-		CPPUNIT_TEST( TestOffByOne ) ;
-		CPPUNIT_TEST( TestParseInvalid ) ;
-		CPPUNIT_TEST( TestCompare ) ;
-	CPPUNIT_TEST_SUITE_END();
+int TestFunction( int v )
+{
+	return v ;
+}
 
-private :
-	void TestParseIso( ) ;
-	void TestParseNoMillisec( ) ;
-	void TestOffByOne( ) ;
-	void TestParseInvalid( ) ;
-	void TestCompare( ) ;
-} ;
+void FunctionTest::TestRun( )
+{
+	Function<int(int)> f = &TestFunction ;
+	Function<std::string()> f2 ;
+	
+	CPPUNIT_ASSERT_EQUAL( 3, f(3) ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string(), f2() ) ;
+}
 
-} // end of namespace
+} // end of namespace grut

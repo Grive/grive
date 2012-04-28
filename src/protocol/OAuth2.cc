@@ -57,7 +57,7 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
-	Json resp = Json::Parse( HttpPostData( token_url, post ) ) ;
+	Json resp = Json::Parse( http::PostData( token_url, post ) ) ;
 	m_access	= resp["access_token"].As<std::string>() ;
 	m_refresh	= resp["refresh_token"].As<std::string>() ;
 }
@@ -66,6 +66,8 @@ std::string OAuth2::MakeAuthURL(
 	const std::string&	client_id,
 	const std::string&	state )
 {
+	using gr::http::Escape ;
+
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
 			Escape( "https://www.googleapis.com/auth/userinfo.email" )		+ "+" + 
@@ -86,7 +88,7 @@ void OAuth2::Refresh( )
 		"&client_secret="	+ m_client_secret +
 		"&grant_type=refresh_token" ;
 
-	Json resp = Json::Parse( HttpPostData( token_url, post ) ) ;
+	Json resp	= Json::Parse( http::PostData( token_url, post ) ) ;
 	m_access	= resp["access_token"].As<std::string>() ;
 }
 
