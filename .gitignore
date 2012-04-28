@@ -1,2 +1,6 @@
 .kdev4
 grive.kdev4
+
+.project
+.cproject
+build/
