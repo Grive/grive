@@ -27,6 +27,9 @@
 #include <iostream>
 #include <iterator>
 
+#include <exception>
+#include <stdexcept>
+
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
@@ -102,8 +105,17 @@ int main( int argc, char **argv )
 		}
 	}
 	
-	OAuth2 token( config["refresh_token"].As<std::string>(), client_id, client_secret ) ;
-	Drive drive( token ) ;
+	try
+	{
+		OAuth2 token( config["refresh_token"].As<std::string>(), client_id, client_secret ) ;
+		Drive drive( token ) ;
+	}
+	catch ( const std::runtime_error& error )
+	{
+		std::cerr << "Please run grive with the \"-a\" option if this is the "
+				<< "first time you're accessing your Google Drive!\n";
+		return -1;
+	}
 	
 	return 0 ;
 }
