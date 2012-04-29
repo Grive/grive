@@ -200,7 +200,7 @@ std::cout << "downloading " << path << std::endl ;
 			else
 			{
 std::cout << "local " << filename << " is newer" << std::endl ;
-// 				UploadFile( entry ) ;
+				UploadFile( entry ) ;
 			}
 		}
 	}
@@ -208,45 +208,43 @@ std::cout << "local " << filename << " is newer" << std::endl ;
 
 void Drive::UploadFile( const Json& entry )
 {
-// 	std::cout << "entry:\n" << entry << std::endl ;
+	std::string meta =
+	"<?xml version='1.0' encoding='UTF-8'?>"
+	"<entry xmlns='http://www.w3.org/2005/Atom' xmlns:docs='http://schemas.google.com/docs/2007'>"
+		"<category scheme='http://schemas.google.com/g/2005#kind'"
+		"term='http://schemas.google.com/docs/2007#document'/>"
+		"<title>Grive Document</title>"
+	"</entry>" ;
 	
-	Json resume_link = entry["link"].FindInArray( "rel",
-		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
-	std::cout << resume_link.As<std::string>() << std::endl ;
-
 	http::Headers hdr( m_http_hdr ) ;
-	hdr.push_back( "Expect:" ) ;
-	hdr.push_back( "If-Match: *" ) ;
-	hdr.push_back( "X-Upload-Content-Length: 29" ) ;
+	hdr.push_back( "Slug: Grive Document" ) ;
 	hdr.push_back( "X-Upload-Content-Type: text/plain" ) ;
+	hdr.push_back( "X-Upload-Content-Length: 10" ) ;
 	
-	std::istringstream resp( http::Put( resume_link.Get(), "", hdr ) ) ;
+	std::string resp = http::PostDataWithHeader(
+		"https://docs.google.com/feeds/upload/create-session/default/private/full?convert=false",
+		"",
+		m_http_hdr ) ;
+	
+	std::cout << "resp " << resp ;
+	std::istringstream ss( resp ) ;
 	
 	std::string line ;
-	while ( std::getline( resp, line ) )
+	while ( std::getline( ss, line ) )
 	{
-		// find the location header
 		static const std::string location = "Location: " ;
 		if ( line.substr( 0, location.size() ) == location )
 		{
-			std::string upload_uri = line.substr( location.size() ) ;
-			upload_uri = upload_uri.substr( 0, upload_uri.size() - 1 ) ;
-			std::cout << upload_uri << std::endl ;
+			std::string uplink = line.substr( location.size() ) ;
+			uplink = uplink.substr( 0, uplink.size() -1 ) ;
 			
-			std::string upload_content = "this is the new text file!!!!" ;
+			std::string data( 10, '!' ) ;
+			http::Headers uphdr ;
+			uphdr.push_back( "Content-Type: text/plain" ) ;
+			uphdr.push_back( "Content-Range: bytes 0-9/10" ) ;
 			
-			std::ostringstream content_range ;
-			content_range << "Content-Range: 0-" << upload_content.size()-1 << '/' << upload_content.size() ;
-			
-			http::Headers upload_hdr/*( m_http_hdr )*/ ;
-			upload_hdr.push_back( "Expect:" ) ;
-			upload_hdr.push_back( "Accept:" ) ;
-			upload_hdr.push_back( "Host:" ) ;
-// 			upload_hdr.push_back( "Content-Type: text/plain" ) ;
-			upload_hdr.push_back( content_range.str() ) ;
-			
-			std::string resp2 = http::Put( upload_uri, upload_content, upload_hdr ) ;
-			std::cout << resp2 << std::endl ;
+			std::string resp = http::Put( uplink, data, uphdr ) ;
+			std::cout << "put response = " << resp << std::endl ;
 		}
 	}
 }

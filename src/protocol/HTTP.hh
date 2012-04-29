@@ -43,6 +43,10 @@ namespace gr { namespace http
 		const std::string&	url,
 		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
+	std::string PostDataWithHeader(
+		const std::string&	url,
+		const std::string&	data,
+		const Headers&		hdr = Headers() ) ;
 	std::string PostFile(
 		const std::string&	url,
 		const std::string& 	filename,

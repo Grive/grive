@@ -166,6 +166,24 @@ std::string PostData( const std::string& url, const std::string& data, const Hea
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
+	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1 ) ;
+
+	DoCurl( curl ) ;
+	return resp;
+}
+
+std::string PostDataWithHeader( const std::string& url, const std::string& data, const Headers& hdr )
+{
+	std::string resp ;
+	CURL *curl = InitCurl( url, &resp, hdr ) ;
+
+	std::string post_data = data ;
+	
+	curl_easy_setopt(curl, CURLOPT_POST, 			1L);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
+	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1L ) ;
+	curl_easy_setopt(curl, CURLOPT_HEADER, 			1L );
 
 	DoCurl( curl ) ;
 	return resp;
