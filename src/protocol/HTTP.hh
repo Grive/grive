@@ -43,6 +43,10 @@ namespace gr { namespace http
 		const std::string&	url,
 		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
+	std::string PostDataWithHeader(
+		const std::string&	url,
+		const std::string&	data,
+		const Headers&		hdr = Headers() ) ;
 	std::string PostFile(
 		const std::string&	url,
 		const std::string& 	filename,
@@ -52,6 +56,8 @@ namespace gr { namespace http
 		const std::string&	url,
 		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
+	
+	void Custom( const std::string& url, const std::string& host, const Headers& headers ) ;
 	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;

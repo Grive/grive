@@ -53,6 +53,8 @@ private :
 private :
 	OAuth2&						m_auth ;
 	std::vector<std::string>	m_http_hdr ;
+
+	std::string					m_resume_link ;
 	
 	FolderList					m_coll ;
 	Collection					m_root ;
