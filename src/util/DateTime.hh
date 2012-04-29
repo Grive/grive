@@ -35,8 +35,8 @@ public :
 	std::time_t Sec( ) const ;
 	unsigned long NanoSec( ) const ;
 
-	struct tm Tm() const ;
-	struct timeval Tv() const ;
+	tm Tm() const ;
+	timeval Tv() const ;
 	
 	bool operator==( const DateTime& dt ) const ;
 	bool operator!=( const DateTime& dt ) const ;
