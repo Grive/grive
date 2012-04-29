@@ -5,11 +5,13 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(OpenSSL REQUIRED)
-find_package(CppUnit REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
+find_package(CppUnit)
 
-set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
+IF ( CPPUNIT_FOUND )
+    set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
+ENDIF ( CPPUNIT_FOUND )
 
 include_directories(
 	${grive_SOURCE_DIR}/src
