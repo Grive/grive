@@ -35,6 +35,14 @@ const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 namespace gr
 {
+	class ConfigError : public std::runtime_error
+	{
+	public :
+		ConfigError( const std::string& msg ) : runtime_error( msg )
+		{
+		}
+	} ;
+
 	const std::string& ConfigFilename()
 	{
 		static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
@@ -47,8 +55,10 @@ namespace gr
 	Json ReadConfig()
 	{
 		std::ifstream ifile( ConfigFilename().c_str() ) ;
+		if ( !ifile )
+			return Json() ;
 		
-		if ( ifile )
+		try
 		{
 			std::string cfg_str(
 				(std::istreambuf_iterator<char>( ifile )),
@@ -56,8 +66,10 @@ namespace gr
 			
 			return Json::Parse( cfg_str ) ;
 		}
-		else
-			return Json() ;
+		catch ( std::runtime_error& e )
+		{
+			throw ConfigError( std::string("cannot open config file ") + e.what() ) ;
+		}
 	}
 	
 	void SaveConfig( const Json& config )
@@ -105,10 +117,10 @@ int main( int argc, char **argv )
 		}
 	}
 	
+	std::string refresh_token ;
 	try
 	{
-		OAuth2 token( config["refresh_token"].As<std::string>(), client_id, client_secret ) ;
-		Drive drive( token ) ;
+		refresh_token = config["refresh_token"].As<std::string>() ;
 	}
 	catch ( const std::runtime_error& error )
 	{
@@ -116,6 +128,9 @@ int main( int argc, char **argv )
 				<< "first time you're accessing your Google Drive!\n";
 		return -1;
 	}
+	
+	OAuth2 token( refresh_token, client_id, client_secret ) ;
+	Drive drive( token ) ;
 	
 	return 0 ;
 }
