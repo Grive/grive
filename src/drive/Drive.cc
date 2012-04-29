@@ -47,8 +47,17 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
-	
 	Json resp = Json::Parse( http::Get( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
+	
+	std::cout << http::Get( "https://docs.google.com/feeds/metadata/default", m_http_hdr ) ;
+	
+	Json resume_link ;
+	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
+	{
+		m_resume_link = resume_link["href"].As<std::string>() ;
+		std::cout << "resume_link = " << resume_link << std::endl ;
+	}
+	
 	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
 	ConstructDirTree( entries ) ;
 	
@@ -158,7 +167,13 @@ void Drive::UpdateFile( const Json& entry )
 		std::string filename	= entry["docs$filename"]["$t"].Get() ;
 		std::string url			= entry["content"]["src"].Get() ;
 		std::string parent_href	= Parent( entry ) ;
-
+/*
+		Json kind_json ;
+		if ( entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", kind_json ) )
+		{
+			std::cout << filename << " kind = " << kind_json << std::endl ;
+		}
+*/
 		bool changed = true ;
 		std::string path = "./" + filename ;
 
@@ -208,25 +223,37 @@ std::cout << "local " << filename << " is newer" << std::endl ;
 
 void Drive::UploadFile( const Json& entry )
 {
-	std::string meta =
+/*	std::string meta =
 	"<?xml version='1.0' encoding='UTF-8'?>"
-	"<entry xmlns='http://www.w3.org/2005/Atom' xmlns:docs='http://schemas.google.com/docs/2007'>"
-		"<category scheme='http://schemas.google.com/g/2005#kind'"
-		"term='http://schemas.google.com/docs/2007#document'/>"
-		"<title>Grive Document</title>"
+	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
+		"<category scheme=\"http://schemas.google.com/g/2005#kind\""
+		"term=\"http://schemas.google.com/docs/2007#file\"/>"
+		"<title>Test document</title>"
 	"</entry>" ;
-	
+*/	
 	http::Headers hdr( m_http_hdr ) ;
-	hdr.push_back( "Slug: Grive Document" ) ;
+//	hdr.push_back( "Slug: Grive Document" ) ;
+//	hdr.push_back( "Content-Type: application/atom+xml" ) ;
 	hdr.push_back( "X-Upload-Content-Type: text/plain" ) ;
-	hdr.push_back( "X-Upload-Content-Length: 10" ) ;
-	
+	hdr.push_back( "X-Upload-Content-Length: 1000" ) ;
+	hdr.push_back( "Expect:" ) ;
+/*	
 	std::string resp = http::PostDataWithHeader(
-		"https://docs.google.com/feeds/upload/create-session/default/private/full?convert=false",
-		"",
-		m_http_hdr ) ;
-	
-	std::cout << "resp " << resp ;
+		m_resume_link + "?convert=false",
+		meta,
+		hdr ) ;
+*/
+	Json resume_link = entry["link"].FindInArray( "rel",
+  		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
+  	std::cout << resume_link.As<std::string>() << std::endl ;
+
+  	std::string etag = entry["gd$etag"].As<std::string>() ;
+  	std::cout << "etag = " << etag << std::endl ;
+  	
+  	hdr.push_back( "If-Match: " + etag ) ;
+  	std::string resp = http::Put( resume_link.Get(), "", hdr ) ;
+
+	std::cout << "resp " << resp << std::endl ;
 	std::istringstream ss( resp ) ;
 	
 	std::string line ;
@@ -238,10 +265,12 @@ void Drive::UploadFile( const Json& entry )
 			std::string uplink = line.substr( location.size() ) ;
 			uplink = uplink.substr( 0, uplink.size() -1 ) ;
 			
-			std::string data( 10, '!' ) ;
+			std::string data( 1000, 'x' ) ;
 			http::Headers uphdr ;
 			uphdr.push_back( "Content-Type: text/plain" ) ;
-			uphdr.push_back( "Content-Range: bytes 0-9/10" ) ;
+			uphdr.push_back( "Content-Range: bytes 0-999/1000" ) ;
+			uphdr.push_back( "Expect:" ) ;
+			uphdr.push_back( "Accept:" ) ;
 			
 			std::string resp = http::Put( uplink, data, uphdr ) ;
 			std::cout << "put response = " << resp << std::endl ;

@@ -51,6 +51,8 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
 
+std::cout << "reading " << (size*nmemb) << " bytes " << data->size() << std::endl ;
+	
 	std::size_t count = std::min( size * nmemb, data->size() ) ;
 	if ( count > 0 )
 	{
@@ -58,6 +60,8 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 		data->erase( 0, count ) ;
 	}
 
+std::cout << "readed " << count << " bytes " << data->size() << std::endl ;
+	
 	return count ;
 }
 
@@ -185,7 +189,16 @@ std::string PostDataWithHeader( const std::string& url, const std::string& data,
 	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1L ) ;
 	curl_easy_setopt(curl, CURLOPT_HEADER, 			1L );
 
-	DoCurl( curl ) ;
+	try
+	{
+		DoCurl( curl ) ;
+	}
+	catch ( ... )
+	{
+		std::cout << "response = " << resp << std::endl ;
+		throw ;
+	}
+	
 	return resp;
 }
 
@@ -213,7 +226,16 @@ std::string Put(
 	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 		1L ) ;
 	
-	DoCurl( curl ) ;
+	try
+	{
+		DoCurl( curl ) ;
+	}
+	catch ( ... )
+	{
+		std::cout << "response = " << resp << std::endl ;
+		throw ;
+	}
+	
 	return resp;
 }
 
