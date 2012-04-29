@@ -23,6 +23,8 @@
 #include <string>
 #include <iosfwd>
 
+#include <sys/time.h>
+
 namespace gr {
 
 class DateTime
