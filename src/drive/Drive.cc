@@ -199,7 +199,7 @@ std::cout << "downloading " << path << std::endl ;
 			else
 			{
 std::cout << "local " << filename << " is newer" << std::endl ;
-				UploadFile( entry ) ;
+// 				UploadFile( entry ) ;
 			}
 		}
 	}

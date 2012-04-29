@@ -40,7 +40,7 @@ DateTime FileMTime( const std::string& filename )
 	if ( ::stat( filename.c_str(), &s ) != 0 )
 		throw std::runtime_error( "cannot get file attribute of " + filename ) ;
 	
-#ifdef __APPLE__ && __DARWIN_64_BIT_INO_T
+#if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
 	return DateTime( s.st_mtimespec.tv_sec, s.st_mtimespec.tv_nsec ) ;
 #else
 	return DateTime( s.st_mtim.tv_sec, s.st_mtim.tv_nsec);
