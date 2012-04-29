@@ -31,6 +31,7 @@
 #include <cassert>
 #include <fstream>
 #include <map>
+#include <sstream>
 
 // for debugging only
 #include <iostream>
@@ -190,7 +191,7 @@ void Drive::UpdateFile( const Json& entry )
 			DateTime local = ifile ? os::FileMTime( path ) : DateTime() ;
 			
 			// remote file is newer, download file
-			if ( remote > local )
+			if ( !ifile || remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
 				http::GetFile( url, path, m_http_hdr ) ;
@@ -213,9 +214,41 @@ void Drive::UploadFile( const Json& entry )
 		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
 	std::cout << resume_link.As<std::string>() << std::endl ;
 
-	std::string resp = http::Put( resume_link.Get(), "", m_http_hdr ) ;
+	http::Headers hdr( m_http_hdr ) ;
+	hdr.push_back( "Expect:" ) ;
+	hdr.push_back( "If-Match: *" ) ;
+	hdr.push_back( "X-Upload-Content-Length: 29" ) ;
+	hdr.push_back( "X-Upload-Content-Type: text/plain" ) ;
 	
-	std::cout << "resp " << resp ;
+	std::istringstream resp( http::Put( resume_link.Get(), "", hdr ) ) ;
+	
+	std::string line ;
+	while ( std::getline( resp, line ) )
+	{
+		// find the location header
+		static const std::string location = "Location: " ;
+		if ( line.substr( 0, location.size() ) == location )
+		{
+			std::string upload_uri = line.substr( location.size() ) ;
+			upload_uri = upload_uri.substr( 0, upload_uri.size() - 1 ) ;
+			std::cout << upload_uri << std::endl ;
+			
+			std::string upload_content = "this is the new text file!!!!" ;
+			
+			std::ostringstream content_range ;
+			content_range << "Content-Range: 0-" << upload_content.size()-1 << '/' << upload_content.size() ;
+			
+			http::Headers upload_hdr/*( m_http_hdr )*/ ;
+			upload_hdr.push_back( "Expect:" ) ;
+			upload_hdr.push_back( "Accept:" ) ;
+			upload_hdr.push_back( "Host:" ) ;
+// 			upload_hdr.push_back( "Content-Type: text/plain" ) ;
+			upload_hdr.push_back( content_range.str() ) ;
+			
+			std::string resp2 = http::Put( upload_uri, upload_content, upload_hdr ) ;
+			std::cout << resp2 << std::endl ;
+		}
+	}
 }
 
 } // end of namespace
