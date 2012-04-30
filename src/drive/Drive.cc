@@ -215,30 +215,40 @@ std::cout << "downloading " << path << std::endl ;
 			else
 			{
 std::cout << "local " << filename << " is newer" << std::endl ;
-				UploadFile( entry ) ;
+				// re-reading the file
+				ifile.seekg(0) ;
+				
+				UploadFile( entry, filename, ifile.rdbuf() ) ;
 			}
 		}
 	}
 }
 
-void Drive::UploadFile( const Json& entry )
+void Drive::UploadFile( const Json& entry, const std::string& filename, std::streambuf *file )
 {
-/*	std::string meta =
-	"<?xml version='1.0' encoding='UTF-8'?>"
+	std::string meta =
+	"<?xml version='1.0' encoding='UTF-8'?>\n"
 	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\""
+		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
 		"term=\"http://schemas.google.com/docs/2007#file\"/>"
-		"<title>Test document</title>"
+		"<title>" + filename + "</title>"
 	"</entry>" ;
-*/	
+
+	std::string data(
+		(std::istreambuf_iterator<char>(file)),
+		(std::istreambuf_iterator<char>()) ) ;
+	
+	std::ostringstream content_len ;
+	content_len << data.size() ;
+	
 	http::Headers hdr( m_http_hdr ) ;
 //	hdr.push_back( "Slug: Grive Document" ) ;
-//	hdr.push_back( "Content-Type: application/atom+xml" ) ;
+	hdr.push_back( "Content-Type: application/atom+xml" ) ;
 	hdr.push_back( "X-Upload-Content-Type: text/plain" ) ;
-	hdr.push_back( "X-Upload-Content-Length: 1000" ) ;
+	hdr.push_back( "X-Upload-Content-Length: " + content_len.str() ) ;
 	hdr.push_back( "Expect:" ) ;
-/*	
-	std::string resp = http::PostDataWithHeader(
+	
+/*	std::string resp = http::PostDataWithHeader(
 		m_resume_link + "?convert=false",
 		meta,
 		hdr ) ;
@@ -247,11 +257,11 @@ void Drive::UploadFile( const Json& entry )
   		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
   	std::cout << resume_link.As<std::string>() << std::endl ;
 
-  	std::string etag = entry["gd$etag"].As<std::string>() ;
-  	std::cout << "etag = " << etag << std::endl ;
+	std::string etag = entry["gd$etag"].As<std::string>() ;
+	std::cout << "etag = " << etag << std::endl ;
   	
   	hdr.push_back( "If-Match: " + etag ) ;
-  	std::string resp = http::Put( resume_link.Get(), "", hdr ) ;
+  	std::string resp = http::Put( resume_link.Get(), meta, hdr ) ;
 
 	std::cout << "resp " << resp << std::endl ;
 	std::istringstream ss( resp ) ;
@@ -265,10 +275,9 @@ void Drive::UploadFile( const Json& entry )
 			std::string uplink = line.substr( location.size() ) ;
 			uplink = uplink.substr( 0, uplink.size() -1 ) ;
 			
-			std::string data( 1000, 'x' ) ;
 			http::Headers uphdr ;
 			uphdr.push_back( "Content-Type: text/plain" ) ;
-			uphdr.push_back( "Content-Range: bytes 0-999/1000" ) ;
+// 			uphdr.push_back( "Content-Range: bytes 0-999/1000" ) ;
 			uphdr.push_back( "Expect:" ) ;
 			uphdr.push_back( "Accept:" ) ;
 			

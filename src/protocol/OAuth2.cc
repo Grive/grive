@@ -74,7 +74,8 @@ std::string OAuth2::MakeAuthURL(
 			Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
 			Escape( "https://docs.google.com/feeds/" )						+ "+" + 
 			Escape( "https://docs.googleusercontent.com/" )					+ "+" + 
-			Escape( "https://spreadsheets.google.com/feeds/" )				+
+			Escape( "https://spreadsheets.google.com/feeds/" )				+ "+" +
+			Escape( "https://www.googleapis.com/auth/drive.file/" )			+
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
 		"&client_id=" + client_id ;
