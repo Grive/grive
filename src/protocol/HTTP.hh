@@ -57,8 +57,6 @@ namespace gr { namespace http
 		const std::string&	data,
 		const Headers&		hdr = Headers() ) ;
 	
-	void Custom( const std::string& url, const std::string& host, const Headers& headers ) ;
-	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 	

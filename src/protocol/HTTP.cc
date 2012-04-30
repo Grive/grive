@@ -51,16 +51,12 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
 
-std::cout << "reading " << (size*nmemb) << " bytes " << data->size() << std::endl ;
-	
 	std::size_t count = std::min( size * nmemb, data->size() ) ;
 	if ( count > 0 )
 	{
 		std::memcpy( ptr, &(*data)[0], count ) ;
 		data->erase( 0, count ) ;
 	}
-
-std::cout << "readed " << count << " bytes " << data->size() << std::endl ;
 	
 	return count ;
 }
@@ -170,7 +166,7 @@ std::string PostData( const std::string& url, const std::string& data, const Hea
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
-	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1 ) ;
+// 	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1 ) ;
 
 	DoCurl( curl ) ;
 	return resp;
@@ -186,7 +182,7 @@ std::string PostDataWithHeader( const std::string& url, const std::string& data,
 	curl_easy_setopt(curl, CURLOPT_POST, 			1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
-	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1L ) ;
+// 	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1L ) ;
 	curl_easy_setopt(curl, CURLOPT_HEADER, 			1L );
 
 	try
@@ -224,7 +220,7 @@ std::string Put(
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
 	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
-	curl_easy_setopt(curl, CURLOPT_VERBOSE, 		1L ) ;
+// 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 		1L ) ;
 	
 	try
 	{
@@ -237,79 +233,6 @@ std::string Put(
 	}
 	
 	return resp;
-}
-
-void Custom( const std::string& url, const std::string& host, const Headers& headers )
-{
-	CURL *curl = curl_easy_init();
-	if ( curl == 0 )
-		throw std::bad_alloc() ;
-
-	// set common options
-	curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 	1L );
-	curl_easy_setopt(curl, CURLOPT_VERBOSE, 		1L ) ;
-	if ( curl_easy_perform( curl ) != 0 )
-		throw std::runtime_error( "curl perform fail" ) ;
-	
-	long sockextr;
-	curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockextr);
-	curl_socket_t sockfd = sockextr ;
-	
-	struct timeval tv;
-	tv.tv_sec	= 60 ;
-	tv.tv_usec	= 0 ;
-	
-	fd_set infd, outfd, errfd;
-	FD_ZERO(&infd);
-	FD_ZERO(&outfd);
-	FD_ZERO(&errfd);
-
-	FD_SET(sockfd, &errfd); /* always check for error */
-	FD_SET(sockfd, &outfd);
-	if ( select(sockfd + 1, &infd, &outfd, &errfd, &tv) == -1 )
-		throw std::runtime_error( "select fail" ) ;
-	
-	std::string path = url.substr( host.size() ) ;
-	std::cout << ("PUT " + path + "HTTP/1.1") << std::endl ;
-	
-	std::ostringstream req ;
-	req << ("PUT " + path + "HTTP/1.1\n")
-		<< "Host: " << "docs.google.com" << "\n" ;
-	
-	for ( Headers::const_iterator i = headers.begin() ; i != headers.end() ; ++i )
-		req << *i << '\n' ;
-	
-	std::string data = "hahaha this is the new file!!!!!" ;
-	req << "Content-Length: " << data.size() << '\n'
-		<< "Content-Range: 0-" << data.size()-1 << '/' << data.size() << "\n\n\n"
-		<< data ;
-	
-	std::string reqstr = req.str() ;
-	std::cout << "requesting: \n" << reqstr << std::endl ;
-	
-	std::size_t iolen ;
-	if ( curl_easy_send(curl, &reqstr[0], reqstr.size(), &iolen) != CURLE_OK )
-		throw std::runtime_error( "cannot send" ) ;
-	
-	while ( true )
-	{
-		char buf[1024+1] ;
-		FD_ZERO(&infd);
-		FD_ZERO(&outfd);
-		FD_ZERO(&errfd);
-
-		FD_SET(sockfd, &errfd); /* always check for error */
-		FD_SET(sockfd, &infd);
-		if ( select(sockfd + 1, &infd, &outfd, &errfd, &tv) == -1 )
-			throw std::runtime_error( "select fail" ) ;
-
-		if ( curl_easy_recv(curl, buf, 1024, &iolen) != CURLE_OK )
-			throw std::runtime_error( "cannot send" ) ;
-		
-		buf[iolen] = '\0' ;
-		std::cout << "read: " << buf << std::endl ;
-	}
 }
 
 std::string Escape( const std::string& str )

@@ -49,14 +49,9 @@ Drive::Drive( OAuth2& auth ) :
 	
 	Json resp = Json::Parse( http::Get( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
 	
-	std::cout << http::Get( "https://docs.google.com/feeds/metadata/default", m_http_hdr ) ;
-	
 	Json resume_link ;
 	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
-	{
 		m_resume_link = resume_link["href"].As<std::string>() ;
-		std::cout << "resume_link = " << resume_link << std::endl ;
-	}
 	
 	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
 	ConstructDirTree( entries ) ;
@@ -238,14 +233,15 @@ void Drive::UploadFile( const Json& entry, const std::string& filename, std::str
 		(std::istreambuf_iterator<char>(file)),
 		(std::istreambuf_iterator<char>()) ) ;
 	
-	std::ostringstream content_len ;
-	content_len << data.size() ;
+	std::ostringstream xcontent_len ;
+	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
 	
 	http::Headers hdr( m_http_hdr ) ;
 //	hdr.push_back( "Slug: Grive Document" ) ;
 	hdr.push_back( "Content-Type: application/atom+xml" ) ;
-	hdr.push_back( "X-Upload-Content-Type: text/plain" ) ;
-	hdr.push_back( "X-Upload-Content-Length: " + content_len.str() ) ;
+	hdr.push_back( "X-Upload-Content-Type: application/octet-stream" ) ;
+	hdr.push_back( xcontent_len.str() ) ;
+  	hdr.push_back( "If-Match: " + entry["gd$etag"].As<std::string>() ) ;
 	hdr.push_back( "Expect:" ) ;
 	
 /*	std::string resp = http::PostDataWithHeader(
@@ -255,16 +251,9 @@ void Drive::UploadFile( const Json& entry, const std::string& filename, std::str
 */
 	Json resume_link = entry["link"].FindInArray( "rel",
   		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
-  	std::cout << resume_link.As<std::string>() << std::endl ;
+//	std::cout << resume_link.As<std::string>() << std::endl ;
 
-	std::string etag = entry["gd$etag"].As<std::string>() ;
-	std::cout << "etag = " << etag << std::endl ;
-  	
-  	hdr.push_back( "If-Match: " + etag ) ;
-  	std::string resp = http::Put( resume_link.Get(), meta, hdr ) ;
-
-	std::cout << "resp " << resp << std::endl ;
-	std::istringstream ss( resp ) ;
+	std::istringstream ss( http::Put( resume_link.Get(), meta, hdr ) ) ;
 	
 	std::string line ;
 	while ( std::getline( ss, line ) )
@@ -276,13 +265,12 @@ void Drive::UploadFile( const Json& entry, const std::string& filename, std::str
 			uplink = uplink.substr( 0, uplink.size() -1 ) ;
 			
 			http::Headers uphdr ;
-			uphdr.push_back( "Content-Type: text/plain" ) ;
+// 			uphdr.push_back( "Content-Type: application/octet-stream" ) ;
 // 			uphdr.push_back( "Content-Range: bytes 0-999/1000" ) ;
 			uphdr.push_back( "Expect:" ) ;
 			uphdr.push_back( "Accept:" ) ;
 			
-			std::string resp = http::Put( uplink, data, uphdr ) ;
-			std::cout << "put response = " << resp << std::endl ;
+			http::Put( uplink, data, uphdr ) ;
 		}
 	}
 }
