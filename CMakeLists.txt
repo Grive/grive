@@ -10,12 +10,12 @@ find_package(CURL REQUIRED)
 find_package(CppUnit)
 
 IF ( CPPUNIT_FOUND )
-    set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
+	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
 ENDIF ( CPPUNIT_FOUND )
 
 include_directories(
 	${grive_SOURCE_DIR}/src
-        ${OPT_INCS}
+	${OPT_INCS}
 )
 
 add_executable( grive
@@ -32,23 +32,23 @@ add_executable( grive
 )
 
 target_link_libraries( grive
-        ${CURL_LIBRARIES}
-        ${JSONC_LIBRARY}
+	${CURL_LIBRARIES}
+	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
 )
 
 IF ( CPPUNIT_FOUND )
 
-    add_executable( unittest
-            test/UnitTest.cc
-            src/util/DateTime.cc
-            test/util/DateTimeTest.cc
-            test/util/FunctionTest.cc
-    )
+	add_executable( unittest
+		test/UnitTest.cc
+		src/util/DateTime.cc
+		test/util/DateTimeTest.cc
+		test/util/FunctionTest.cc
+	)
 
-    target_link_libraries( unittest
-            ${CPPUNIT_LIBRARY}
-    )
+	target_link_libraries( unittest
+		${CPPUNIT_LIBRARY}
+	)
 
 ELSE ( CPPUNIT_FOUND )
 	message( STATUS "skip building unittest" )
