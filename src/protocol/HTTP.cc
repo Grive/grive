@@ -92,7 +92,7 @@ void DoCurl( CURL *curl )
 
 	CURLcode curl_code = curl_easy_perform(curl);
 
-	int http_code = 0;
+	long http_code = 0;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
 	// clean up
@@ -263,3 +263,96 @@ std::string Unescape( const std::string& str )
 }
 
 } } // end of namespace
+
+namespace gr {
+
+struct Http::Impl
+{
+	CURL			*curl ;
+	std::string		location ;
+} ;
+
+Http::Http() :
+	m_pimpl( new Impl )
+{
+	m_pimpl->curl = ::curl_easy_init();
+	
+}
+
+Http::~Http()
+{
+	::curl_easy_cleanup( m_pimpl->curl );
+}
+
+std::size_t Http::HeaderCallback( void *ptr, size_t size, size_t nmemb, Http *pthis )
+{
+	std::string line( (char*)ptr, (char*)ptr + size*nmemb ) ;
+	
+	static const std::string loc = "Location: " ;
+	std::size_t pos = line.find( loc ) ;
+	if ( pos != line.npos )
+	{
+		std::size_t end_pos = line.find( "\r\n", pos ) ;
+		pthis->m_pimpl->location = line.substr( loc.size(), end_pos - loc.size() ) ;
+	}
+	
+	return size*nmemb ;
+}
+
+std::string Http::Put(
+	const std::string&		url,
+	const std::string&		data,
+	const http::Headers&	hdr )
+{
+	CURL *curl = m_pimpl->curl ;
+
+	std::string put_data = data ;
+	std::string resp ;
+
+	// set common options
+	curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	WriteCallback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		&resp ) ;
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,	0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST,	0L);
+	curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
+	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
+	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION,	&Http::HeaderCallback ) ;
+	curl_easy_setopt(curl, CURLOPT_WRITEHEADER ,	this ) ;
+
+	// set headers
+	struct curl_slist *curl_hdr = 0 ;
+    for ( Headers::const_iterator i = hdr.begin() ; i != hdr.end() ; ++i )
+		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
+	curl_easy_setopt( curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
+
+	char error_buf[CURL_ERROR_SIZE] = {} ;
+	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error_buf ) ;
+
+	CURLcode curl_code = curl_easy_perform(curl);
+
+	long http_code = 0;
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+	if ( curl_code != CURLE_OK )
+	{
+		throw Exception( curl_code, http_code, error_buf ) ;
+	}
+	else if (http_code >= 400 )
+	{
+		std::cout << "http error " << http_code << " " << resp << std::endl ;
+		throw Exception( curl_code, http_code, error_buf ) ;
+	}
+
+	return resp ;
+}
+
+std::string Http::RedirLocation() const
+{
+	return m_pimpl->location ;
+}
+
+} // end of namespace

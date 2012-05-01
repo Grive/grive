@@ -138,27 +138,15 @@ void File::Upload( std::streambuf *file, const http::Headers& auth )
   	hdr.push_back( "If-Match: " + m_etag ) ;
 	hdr.push_back( "Expect:" ) ;
 	
-	std::istringstream ss( http::Put( m_upload_link, meta, hdr ) ) ;
+	Http http ;
+	http.Put( m_upload_link, meta, hdr ) ;
 	
 	// parse the header and find "Location"
-	std::string line ;
-	while ( std::getline( ss, line ) )
-	{
-		static const std::string location = "Location: " ;
-		if ( line.substr( 0, location.size() ) == location )
-		{
-			std::string uplink = line.substr( location.size() ) ;
-			uplink = uplink.substr( 0, uplink.size() -1 ) ;
-
-			// interestingly this doesn't require the access token
-			http::Headers uphdr ;
-			uphdr.push_back( "Expect:" ) ;
-			uphdr.push_back( "Accept:" ) ;
-			
-			http::Put( uplink, data, uphdr ) ;
-		}
-	}
-
+	http::Headers uphdr ;
+	uphdr.push_back( "Expect:" ) ;
+	uphdr.push_back( "Accept:" ) ;
+	
+	http.Put( http.RedirLocation(), data, uphdr ) ;
 }
 
 } // end of namespace

@@ -19,61 +19,79 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <stdexcept>
 #include <vector>
 
-namespace gr { namespace http
-{
-	typedef std::vector<std::string> Headers ;
+namespace gr {
 
+	namespace http
+	{
+		typedef std::vector<std::string> Headers ;
+		
+		std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
+		void GetFile(
+			const std::string&	url,
+			const std::string&	filename,
+			const Headers& 		hdr = Headers() ) ;
+		
+		void GetFile(
+			const std::string&	url,
+			const std::string&	filename,
+			std::string&		md5sum,
+			const Headers& 		hdr = Headers() ) ;
+		
+		std::string PostData(
+			const std::string&	url,
+			const std::string&	data,
+			const Headers&		hdr = Headers() ) ;
+		std::string PostDataWithHeader(
+			const std::string&	url,
+			const std::string&	data,
+			const Headers&		hdr = Headers() ) ;
+		std::string PostFile(
+			const std::string&	url,
+			const std::string& 	filename,
+			const Headers&		hdr = Headers() ) ;
+		
+		std::string Put(
+			const std::string&	url,
+			const std::string&	data,
+			const Headers&		hdr = Headers() ) ;
+		
+		std::string Escape( const std::string& str ) ;
+		std::string Unescape( const std::string& str ) ;
+		
+		class Exception : public std::runtime_error
+		{
+		public :
+			Exception( int curl_code, int http_code, const char *err_buf ) ;
+		
+		private :
+			static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
+		} ;
+	}
+	
 	class Http
 	{
 	public :
+		Http() ;
+		~Http() ;
+		
+		std::string Put(
+			const std::string&		url,
+			const std::string&		data,
+			const http::Headers&	hdr = http::Headers() ) ;
+
+		std::string RedirLocation() const ;
+	
+	private :
+		static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Http *pthis ) ;
+	
 	private :
 		struct Impl ;
-	} ;
-	
-	std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
-	void GetFile(
-		const std::string&	url,
-		const std::string&	filename,
-		const Headers& 		hdr = Headers() ) ;
-	
-	void GetFile(
-		const std::string&	url,
-		const std::string&	filename,
-		std::string&		md5sum,
-		const Headers& 		hdr = Headers() ) ;
-	
-	std::string PostData(
-		const std::string&	url,
-		const std::string&	data,
-		const Headers&		hdr = Headers() ) ;
-	std::string PostDataWithHeader(
-		const std::string&	url,
-		const std::string&	data,
-		const Headers&		hdr = Headers() ) ;
-	std::string PostFile(
-		const std::string&	url,
-		const std::string& 	filename,
-		const Headers&		hdr = Headers() ) ;
-	
-	std::string Put(
-		const std::string&	url,
-		const std::string&	data,
-		const Headers&		hdr = Headers() ) ;
-	
-	std::string Escape( const std::string& str ) ;
-	std::string Unescape( const std::string& str ) ;
-	
-	class Exception : public std::runtime_error
-	{
-	public :
-		Exception( int curl_code, int http_code, const char *err_buf ) ;
-	
-	private :
-		static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
+		std::auto_ptr<Impl>	m_pimpl ;
 	} ;
 
-} } // end of namespace
+} // end of namespace
