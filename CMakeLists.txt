@@ -18,8 +18,19 @@ include_directories(
 	${OPT_INCS}
 )
 
-add_executable( grive
-	src/main.cc
+file(GLOB DRIVE_HEADERS
+    ${grive_SOURCE_DIR}/src/drive/*.hh
+)
+
+file (GLOB PROTOCOL_HEADERS
+    ${grive_SOURCE_DIR}/src/protocol/*.hh
+)
+
+file (GLOB UTIL_HEADERS
+    ${grive_SOURCE_DIR}/src/util/*.hh
+)
+
+add_library( fgrive SHARED
 	src/drive/Collection.cc
 	src/drive/Drive.cc
 	src/protocol/Download.cc
@@ -31,27 +42,43 @@ add_executable( grive
 	src/util/OS.cc
 )
 
-target_link_libraries( grive
+add_executable( grive
+	src/main.cc
+)
+
+target_link_libraries( fgrive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
 )
 
-IF ( CPPUNIT_FOUND )
+target_link_libraries( grive
+    fgrive
+)
 
-	add_executable( unittest
-		test/UnitTest.cc
-		src/util/DateTime.cc
-		test/util/DateTimeTest.cc
-		test/util/FunctionTest.cc
-	)
+set_target_properties(fgrive PROPERTIES
+    SOVERSION 0 VERSION 0.0.1
+)
 
-	target_link_libraries( unittest
-		${CPPUNIT_LIBRARY}
-	)
+if ( CPPUNIT_FOUND )
+    add_executable( unittest
+	    test/UnitTest.cc
+	    src/util/DateTime.cc
+	    test/util/DateTimeTest.cc
+	    test/util/FunctionTest.cc
+    )
 
-ELSE ( CPPUNIT_FOUND )
-	message( STATUS "skip building unittest" )
-ENDIF ( CPPUNIT_FOUND )
+    target_link_libraries( unittest
+	    ${CPPUNIT_LIBRARY}
+    )
+    else ( CPPUNIT_FOUND )
+	    message( STATUS "skip building unittest" )
+endif ( CPPUNIT_FOUND )
 
-INSTALL ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/grive DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
+## Install targets
+install(TARGETS fgrive LIBRARY DESTINATION lib)
+install(TARGETS grive RUNTIME DESTINATION bin)
+install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
+install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
+install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
