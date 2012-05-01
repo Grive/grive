@@ -33,6 +33,7 @@ file (GLOB UTIL_HEADERS
 add_library( fgrive SHARED
 	src/drive/Collection.cc
 	src/drive/Drive.cc
+	src/drive/File.cc
 	src/protocol/Download.cc
 	src/protocol/HTTP.cc
 	src/protocol/Json.cc

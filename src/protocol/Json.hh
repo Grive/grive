@@ -52,18 +52,9 @@ public :
 	template <typename T>
 	T As() const ;
 	
-	struct Proxy
-	{
-		const Json&	referring ;
-		explicit Proxy( const Json& j ) : referring( j ) { }
-		operator bool() const ;
-		operator int() const ;
-		operator Object() const ;
-		operator Array() const ;
-		operator std::string() const ;
-	} ;
-	Proxy Get() const ;
-	
+	// As<std::string>() shortcut
+	std::string Str() const ;
+
 	template <typename T>
 	bool Is() const ;
 	

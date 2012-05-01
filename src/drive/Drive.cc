@@ -19,6 +19,8 @@
 
 #include "Drive.hh"
 
+#include "File.hh"
+
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
@@ -68,13 +70,6 @@ Drive::Drive( OAuth2& auth ) :
 
 Drive::~Drive( )
 {
-}
-
-std::string Drive::Kind( const Json& entry )
-{
-	Json node ;
-	return entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node ) ?
-		node["label"].As<std::string>() : std::string() ;
 }
 
 struct SortCollectionByHref
@@ -147,129 +142,49 @@ void Drive::ConstructDirTree( const std::vector<Json>& entries )
 	m_root.CreateSubDir( Path() ) ;
 }
 
-std::string Drive::Parent( const Json& entry )
-{
-	Json node ;
-	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
-		 node["href"].As<std::string>() : std::string() ;
-}
-
 void Drive::UpdateFile( const Json& entry )
 {
 	// only handle uploaded files
-	if ( entry.Has( "docs$filename" ) )
+	if ( entry.Has( "docs$suggestedFilename" ) )
 	{
-		// use title as the filename
-		std::string filename	= entry["docs$filename"]["$t"].Get() ;
-		std::string url			= entry["content"]["src"].Get() ;
-		std::string parent_href	= Parent( entry ) ;
-/*
-		Json kind_json ;
-		if ( entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", kind_json ) )
-		{
-			std::cout << filename << " kind = " << kind_json << std::endl ;
-		}
-*/
+		File file( entry ) ;
+	
 		bool changed = true ;
-		Path path = Path() / filename ;
+		Path path = Path() / file.Filename() ;
 
 		// determine which folder the file belongs to
-		if ( !parent_href.empty() )
+		if ( !file.Parent().empty() )
 		{
-			FolderListIterator pit = FindFolder( parent_href ) ;
+			FolderListIterator pit = FindFolder( file.Parent() ) ;
 			if ( pit != m_coll.end() )
-				path = pit->Dir() / filename ;
+				path = pit->Dir() / file.Filename() ;
 		}
 
 		// compare checksum first if file exists
-		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::out ) ;
-		if ( ifile && entry.Has("docs$md5Checksum") )
-		{
-			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
-			std::string local_md5	= crypt::MD5( ifile.rdbuf() ) ;
-			
-			std::transform( remote_md5.begin(), remote_md5.end(), remote_md5.begin(), tolower ) ;
-			if ( local_md5 == remote_md5 )
-				changed = false ;
-		}
+		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
+		if ( ifile && file.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
+			changed = false ;
 		
 		// if the checksum is different, file is changed and we need to update
 		if ( changed )
 		{
-			DateTime remote( entry["updated"]["$t"].As<std::string>() ) ;
-			DateTime local = ifile ? os::FileMTime( path.Str() ) : DateTime() ;
+			DateTime remote	= file.ServerModified() ;
+			DateTime local	= ifile ? os::FileMTime( path ) : DateTime() ;
 			
 			// remote file is newer, download file
 			if ( !ifile || remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
-				http::GetFile( url, path.Str(), m_http_hdr ) ;
-				os::SetFileTime( path.Str(), remote ) ;
+				file.Download( path, m_http_hdr ) ;
 			}
 			else
 			{
-std::cout << "local " << filename << " is newer" << std::endl ;
+std::cout << "local " << path << " is newer" << std::endl ;
 				// re-reading the file
 				ifile.seekg(0) ;
 				
-				UploadFile( entry, filename, ifile.rdbuf() ) ;
+				file.Upload( ifile.rdbuf(), m_http_hdr ) ;
 			}
-		}
-	}
-}
-
-void Drive::UploadFile( const Json& entry, const std::string& filename, std::streambuf *file )
-{
-	std::string meta =
-	"<?xml version='1.0' encoding='UTF-8'?>\n"
-	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
-		"term=\"http://schemas.google.com/docs/2007#file\"/>"
-		"<title>" + filename + "</title>"
-	"</entry>" ;
-
-	std::string data(
-		(std::istreambuf_iterator<char>(file)),
-		(std::istreambuf_iterator<char>()) ) ;
-	
-	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
-	
-	http::Headers hdr( m_http_hdr ) ;
-//	hdr.push_back( "Slug: Grive Document" ) ;
-	hdr.push_back( "Content-Type: application/atom+xml" ) ;
-	hdr.push_back( "X-Upload-Content-Type: application/octet-stream" ) ;
-	hdr.push_back( xcontent_len.str() ) ;
-  	hdr.push_back( "If-Match: " + entry["gd$etag"].As<std::string>() ) ;
-	hdr.push_back( "Expect:" ) ;
-	
-/*	std::string resp = http::PostDataWithHeader(
-		m_resume_link + "?convert=false",
-		meta,
-		hdr ) ;
-*/
-	Json resume_link = entry["link"].FindInArray( "rel",
-  		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"] ;
-//	std::cout << resume_link.As<std::string>() << std::endl ;
-
-	std::istringstream ss( http::Put( resume_link.Get(), meta, hdr ) ) ;
-	
-	std::string line ;
-	while ( std::getline( ss, line ) )
-	{
-		static const std::string location = "Location: " ;
-		if ( line.substr( 0, location.size() ) == location )
-		{
-			std::string uplink = line.substr( location.size() ) ;
-			uplink = uplink.substr( 0, uplink.size() -1 ) ;
-			
-			http::Headers uphdr ;
-// 			uphdr.push_back( "Content-Type: application/octet-stream" ) ;
-// 			uphdr.push_back( "Content-Range: bytes 0-999/1000" ) ;
-			uphdr.push_back( "Expect:" ) ;
-			uphdr.push_back( "Accept:" ) ;
-			
-			http::Put( uplink, data, uphdr ) ;
 		}
 	}
 }

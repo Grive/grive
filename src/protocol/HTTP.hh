@@ -27,6 +27,13 @@ namespace gr { namespace http
 {
 	typedef std::vector<std::string> Headers ;
 
+	class Http
+	{
+	public :
+	private :
+		struct Impl ;
+	} ;
+	
 	std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
 	void GetFile(
 		const std::string&	url,

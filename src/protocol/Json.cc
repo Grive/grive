@@ -257,34 +257,10 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 	}
 }
 
-Json::Proxy Json::Get() const
+std::string Json::Str() const
 {
-	return Proxy( *this ) ;
+	return As<std::string>() ;
 }
 
-Json::Proxy::operator bool() const
-{
-	return referring.As<bool>() ;
-}
-
-Json::Proxy::operator int() const
-{
-	return referring.As<int>() ;
-}
-
-Json::Proxy::operator Object() const
-{
-	return referring.As<Object>() ;
-}
-
-Json::Proxy::operator Array() const
-{
-	return referring.As<Array>() ;
-}
-
-Json::Proxy::operator std::string() const
-{
-	return referring.As<std::string>() ;
-}
 
 }
