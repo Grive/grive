@@ -2,40 +2,16 @@ project(grive)
 
 cmake_minimum_required(VERSION 2.8)
 
-include(FindOpenSSL)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-###############################################################################
-# finding cppunit
-###############################################################################
-find_path( CPPUNIT_INCLUDE_DIR cppunit/TestFixture.h /usr/include
-                                                     /usr/local/include
-                                                     ${CPPUNIT_PREFIX}/include )
-find_library( CPPUNIT_LIBRARY_DEBUG NAMES cppunit cppunit_dll
-              PATHS /usr/lib
-                    /usr/lib64
-                    /usr/local/lib
-                    /usr/local/lib64
-                    ${CPPUNIT_PREFIX}/lib
-              PATH_SUFFIXES debug )
+find_package(OpenSSL REQUIRED)
+find_package(JSONC REQUIRED)
+find_package(CURL REQUIRED)
+find_package(CppUnit)
 
-find_library( CPPUNIT_LIBRARY_RELEASE NAMES cppunit cppunit_dll
-              PATHS /usr/lib
-                    /usr/lib64
-                    /usr/local/lib
-                    /usr/local/lib64
-                    ${CPPUNIT_PREFIX}/lib
-              PATH_SUFFIXES release )
-
-set( CPPUNIT_LIBRARY debug     ${CPPUNIT_LIBRARY_DEBUG}
-                     optimized ${CPPUNIT_LIBRARY_RELEASE} )
-
-if ( CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY )
-	message( STATUS "found cppunit" )
-	set( CPPUNIT_FOUND	TRUE )
+IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
-endif ( CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY )
-
-###############################################################################
+ENDIF ( CPPUNIT_FOUND )
 
 include_directories(
 	${grive_SOURCE_DIR}/src
@@ -54,7 +30,7 @@ file (GLOB UTIL_HEADERS
     ${grive_SOURCE_DIR}/src/util/*.hh
 )
 
-add_library( grive SHARED
+add_library( fgrive SHARED
 	src/main.cc
 	src/drive/Collection.cc
 	src/drive/Drive.cc
@@ -67,21 +43,21 @@ add_library( grive SHARED
 	src/util/OS.cc
 )
 
-add_executable( grive_cli
+add_executable( grive
 	src/main.cc
 )
 
-target_link_libraries( grive
-	curl
-	json
+target_link_libraries( fgrive
+	${CURL_LIBRARIES}
+	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
 )
 
-target_link_libraries( grive_cli
-    grive
+target_link_libraries( grive
+    fgrive
 )
 
-set_target_properties(grive PROPERTIES
+set_target_properties(fgrive PROPERTIES
     SOVERSION 0 VERSION 0.0.1
 )
 
@@ -102,8 +78,8 @@ endif ( CPPUNIT_FOUND )
 
 
 ## Install targets
-install(TARGETS grive LIBRARY DESTINATION lib)
-install(TARGETS grive_cli RUNTIME DESTINATION bin)
+install(TARGETS fgrive LIBRARY DESTINATION lib)
+install(TARGETS grive RUNTIME DESTINATION bin)
 install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
 install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
 install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
