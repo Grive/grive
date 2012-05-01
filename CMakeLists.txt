@@ -29,6 +29,7 @@ add_executable( grive
 	src/util/Crypt.cc
 	src/util/DateTime.cc
 	src/util/OS.cc
+	src/util/Path.cc
 )
 
 target_link_libraries( grive
@@ -40,10 +41,13 @@ target_link_libraries( grive
 IF ( CPPUNIT_FOUND )
 
 	add_executable( unittest
-		test/UnitTest.cc
 		src/util/DateTime.cc
+		src/util/Path.cc
+		
+		test/UnitTest.cc
 		test/util/DateTimeTest.cc
 		test/util/FunctionTest.cc
+		test/util/PathTest.cc
 	)
 
 	target_link_libraries( unittest

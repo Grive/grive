@@ -27,6 +27,7 @@
 namespace gr {
 
 class Json ;
+class Path ;
 
 class Collection
 {
@@ -43,7 +44,7 @@ public :
 	const std::string& Href() const ;
 	const Collection* Parent() const ;
 	Collection* Parent() ;
-	std::string Path() const ;
+	Path Dir() const ;
 
 	void AddChild( Collection *child ) ;
 	void AddLeaf( const std::string& filename ) ;
@@ -51,7 +52,7 @@ public :
 	void Swap( Collection& coll ) ;
 
 	// traversing the tree
-	void CreateSubDir( const std::string& prefix = "." ) ;
+	void CreateSubDir( const Path& prefix ) ;
 	void ForEachFile(
 		Function<void(const std::string&)>	callback,
 		const std::string& 					prefix = "." ) ;

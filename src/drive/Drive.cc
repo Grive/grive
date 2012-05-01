@@ -25,6 +25,7 @@
 #include "util/Crypt.hh"
 #include "util/DateTime.hh"
 #include "util/OS.hh"
+#include "util/Path.hh"
 
 // standard C++ library
 #include <algorithm>
@@ -143,7 +144,7 @@ void Drive::ConstructDirTree( const std::vector<Json>& entries )
 	
 	// lastly, iterating from the root, create the directories in the local file system
 	assert( m_root.Parent() == 0 ) ;
-	m_root.CreateSubDir( "" ) ;
+	m_root.CreateSubDir( Path() ) ;
 }
 
 std::string Drive::Parent( const Json& entry )
@@ -170,20 +171,22 @@ void Drive::UpdateFile( const Json& entry )
 		}
 */
 		bool changed = true ;
-		std::string path = "./" + filename ;
+		Path path = Path() / filename ;
 
 		// determine which folder the file belongs to
 		if ( !parent_href.empty() )
 		{
 			FolderListIterator pit = FindFolder( parent_href ) ;
 			if ( pit != m_coll.end() )
-				path = pit->Path() + "/" + filename ;
+				path = pit->Dir() / filename ;
 		}
-		
+
+// std::cout << "here!" << std::endl ;
+std::cout << "file name " << path << std::endl ;
 //		std::cout << "file time: " << entry["updated"]["$t"].As<std::string>() << " " << remote << " " << local << std::endl ;
 		
 		// compare checksum first if file exists
-		std::ifstream ifile( path.c_str(), std::ios::binary | std::ios::out ) ;
+		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::out ) ;
 		if ( ifile && entry.Has("docs$md5Checksum") )
 		{
 			std::string remote_md5	= entry["docs$md5Checksum"]["$t"].As<std::string>() ;
@@ -198,14 +201,14 @@ void Drive::UpdateFile( const Json& entry )
 		if ( changed )
 		{
 			DateTime remote( entry["updated"]["$t"].As<std::string>() ) ;
-			DateTime local = ifile ? os::FileMTime( path ) : DateTime() ;
+			DateTime local = ifile ? os::FileMTime( path.Str() ) : DateTime() ;
 			
 			// remote file is newer, download file
 			if ( !ifile || remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
-				http::GetFile( url, path, m_http_hdr ) ;
-				os::SetFileTime( path, remote ) ;
+				http::GetFile( url, path.Str(), m_http_hdr ) ;
+				os::SetFileTime( path.Str(), remote ) ;
 			}
 			else
 			{

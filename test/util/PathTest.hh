@@ -17,21 +17,27 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <cppunit/ui/text/TestRunner.h>
+#pragma once
 
-#include "util/DateTimeTest.hh"
-#include "util/FunctionTest.hh"
-#include "util/PathTest.hh"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-int main( int argc, char **argv )
+namespace grut {
+
+class PathTest : public CppUnit::TestFixture
 {
-	using namespace grut ;
+public :
+	PathTest( ) ;
 
-	CppUnit::TextUi::TestRunner runner;
-	runner.addTest( DateTimeTest::suite( ) ) ;
-	runner.addTest( FunctionTest::suite( ) ) ;
-	runner.addTest( PathTest::suite( ) ) ;
-	runner.run();
-  
-	return 0 ;
-}
+	// declare suit function
+	CPPUNIT_TEST_SUITE( PathTest ) ;
+		CPPUNIT_TEST( TestStr ) ;
+		CPPUNIT_TEST( TestSeparate ) ;
+	CPPUNIT_TEST_SUITE_END();
+
+private :
+	void TestStr( ) ;
+	void TestSeparate( ) ;
+} ;
+
+} // end of namespace

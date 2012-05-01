@@ -18,7 +18,9 @@
 */
 
 #include "OS.hh"
+
 #include "DateTime.hh"
+#include "Path.hh"
 
 #include <stdexcept>
 
@@ -29,9 +31,19 @@
 
 namespace gr { namespace os {
 
+void MakeDir( const Path& dir )
+{
+	MakeDir( dir.Str() ) ;
+}
+
 void MakeDir( const std::string& dir )
 {
 	mkdir( dir.c_str(), 0700 ) ;
+}
+
+DateTime FileMTime( const Path& filename )
+{
+	return FileMTime( filename.Str() ) ;
 }
 
 DateTime FileMTime( const std::string& filename )
@@ -45,6 +57,11 @@ DateTime FileMTime( const std::string& filename )
 #else
 	return DateTime( s.st_mtim.tv_sec, s.st_mtim.tv_nsec);
 #endif
+}
+
+void SetFileTime( const Path& filename, const DateTime& t )
+{
+	return SetFileTime( filename.Str(), t ) ;
 }
 
 void SetFileTime( const std::string& filename, const DateTime& t )

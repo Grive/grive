@@ -24,12 +24,18 @@
 namespace gr {
 
 class DateTime ;
+class Path ;
 
 namespace os
 {
 	void MakeDir( const std::string& dir ) ;
+	void MakeDir( const Path& dir ) ;
+	
 	DateTime FileMTime( const std::string& filename ) ;
+	DateTime FileMTime( const Path& filename ) ;
+	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
+	void SetFileTime( const Path& filename, const DateTime& t ) ;
 }
 
 } // end of namespaces

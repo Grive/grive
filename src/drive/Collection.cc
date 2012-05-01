@@ -20,6 +20,7 @@
 #include "Collection.hh"
 
 #include "protocol/Json.hh"
+#include "util/Path.hh"
 #include "util/OS.hh"
 
 #include <cassert>
@@ -104,15 +105,15 @@ void Collection::Swap( Collection& coll )
 	m_leaves.swap( coll.m_leaves ) ;
 }
 
-void Collection::CreateSubDir( const std::string& prefix )
+void Collection::CreateSubDir( const Path& prefix )
 {
-	std::string dir = prefix + m_title ;
+	Path dir = prefix / m_title ;
 	os::MakeDir( dir ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
 		assert( (*i)->m_parent == this ) ;
-		(*i)->CreateSubDir( prefix + m_title + "/" ) ;
+		(*i)->CreateSubDir( dir ) ;
 	}
 }
 
@@ -122,10 +123,10 @@ void Collection::ForEachFile(
 {
 }
 
-std::string Collection::Path() const
+Path Collection::Dir() const
 {
 	assert( m_parent != this ) ;
-	return m_parent != 0 ? (m_parent->Path() + "/" + m_title) : m_title ;
+	return m_parent != 0 ? (m_parent->Dir() / m_title) : Path() ;
 }
 
 } // end of namespace
