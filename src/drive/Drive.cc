@@ -181,10 +181,6 @@ void Drive::UpdateFile( const Json& entry )
 				path = pit->Dir() / filename ;
 		}
 
-// std::cout << "here!" << std::endl ;
-std::cout << "file name " << path << std::endl ;
-//		std::cout << "file time: " << entry["updated"]["$t"].As<std::string>() << " " << remote << " " << local << std::endl ;
-		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::out ) ;
 		if ( ifile && entry.Has("docs$md5Checksum") )
