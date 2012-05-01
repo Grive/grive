@@ -31,7 +31,6 @@ file (GLOB UTIL_HEADERS
 )
 
 add_library( fgrive SHARED
-	src/main.cc
 	src/drive/Collection.cc
 	src/drive/Drive.cc
 	src/protocol/Download.cc
