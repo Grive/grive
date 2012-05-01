@@ -17,23 +17,35 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <cppunit/ui/text/TestRunner.h>
+#include "SignalHandlerTest.hh"
 
-#include "util/DateTimeTest.hh"
-#include "util/FunctionTest.hh"
-#include "util/PathTest.hh"
-#include "util/SignalHandlerTest.hh"
+#include "util/SignalHandler.hh"
 
-int main( int argc, char **argv )
+#include <signal.h>
+
+void test_callback( int )
 {
-	using namespace grut ;
 
-	CppUnit::TextUi::TestRunner runner;
-	runner.addTest( DateTimeTest::suite( ) ) ;
-	runner.addTest( FunctionTest::suite( ) ) ;
-	runner.addTest( PathTest::suite( ) ) ;
-	runner.addTest( SignalHandlerTest::suite( ) ) ;
-	runner.run();
-  
-	return 0 ;
+}
+
+namespace grut {
+
+using namespace gr ;
+
+SignalHandlerTest::SignalHandlerTest( )
+{
+}
+
+void SignalHandlerTest::TestMultipleSignals( )
+{
+	SignalHandler::GetInstance().RegisterSignal( SIGINT, &test_callback );
+	CPPUNIT_ASSERT_THROW(
+			SignalHandler::GetInstance().RegisterSignal( SIGINT, &test_callback ),
+			SignalError);
+
+	SignalHandler::GetInstance().UnregisterSignal( SIGINT );
+	CPPUNIT_ASSERT_NO_THROW(
+			SignalHandler::GetInstance().RegisterSignal( SIGINT, &test_callback ));
+}
+
 }
