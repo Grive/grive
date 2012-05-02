@@ -20,6 +20,7 @@
 #include "HTTP.hh"
 
 #include "Download.hh"
+#include "util/SignalHandler.hh"
 
 // dependent libraries
 #include <curl/curl.h>
@@ -30,6 +31,8 @@
 #include <iostream>
 #include <sstream>
 #include <streambuf>
+
+#include <signal.h>
 
 namespace {
 
@@ -109,6 +112,14 @@ void DoCurl( CURL *curl )
 	}
 }
 
+// Callback for SIGINT
+void CallbackInt( int )
+{
+	// TODO: instead of just disabling the signal, clean up the environment
+	//       and exit gracefully
+	std::cout << " Signal disabled while downloading file..\n";
+}
+
 } // end of local namespace
 
 namespace gr { namespace http {
@@ -139,6 +150,9 @@ void GetFile(
 	const std::string&	filename,
 	const Headers& 		hdr )
 {
+	// Register the callback
+	SignalHandler::GetInstance().RegisterSignal( SIGINT, &CallbackInt ) ;
+
 	Download dl( filename, Download::NoChecksum() ) ;
 		
 	CURL *curl = InitCurl( url, 0, hdr ) ;

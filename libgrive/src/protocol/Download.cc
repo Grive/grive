@@ -18,12 +18,15 @@
 */
 
 #include "Download.hh"
+#include "util/SignalHandler.hh"
 
 #include <openssl/evp.h>
 
 #include <cassert>
 #include <new>
 #include <stdexcept>
+
+#include <signal.h>
 
 namespace gr {
 
@@ -57,6 +60,9 @@ Download::~Download( )
 
 std::string Download::Finish() const
 {
+	// Unregister the signal
+	SignalHandler::GetInstance().UnregisterSignal( SIGINT ) ;
+
 	std::string result ;
 
 	// get the checksum and return it ;

@@ -22,6 +22,7 @@
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
 #include "util/PathTest.hh"
+#include "util/SignalHandlerTest.hh"
 
 int main( int argc, char **argv )
 {
@@ -31,6 +32,7 @@ int main( int argc, char **argv )
 	runner.addTest( DateTimeTest::suite( ) ) ;
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( PathTest::suite( ) ) ;
+	runner.addTest( SignalHandlerTest::suite( ) ) ;
 	runner.run();
   
 	return 0 ;
