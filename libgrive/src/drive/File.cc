@@ -45,15 +45,16 @@ void File::Update( const Json& entry )
 	m_filename			= entry["docs$suggestedFilename"]["$t"].Str() ;
 	m_href				= entry["content"]["src"].Str() ;
 	m_parent			= Parent( entry ) ;
-	m_server_md5		= entry["docs$md5Checksum"]["$t"].Str() ;
 	m_server_modified	= DateTime( entry["updated"]["$t"].Str() ) ;
 	m_etag				= entry["gd$etag"].Str() ;
+	
+	m_server_md5		= entry.Has("docs$md5Checksum") ?
+		entry["docs$md5Checksum"]["$t"].Str() : "" ;
 
 	Json node ;
 	m_kind				= entry["category"].
 		FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node )
 		? node["label"].Str() : std::string() ;
-
 	
 	m_upload_link		= entry["link"].FindInArray( "rel",
   		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"].Str() ;
