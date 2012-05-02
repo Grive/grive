@@ -18,7 +18,7 @@
 */
 
 #include "Download.hh"
-#include "util/SignalHandler.hh"
+// #include "util/SignalHandler.hh"
 
 #include <openssl/evp.h>
 
@@ -61,7 +61,7 @@ Download::~Download( )
 std::string Download::Finish() const
 {
 	// Unregister the signal
-	SignalHandler::GetInstance().UnregisterSignal( SIGINT ) ;
+// 	SignalHandler::GetInstance().UnregisterSignal( SIGINT ) ;
 
 	std::string result ;
 
