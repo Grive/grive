@@ -32,14 +32,6 @@ public :
 	virtual ~SignalError() throw () ;
 };
 
-class SignalFunctor
-{
-public :
-	SignalFunctor() ;
-	virtual ~SignalFunctor() ;
-	static void Callback( int signumber ) ;
-};
-
 class SignalHandler
 {
 	typedef void (*Callback)(int);
