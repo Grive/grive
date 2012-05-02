@@ -1,10 +1,19 @@
-The first version of grive:
+Grive 0.0.3 
 
-This is a very experimental version. It just download all the files in your google drive
-in the current directory.
+Grive is still considered experimental. It just download all the files in your google drive
+in the current directory. After you make some changes to the local files, run grive and
+it will upload your changes back to your google drive.
+
+There are a few things that grive does not do at the moment:
+- wait for changes in file system to occur and upload. Grive only sync when you run it.
+- create new files in google drive. Grive only uploads changed files that already
+  exist in server.
+  
+Of course there will be done in future, possibly the next release.
 
 This is compiled in Fedora 16 x64. You need the following libraries to run:
-json-c, libcurl, libstdc++ and openssl.
+json-c, libcurl, libstdc++ and openssl. CppUnit is also optional and required
+only if you want to build the test cases.
 
 For the first time running grive, you should use the "-a" argument to grant
 permission to grive to access to your Google Drive. An URL should be printed.
