@@ -28,6 +28,10 @@ file (GLOB UTIL_HEADERS
     ${libgrive_SOURCE_DIR}/src/util/*.hh
 )
 
+file (GLOB XML_HEADERS
+    ${libgrive_SOURCE_DIR}/src/xml/*.hh
+)
+
 file (GLOB LIBGRIVE_SRC
 	src/drive/*.cc
 	src/protocol/*.cc
@@ -49,6 +53,8 @@ set_target_properties(grive PROPERTIES
 install(TARGETS grive LIBRARY DESTINATION lib)
 install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
 install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
+install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
+install(FILES ${XML_HEADERS} DESTINATION include/grive/xml)
 
 IF ( CPPUNIT_FOUND )
 	message("-- Building unitary tests along with the library and the binary")
