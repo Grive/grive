@@ -18,6 +18,10 @@
 */
 
 #include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/XmlOutputter.h>
+#include <cppunit/Outputter.h>
+
+#include <sstream>
 
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
@@ -34,6 +38,11 @@ int main( int argc, char **argv )
 	runner.addTest( PathTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;
 	runner.run();
+
+	std::ofstream report_file( "report.xml" ) ;
+	CppUnit::XmlOutputter xmloutputter ( &runner.result( ), report_file ) ;
+	xmloutputter.write( ) ;
+	report_file.close( ) ;
   
 	return 0 ;
 }
