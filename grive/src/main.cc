@@ -130,8 +130,15 @@ int main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	Drive drive( token ) ;
+	try
+	{
+		OAuth2 token( refresh_token, client_id, client_secret ) ;
+		Drive drive( token ) ;
+	}
+	catch ( const std::exception& exception )
+	{
+		std::cerr << "Exception caught: " << exception.what( ) << std::endl;
+	}
 	
 	return 0 ;
 }
