@@ -36,6 +36,7 @@ file (GLOB LIBGRIVE_SRC
 	src/drive/*.cc
 	src/protocol/*.cc
 	src/util/*.cc
+	src/xml/*.cc
 )
 
 add_library( grive SHARED ${LIBGRIVE_SRC} )
@@ -63,6 +64,7 @@ IF ( CPPUNIT_FOUND )
     # list of test source files here
 	file(GLOB TEST_SRC
 		test/util/*.cc
+		test/xml/*.cc
 	)
 
 	add_executable( unittest

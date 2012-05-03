@@ -17,25 +17,39 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <cppunit/ui/text/TestRunner.h>
+#include "NodeTest.hh"
 
-#include "util/DateTimeTest.hh"
-#include "util/FunctionTest.hh"
-#include "util/PathTest.hh"
-#include "util/SignalHandlerTest.hh"
-#include "xml/NodeTest.hh"
+#include "xml/Node.hh"
 
-int main( int argc, char **argv )
+#include <iostream>
+
+namespace grut {
+
+using namespace gr::xml ;
+
+NodeTest::NodeTest( )
 {
-	using namespace grut ;
-
-	CppUnit::TextUi::TestRunner runner;
-	runner.addTest( DateTimeTest::suite( ) ) ;
-	runner.addTest( FunctionTest::suite( ) ) ;
-	runner.addTest( PathTest::suite( ) ) ;
-	runner.addTest( SignalHandlerTest::suite( ) ) ;
-	runner.addTest( NodeTest::suite( ) ) ;
-	runner.run();
-  
-	return 0 ;
 }
+
+void NodeTest::TestTree( )
+{
+	Node node = Node::Element( "root" ) ;
+	CPPUNIT_ASSERT_EQUAL( 1UL, node.RefCount() ) ;
+	CPPUNIT_ASSERT_EQUAL( Node::element, node.GetType() ) ;
+	
+	Node c1 = node.AddElement( "child1" ) ;
+	c1.AddText( "this is a line" ) ;
+	Node c11 = c1.AddElement( "b" ) ;
+	CPPUNIT_ASSERT_EQUAL( 2UL, c1.RefCount() ) ;
+	
+	Node c2 = node.AddElement( "child2" ) ;
+	Node c0 = node.AddElement( "child0" ) ;
+	
+	Node c1_ = node["child1"] ;
+	Node c11_ = node["child1"]["b"] ;
+	
+	CPPUNIT_ASSERT_EQUAL( 3UL, c1_.RefCount() ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("child1"), c1_.Str() ) ;
+}
+
+} // end of namespace grut
