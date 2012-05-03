@@ -62,7 +62,7 @@ void SignalHandler::UnregisterSignal( unsigned int signumber )
 	}
 }
 
-void SignalHandler::RegisterSignal( unsigned int signumber, Callback callback )
+void SignalHandler::RegisterSignal( unsigned int signumber, Callback callback ) throw ( SignalError )
 {
 	if ( m_signals.find( signumber ) != m_signals.end() )
 	{

@@ -39,7 +39,7 @@ class SignalHandler
 
 public :
 	virtual ~SignalHandler() ;
-	void RegisterSignal ( unsigned int signumber, Callback callback ) ;
+	void RegisterSignal ( unsigned int signumber, Callback callback ) throw ( SignalError );
 	void UnregisterSignal( unsigned int signumber );
 	static SignalHandler& GetInstance() ;
 
