@@ -19,43 +19,23 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-namespace gr { namespace xml {
+namespace grut {
 
-class Node
+class NodeTest : public CppUnit::TestFixture
 {
 public :
-	Node() ;
-	Node( const Node& node ) ;
-	~Node() ;
+	NodeTest( ) ;
 
-	static Node Element( const std::string& name ) ;
-	static Node Text( const std::string& name ) ;
-	
-	Node& operator=( const Node& node ) ;
-	
-	Node AddElement( const std::string& name ) ;
-	Node AddText( const std::string& text ) ;
-
-	Node operator[]( const std::string& name ) const ;
-	const std::string& Str() const ;
-	
-	// read-only access to the reference counter. for checking.
-	std::size_t RefCount() const ;
-	
-	enum Type { element, attr, text } ;
-	Type GetType() const ;
-	
-private :
-	class	Impl ;
+	// declare suit function
+	CPPUNIT_TEST_SUITE( NodeTest ) ;
+		CPPUNIT_TEST( TestTree ) ;
+	CPPUNIT_TEST_SUITE_END();
 
 private :
-	explicit Node( Impl *impl ) ;
-
-private :
-	Impl *m_ptr ;
+	void TestTree( ) ;
 } ;
 
-} } // end of namespace
+} // end of namespace

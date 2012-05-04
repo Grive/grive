@@ -17,45 +17,39 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "NodeTest.hh"
 
-#include <string>
-#include <vector>
+#include "xml/Node.hh"
 
-namespace gr { namespace xml {
+#include <iostream>
 
-class Node
+namespace grut {
+
+using namespace gr::xml ;
+
+NodeTest::NodeTest( )
 {
-public :
-	Node() ;
-	Node( const Node& node ) ;
-	~Node() ;
+}
 
-	static Node Element( const std::string& name ) ;
-	static Node Text( const std::string& name ) ;
+void NodeTest::TestTree( )
+{
+	Node node = Node::Element( "root" ) ;
+	CPPUNIT_ASSERT_EQUAL( 1UL, node.RefCount() ) ;
+	CPPUNIT_ASSERT_EQUAL( Node::element, node.GetType() ) ;
 	
-	Node& operator=( const Node& node ) ;
+	Node c1 = node.AddElement( "child1" ) ;
+	c1.AddText( "this is a line" ) ;
+	Node c11 = c1.AddElement( "b" ) ;
+	CPPUNIT_ASSERT_EQUAL( 2UL, c1.RefCount() ) ;
 	
-	Node AddElement( const std::string& name ) ;
-	Node AddText( const std::string& text ) ;
+	Node c2 = node.AddElement( "child2" ) ;
+	Node c0 = node.AddElement( "child0" ) ;
+	
+	Node c1_ = node["child1"] ;
+	Node c11_ = node["child1"]["b"] ;
+	
+	CPPUNIT_ASSERT_EQUAL( 3UL, c1_.RefCount() ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("child1"), c1_.Str() ) ;
+}
 
-	Node operator[]( const std::string& name ) const ;
-	const std::string& Str() const ;
-	
-	// read-only access to the reference counter. for checking.
-	std::size_t RefCount() const ;
-	
-	enum Type { element, attr, text } ;
-	Type GetType() const ;
-	
-private :
-	class	Impl ;
-
-private :
-	explicit Node( Impl *impl ) ;
-
-private :
-	Impl *m_ptr ;
-} ;
-
-} } // end of namespace
+} // end of namespace grut

@@ -27,6 +27,7 @@
 #include "util/FunctionTest.hh"
 #include "util/PathTest.hh"
 #include "util/SignalHandlerTest.hh"
+#include "xml/NodeTest.hh"
 
 int main( int argc, char **argv )
 {
@@ -37,6 +38,7 @@ int main( int argc, char **argv )
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( PathTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;
+	runner.addTest( NodeTest::suite( ) ) ;
 	runner.run();
 
 	std::ofstream report_file( "report.xml" ) ;

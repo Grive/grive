@@ -20,7 +20,7 @@
 #include "HTTP.hh"
 
 #include "Download.hh"
-#include "util/SignalHandler.hh"
+// #include "util/SignalHandler.hh"
 
 // dependent libraries
 #include <curl/curl.h>
@@ -151,7 +151,7 @@ void GetFile(
 	const Headers& 		hdr )
 {
 	// Register the callback
-	SignalHandler::GetInstance().RegisterSignal( SIGINT, &CallbackInt ) ;
+// 	SignalHandler::GetInstance().RegisterSignal( SIGINT, &CallbackInt ) ;
 
 	Download dl( filename, Download::NoChecksum() ) ;
 		
