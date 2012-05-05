@@ -24,15 +24,11 @@
 #include <stdexcept>
 #include <vector>
 
-namespace gr { namespace xml
-{
-	class Node ;
-	class TreeBuilder ;
-} }
-
 namespace gr { namespace http {
 
 typedef std::vector<std::string> Headers ;
+
+class Receivable ;
 
 std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
 void GetFile(
@@ -75,7 +71,13 @@ public :
 private :
 	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
 } ;
+
+/*!	\class	Agent
+	\brief	class to provide HTTP access
 	
+	This class provides functions to send HTTP request in many methods (e.g. get, post and put).
+	Normally the HTTP response is returned in a Receivable.
+*/
 class Agent
 {
 public :
@@ -87,15 +89,17 @@ public :
 		const std::string&		data,
 		const http::Headers&	hdr = http::Headers() ) ;
 
-	xml::Node GetXml(
+	long Get(
 		const std::string& 		url,
+		Receivable				*dest,
 		const http::Headers&	hdr = http::Headers() ) ;
 		
 	std::string RedirLocation() const ;
 
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis ) ;
-	static std::size_t XmlCallback( void* ptr, size_t size, size_t nmemb, gr::xml::TreeBuilder* tb ) ;
+// 	static std::size_t XmlCallback( void* ptr, size_t size, size_t nmemb, gr::xml::TreeBuilder* tb ) ;
+	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
 	
 	void SetHeader( const http::Headers& hdr ) ;
 		

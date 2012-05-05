@@ -20,9 +20,10 @@
 #include "HTTP.hh"
 
 #include "Download.hh"
-// #include "util/SignalHandler.hh"
-#include "xml/Node.hh"
-#include "xml/TreeBuilder.hh"
+#include "Receivable.hh"
+
+// #include "xml/Node.hh"
+// #include "xml/TreeBuilder.hh"
 
 // dependent libraries
 #include <curl/curl.h>
@@ -317,10 +318,16 @@ std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *
 	return size*nmemb ;
 }
 
-std::size_t Agent::XmlCallback( void *ptr, size_t size, size_t nmemb, xml::TreeBuilder *tb )
+// std::size_t Agent::XmlCallback( void *ptr, size_t size, size_t nmemb, xml::TreeBuilder *tb )
+// {
+// 	tb->ParseData( reinterpret_cast<char*>(ptr), size*nmemb ) ;
+// 	return size*nmemb ;
+// }
+
+std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
 {
-	tb->ParseData( reinterpret_cast<char*>(ptr), size*nmemb ) ;
-	return size*nmemb ;
+	assert( recv != 0 ) ;
+	return recv->OnData( ptr, size * nmemb ) ;
 }
 
 std::string Agent::Put(
@@ -361,6 +368,33 @@ std::string Agent::Put(
 	}
 
 	return resp ;
+}
+
+long Agent::Get(
+	const std::string& 		url,
+	Receivable				*dest,
+	const http::Headers&	hdr )
+{
+	CURL *curl = m_pimpl->curl ;
+
+	// set common options
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive);
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
+
+	SetHeader( hdr ) ;
+	
+	CURLcode curl_code = ::curl_easy_perform(curl);
+
+	long http_code = 0;
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+	if ( curl_code != CURLE_OK )
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+
+	return http_code ;
 }
 
 void Agent::SetHeader( const http::Headers& hdr )
