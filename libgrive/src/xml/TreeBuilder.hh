@@ -19,8 +19,8 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
-#include <vector>
 
 namespace gr { namespace xml {
 
@@ -29,17 +29,24 @@ class Node ;
 class TreeBuilder
 {
 public :
+	TreeBuilder() ;
+	~TreeBuilder() ;
+	
+	void ParseData( const char *data, std::size_t count, bool last = false ) ;
+	Node Result( ) const ;
+	
+	// one shot helpers
 	static Node ParseFile( const std::string& file ) ;
 	static Node Parse( const std::string& xml ) ;
 
 private :
-	TreeBuilder() ;
-
+	
 	static void StartElement( void* pvthis, const char* name, const char** attr ) ;
 	static void EndElement( void* pvthis, const char* name ) ;
 
 private :
-	std::vector<Node> m_stack ;
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
 } ;
 
 } } // end of namespace

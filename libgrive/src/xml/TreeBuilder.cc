@@ -25,20 +25,33 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 namespace gr { namespace xml {
 
-TreeBuilder::TreeBuilder() : m_stack( 1, Node() )
+struct TreeBuilder::Impl
+{
+	std::vector<Node>	stack ;
+	::XML_Parser		psr ;
+} ;
+
+TreeBuilder::TreeBuilder() : m_impl( new Impl )
+{
+	m_impl->stack.push_back( Node() ) ;
+	m_impl->psr = ::XML_ParserCreate( 0 ) ;
+	
+	::XML_SetElementHandler( m_impl->psr, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
+	::XML_SetUserData( m_impl->psr , this ) ;
+}
+
+TreeBuilder::~TreeBuilder()
 {
 }
 
 Node TreeBuilder::ParseFile( const std::string& file )
 {
-	::XML_Parser p = ::XML_ParserCreate( 0 ) ;
-	::XML_SetElementHandler( p, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
-	
 	TreeBuilder tb ;
-	::XML_SetUserData( p, &tb ) ;
+	::XML_Parser p = tb.m_impl->psr ;
 	
 	std::ifstream f( file.c_str() ) ;
 	
@@ -48,22 +61,26 @@ Node TreeBuilder::ParseFile( const std::string& file )
 		XML_ParseBuffer( p, count, false ) ;
 	XML_ParseBuffer( p, 0, true ) ;
 	
-	assert( tb.m_stack.size() == 1 ) ;
-	return tb.m_stack.front() ;
+	return tb.Result() ;
+}
+
+void TreeBuilder::ParseData( const char *data, std::size_t count, bool last )
+{
+	if ( ::XML_Parse( m_impl->psr, data, count, last ) == 0 )
+		throw std::runtime_error( "XML parse error" ) ;
 }
 
 Node TreeBuilder::Parse( const std::string& xml )
 {
-	::XML_Parser p = ::XML_ParserCreate( 0 ) ;
-	::XML_SetElementHandler( p, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
-	
 	TreeBuilder tb ;
-	::XML_SetUserData( p, &tb ) ;
+	tb.ParseData( xml.c_str(), xml.size(), true ) ;
+	return tb.Result() ;
+}
 
-	XML_Parse( p, xml.c_str(), xml.size(), true ) ;
-	
-	assert( tb.m_stack.size() == 1 ) ;
-	return tb.m_stack.front() ;
+Node TreeBuilder::Result() const
+{
+	assert( m_impl->stack.size() == 1 ) ;
+	return m_impl->stack.front() ;
 }
 
 void TreeBuilder::StartElement( void *pvthis, const char *name, const char **attr )
@@ -74,7 +91,7 @@ void TreeBuilder::StartElement( void *pvthis, const char *name, const char **att
 
 	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
 	
-	Node n = pthis->m_stack.back().AddElement( name ) ;
+	Node n = pthis->m_impl->stack.back().AddElement( name ) ;
 	
 	for ( std::size_t i = 0 ; attr[i] != 0 ; i += 2 )
 	{
@@ -82,15 +99,15 @@ void TreeBuilder::StartElement( void *pvthis, const char *name, const char **att
 		n.AddAttribute( attr[i], attr[i+1] ) ;
 	}
 	
-	pthis->m_stack.push_back( n ) ;
+	pthis->m_impl->stack.push_back( n ) ;
 }
 
 void TreeBuilder::EndElement( void* pvthis, const char* name )
 {
 	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
 	
-	assert( pthis->m_stack.back().Name() == name ) ;
-	pthis->m_stack.pop_back() ;
+	assert( pthis->m_impl->stack.back().Name() == name ) ;
+	pthis->m_impl->stack.pop_back() ;
 }
 
 } } // end of namespace
