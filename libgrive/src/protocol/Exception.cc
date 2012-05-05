@@ -17,34 +17,22 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Exception.hh"
 
-#include "Receivable.hh"
+#include <sstream>
 
-#include <string>
-#include <fstream>
+namespace gr { namespace http {
 
-#include <openssl/evp.h>
-
-namespace gr {
-
-class Download : public http::Receivable
+Exception::Exception( int curl_code, int http_code, const char *err_buf )
+	: runtime_error( Format( curl_code, http_code, err_buf ) )
 {
-public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
-	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
-	
-private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
-} ;
+}
 
-} // end of namespace
+std::string Exception::Format( int curl_code, int http_code, const char *err_buf )
+{
+	std::ostringstream ss ;
+	ss << "CURL code = " << curl_code << " HTTP code = " << http_code << " (" << err_buf << ")" ;
+	return ss.str() ;
+}
+
+} } // end of namespace

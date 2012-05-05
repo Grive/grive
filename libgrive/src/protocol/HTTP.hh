@@ -21,7 +21,6 @@
 
 #include <memory>
 #include <string>
-#include <stdexcept>
 #include <vector>
 
 namespace gr { namespace http {
@@ -29,48 +28,6 @@ namespace gr { namespace http {
 typedef std::vector<std::string> Headers ;
 
 class Receivable ;
-
-std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
-void GetFile(
-	const std::string&	url,
-	const std::string&	filename,
-	const Headers& 		hdr = Headers() ) ;
-
-void GetFile(
-	const std::string&	url,
-	const std::string&	filename,
-	std::string&		md5sum,
-	const Headers& 		hdr = Headers() ) ;
-
-std::string PostData(
-	const std::string&	url,
-	const std::string&	data,
-	const Headers&		hdr = Headers() ) ;
-std::string PostDataWithHeader(
-	const std::string&	url,
-	const std::string&	data,
-	const Headers&		hdr = Headers() ) ;
-std::string PostFile(
-	const std::string&	url,
-	const std::string& 	filename,
-	const Headers&		hdr = Headers() ) ;
-
-std::string Put(
-	const std::string&	url,
-	const std::string&	data,
-	const Headers&		hdr = Headers() ) ;
-
-std::string Escape( const std::string& str ) ;
-std::string Unescape( const std::string& str ) ;
-
-class Exception : public std::runtime_error
-{
-public :
-	Exception( int curl_code, int http_code, const char *err_buf ) ;
-
-private :
-	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
-} ;
 
 /*!	\class	Agent
 	\brief	class to provide HTTP access
@@ -84,21 +41,30 @@ public :
 	Agent() ;
 	~Agent() ;
 	
-	std::string Put(
+	long Put(
 		const std::string&		url,
 		const std::string&		data,
+		Receivable				*dest,
 		const http::Headers&	hdr = http::Headers() ) ;
 
 	long Get(
 		const std::string& 		url,
 		Receivable				*dest,
 		const http::Headers&	hdr = http::Headers() ) ;
-		
+	
+	long Post(
+		const std::string& 		url,
+		const std::string&		data,
+		Receivable				*dest,
+		const http::Headers&	hdr = http::Headers() ) ;
+	
 	std::string RedirLocation() const ;
+	
+	std::string Escape( const std::string& str ) ;
+	std::string Unescape( const std::string& str ) ;
 
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis ) ;
-// 	static std::size_t XmlCallback( void* ptr, size_t size, size_t nmemb, gr::xml::TreeBuilder* tb ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
 	
 	void SetHeader( const http::Headers& hdr ) ;

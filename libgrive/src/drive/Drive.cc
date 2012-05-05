@@ -23,6 +23,7 @@
 
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
+#include "protocol/JsonResponse.hh"
 #include "protocol/OAuth2.hh"
 #include "util/Crypt.hh"
 #include "util/DateTime.hh"
@@ -50,7 +51,10 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
-	Json resp = Json::Parse( http::Get( root_url + "?alt=json&showfolders=true", m_http_hdr )) ;
+	http::JsonResponse str ;
+	http::Agent agent ;
+	agent.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
+	Json resp = str.Response() ;
 	
 	Json resume_link ;
 	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )

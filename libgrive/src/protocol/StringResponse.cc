@@ -17,34 +17,23 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "StringResponse.hh"
 
-#include "Receivable.hh"
+namespace gr { namespace http {
 
-#include <string>
-#include <fstream>
-
-#include <openssl/evp.h>
-
-namespace gr {
-
-class Download : public http::Receivable
+StringResponse::StringResponse()
 {
-public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
-	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
-	
-private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
-} ;
+}
 
-} // end of namespace
+std::size_t StringResponse::OnData( void *data, std::size_t count )
+{
+	m_resp.append( reinterpret_cast<char*>(data), count ) ;
+	return count ;
+}
+
+const std::string& StringResponse::Response() const
+{
+	return m_resp ;
+}
+
+} } // end of namespace

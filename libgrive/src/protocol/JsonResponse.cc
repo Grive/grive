@@ -17,34 +17,24 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "JsonResponse.hh"
 
-#include "Receivable.hh"
+#include "Json.hh"
 
-#include <string>
-#include <fstream>
+namespace gr { namespace http {
 
-#include <openssl/evp.h>
-
-namespace gr {
-
-class Download : public http::Receivable
+JsonResponse::JsonResponse()
 {
-public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
-	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
-	
-private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
-} ;
+}
 
-} // end of namespace
+std::size_t JsonResponse::OnData( void *data, std::size_t count )
+{
+	return m_resp.OnData( data, count ) ;
+}
+
+Json JsonResponse::Response() const
+{
+	return Json::Parse( m_resp.Response() ) ;
+}
+
+} } // end of namespace

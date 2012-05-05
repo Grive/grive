@@ -21,6 +21,7 @@
 
 #include "protocol/HTTP.hh"
 #include "protocol/Json.hh"
+#include "protocol/JsonResponse.hh"
 
 // for debugging
 #include <iostream>
@@ -57,25 +58,30 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
-	Json resp = Json::Parse( http::PostData( token_url, post ) ) ;
-	m_access	= resp["access_token"].As<std::string>() ;
-	m_refresh	= resp["refresh_token"].As<std::string>() ;
+	http::JsonResponse	resp ;
+	http::Agent			http ;
+
+	http.Post( token_url, post, &resp ) ;
+
+	Json jresp	= resp.Response() ;
+	m_access	= jresp["access_token"].As<std::string>() ;
+	m_refresh	= jresp["refresh_token"].As<std::string>() ;
 }
 
 std::string OAuth2::MakeAuthURL(
 	const std::string&	client_id,
 	const std::string&	state )
 {
-	using gr::http::Escape ;
+	http::Agent h ;
 
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
-			Escape( "https://www.googleapis.com/auth/userinfo.email" )		+ "+" + 
-			Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
-			Escape( "https://docs.google.com/feeds/" )						+ "+" + 
-			Escape( "https://docs.googleusercontent.com/" )					+ "+" + 
-			Escape( "https://spreadsheets.google.com/feeds/" )				+ /*"+" +
-			Escape( "https://www.googleapis.com/auth/drive.file/" )			+*/
+			h.Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" + 
+			h.Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
+			h.Escape( "https://docs.google.com/feeds/" )					+ "+" + 
+			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
+			h.Escape( "https://spreadsheets.google.com/feeds/" )			+ /*"+" +
+			h.Escape( "https://www.googleapis.com/auth/drive.file/" )		+*/
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
 		"&client_id=" + client_id ;
@@ -89,8 +95,14 @@ void OAuth2::Refresh( )
 		"&client_secret="	+ m_client_secret +
 		"&grant_type=refresh_token" ;
 
-	Json resp	= Json::Parse( http::PostData( token_url, post ) ) ;
-	m_access	= resp["access_token"].As<std::string>() ;
+	http::JsonResponse	resp ;
+	http::Agent			http ;
+
+	http.Post( token_url, post, &resp ) ;
+std::cout << "here" << std::endl ;
+
+	Json jresp	= resp.Response() ;
+	m_access	= jresp["access_token"].As<std::string>() ;
 }
 
 std::string OAuth2::RefreshToken( ) const

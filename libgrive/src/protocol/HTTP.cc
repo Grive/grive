@@ -20,10 +20,8 @@
 #include "HTTP.hh"
 
 #include "Download.hh"
+#include "Exception.hh"
 #include "Receivable.hh"
-
-// #include "xml/Node.hh"
-// #include "xml/TreeBuilder.hh"
 
 // dependent libraries
 #include <curl/curl.h>
@@ -41,17 +39,6 @@ namespace {
 
 using namespace gr::http ;
 
-// libcurl callback to append to a string
-std::size_t WriteCallback( char *data, size_t size, size_t nmemb, std::string *resp )
-{
-	assert( resp != 0 ) ;
-	assert( data != 0 ) ;
-	
-	std::size_t count = size * nmemb ;
-	resp->append( data, count ) ;
-	return count ;
-}
-
 size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
 {
 	assert( ptr != 0 ) ;
@@ -67,54 +54,6 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 	return count ;
 }
 
-CURL* InitCurl( const std::string& url, std::string *resp, const Headers& hdr )
-{
-	CURL *curl = curl_easy_init();
-	if ( curl == 0 )
-		throw std::bad_alloc() ;
-
-	// set common options
-	curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
-	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,	1);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	WriteCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		resp ) ;
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,	0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST,	0L);
-
-	// set headers
-	struct curl_slist *curl_hdr = 0 ;
-    for ( Headers::const_iterator i = hdr.begin() ; i != hdr.end() ; ++i )
-		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
-	curl_easy_setopt( curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
-	
-	return curl ;
-}
-
-void DoCurl( CURL *curl )
-{
-	char error_buf[CURL_ERROR_SIZE] = {} ;
-	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error_buf ) ;
-
-	CURLcode curl_code = curl_easy_perform(curl);
-
-	long http_code = 0;
-	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-	// clean up
-	curl_easy_cleanup(curl);
-	
-	if ( curl_code != CURLE_OK )
-	{
-		throw Exception( curl_code, http_code, error_buf ) ;
-	}
-	else if (http_code >= 400 )
-	{
-		std::cout << "http error " << http_code << std::endl ;
-		throw Exception( curl_code, http_code, error_buf ) ;
-	}
-}
-
 // Callback for SIGINT
 void CallbackInt( int )
 {
@@ -127,158 +66,6 @@ void CallbackInt( int )
 
 namespace gr { namespace http {
 
-Exception::Exception( int curl_code, int http_code, const char *err_buf )
-	: runtime_error( Format( curl_code, http_code, err_buf ) )
-{
-}
-
-std::string Exception::Format( int curl_code, int http_code, const char *err_buf )
-{
-	std::ostringstream ss ;
-	ss << "CURL code = " << curl_code << " HTTP code = " << http_code << " (" << err_buf << ")" ;
-	return ss.str() ;
-}
-
-std::string Get( const std::string& url, const Headers& hdr )
-{
-	std::string resp ;
-	CURL *curl = InitCurl( url, &resp, hdr ) ;
-	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-	DoCurl( curl ) ;
-	return resp;
-}
-
-void GetFile(
-	const std::string&	url,
-	const std::string&	filename,
-	const Headers& 		hdr )
-{
-	// Register the callback
-// 	SignalHandler::GetInstance().RegisterSignal( SIGINT, &CallbackInt ) ;
-
-	Download dl( filename, Download::NoChecksum() ) ;
-		
-	CURL *curl = InitCurl( url, 0, hdr ) ;
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Download::Callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		&dl ) ;
-	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-	DoCurl( curl ) ;
-}
-
-void GetFile(
-	const std::string&	url,
-	const std::string&	filename,
-	std::string&		md5sum,
-	const Headers& 		hdr )
-{
-}
-
-std::string PostData( const std::string& url, const std::string& data, const Headers& hdr )
-{
-	std::string resp ;
-	CURL *curl = InitCurl( url, &resp, hdr ) ;
-
-	std::string post_data = data ;
-	
-	curl_easy_setopt(curl, CURLOPT_POST, 1L);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
-// 	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1 ) ;
-
-	DoCurl( curl ) ;
-	return resp;
-}
-
-std::string PostDataWithHeader( const std::string& url, const std::string& data, const Headers& hdr )
-{
-	std::string resp ;
-	CURL *curl = InitCurl( url, &resp, hdr ) ;
-
-	std::string post_data = data ;
-	
-	curl_easy_setopt(curl, CURLOPT_POST, 			1L);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS,		&post_data[0] ) ;
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 	post_data.size() ) ;
-// 	curl_easy_setopt(curl, CURLOPT_VERBOSE,			1L ) ;
-	curl_easy_setopt(curl, CURLOPT_HEADER, 			1L );
-
-	try
-	{
-		DoCurl( curl ) ;
-	}
-	catch ( ... )
-	{
-		std::cout << "response = " << resp << std::endl ;
-		throw ;
-	}
-	
-	return resp;
-}
-
-std::string PostFile( const std::string& url, const std::string& filename, const Headers& hdr )
-{
-	std::string resp ;
-	return resp;
-}
-
-std::string Put(
-	const std::string&	url,
-	const std::string&	data,
-	const Headers&		hdr )
-{
-	std::string resp ;
-	CURL *curl = InitCurl( url, &resp, hdr ) ;
-	
-	std::string put_data = data ;
-
-	// set common options
-	curl_easy_setopt(curl, CURLOPT_HEADER, 			1L );
-	curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
-	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
-	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
-	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
-// 	curl_easy_setopt(curl, CURLOPT_VERBOSE, 		1L ) ;
-	
-	try
-	{
-		DoCurl( curl ) ;
-	}
-	catch ( ... )
-	{
-		std::cout << "response = " << resp << std::endl ;
-		throw ;
-	}
-	
-	return resp;
-}
-
-std::string Escape( const std::string& str )
-{
-	CURL *curl = curl_easy_init();
-	
-	char *tmp = curl_easy_escape( curl, str.c_str(), str.size() ) ;
-	std::string result = tmp ;
-	curl_free( tmp ) ;
-	
-	curl_easy_cleanup(curl);
-	
-	return result ;
-}
-
-std::string Unescape( const std::string& str )
-{
-	CURL *curl = curl_easy_init();
-	
-	int r ;
-	char *tmp = curl_easy_unescape( curl, str.c_str(), str.size(), &r ) ;
-	std::string result = tmp ;
-	curl_free( tmp ) ;
-	
-	curl_easy_cleanup(curl);
-	
-	return result ;
-}
-
 struct Agent::Impl
 {
 	CURL			*curl ;
@@ -290,11 +77,12 @@ Agent::Agent() :
 	m_pimpl( new Impl )
 {
 	m_pimpl->curl = ::curl_easy_init();
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L);
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L);
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ; 
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&Agent::HeaderCallback ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_ERRORBUFFER, 	m_pimpl->error ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER, 			0L ) ;
 }
 
 Agent::~Agent()
@@ -318,41 +106,34 @@ std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *
 	return size*nmemb ;
 }
 
-// std::size_t Agent::XmlCallback( void *ptr, size_t size, size_t nmemb, xml::TreeBuilder *tb )
-// {
-// 	tb->ParseData( reinterpret_cast<char*>(ptr), size*nmemb ) ;
-// 	return size*nmemb ;
-// }
-
 std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
 {
 	assert( recv != 0 ) ;
 	return recv->OnData( ptr, size * nmemb ) ;
 }
 
-std::string Agent::Put(
+long Agent::Put(
 	const std::string&		url,
 	const std::string&		data,
+	Receivable				*dest,
 	const http::Headers&	hdr )
 {
 	CURL *curl = m_pimpl->curl ;
 
 	std::string put_data = data ;
-	std::string resp ;
 
 	// set common options
-	curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&WriteCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		&resp ) ;
-	curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
-	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
-	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
-	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
+	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
 
 	SetHeader( hdr ) ;
 	
-	CURLcode curl_code = curl_easy_perform(curl);
+	CURLcode curl_code = ::curl_easy_perform(curl);
 
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
@@ -363,11 +144,11 @@ std::string Agent::Put(
 	}
 	else if (http_code >= 400 )
 	{
-		std::cout << "http error " << http_code << " " << resp << std::endl ;
+		std::cout << "http error " << http_code << std::endl ;
 		throw Exception( curl_code, http_code, m_pimpl->error ) ;
 	}
 
-	return resp ;
+	return http_code ;
 }
 
 long Agent::Get(
@@ -379,10 +160,9 @@ long Agent::Get(
 
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive);
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
-	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
+	::curl_easy_setopt(curl, CURLOPT_HTTPGET, 		1L);
 
 	SetHeader( hdr ) ;
 	
@@ -393,6 +173,46 @@ long Agent::Get(
 
 	if ( curl_code != CURLE_OK )
 		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	else if (http_code >= 400 )
+	{
+		std::cout << "http error " << http_code << std::endl ;
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	}
+
+	return http_code ;
+}
+
+long Agent::Post(
+	const std::string& 		url,
+	const std::string&		data,
+	Receivable				*dest,
+	const http::Headers&	hdr )
+{
+	CURL *curl = m_pimpl->curl ;
+
+	std::string post_data = data ;
+	
+	::curl_easy_setopt(curl, CURLOPT_POST, 			1L);
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_POSTFIELDS,	&post_data[0] ) ;
+	::curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size() ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+
+	SetHeader( hdr ) ;
+	
+	CURLcode curl_code = ::curl_easy_perform(curl);
+
+	long http_code = 0;
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+	if ( curl_code != CURLE_OK )
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	else if (http_code >= 400 )
+	{
+		std::cout << "http error " << http_code << std::endl ;
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	}
 
 	return http_code ;
 }
@@ -412,5 +232,31 @@ std::string Agent::RedirLocation() const
 	return m_pimpl->location ;
 }
 
+std::string Agent::Escape( const std::string& str )
+{
+	CURL *curl = m_pimpl->curl ;
+	
+	char *tmp = curl_easy_escape( curl, str.c_str(), str.size() ) ;
+	std::string result = tmp ;
+	curl_free( tmp ) ;
+	
+	curl_easy_cleanup(curl);
+	
+	return result ;
+}
+
+std::string Agent::Unescape( const std::string& str )
+{
+	CURL *curl = m_pimpl->curl ;
+	
+	int r ;
+	char *tmp = curl_easy_unescape( curl, str.c_str(), str.size(), &r ) ;
+	std::string result = tmp ;
+	curl_free( tmp ) ;
+	
+	curl_easy_cleanup(curl);
+	
+	return result ;
+}
 
 } } // end of namespace

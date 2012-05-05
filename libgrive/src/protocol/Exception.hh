@@ -19,32 +19,17 @@
 
 #pragma once
 
-#include "Receivable.hh"
+#include <stdexcept>
 
-#include <string>
-#include <fstream>
+namespace gr { namespace http {
 
-#include <openssl/evp.h>
-
-namespace gr {
-
-class Download : public http::Receivable
+class Exception : public std::runtime_error
 {
 public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
-	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
-	
+	Exception( int curl_code, int http_code, const char *err_buf ) ;
+
 private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
+	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
 } ;
 
-} // end of namespace
+} } // end of namespace

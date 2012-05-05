@@ -19,12 +19,15 @@
 
 #include "File.hh"
 
+#include "protocol/Download.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
+#include "protocol/StringResponse.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
 
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 #include <sstream>
 
@@ -112,8 +115,11 @@ std::string File::Parent() const
 
 void File::Download( const Path& file, const http::Headers& auth ) const
 {
-	http::GetFile( m_href, file.Str(), auth ) ;
-	os::SetFileTime( file, m_server_modified ) ;
+	gr::Download dl( file.Str(), Download::NoChecksum() ) ;
+	http::Agent http ;
+	long r = http.Get( m_href, &dl, auth ) ;
+	if ( r <= 400 )
+		os::SetFileTime( file, m_server_modified ) ;
 }
 
 bool File::Upload( std::streambuf *file, const http::Headers& auth )
@@ -144,15 +150,18 @@ bool File::Upload( std::streambuf *file, const http::Headers& auth )
   	hdr.push_back( "If-Match: " + m_etag ) ;
 	hdr.push_back( "Expect:" ) ;
 	
+	http::StringResponse str ;
 	http::Agent http ;
-	http.Put( m_upload_link, meta, hdr ) ;
+	http.Put( m_upload_link, meta, &str, hdr ) ;
+	
+	std::string uplink = http.RedirLocation() ;
 	
 	// parse the header and find "Location"
 	http::Headers uphdr ;
 	uphdr.push_back( "Expect:" ) ;
 	uphdr.push_back( "Accept:" ) ;
 	
-	http.Put( http.RedirLocation(), data, uphdr ) ;
+	http.Put( uplink, data, &str, uphdr ) ;
 	return true ;
 }
 

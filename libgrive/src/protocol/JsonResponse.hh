@@ -20,31 +20,26 @@
 #pragma once
 
 #include "Receivable.hh"
+#include "StringResponse.hh"
 
-#include <string>
-#include <fstream>
+namespace gr
+{
+	class Json ;
+}
 
-#include <openssl/evp.h>
+namespace gr { namespace http {
 
-namespace gr {
-
-class Download : public http::Receivable
+class JsonResponse : public Receivable
 {
 public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
+	JsonResponse() ;
+
 	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
+
+	Json Response() const ;
 	
 private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
+	StringResponse	m_resp ;
 } ;
 
-} // end of namespace
+} } // end of namespace

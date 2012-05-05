@@ -93,4 +93,14 @@ std::size_t Download::Callback( char *data, std::size_t size, std::size_t nmemb,
 	return pthis->m_file.rdbuf()->sputn( data, count ) ;
 }
 
+std::size_t Download::OnData( void *data, std::size_t count )
+{
+	assert( data != 0 ) ;
+	
+	if ( m_mdctx != 0 )
+		::EVP_DigestUpdate( m_mdctx, data, count ) ;
+	
+	return m_file.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
+}
+
 } // end of namespace

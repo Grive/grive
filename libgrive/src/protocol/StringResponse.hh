@@ -22,29 +22,20 @@
 #include "Receivable.hh"
 
 #include <string>
-#include <fstream>
 
-#include <openssl/evp.h>
+namespace gr { namespace http {
 
-namespace gr {
-
-class Download : public http::Receivable
+class StringResponse : public Receivable
 {
 public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
-	
-	std::string Finish() const ;
-	
+	StringResponse() ;
+
 	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
+
+	const std::string& Response() const ;
 	
 private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
+	std::string	m_resp ;
 } ;
 
-} // end of namespace
+} } // end of namespace
