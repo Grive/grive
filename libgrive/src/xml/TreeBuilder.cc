@@ -23,6 +23,7 @@
 #include <expat.h>
 
 #include <cassert>
+#include <iostream>
 #include <fstream>
 
 namespace gr { namespace xml {

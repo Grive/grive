@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <stdexcept>
 
 namespace gr { namespace xml {
@@ -39,10 +40,11 @@ public :
 	{
 	}
 	
-	Impl( const std::string& str, Type type ) :
+	Impl( const std::string& str, Type type, const std::string& value = "" ) :
 		m_ref(1),
 		m_type( type ),
-		m_name( str )
+		m_name( str ),
+		m_value( value )
 	{
 	}
 	
@@ -72,16 +74,21 @@ public :
 	void Add( Impl *child )
 	{
 		assert( child != 0 ) ;
+		assert( child->m_type >= element && child->m_type <= text ) ;
 	
-		if ( child->m_type != text )
+		ImplVec *map[] = { &m_element, &m_attr, 0 } ;
+	
+		if ( map[child->m_type] != 0 )
 		{
-			iterator p = std::lower_bound( m_map.begin(), m_map.end(), child, Comp() ) ;
-			
+			ImplVec& vec = *map[child->m_type] ;
+			iterator p = std::lower_bound( vec.begin(), vec.end(), child, Comp() ) ;
+
 			// cannot allow duplicate attribute nodes
-			if ( child->m_type == attr && p != m_map.end() && (*p)->m_name == child->m_name )
+			if ( child->m_type	== attr && p 			!= vec.end() &&
+				 (*p)->m_type	== attr && (*p)->m_name == child->m_name )
 				throw std::runtime_error( "duplicate attribute " + child->m_name ) ;
 			
-			m_map.insert( p, child ) ;
+			vec.insert( p, child ) ;
 		}
 		
 		m_children.push_back( child ) ;
@@ -89,9 +96,19 @@ public :
 
 	Impl* Find( const std::string& name )
 	{
-		Impl tmp( name, element ) ;
-		iterator i = std::lower_bound( m_map.begin(), m_map.end(), &tmp, Comp() ) ;
-		return i != m_map.end() && (*i)->m_name == name ? *i : 0 ;
+		assert( !name.empty() ) ;
+
+		return name[0] == '@'
+			? Find( m_attr, name.substr(1) ) 
+			: Find( m_element, name ) ;
+	}
+	
+	Impl* Find( ImplVec& map, const std::string& name )
+	{
+		Impl tmp( name , element ) ;
+		iterator i = std::lower_bound( map.begin(), map.end(), &tmp, Comp() ) ;
+
+		return i != map.end() && (*i)->m_name == name ? *i : 0 ;
 	}
 	
 	iterator Begin()
@@ -109,9 +126,14 @@ public :
 		return m_name ;
 	}
 	
-	void Name( const std::string& name )
+	const std::string& Value() const
 	{
-		m_name = name ;
+		return m_value ;
+	}
+	
+	void Value( const std::string& val )
+	{
+		m_value = val ;
 	}
 	
 	Type GetType() const
@@ -132,7 +154,8 @@ private :
 	
 	Type			m_type ;
 	std::string		m_name ;
-	ImplVec			m_map ;
+	std::string		m_value ;
+	ImplVec			m_element, m_attr ;
 	ImplVec			m_children ;
 } ;
 
@@ -210,11 +233,7 @@ void Node::AddAttribute( const std::string& name, const std::string& val )
 {
 	assert( m_ptr != 0 ) ;
 	assert( GetType() == element ) ;
-	
-	Impl *anode	= new Impl( name, attr ) ;
-	Impl *vnode	= new Impl( val, text ) ;
-	anode->Add( vnode ) ;
-	m_ptr->Add( anode ) ;
+	m_ptr->Add( new Impl( name, attr, val ) ) ;
 }
 
 void Node::AddNode( const Node& node )
@@ -229,6 +248,8 @@ void Node::AddNode( const Node& node )
 Node Node::operator[]( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
+	assert( !name.empty() ) ;
+	
 	Impl *i = m_ptr->Find( name ) ;
 	if ( i != 0 )
 		return Node( i->AddRef() ) ;
@@ -256,7 +277,8 @@ const std::string& Node::Name() const
 
 std::string Node::Value() const
 {
-	return std::string() ;
+	assert( m_ptr != 0 ) ;
+	return m_ptr->Value() ;
 }
 
 } } // end namespace
