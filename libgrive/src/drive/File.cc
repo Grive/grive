@@ -56,8 +56,9 @@ void File::Update( const Json& entry )
 		FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node )
 		? node["label"].Str() : std::string() ;
 	
-	m_upload_link		= entry["link"].FindInArray( "rel",
-  		"http://schemas.google.com/g/2005#resumable-edit-media" )["href"].Str() ;
+	m_upload_link		= entry["link"].
+		FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-edit-media", node )
+		? node["href"].Str() : std::string() ;
 
   	// convert to lower case for easy comparison
 	std::transform(
@@ -115,8 +116,12 @@ void File::Download( const Path& file, const http::Headers& auth ) const
 	os::SetFileTime( file, m_server_modified ) ;
 }
 
-void File::Upload( std::streambuf *file, const http::Headers& auth )
+bool File::Upload( std::streambuf *file, const http::Headers& auth )
 {
+	// upload link missing means that file is read only
+	if ( m_upload_link.empty() )
+		return false ;
+
 	std::string meta =
 	"<?xml version='1.0' encoding='UTF-8'?>\n"
 	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
@@ -148,6 +153,7 @@ void File::Upload( std::streambuf *file, const http::Headers& auth )
 	uphdr.push_back( "Accept:" ) ;
 	
 	http.Put( http.RedirLocation(), data, uphdr ) ;
+	return true ;
 }
 
 } // end of namespace

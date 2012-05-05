@@ -183,7 +183,8 @@ std::cout << "local " << path << " is newer" << std::endl ;
 				// re-reading the file
 				ifile.seekg(0) ;
 				
-				file.Upload( ifile.rdbuf(), m_http_hdr ) ;
+				if ( !file.Upload( ifile.rdbuf(), m_http_hdr ) )
+std::cout << path << " is read only" << std::endl ;
 			}
 		}
 	}
