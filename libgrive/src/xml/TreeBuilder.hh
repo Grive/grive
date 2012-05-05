@@ -24,44 +24,22 @@
 
 namespace gr { namespace xml {
 
-class Node
+class Node ;
+
+class TreeBuilder
 {
 public :
-	Node() ;
-	Node( const Node& node ) ;
-	~Node() ;
-
-	static Node Element( const std::string& name ) ;
-	static Node Text( const std::string& name ) ;
-	
-	Node& operator=( const Node& node ) ;
-	
-	Node AddElement( const std::string& name ) ;
-	Node AddText( const std::string& text ) ;
-	void AddNode( const Node& node ) ;
-	void AddAttribute( const std::string& name, const std::string& val ) ;
-
-	Node operator[]( const std::string& name ) const ;
-	
-	const std::string& Name() const ;
-	std::string Value() const ;
-	
-	// read-only access to the reference counter. for checking.
-	std::size_t RefCount() const ;
-	
-	enum Type { element, attr, text } ;
-	Type GetType() const ;
-
-	static bool IsCompatible( Type parent, Type child ) ;
-	
-private :
-	class	Impl ;
+	static Node ParseFile( const std::string& file ) ;
+	static Node Parse( const std::string& xml ) ;
 
 private :
-	explicit Node( Impl *impl ) ;
+	TreeBuilder() ;
+
+	static void StartElement( void* pvthis, const char* name, const char** attr ) ;
+	static void EndElement( void* pvthis, const char* name ) ;
 
 private :
-	Impl *m_ptr ;
+	std::vector<Node> m_stack ;
 } ;
 
 } } // end of namespace

@@ -35,14 +35,14 @@ public :
 	typedef ImplVec::iterator iterator ;
 
 public :
-	Impl() : m_ref(1)
+	Impl() : m_ref(1), m_type( element )
 	{
 	}
 	
 	Impl( const std::string& str, Type type ) :
 		m_ref(1),
 		m_type( type ),
-		m_str( str )
+		m_name( str )
 	{
 	}
 	
@@ -74,16 +74,24 @@ public :
 		assert( child != 0 ) ;
 	
 		if ( child->m_type != text )
-			m_map.insert( std::lower_bound( m_map.begin(), m_map.end(), child, Comp() ), child ) ;
+		{
+			iterator p = std::lower_bound( m_map.begin(), m_map.end(), child, Comp() ) ;
+			
+			// cannot allow duplicate attribute nodes
+			if ( child->m_type == attr && p != m_map.end() && (*p)->m_name == child->m_name )
+				throw std::runtime_error( "duplicate attribute " + child->m_name ) ;
+			
+			m_map.insert( p, child ) ;
+		}
 		
 		m_children.push_back( child ) ;
 	}
 
-	Impl* Find( const std::string& str )
+	Impl* Find( const std::string& name )
 	{
-		Impl tmp( str, element ) ;
+		Impl tmp( name, element ) ;
 		iterator i = std::lower_bound( m_map.begin(), m_map.end(), &tmp, Comp() ) ;
-		return i != m_map.end() && (*i)->m_str == str ? *i : 0 ;
+		return i != m_map.end() && (*i)->m_name == name ? *i : 0 ;
 	}
 	
 	iterator Begin()
@@ -96,14 +104,14 @@ public :
 		return m_children.end() ;
 	}
 	
-	const std::string& Str() const
+	const std::string& Name() const
 	{
-		return m_str ;
+		return m_name ;
 	}
 	
-	void Str( const std::string& str )
+	void Name( const std::string& name )
 	{
-		m_str = str ;
+		m_name = name ;
 	}
 	
 	Type GetType() const
@@ -115,7 +123,7 @@ public :
 	{
 		bool operator()( Impl *p1, Impl *p2 ) const
 		{
-			return p1->Str() < p2->Str() ;
+			return p1->Name() < p2->Name() ;
 		}
 	} ;
 
@@ -123,7 +131,7 @@ private :
 	std::size_t		m_ref ;
 	
 	Type			m_type ;
-	std::string		m_str ;
+	std::string		m_name ;
 	ImplVec			m_map ;
 	ImplVec			m_children ;
 } ;
@@ -163,9 +171,25 @@ Node& Node::operator=( const Node& node )
 	return *this ;
 }
 
+bool Node::IsCompatible( Type parent, Type child )
+{
+	static const bool map[][3] =
+	{
+		// element,	attr,	text
+		{ true,		true,	true },		// element
+		{ false,	false,	true },		// attribute
+		{ false,	false,	false }		// text
+	} ;
+	
+	assert( parent >= element && parent <= text ) ;
+	assert( child  >= element && child  <= text ) ;
+	return map[parent][child] ;
+}
+
 Node Node::AddElement( const std::string& name )
 {
 	assert( m_ptr != 0 ) ;
+	assert( IsCompatible( GetType(), element) ) ;
 	
 	Impl *child = new Impl( name, element ) ;
 	m_ptr->Add( child->AddRef() ) ;
@@ -175,10 +199,31 @@ Node Node::AddElement( const std::string& name )
 Node Node::AddText( const std::string& str )
 {
 	assert( m_ptr != 0 ) ;
+	assert( IsCompatible( GetType(), text ) ) ;
 
 	Impl *child = new Impl( str, text ) ;
 	m_ptr->Add( child->AddRef() ) ;
 	return Node( child ) ;
+}
+
+void Node::AddAttribute( const std::string& name, const std::string& val )
+{
+	assert( m_ptr != 0 ) ;
+	assert( GetType() == element ) ;
+	
+	Impl *anode	= new Impl( name, attr ) ;
+	Impl *vnode	= new Impl( val, text ) ;
+	anode->Add( vnode ) ;
+	m_ptr->Add( anode ) ;
+}
+
+void Node::AddNode( const Node& node )
+{
+	assert( m_ptr != 0 ) ;
+	assert( node.m_ptr != 0 ) ;
+	assert( IsCompatible( GetType(), node.GetType() ) ) ;
+	
+	m_ptr->Add( node.m_ptr->AddRef() ) ;
 }
 
 Node Node::operator[]( const std::string& name ) const
@@ -203,10 +248,15 @@ Node::Type Node::GetType() const
 	return m_ptr->GetType() ;
 }
 
-const std::string& Node::Str() const
+const std::string& Node::Name() const
 {
 	assert( m_ptr != 0 ) ;
-	return m_ptr->Str() ;
+	return m_ptr->Name() ;
+}
+
+std::string Node::Value() const
+{
+	return std::string() ;
 }
 
 } } // end namespace

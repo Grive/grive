@@ -45,6 +45,7 @@ target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
+	expat
 )
 
 set_target_properties(grive PROPERTIES

@@ -20,6 +20,7 @@
 #include "NodeTest.hh"
 
 #include "xml/Node.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <iostream>
 
@@ -49,7 +50,14 @@ void NodeTest::TestTree( )
 	Node c11_ = node["child1"]["b"] ;
 	
 	CPPUNIT_ASSERT_EQUAL( 3UL, c1_.RefCount() ) ;
-	CPPUNIT_ASSERT_EQUAL( std::string("child1"), c1_.Str() ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("child1"), c1_.Name() ) ;
+}
+
+void NodeTest::TestParseFile( )
+{
+	Node n = TreeBuilder::Parse( "<entry><link href=\"q\">abc</link></entry>" ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("entry"), n["entry"].Name() ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("q"), n["entry"]["link"].Name() ) ;
 }
 
 } // end of namespace grut

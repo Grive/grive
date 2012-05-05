@@ -32,10 +32,12 @@ public :
 	// declare suit function
 	CPPUNIT_TEST_SUITE( NodeTest ) ;
 		CPPUNIT_TEST( TestTree ) ;
+		CPPUNIT_TEST( TestParseFile ) ;
 	CPPUNIT_TEST_SUITE_END();
 
 private :
 	void TestTree( ) ;
+	void TestParseFile( ) ;
 } ;
 
 } // end of namespace
