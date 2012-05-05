@@ -19,10 +19,10 @@
 
 #include "File.hh"
 
-#include "protocol/Download.hh"
+#include "http/Download.hh"
+#include "http/StringResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
-#include "protocol/StringResponse.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
 

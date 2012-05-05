@@ -21,7 +21,7 @@
 
 #include "File.hh"
 
-#include "protocol/HTTP.hh"
+#include "http/HTTP.hh"
 #include "protocol/Json.hh"
 #include "protocol/JsonResponse.hh"
 #include "protocol/OAuth2.hh"

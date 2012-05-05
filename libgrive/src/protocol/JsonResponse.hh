@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "Receivable.hh"
-#include "StringResponse.hh"
+#include "http/Receivable.hh"
+#include "http/StringResponse.hh"
 
 namespace gr
 {

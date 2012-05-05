@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "protocol/HTTP.hh"
+#include "http/HTTP.hh"
 #include "util/DateTime.hh"
 
 #include <iosfwd>

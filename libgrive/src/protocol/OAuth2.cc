@@ -19,9 +19,10 @@
 
 #include "OAuth2.hh"
 
-#include "protocol/HTTP.hh"
-#include "protocol/Json.hh"
-#include "protocol/JsonResponse.hh"
+#include "JsonResponse.hh"
+#include "Json.hh"
+
+#include "http/HTTP.hh"
 
 // for debugging
 #include <iostream>
@@ -99,10 +100,8 @@ void OAuth2::Refresh( )
 	http::Agent			http ;
 
 	http.Post( token_url, post, &resp ) ;
-std::cout << "here" << std::endl ;
 
-	Json jresp	= resp.Response() ;
-	m_access	= jresp["access_token"].As<std::string>() ;
+	m_access	= resp.Response()["access_token"].As<std::string>() ;
 }
 
 std::string OAuth2::RefreshToken( ) const

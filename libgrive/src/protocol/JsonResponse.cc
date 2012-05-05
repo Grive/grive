@@ -19,7 +19,7 @@
 
 #include "JsonResponse.hh"
 
-#include "Json.hh"
+#include "protocol/Json.hh"
 
 namespace gr { namespace http {
 

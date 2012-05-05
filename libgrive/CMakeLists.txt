@@ -34,6 +34,7 @@ file (GLOB XML_HEADERS
 
 file (GLOB LIBGRIVE_SRC
 	src/drive/*.cc
+	src/http/*.cc
 	src/protocol/*.cc
 	src/util/*.cc
 	src/xml/*.cc
