@@ -21,10 +21,12 @@
 
 #include "http/Download.hh"
 #include "http/StringResponse.hh"
+#include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
+#include "xml/Node.hh"
 
 #include <algorithm>
 #include <iostream>
@@ -161,7 +163,11 @@ bool File::Upload( std::streambuf *file, const http::Headers& auth )
 	uphdr.push_back( "Expect:" ) ;
 	uphdr.push_back( "Accept:" ) ;
 	
-	http.Put( uplink, data, &str, uphdr ) ;
+	http::XmlResponse xml ;
+	http.Put( uplink, data, &xml, uphdr ) ;
+
+std::cout << xml.Response() << std::endl ;
+
 	return true ;
 }
 

@@ -22,8 +22,11 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
-#include <iostream>
+#include <iterator>
 #include <stdexcept>
+
+// debugging
+#include <iostream>
 
 namespace gr { namespace xml {
 
@@ -279,6 +282,25 @@ std::string Node::Value() const
 {
 	assert( m_ptr != 0 ) ;
 	return m_ptr->Value() ;
+}
+
+std::vector<Node> Node::Children() const
+{
+	std::vector<Node> result ;
+	for ( Impl::iterator i = m_ptr->Begin() ; i != m_ptr->End() ; ++i )
+		result.push_back( Node( (*i)->AddRef() ) ) ;
+
+	return result ;
+}
+
+std::ostream& operator<<( std::ostream& os, const Node& node )
+{
+	os << '<' << node.Name() << '>' ;
+	
+	std::vector<Node> c = node.Children() ;
+	
+	std::copy( c.begin(), c.end(), std::ostream_iterator<Node>(os, "\n") ) ;
+	return os ;
 }
 
 } } // end namespace

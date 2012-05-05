@@ -53,6 +53,8 @@ public :
 	Type GetType() const ;
 
 	static bool IsCompatible( Type parent, Type child ) ;
+
+	std::vector<Node> Children() const ;
 	
 private :
 	class	Impl ;
@@ -63,5 +65,7 @@ private :
 private :
 	Impl *m_ptr ;
 } ;
+
+std::ostream& operator<<( std::ostream& os, const Node& node ) ;
 
 } } // end of namespace
