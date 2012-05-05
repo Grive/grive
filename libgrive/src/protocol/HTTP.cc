@@ -21,6 +21,8 @@
 
 #include "Download.hh"
 // #include "util/SignalHandler.hh"
+#include "xml/Node.hh"
+#include "xml/TreeBuilder.hh"
 
 // dependent libraries
 #include <curl/curl.h>
@@ -276,31 +278,33 @@ std::string Unescape( const std::string& str )
 	return result ;
 }
 
-} } // end of namespace
-
-namespace gr {
-
-struct Http::Impl
+struct Agent::Impl
 {
 	CURL			*curl ;
 	std::string		location ;
+	char error[CURL_ERROR_SIZE] ;
 } ;
 
-Http::Http() :
+Agent::Agent() :
 	m_pimpl( new Impl )
 {
 	m_pimpl->curl = ::curl_easy_init();
-	
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L);
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L);
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&Agent::HeaderCallback ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_ERRORBUFFER, 	m_pimpl->error ) ;
 }
 
-Http::~Http()
+Agent::~Agent()
 {
 	::curl_easy_cleanup( m_pimpl->curl );
 }
 
-std::size_t Http::HeaderCallback( void *ptr, size_t size, size_t nmemb, Http *pthis )
+std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis )
 {
-	std::string line( (char*)ptr, (char*)ptr + size*nmemb ) ;
+	char *str = reinterpret_cast<char*>(ptr) ;
+	std::string line( str, str + size*nmemb ) ;
 	
 	static const std::string loc = "Location: " ;
 	std::size_t pos = line.find( loc ) ;
@@ -313,7 +317,13 @@ std::size_t Http::HeaderCallback( void *ptr, size_t size, size_t nmemb, Http *pt
 	return size*nmemb ;
 }
 
-std::string Http::Put(
+std::size_t Agent::XmlCallback( void *ptr, size_t size, size_t nmemb, xml::TreeBuilder *tb )
+{
+	tb->ParseData( reinterpret_cast<char*>(ptr), size*nmemb ) ;
+	return size*nmemb ;
+}
+
+std::string Agent::Put(
 	const std::string&		url,
 	const std::string&		data,
 	const http::Headers&	hdr )
@@ -326,47 +336,47 @@ std::string Http::Put(
 	// set common options
 	curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
 	curl_easy_setopt(curl, CURLOPT_HEADER, 			0);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	WriteCallback);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&WriteCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA,		&resp ) ;
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,	0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST,	0L);
 	curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
 	curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	curl_easy_setopt(curl, CURLOPT_INFILESIZE, 		put_data.size() ) ;
-	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION,	&Http::HeaderCallback ) ;
-	curl_easy_setopt(curl, CURLOPT_WRITEHEADER ,	this ) ;
 
-	// set headers
-	struct curl_slist *curl_hdr = 0 ;
-    for ( Headers::const_iterator i = hdr.begin() ; i != hdr.end() ; ++i )
-		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
-	curl_easy_setopt( curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
-
-	char error_buf[CURL_ERROR_SIZE] = {} ;
-	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error_buf ) ;
-
+	SetHeader( hdr ) ;
+	
 	CURLcode curl_code = curl_easy_perform(curl);
 
 	long http_code = 0;
-	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
 	if ( curl_code != CURLE_OK )
 	{
-		throw Exception( curl_code, http_code, error_buf ) ;
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
 	}
 	else if (http_code >= 400 )
 	{
 		std::cout << "http error " << http_code << " " << resp << std::endl ;
-		throw Exception( curl_code, http_code, error_buf ) ;
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
 	}
 
 	return resp ;
 }
 
-std::string Http::RedirLocation() const
+void Agent::SetHeader( const http::Headers& hdr )
+{
+	// set headers
+	struct curl_slist *curl_hdr = 0 ;
+    for ( Headers::const_iterator i = hdr.begin() ; i != hdr.end() ; ++i )
+		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
+	
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
+}
+
+std::string Agent::RedirLocation() const
 {
 	return m_pimpl->location ;
 }
 
-} // end of namespace
+
+} } // end of namespace

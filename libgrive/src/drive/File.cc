@@ -139,7 +139,7 @@ void File::Upload( std::streambuf *file, const http::Headers& auth )
   	hdr.push_back( "If-Match: " + m_etag ) ;
 	hdr.push_back( "Expect:" ) ;
 	
-	Http http ;
+	http::Agent http ;
 	http.Put( m_upload_link, meta, hdr ) ;
 	
 	// parse the header and find "Location"

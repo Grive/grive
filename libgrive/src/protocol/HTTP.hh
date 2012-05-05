@@ -24,74 +24,84 @@
 #include <stdexcept>
 #include <vector>
 
-namespace gr {
+namespace gr { namespace xml
+{
+	class Node ;
+	class TreeBuilder ;
+} }
 
-	namespace http
-	{
-		typedef std::vector<std::string> Headers ;
-		
-		std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
-		void GetFile(
-			const std::string&	url,
-			const std::string&	filename,
-			const Headers& 		hdr = Headers() ) ;
-		
-		void GetFile(
-			const std::string&	url,
-			const std::string&	filename,
-			std::string&		md5sum,
-			const Headers& 		hdr = Headers() ) ;
-		
-		std::string PostData(
-			const std::string&	url,
-			const std::string&	data,
-			const Headers&		hdr = Headers() ) ;
-		std::string PostDataWithHeader(
-			const std::string&	url,
-			const std::string&	data,
-			const Headers&		hdr = Headers() ) ;
-		std::string PostFile(
-			const std::string&	url,
-			const std::string& 	filename,
-			const Headers&		hdr = Headers() ) ;
-		
-		std::string Put(
-			const std::string&	url,
-			const std::string&	data,
-			const Headers&		hdr = Headers() ) ;
-		
-		std::string Escape( const std::string& str ) ;
-		std::string Unescape( const std::string& str ) ;
-		
-		class Exception : public std::runtime_error
-		{
-		public :
-			Exception( int curl_code, int http_code, const char *err_buf ) ;
-		
-		private :
-			static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
-		} ;
-	}
-	
-	class Http
-	{
-	public :
-		Http() ;
-		~Http() ;
-		
-		std::string Put(
-			const std::string&		url,
-			const std::string&		data,
-			const http::Headers&	hdr = http::Headers() ) ;
+namespace gr { namespace http {
 
-		std::string RedirLocation() const ;
-	
-	private :
-		static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Http *pthis ) ;
-	
-	private :
-		struct Impl ;
-		std::auto_ptr<Impl>	m_pimpl ;
-	} ;
+typedef std::vector<std::string> Headers ;
 
-} // end of namespace
+std::string Get( const std::string& url, const Headers& hdr = Headers() ) ;
+void GetFile(
+	const std::string&	url,
+	const std::string&	filename,
+	const Headers& 		hdr = Headers() ) ;
+
+void GetFile(
+	const std::string&	url,
+	const std::string&	filename,
+	std::string&		md5sum,
+	const Headers& 		hdr = Headers() ) ;
+
+std::string PostData(
+	const std::string&	url,
+	const std::string&	data,
+	const Headers&		hdr = Headers() ) ;
+std::string PostDataWithHeader(
+	const std::string&	url,
+	const std::string&	data,
+	const Headers&		hdr = Headers() ) ;
+std::string PostFile(
+	const std::string&	url,
+	const std::string& 	filename,
+	const Headers&		hdr = Headers() ) ;
+
+std::string Put(
+	const std::string&	url,
+	const std::string&	data,
+	const Headers&		hdr = Headers() ) ;
+
+std::string Escape( const std::string& str ) ;
+std::string Unescape( const std::string& str ) ;
+
+class Exception : public std::runtime_error
+{
+public :
+	Exception( int curl_code, int http_code, const char *err_buf ) ;
+
+private :
+	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
+} ;
+	
+class Agent
+{
+public :
+	Agent() ;
+	~Agent() ;
+	
+	std::string Put(
+		const std::string&		url,
+		const std::string&		data,
+		const http::Headers&	hdr = http::Headers() ) ;
+
+	xml::Node GetXml(
+		const std::string& 		url,
+		const http::Headers&	hdr = http::Headers() ) ;
+		
+	std::string RedirLocation() const ;
+
+private :
+	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis ) ;
+	static std::size_t XmlCallback( void* ptr, size_t size, size_t nmemb, gr::xml::TreeBuilder* tb ) ;
+	
+	void SetHeader( const http::Headers& hdr ) ;
+		
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_pimpl ;
+} ;
+
+} } // end of namespace
