@@ -38,15 +38,23 @@ public :
 	
 	Node AddElement( const std::string& name ) ;
 	Node AddText( const std::string& text ) ;
+	void AddNode( const Node& node ) ;
+	void AddAttribute( const std::string& name, const std::string& val ) ;
 
 	Node operator[]( const std::string& name ) const ;
-	const std::string& Str() const ;
+	
+	const std::string& Name() const ;
+	std::string Value() const ;
 	
 	// read-only access to the reference counter. for checking.
 	std::size_t RefCount() const ;
 	
 	enum Type { element, attr, text } ;
 	Type GetType() const ;
+
+	static bool IsCompatible( Type parent, Type child ) ;
+
+	std::vector<Node> Children() const ;
 	
 private :
 	class	Impl ;
@@ -57,5 +65,7 @@ private :
 private :
 	Impl *m_ptr ;
 } ;
+
+std::ostream& operator<<( std::ostream& os, const Node& node ) ;
 
 } } // end of namespace

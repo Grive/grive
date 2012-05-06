@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "Receivable.hh"
+
 #include <string>
 #include <fstream>
 
@@ -26,7 +28,7 @@
 
 namespace gr {
 
-class Download
+class Download : public http::Receivable
 {
 public :
 	struct NoChecksum {} ;
@@ -35,6 +37,8 @@ public :
 	~Download( ) ;
 	
 	std::string Finish() const ;
+	
+	std::size_t OnData( void *data, std::size_t count ) ;
 	
 	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
 	

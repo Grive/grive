@@ -17,27 +17,22 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Exception.hh"
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <sstream>
 
-namespace grut {
+namespace gr { namespace http {
 
-class NodeTest : public CppUnit::TestFixture
+Exception::Exception( int curl_code, int http_code, const char *err_buf )
+	: runtime_error( Format( curl_code, http_code, err_buf ) )
 {
-public :
-	NodeTest( ) ;
+}
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+std::string Exception::Format( int curl_code, int http_code, const char *err_buf )
+{
+	std::ostringstream ss ;
+	ss << "CURL code = " << curl_code << " HTTP code = " << http_code << " (" << err_buf << ")" ;
+	return ss.str() ;
+}
 
-private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
-} ;
-
-} // end of namespace
+} } // end of namespace

@@ -17,27 +17,24 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "JsonResponse.hh"
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "protocol/Json.hh"
 
-namespace grut {
+namespace gr { namespace http {
 
-class NodeTest : public CppUnit::TestFixture
+JsonResponse::JsonResponse()
 {
-public :
-	NodeTest( ) ;
+}
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+std::size_t JsonResponse::OnData( void *data, std::size_t count )
+{
+	return m_resp.OnData( data, count ) ;
+}
 
-private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
-} ;
+Json JsonResponse::Response() const
+{
+	return Json::Parse( m_resp.Response() ) ;
+}
 
-} // end of namespace
+} } // end of namespace

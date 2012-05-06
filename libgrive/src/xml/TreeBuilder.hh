@@ -19,25 +19,34 @@
 
 #pragma once
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <memory>
+#include <string>
 
-namespace grut {
+namespace gr { namespace xml {
 
-class NodeTest : public CppUnit::TestFixture
+class Node ;
+
+class TreeBuilder
 {
 public :
-	NodeTest( ) ;
-
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+	TreeBuilder() ;
+	~TreeBuilder() ;
+	
+	void ParseData( const char *data, std::size_t count, bool last = false ) ;
+	Node Result( ) const ;
+	
+	// one shot helpers
+	static Node ParseFile( const std::string& file ) ;
+	static Node Parse( const std::string& xml ) ;
 
 private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
+	
+	static void StartElement( void* pvthis, const char* name, const char** attr ) ;
+	static void EndElement( void* pvthis, const char* name ) ;
+
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
 } ;
 
-} // end of namespace
+} } // end of namespace

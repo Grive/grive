@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "protocol/HTTP.hh"
+#include "http/HTTP.hh"
 #include "util/DateTime.hh"
 
 #include <iosfwd>
@@ -48,7 +48,7 @@ public :
 	std::string Parent() const ;
 	
 	void Download( const Path& file, const http::Headers& auth ) const ;
-	void Upload( std::streambuf *file, const http::Headers& auth ) ;
+	bool Upload( std::streambuf *file, const http::Headers& auth ) ;
 
 private :
 	void Update( const Json& entry ) ;

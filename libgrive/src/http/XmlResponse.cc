@@ -17,27 +17,30 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "XmlResponse.hh"
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "xml/Node.hh"
 
-namespace grut {
+namespace gr { namespace http {
 
-class NodeTest : public CppUnit::TestFixture
+XmlResponse::XmlResponse()
 {
-public :
-	NodeTest( ) ;
+}
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+std::size_t XmlResponse::OnData( void *data, std::size_t count )
+{
+	m_tb.ParseData( reinterpret_cast<char*>(data), count ) ;
+	return count ;
+}
 
-private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
-} ;
+void XmlResponse::Finish()
+{
+	m_tb.ParseData( 0, 0, true ) ;
+}
 
-} // end of namespace
+xml::Node XmlResponse::Response() const
+{
+	return m_tb.Result() ;
+}
+
+} } // end of namespace

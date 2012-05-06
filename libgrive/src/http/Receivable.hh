@@ -19,25 +19,14 @@
 
 #pragma once
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <cstddef>
 
-namespace grut {
+namespace gr { namespace http {
 
-class NodeTest : public CppUnit::TestFixture
+class Receivable
 {
 public :
-	NodeTest( ) ;
-
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
-
-private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
+	virtual std::size_t OnData( void *data, std::size_t count ) = 0 ;
 } ;
 
-} // end of namespace
+} } // end of namespace

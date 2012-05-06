@@ -19,25 +19,17 @@
 
 #pragma once
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <stdexcept>
 
-namespace grut {
+namespace gr { namespace http {
 
-class NodeTest : public CppUnit::TestFixture
+class Exception : public std::runtime_error
 {
 public :
-	NodeTest( ) ;
-
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+	Exception( int curl_code, int http_code, const char *err_buf ) ;
 
 private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
+	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
 } ;
 
-} // end of namespace
+} } // end of namespace

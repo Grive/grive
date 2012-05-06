@@ -19,25 +19,27 @@
 
 #pragma once
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "http/Receivable.hh"
+#include "http/StringResponse.hh"
 
-namespace grut {
+namespace gr
+{
+	class Json ;
+}
 
-class NodeTest : public CppUnit::TestFixture
+namespace gr { namespace http {
+
+class JsonResponse : public Receivable
 {
 public :
-	NodeTest( ) ;
+	JsonResponse() ;
 
-	// declare suit function
-	CPPUNIT_TEST_SUITE( NodeTest ) ;
-		CPPUNIT_TEST( TestTree ) ;
-		CPPUNIT_TEST( TestParseFile ) ;
-	CPPUNIT_TEST_SUITE_END();
+	std::size_t OnData( void *data, std::size_t count ) ;
 
+	Json Response() const ;
+	
 private :
-	void TestTree( ) ;
-	void TestParseFile( ) ;
+	StringResponse	m_resp ;
 } ;
 
-} // end of namespace
+} } // end of namespace
