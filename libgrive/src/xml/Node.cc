@@ -183,7 +183,7 @@ Node::iterator::iterator( ImplVec::iterator it ) : m_it( it )
 
 Node::iterator::value_type Node::iterator::operator*() const
 {
-	return Node( *m_it ) ;
+	return Node( (*m_it)->AddRef() ) ;
 }
 
 Node::iterator Node::iterator::operator++()

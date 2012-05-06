@@ -89,6 +89,7 @@ public :
 		ImplVec::iterator	m_it ;
 	} ;
 	
+	
 
 private :
 	explicit Node( Impl *impl ) ;
