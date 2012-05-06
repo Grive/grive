@@ -26,6 +26,11 @@
 
 namespace gr {
 
+namespace http
+{
+	class Agent ;
+}
+
 class OAuth2 ;
 class Json ;
 
@@ -42,7 +47,7 @@ public :
 private :
 	void UpdateFile( const Json& entry ) ;
 	
-	void ConstructDirTree( const std::vector<Json>& entries ) ;
+	void ConstructDirTree( http::Agent *http ) ;
 	
 	FolderListIterator FindFolder( const std::string& href ) ;
 	

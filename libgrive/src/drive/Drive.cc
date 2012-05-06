@@ -53,35 +53,38 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 	
+	http::Agent http ;
+	ConstructDirTree( &http ) ;
+	
 	http::JsonResponse str ;
-	http::Agent agent ;
-	agent.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
+	http.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
 	Json resp = str.Response() ;
-/*	
-	http::XmlResponse xml ;
-	agent.Get( root_url, &xml, m_http_hdr ) ;
-	xml::Node nroot = xml.Response() ;
-*/
+	
 	Json resume_link ;
 	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
 		m_resume_link = resume_link["href"].As<std::string>() ;
-/*
-	std::string next_link ;
-	Json next_link_json ;
-	if ( resp["feed"]["link"].FindInArray( "rel", "next", next_link_json ) )
-		next_link = next_link_json["href"].As<std::string>() ;
-std::cout << "next link = " << next_link << std::endl ;
-*/
-	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
-	ConstructDirTree( entries ) ;
-	
-	for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
+
+	bool has_next = false ;
+	do
 	{
-		if ( !Collection::IsCollection( *i ) )
+		Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
+		for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
-			UpdateFile( *i ) ;
+			if ( !Collection::IsCollection( *i ) )
+			{
+				UpdateFile( *i ) ;
+			}
 		}
-	}
+		
+		Json next ;
+		has_next = resp["feed"]["link"].FindInArray( "rel", "next", next ) ;
+		
+		if ( has_next )
+		{
+			http.Get( next["href"].Str(), &str, m_http_hdr ) ;
+			resp = str.Response() ;
+		}
+	} while ( has_next ) ;
 }
 
 Drive::~Drive( )
@@ -109,24 +112,40 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 	 return (it != m_coll.end() && it->Href() == href) ? it : m_coll.end() ;
 }
 
-void Drive::ConstructDirTree( const std::vector<Json>& entries )
+void Drive::ConstructDirTree( http::Agent *http )
 {
+	http::JsonResponse jrsp ;
+	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;
+	Json resp = jrsp.Response() ;
+	
 	assert( m_coll.empty() ) ;
+	
 	std::map<std::string, std::string> parent_href ;
-
-	// first, get all collections from the query result
-	for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
+	while ( true )
 	{
-		if ( Collection::IsCollection( *i ) )
+		Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
+
+		// first, get all collections from the query result
+		for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
-			m_coll.push_back( Collection( *i ) ) ;
-			parent_href.insert(
-				std::make_pair(
-					m_coll.back().Href(),
-					Collection::ParentHref( *i ) ) ) ;
+			if ( Collection::IsCollection( *i ) )
+			{
+				m_coll.push_back( Collection( *i ) ) ;
+				parent_href.insert(
+					std::make_pair(
+						m_coll.back().Href(),
+						Collection::ParentHref( *i ) ) ) ;
+			}
 		}
+		assert( m_coll.size() == parent_href.size() ) ;
+		
+		Json next ;
+		if ( !resp["feed"]["link"].FindInArray( "rel", "next", next ) )
+			break ;
+
+		http->Get( next["href"].Str(), &jrsp, m_http_hdr ) ;
+		resp = jrsp.Response() ;
 	}
-	assert( m_coll.size() == parent_href.size() ) ;
 	
 	// second, build up linkage between parent and child 
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
