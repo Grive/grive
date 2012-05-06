@@ -177,6 +177,38 @@ private :
 	ImplVec			m_children ;
 } ;
 
+Node::iterator::iterator( ImplVec::iterator it ) : m_it( it )
+{
+}
+
+Node::iterator::value_type Node::iterator::operator*() const
+{
+	return Node( *m_it ) ;
+}
+
+Node::iterator Node::iterator::operator++()
+{
+	m_it++ ;
+	return *this ;
+}
+
+Node::iterator Node::iterator::operator++(int)
+{
+	iterator tmp( *this ) ;
+	++tmp ;
+	return tmp ;
+}
+
+bool Node::iterator::operator==( const iterator& i ) const
+{
+	return m_it == i.m_it ;
+}
+
+bool Node::iterator::operator!=( const iterator& i ) const
+{
+	return m_it != i.m_it ;
+}
+
 Node::Node() : m_ptr( new Impl )
 {
 }
@@ -321,5 +353,16 @@ std::ostream& operator<<( std::ostream& os, const Node& node )
 	std::copy( c.begin(), c.end(), std::ostream_iterator<Node>(os, "\n") ) ;
 	return os ;
 }
+
+Node::iterator Node::begin()
+{
+	return iterator( m_ptr->Begin() ) ;
+}
+
+Node::iterator Node::end()
+{
+	return iterator( m_ptr->End() ) ;
+}
+
 
 } } // end namespace

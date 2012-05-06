@@ -52,7 +52,7 @@ target_link_libraries( grive
 )
 
 set_target_properties(grive PROPERTIES
-    SOVERSION 0 VERSION 0.0.4
+    SOVERSION 0 VERSION ${GRIVE_VERSION}
 )
 
 install(TARGETS grive LIBRARY DESTINATION lib)

@@ -63,6 +63,9 @@ public :
 	// TODO: implement iterator begin/end functions instead
 	std::vector<Node> Attr() const ;
 	
+	iterator begin() ;
+	iterator end() ;
+	
 private :
 	class	Impl ;
 	typedef std::vector<Impl*>	ImplVec ;
@@ -71,15 +74,19 @@ public :
 	class iterator
 	{
 	public :
-		iterator( ImplVec::iterator *impl ) ;
+		explicit iterator( std::vector< gr::xml::Node::Impl* >::iterator it ) ;
 	
 		typedef Node value_type ;
 		
 		value_type operator*() const ;
-// 		value_type operator*() const ;
+		iterator operator++() ;
+		iterator operator++(int) ;
+		
+		bool operator==( const iterator& i ) const ;
+		bool operator!=( const iterator& i ) const ;
 	
 	private :
-		ImplVec::iterator	*m_node ;
+		ImplVec::iterator	m_it ;
 	} ;
 	
 
