@@ -22,6 +22,7 @@
 #include "File.hh"
 
 #include "http/HTTP.hh"
+#include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/JsonResponse.hh"
 #include "protocol/OAuth2.hh"
@@ -29,6 +30,7 @@
 #include "util/DateTime.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
+#include "xml/Node.hh"
 
 // standard C++ library
 #include <algorithm>
@@ -55,11 +57,21 @@ Drive::Drive( OAuth2& auth ) :
 	http::Agent agent ;
 	agent.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
 	Json resp = str.Response() ;
-	
+/*	
+	http::XmlResponse xml ;
+	agent.Get( root_url, &xml, m_http_hdr ) ;
+	xml::Node nroot = xml.Response() ;
+*/
 	Json resume_link ;
 	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
 		m_resume_link = resume_link["href"].As<std::string>() ;
-	
+/*
+	std::string next_link ;
+	Json next_link_json ;
+	if ( resp["feed"]["link"].FindInArray( "rel", "next", next_link_json ) )
+		next_link = next_link_json["href"].As<std::string>() ;
+std::cout << "next link = " << next_link << std::endl ;
+*/
 	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
 	ConstructDirTree( entries ) ;
 	

@@ -311,7 +311,10 @@ std::vector<Node> Node::Children() const
 
 std::ostream& operator<<( std::ostream& os, const Node& node )
 {
-	os << '<' << node.Name() << '>' ;
+	if ( node.GetType() == Node::element )
+	{
+		os << '<' << node.Name() << ' ' ;
+	}
 	
 	std::vector<Node> c = node.Children() ;
 	

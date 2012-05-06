@@ -27,6 +27,9 @@ namespace gr { namespace xml {
 class Node
 {
 public :
+	class iterator ;
+
+public :
 	Node() ;
 	Node( const Node& node ) ;
 	~Node() ;
@@ -57,8 +60,23 @@ public :
 	// TODO: implement iterator begin/end functions instead
 	std::vector<Node> Children() const ;
 	
+	// TODO: implement iterator begin/end functions instead
+	std::vector<Node> Attr() const ;
+	
 private :
 	class	Impl ;
+	typedef std::vector<Impl*>	ImplVec ;
+	
+public :
+	class iterator
+	{
+	public :
+		iterator( ImplVec::iterator *impl ) ;
+	
+	private :
+		ImplVec::iterator	*m_node ;
+	} ;
+	
 
 private :
 	explicit Node( Impl *impl ) ;
