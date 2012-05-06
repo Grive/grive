@@ -42,7 +42,7 @@ public :
 private :
 	void UpdateFile( const Json& entry ) ;
 	
-	void ConstructDirTree( const std::vector<Json>& entries ) ;
+	void ConstructDirTree( ) ;
 	
 	FolderListIterator FindFolder( const std::string& href ) ;
 	
