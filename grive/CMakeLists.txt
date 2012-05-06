@@ -5,6 +5,8 @@ include_directories(
 	${OPT_INCS}
 )
 
+add_definitions( -DVERSION="${GRIVE_VERSION}" )
+
 add_executable( grive_executable
 	src/main.cc
 )

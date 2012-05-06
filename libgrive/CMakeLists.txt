@@ -34,6 +34,8 @@ file (GLOB LIBGRIVE_SRC
 	src/util/*.cc
 )
 
+add_definitions( -DVERSION="${GRIVE_VERSION}" )
+
 add_library( grive SHARED ${LIBGRIVE_SRC} )
 
 target_link_libraries( grive
@@ -43,7 +45,7 @@ target_link_libraries( grive
 )
 
 set_target_properties(grive PROPERTIES
-    SOVERSION 0 VERSION 0.0.3
+    SOVERSION 0 VERSION 0.0.4
 )
 
 install(TARGETS grive LIBRARY DESTINATION lib)
