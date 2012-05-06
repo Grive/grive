@@ -87,7 +87,7 @@ int main( int argc, char **argv )
 	Json config = ReadConfig() ;
 	
 	int c ;
-	while ((c = getopt (argc, argv, "ac:")) != -1)
+	while ((c = getopt (argc, argv, "ac:v")) != -1)
 	{
 		switch ( c )
 		{
@@ -114,6 +114,13 @@ int main( int argc, char **argv )
 				SaveConfig( config ) ;
 				
 				break ;
+			}
+			
+			case 'v' :
+			{
+				std::cout
+					<< "grive version " VERSION " " __DATE__ " " __TIME__ << std::endl ;
+				return 0 ;
 			}
 		}
 	}
