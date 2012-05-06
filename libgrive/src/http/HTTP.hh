@@ -41,6 +41,7 @@ public :
 	Agent() ;
 	~Agent() ;
 	
+	// TODO: implement put from file, or some callback interface to pull data
 	long Put(
 		const std::string&		url,
 		const std::string&		data,

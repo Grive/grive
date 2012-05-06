@@ -37,6 +37,7 @@ private :
 
 public :
 	typedef ImplVec::iterator iterator ;
+	typedef ImplVec::const_iterator const_iterator ;
 
 public :
 	Impl() : m_ref(1), m_type( element )
@@ -124,14 +125,28 @@ public :
 		return m_children.end() ;
 	}
 	
+	const_iterator Begin() const
+	{
+		return m_children.begin() ;
+	}
+	
+	const_iterator End() const
+	{
+		return m_children.end() ;
+	}
+	
 	const std::string& Name() const
 	{
 		return m_name ;
 	}
 	
-	const std::string& Value() const
+	std::string Value() const
 	{
-		return m_value ;
+		std::string value = m_value ;
+		for ( const_iterator i = Begin() ; i != End() ; ++i )
+			value += (*i)->Value() ;
+
+		return value ;
 	}
 	
 	void Value( const std::string& val )
@@ -227,7 +242,7 @@ Node Node::AddText( const std::string& str )
 	assert( m_ptr != 0 ) ;
 	assert( IsCompatible( GetType(), text ) ) ;
 
-	Impl *child = new Impl( str, text ) ;
+	Impl *child = new Impl( "#text", text, str ) ;
 	m_ptr->Add( child->AddRef() ) ;
 	return Node( child ) ;
 }
@@ -281,6 +296,7 @@ const std::string& Node::Name() const
 std::string Node::Value() const
 {
 	assert( m_ptr != 0 ) ;
+	
 	return m_ptr->Value() ;
 }
 

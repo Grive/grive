@@ -43,6 +43,7 @@ private :
 	
 	static void StartElement( void* pvthis, const char* name, const char** attr ) ;
 	static void EndElement( void* pvthis, const char* name ) ;
+	static void OnCharData( void *pvthis, const char *s, int len ) ;
 
 private :
 	struct Impl ;

@@ -41,6 +41,7 @@ TreeBuilder::TreeBuilder() : m_impl( new Impl )
 	m_impl->psr = ::XML_ParserCreate( 0 ) ;
 	
 	::XML_SetElementHandler( m_impl->psr, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
+	::XML_SetCharacterDataHandler( m_impl->psr, &TreeBuilder::OnCharData ) ;
 	::XML_SetUserData( m_impl->psr , this ) ;
 }
 
@@ -108,6 +109,12 @@ void TreeBuilder::EndElement( void* pvthis, const char* name )
 	
 	assert( pthis->m_impl->stack.back().Name() == name ) ;
 	pthis->m_impl->stack.pop_back() ;
+}
+
+void TreeBuilder::OnCharData( void *pvthis, const char *s, int len )
+{
+	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
+	pthis->m_impl->stack.back().AddText( std::string( s, len ) ) ;
 }
 
 } } // end of namespace

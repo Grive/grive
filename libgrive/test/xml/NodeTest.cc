@@ -59,7 +59,8 @@ void NodeTest::TestParseFile( )
 	CPPUNIT_ASSERT_EQUAL( std::string("entry"), n["entry"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("link"), n["entry"]["link"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("q"), n["entry"]["link"]["@href"].Value() ) ;
-// 	CPPUNIT_ASSERT_EQUAL( Node::element, n["entry"]["link"]["href"].GetType() ) ;
+	CPPUNIT_ASSERT_EQUAL( Node::element, n["entry"]["link"]["href"].GetType() ) ;
+	CPPUNIT_ASSERT_EQUAL( std::string("abc"), n["entry"]["link"]["href"].Value() ) ;
 }
 
 } // end of namespace grut

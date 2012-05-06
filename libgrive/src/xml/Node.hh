@@ -54,6 +54,7 @@ public :
 
 	static bool IsCompatible( Type parent, Type child ) ;
 
+	// TODO: implement iterator begin/end functions instead
 	std::vector<Node> Children() const ;
 	
 private :
