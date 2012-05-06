@@ -69,6 +69,8 @@ void NodeTest::TestParseFile( )
 		CPPUNIT_ASSERT_EQUAL( std::string("href"), (*i).Name() ) ;
 		++i ;
 	}
+	
+	std::cout << n << std::endl ;
 }
 
 } // end of namespace grut

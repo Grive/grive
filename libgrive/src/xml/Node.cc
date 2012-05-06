@@ -135,6 +135,11 @@ public :
 		return m_children.end() ;
 	}
 	
+	std::pair<iterator, iterator> Attr()
+	{
+		return std::make_pair( m_attr.begin(), m_attr.end() ) ;
+	}
+	
 	const std::string& Name() const
 	{
 		return m_name ;
@@ -176,6 +181,10 @@ private :
 	ImplVec			m_element, m_attr ;
 	ImplVec			m_children ;
 } ;
+
+Node::iterator::iterator( )
+{
+}
 
 Node::iterator::iterator( ImplVec::iterator it ) : m_it( it )
 {
@@ -332,36 +341,55 @@ std::string Node::Value() const
 	return m_ptr->Value() ;
 }
 
-std::vector<Node> Node::Children() const
-{
-	std::vector<Node> result ;
-	for ( Impl::iterator i = m_ptr->Begin() ; i != m_ptr->End() ; ++i )
-		result.push_back( Node( (*i)->AddRef() ) ) ;
-
-	return result ;
-}
-
 std::ostream& operator<<( std::ostream& os, const Node& node )
 {
 	if ( node.GetType() == Node::element )
 	{
-		os << '<' << node.Name() << ' ' ;
+		os << '<' << node.Name() ;
+		
+		// print attributes
+		Node::Range attrs = node.Attr() ;
+		if ( attrs.first != attrs.second )
+			os << ' ' ;
+		
+		std::copy( attrs.first, attrs.second, std::ostream_iterator<Node>(os, " ") ) ;
+		os << '>' ;
+		
+		// recursively print children
+		for ( Node::iterator i = node.begin() ; i != node.end() ; ++i )
+		{
+			if ( (*i).GetType() != Node::attr )
+				os << *i ;
+		}
+		os << "</" << node.Name() << '>' ;
+	}
+	else if ( node.GetType() == Node::attr )
+	{
+		os << node.Name() << "=\"" << node.Value() << "\"" ;
+	}
+	else
+	{
+		os << node.Value() ;
 	}
 	
-	std::vector<Node> c = node.Children() ;
-	
-	std::copy( c.begin(), c.end(), std::ostream_iterator<Node>(os, "\n") ) ;
 	return os ;
 }
 
-Node::iterator Node::begin()
+Node::iterator Node::begin() const
 {
 	return iterator( m_ptr->Begin() ) ;
 }
 
-Node::iterator Node::end()
+Node::iterator Node::end() const
 {
 	return iterator( m_ptr->End() ) ;
+}
+
+Node::Range Node::Attr() const
+{
+	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Attr() ;
+
+	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
 }
 
 
