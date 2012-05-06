@@ -217,6 +217,37 @@ long Agent::Post(
 	return http_code ;
 }
 
+long Agent::Custom(
+	const std::string&		method,
+	const std::string&		url,
+	Receivable				*dest,
+	const http::Headers&	hdr )
+{
+	CURL *curl = m_pimpl->curl ;
+
+	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+
+	SetHeader( hdr ) ;
+	
+	CURLcode curl_code = ::curl_easy_perform(curl);
+
+	long http_code = 0;
+	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+	if ( curl_code != CURLE_OK )
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	else if (http_code >= 400 )
+	{
+		std::cout << "http error " << http_code << std::endl ;
+		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+	}
+
+	return http_code ;
+}
+
 void Agent::SetHeader( const http::Headers& hdr )
 {
 	// set headers
@@ -240,8 +271,6 @@ std::string Agent::Escape( const std::string& str )
 	std::string result = tmp ;
 	curl_free( tmp ) ;
 	
-	curl_easy_cleanup(curl);
-	
 	return result ;
 }
 
@@ -253,8 +282,6 @@ std::string Agent::Unescape( const std::string& str )
 	char *tmp = curl_easy_unescape( curl, str.c_str(), str.size(), &r ) ;
 	std::string result = tmp ;
 	curl_free( tmp ) ;
-	
-	curl_easy_cleanup(curl);
 	
 	return result ;
 }

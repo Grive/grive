@@ -44,12 +44,16 @@ public :
 	std::string ServerMD5() const ;
 	DateTime ServerModified() const ;
 	
+	std::string ResourceID() const ;
+	std::string ETag() const ;
+	
 	std::string Href() const ;
 	std::string Parent() const ;
 	
 	void Download( const Path& file, const http::Headers& auth ) const ;
 	bool Upload( std::streambuf *file, const http::Headers& auth ) ;
-
+	void Delete( gr::http::Agent* http, const gr::http::Headers& auth ) ;
+	
 private :
 	void Update( const Json& entry ) ;
 	static std::string Parent( const Json& entry ) ;
@@ -60,6 +64,7 @@ private :
 	std::string		m_kind ;
 	std::string		m_server_md5 ;
 	std::string		m_etag ;
+	std::string		m_resource_id ;
 
 	std::string		m_href ;
 	std::string		m_parent ;

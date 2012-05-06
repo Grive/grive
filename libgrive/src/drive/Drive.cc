@@ -19,6 +19,7 @@
 
 #include "Drive.hh"
 
+#include "CommonUri.hh"
 #include "File.hh"
 
 #include "http/HTTP.hh"
@@ -43,8 +44,6 @@
 #include <iostream>
 
 namespace gr {
-
-const std::string root_url = "https://docs.google.com/feeds/default/private/full" ;
 
 Drive::Drive( OAuth2& auth ) :
 	m_auth( auth ),

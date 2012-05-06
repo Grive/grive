@@ -59,6 +59,12 @@ public :
 		Receivable				*dest,
 		const http::Headers&	hdr = http::Headers() ) ;
 	
+	long Custom(
+		const std::string&		method,
+		const std::string&		url,
+		Receivable				*dest,
+		const http::Headers&	hdr = http::Headers() ) ;
+	
 	std::string RedirLocation() const ;
 	
 	std::string Escape( const std::string& str ) ;

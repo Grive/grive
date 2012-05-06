@@ -73,6 +73,11 @@ public :
 	public :
 		iterator( ImplVec::iterator *impl ) ;
 	
+		typedef Node value_type ;
+		
+		value_type operator*() const ;
+// 		value_type operator*() const ;
+	
 	private :
 		ImplVec::iterator	*m_node ;
 	} ;

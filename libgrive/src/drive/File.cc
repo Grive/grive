@@ -19,6 +19,8 @@
 
 #include "File.hh"
 
+#include "CommonUri.hh"
+
 #include "http/Download.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
@@ -47,11 +49,16 @@ File::File( const Json& entry )
 void File::Update( const Json& entry )
 {
 	m_title				= entry["title"]["$t"].Str() ;
-	m_filename			= entry["docs$suggestedFilename"]["$t"].Str() ;
+	
+	m_filename			= entry.Has("docs$suggestedFilename") ?
+		entry["docs$suggestedFilename"]["$t"].Str() : "" ;
+	
 	m_href				= entry["content"]["src"].Str() ;
 	m_parent			= Parent( entry ) ;
 	m_server_modified	= DateTime( entry["updated"]["$t"].Str() ) ;
 	m_etag				= entry["gd$etag"].Str() ;
+	
+	m_resource_id		= entry["gd$resourceId"]["$t"].Str() ;
 	
 	m_server_md5		= entry.Has("docs$md5Checksum") ?
 		entry["docs$md5Checksum"]["$t"].Str() : "" ;
@@ -169,6 +176,27 @@ bool File::Upload( std::streambuf *file, const http::Headers& auth )
 std::cout << xml.Response() << std::endl ;
 
 	return true ;
+}
+
+std::string File::ResourceID() const
+{
+	return m_resource_id ;
+}
+
+std::string File::ETag() const
+{
+	return m_etag ;
+}
+
+void File::Delete( http::Agent *http, const http::Headers& auth )
+{
+	http::Headers hdr( auth ) ;
+	hdr.push_back( "If-Match: " + m_etag ) ;
+	
+std::cout << root_url + "/" + m_resource_id + "?delete=true" << std::endl ;
+	
+	http::StringResponse str ;
+	http->Custom( "DELETE", root_url + "/" + m_resource_id + "?delete=true", &str, hdr ) ;
 }
 
 } // end of namespace
