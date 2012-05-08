@@ -76,6 +76,7 @@ private :
 	Json( struct json_object *json, NotOwned ) ;
 	
 private :
+public :
 	struct json_object	*m_json ;
 } ;
 

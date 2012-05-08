@@ -35,6 +35,7 @@ public :
 	JsonResponse() ;
 
 	std::size_t OnData( void *data, std::size_t count ) ;
+	void Clear() ;
 
 	Json Response() const ;
 	

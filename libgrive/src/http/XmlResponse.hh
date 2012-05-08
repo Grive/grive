@@ -21,11 +21,12 @@
 
 #include "Receivable.hh"
 
-#include "xml/TreeBuilder.hh"
+#include <memory>
 
 namespace gr { namespace xml
 {
 	class Node ;
+	class TreeBuilder ;
 } }
 
 namespace gr { namespace http {
@@ -35,13 +36,14 @@ class XmlResponse : public Receivable
 public :
 	XmlResponse() ;
 
+	void Clear() ;
 	std::size_t OnData( void *data, std::size_t count ) ;
 	void Finish() ;
 
 	xml::Node Response() const ;
 	
 private :
-	xml::TreeBuilder	m_tb ;
+	std::auto_ptr<xml::TreeBuilder>	m_tb ;
 } ;
 
 } } // end of namespace

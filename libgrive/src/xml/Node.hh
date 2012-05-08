@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <iosfwd>
 #include <string>
 #include <vector>
 #include <utility>
@@ -58,6 +59,8 @@ public :
 	Type GetType() const ;
 
 	static bool IsCompatible( Type parent, Type child ) ;
+	static std::ostream& PrintChar( std::ostream& os, char c ) ;
+	static std::ostream& PrintString( std::ostream& os, const std::string& s ) ;
 
 	iterator begin() const ;
 	iterator end() const ;
@@ -92,8 +95,6 @@ public :
 		ImplVec::iterator	m_it ;
 	} ;
 	
-	
-
 private :
 	explicit Node( Impl *impl ) ;
 

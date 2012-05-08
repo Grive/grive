@@ -38,6 +38,7 @@ public :
 	
 	std::string Finish() const ;
 	
+	void Clear() ;
 	std::size_t OnData( void *data, std::size_t count ) ;
 	
 	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;

@@ -365,13 +365,36 @@ std::ostream& operator<<( std::ostream& os, const Node& node )
 	}
 	else if ( node.GetType() == Node::attr )
 	{
-		os << node.Name() << "=\"" << node.Value() << "\"" ;
+		os << node.Name() << "=\"" ;
+		Node::PrintString( os, node.Value() ) ;
+		os << "\"" ;
 	}
 	else
 	{
-		os << node.Value() ;
+		Node::PrintString( os, node.Value() ) ;
 	}
 	
+	return os ;
+}
+
+std::ostream& Node::PrintString( std::ostream& os, const std::string& s )
+{
+	for ( std::string::const_iterator i = s.begin() ; i != s.end() ; ++i )
+		Node::PrintChar( os, *i ) ;
+	return os ;
+}
+
+std::ostream& Node::PrintChar( std::ostream& os, char c )
+{
+	switch ( c )
+	{
+		case '\"': 	os << "&quot;" ; break ;
+		case '\'':	os << "&apos;" ; break ;
+		case '&':	os << "&amp;" ; break ;
+		case '<':	os << "&lt;" ; break ;
+		case '>':	os << "&gt;" ; break ;
+		default :	os << c ; break ;
+	}
 	return os ;
 }
 

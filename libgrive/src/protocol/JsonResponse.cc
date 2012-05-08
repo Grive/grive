@@ -27,6 +27,11 @@ JsonResponse::JsonResponse()
 {
 }
 
+void JsonResponse::Clear()
+{
+	m_resp.Clear() ;
+}
+
 std::size_t JsonResponse::OnData( void *data, std::size_t count )
 {
 	return m_resp.OnData( data, count ) ;
