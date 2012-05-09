@@ -41,7 +41,8 @@ public :
 	Agent() ;
 	~Agent() ;
 	
-	// TODO: implement put from file, or some callback interface to pull data
+	void SetLogFile( const std::string& prefix ) ;
+	
 	long Put(
 		const std::string&		url,
 		const std::string&		data,
@@ -75,6 +76,7 @@ private :
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
 	
 	void SetHeader( const http::Headers& hdr ) ;
+	std::string LogFilename() const ;
 		
 private :
 	struct Impl ;

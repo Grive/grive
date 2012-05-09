@@ -71,7 +71,7 @@ Drive::Drive( OAuth2& auth ) :
 		{
 			if ( !Collection::IsCollection( *i ) )
 			{
-				UpdateFile( *i ) ;
+				UpdateFile( *i, &http ) ;
 			}
 		}
 		
@@ -171,7 +171,7 @@ abc << xml.Response()["feed"] ;
 	m_root.CreateSubDir( Path() ) ;
 }
 
-void Drive::UpdateFile( const Json& entry )
+void Drive::UpdateFile( const Json& entry, http::Agent *http )
 {
 	// only handle uploaded files
 	if ( entry.Has( "docs$suggestedFilename" ) )
@@ -204,7 +204,7 @@ void Drive::UpdateFile( const Json& entry )
 			if ( !ifile || remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
-				file.Download( path, m_http_hdr ) ;
+				file.Download( http, path, m_http_hdr ) ;
 			}
 			else
 			{
@@ -212,7 +212,7 @@ std::cout << "local " << path << " is newer" << std::endl ;
 				// re-reading the file
 				ifile.seekg(0) ;
 				
-				if ( !file.Upload( ifile.rdbuf(), m_http_hdr ) )
+				if ( !file.Upload( http, ifile.rdbuf(), m_http_hdr ) )
 std::cout << path << " is read only" << std::endl ;
 			}
 		}

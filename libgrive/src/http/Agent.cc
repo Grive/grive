@@ -71,6 +71,8 @@ struct Agent::Impl
 	CURL			*curl ;
 	std::string		location ;
 	char error[CURL_ERROR_SIZE] ;
+	
+	std::string		log_prefix ;
 } ;
 
 Agent::Agent() :
@@ -88,6 +90,15 @@ Agent::Agent() :
 Agent::~Agent()
 {
 	::curl_easy_cleanup( m_pimpl->curl );
+}
+
+void Agent::SetLogFile( const std::string& prefix )
+{
+	m_pimpl->log_prefix = prefix ;
+}
+
+std::string Agent::LogFilename() const
+{
 }
 
 std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis )

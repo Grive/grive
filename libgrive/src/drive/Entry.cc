@@ -133,16 +133,15 @@ std::string Entry::ParentHref() const
 	return m_parent_href ;
 }
 
-void Entry::Download( const Path& file, const http::Headers& auth ) const
+void Entry::Download( gr::http::Agent* http, const Path& file, const http::Headers& auth ) const
 {
 	gr::Download dl( file.Str(), Download::NoChecksum() ) ;
-	http::Agent http ;
-	long r = http.Get( m_content_src, &dl, auth ) ;
+	long r = http->Get( m_content_src, &dl, auth ) ;
 	if ( r <= 400 )
 		os::SetFileTime( file, m_server_modified ) ;
 }
 
-bool Entry::Upload( std::streambuf *file, const http::Headers& auth )
+bool Entry::Upload( gr::http::Agent* http, std::streambuf *file, const http::Headers& auth )
 {
 	// upload link missing means that file is read only
 	if ( m_upload_link.empty() )
@@ -171,10 +170,9 @@ bool Entry::Upload( std::streambuf *file, const http::Headers& auth )
 	hdr.push_back( "Expect:" ) ;
 	
 	http::StringResponse str ;
-	http::Agent http ;
-	http.Put( m_upload_link, meta, &str, hdr ) ;
+	http->Put( m_upload_link, meta, &str, hdr ) ;
 	
-	std::string uplink = http.RedirLocation() ;
+	std::string uplink = http->RedirLocation() ;
 	
 	// parse the header and find "Location"
 	http::Headers uphdr ;
@@ -182,7 +180,7 @@ bool Entry::Upload( std::streambuf *file, const http::Headers& auth )
 	uphdr.push_back( "Accept:" ) ;
 	
 	http::XmlResponse xml ;
-	http.Put( uplink, data, &xml, uphdr ) ;
+	http->Put( uplink, data, &xml, uphdr ) ;
 
 std::cout << xml.Response() << std::endl ;
 

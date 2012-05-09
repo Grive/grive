@@ -45,7 +45,7 @@ public :
 	~Drive( ) ;
 
 private :
-	void UpdateFile( const Json& entry ) ;
+	void UpdateFile( const Json& entry, http::Agent *http ) ;
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	
