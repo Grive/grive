@@ -23,6 +23,7 @@
 #include "Entry.hh"
 
 #include "http/Agent.hh"
+#include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/JsonResponse.hh"
@@ -114,10 +115,12 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-	http->Get( root_url + "/-/folder?showroot=true&max-results=10", &xml, m_http_hdr ) ;
+	http::ResponseLog log( "dir-", &xml ) ;
+	
+	http->Get( root_url + "/-/folder?showroot=true&max-results=10", &log, m_http_hdr ) ;
 
-	std::ofstream abc( "abc.xml" ) ;
-abc << xml.Response()["feed"] ;
+std::ofstream abc( "abc.xml" ) ;
+abc << xml.Response()["feed"]["entry"] ;
 
 	http::JsonResponse jrsp ;
 	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;

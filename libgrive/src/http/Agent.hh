@@ -76,7 +76,9 @@ private :
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
 	
 	void SetHeader( const http::Headers& hdr ) ;
-	std::string LogFilename() const ;
+	long ExecCurl(
+		Receivable				*dest,
+		const http::Headers&	hdr) ;
 		
 private :
 	struct Impl ;

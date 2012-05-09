@@ -97,10 +97,6 @@ void Agent::SetLogFile( const std::string& prefix )
 	m_pimpl->log_prefix = prefix ;
 }
 
-std::string Agent::LogFilename() const
-{
-}
-
 std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis )
 {
 	char *str = reinterpret_cast<char*>(ptr) ;
@@ -127,24 +123,12 @@ std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *re
 	return recv->OnData( ptr, size * nmemb ) ;
 }
 
-long Agent::Put(
-	const std::string&		url,
-	const std::string&		data,
+long Agent::ExecCurl(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
 	CURL *curl = m_pimpl->curl ;
-
-	std::string put_data = data ;
-
-	// set common options
-	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
-	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
+	assert( curl != 0 ) ;
 
 	SetHeader( hdr ) ;
 	
@@ -167,6 +151,28 @@ long Agent::Put(
 	return http_code ;
 }
 
+long Agent::Put(
+	const std::string&		url,
+	const std::string&		data,
+	Receivable				*dest,
+	const http::Headers&	hdr )
+{
+	CURL *curl = m_pimpl->curl ;
+
+	std::string put_data = data ;
+
+	// set common options
+	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
+	
+	return ExecCurl( dest, hdr ) ;
+}
+
 long Agent::Get(
 	const std::string& 		url,
 	Receivable				*dest,
@@ -180,29 +186,7 @@ long Agent::Get(
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 	::curl_easy_setopt(curl, CURLOPT_HTTPGET, 		1L);
 
-	SetHeader( hdr ) ;
-/*	
-	static int s_count = 0 ;
-	std::ostringstream logss ;
-	logss << "get" << s_count++ << ".txt" ;
-	g_log.open( logss.str().c_str() ) ;
-	*/
-	dest->Clear() ;
-	CURLcode curl_code = ::curl_easy_perform(curl);
-// 	g_log.close() ;
-	
-	long http_code = 0;
-	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-	if ( curl_code != CURLE_OK )
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	else if (http_code >= 400 )
-	{
-		std::cout << "http error " << http_code << std::endl ;
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	}
-
-	return http_code ;
+	return ExecCurl( dest, hdr ) ;
 }
 
 long Agent::Post(
@@ -222,23 +206,7 @@ long Agent::Post(
 	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
-	SetHeader( hdr ) ;
-	
-	dest->Clear() ;
-	CURLcode curl_code = ::curl_easy_perform(curl);
-
-	long http_code = 0;
-	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-	if ( curl_code != CURLE_OK )
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	else if (http_code >= 400 )
-	{
-		std::cout << "http error " << http_code << std::endl ;
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	}
-
-	return http_code ;
+	return ExecCurl( dest, hdr ) ;
 }
 
 long Agent::Custom(
@@ -254,23 +222,7 @@ long Agent::Custom(
 	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
-	SetHeader( hdr ) ;
-	
-	dest->Clear() ;
-	CURLcode curl_code = ::curl_easy_perform(curl);
-
-	long http_code = 0;
-	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-	if ( curl_code != CURLE_OK )
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	else if (http_code >= 400 )
-	{
-		std::cout << "http error " << http_code << std::endl ;
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	}
-
-	return http_code ;
+	return ExecCurl( dest, hdr ) ;
 }
 
 void Agent::SetHeader( const http::Headers& hdr )

@@ -59,6 +59,20 @@ DateTime::DateTime( std::time_t sec, unsigned long nsec ) :
 {
 }
 
+DateTime DateTime::Now()
+{
+	return DateTime( std::time(0) ) ;
+}
+
+std::string DateTime::Format( const std::string& format ) const
+{
+	struct tm tp = Tm() ;
+
+	char tmp[1024] ;
+	std::size_t count = ::strftime( tmp, sizeof(tmp), format.c_str(), &tp ) ;
+	return count > 0 ? std::string( tmp, count ) : "" ;	
+}
+
 struct tm DateTime::Tm() const
 {
 	struct tm tp ;

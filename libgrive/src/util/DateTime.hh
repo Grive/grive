@@ -34,9 +34,12 @@ public :
 	explicit DateTime( const std::string& iso ) ;
 	explicit DateTime( std::time_t sec, unsigned long nsec = 0 ) ;
 
+	static DateTime Now() ;
+	
 	std::time_t Sec( ) const ;
 	unsigned long NanoSec( ) const ;
-
+	std::string Format( const std::string& format ) const ;
+	
 	tm Tm() const ;
 	timeval Tv() const ;
 	
