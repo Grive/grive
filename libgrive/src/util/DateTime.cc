@@ -129,4 +129,10 @@ bool DateTime::operator<=( const DateTime& dt ) const
 	return !( *this > dt ) ;
 }
 
+void DateTime::Swap( DateTime& dt )
+{
+	std::swap( m_sec, dt.m_sec ) ;
+	std::swap( m_nsec, dt.m_nsec ) ;
+}
+
 } // end of namespace

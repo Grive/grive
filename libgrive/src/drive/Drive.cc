@@ -22,7 +22,7 @@
 #include "CommonUri.hh"
 #include "Entry.hh"
 
-#include "http/HTTP.hh"
+#include "http/Agent.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/JsonResponse.hh"
@@ -71,7 +71,7 @@ Drive::Drive( OAuth2& auth ) :
 		{
 			if ( !Collection::IsCollection( *i ) )
 			{
-				UpdateFile( *i ) ;
+				UpdateFile( *i, &http ) ;
 			}
 		}
 		
@@ -125,7 +125,6 @@ abc << xml.Response()["feed"] ;
 	
 	assert( m_coll.empty() ) ;
 	
-	std::map<std::string, std::string> parent_href ;
 	while ( true )
 	{
 		Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
@@ -134,15 +133,8 @@ abc << xml.Response()["feed"] ;
 		for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
 			if ( Collection::IsCollection( *i ) )
-			{
 				m_coll.push_back( Collection( *i ) ) ;
-				parent_href.insert(
-					std::make_pair(
-						m_coll.back().Href(),
-						Collection::ParentHref( *i ) ) ) ;
-			}
 		}
-		assert( m_coll.size() == parent_href.size() ) ;
 		
 		Json next ;
 		if ( !resp["feed"]["link"].FindInArray( "rel", "next", next ) )
@@ -156,14 +148,11 @@ abc << xml.Response()["feed"] ;
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
-		assert( parent_href.find( i->Href() ) != parent_href.end() ) ;
-		std::string parent = parent_href[i->Href()] ;
-		
-		if ( parent.empty() )
+		if ( i->ParentHref().empty() )
 			m_root.AddChild( &*i ) ;
 		else
 		{
-			FolderListIterator pit = FindFolder( parent ) ;
+			FolderListIterator pit = FindFolder( i->ParentHref() ) ;
 			if ( pit != m_coll.end() )
 			{
 				// it shouldn't happen, just in case
@@ -182,7 +171,7 @@ abc << xml.Response()["feed"] ;
 	m_root.CreateSubDir( Path() ) ;
 }
 
-void Drive::UpdateFile( const Json& entry )
+void Drive::UpdateFile( const Json& entry, http::Agent *http )
 {
 	// only handle uploaded files
 	if ( entry.Has( "docs$suggestedFilename" ) )
@@ -193,18 +182,18 @@ void Drive::UpdateFile( const Json& entry )
 		Path path = Path() / file.Filename() ;
 
 		// determine which folder the file belongs to
-		if ( !file.Parent().empty() )
+		if ( !file.ParentHref().empty() )
 		{
-			FolderListIterator pit = FindFolder( file.Parent() ) ;
+			FolderListIterator pit = FindFolder( file.ParentHref() ) ;
 			if ( pit != m_coll.end() )
 				path = pit->Dir() / file.Filename() ;
 		}
-
+		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
 		if ( ifile && file.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
 			changed = false ;
-		
+
 		// if the checksum is different, file is changed and we need to update
 		if ( changed )
 		{
@@ -215,7 +204,7 @@ void Drive::UpdateFile( const Json& entry )
 			if ( !ifile || remote > local )
 			{
 std::cout << "downloading " << path << std::endl ;
-				file.Download( path, m_http_hdr ) ;
+				file.Download( http, path, m_http_hdr ) ;
 			}
 			else
 			{
@@ -223,7 +212,7 @@ std::cout << "local " << path << " is newer" << std::endl ;
 				// re-reading the file
 				ifile.seekg(0) ;
 				
-				if ( !file.Upload( ifile.rdbuf(), m_http_hdr ) )
+				if ( !file.Upload( http, ifile.rdbuf(), m_http_hdr ) )
 std::cout << path << " is read only" << std::endl ;
 			}
 		}
