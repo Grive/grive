@@ -17,7 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "File.hh"
+#include "Entry.hh"
 
 #include "CommonUri.hh"
 
@@ -37,16 +37,16 @@
 
 namespace gr {
 
-File::File( const Path& file )
+Entry::Entry( const Path& file )
 {
 }
 
-File::File( const Json& entry )
+Entry::Entry( const Json& entry )
 {
 	Update( entry ) ;
 }
 
-void File::Update( const Json& entry )
+void Entry::Update( const Json& entry )
 {
 	m_title				= entry["title"]["$t"].Str() ;
 	
@@ -80,49 +80,49 @@ void File::Update( const Json& entry )
 		tolower ) ;
 }
 
-std::string File::Parent( const Json& entry )
+std::string Entry::Parent( const Json& entry )
 {
 	Json node ;
 	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
 		 node["href"].Str() : std::string() ;
 }
 
-std::string File::Title() const
+std::string Entry::Title() const
 {
 	return m_title ;
 }
 
-std::string File::Filename() const
+std::string Entry::Filename() const
 {
 	return m_filename ;
 }
 
-std::string File::Kind() const
+std::string Entry::Kind() const
 {
 	return m_kind ;
 }
 
-std::string File::ServerMD5() const
+std::string Entry::ServerMD5() const
 {
 	return m_server_md5 ;
 }
 
-DateTime File::ServerModified() const
+DateTime Entry::ServerModified() const
 {
 	return m_server_modified ;
 }
 
-std::string File::Href() const
+std::string Entry::Href() const
 {
 	return m_href ;
 }
 
-std::string File::Parent() const
+std::string Entry::Parent() const
 {
 	return m_parent ;
 }
 
-void File::Download( const Path& file, const http::Headers& auth ) const
+void Entry::Download( const Path& file, const http::Headers& auth ) const
 {
 	gr::Download dl( file.Str(), Download::NoChecksum() ) ;
 	http::Agent http ;
@@ -131,7 +131,7 @@ void File::Download( const Path& file, const http::Headers& auth ) const
 		os::SetFileTime( file, m_server_modified ) ;
 }
 
-bool File::Upload( std::streambuf *file, const http::Headers& auth )
+bool Entry::Upload( std::streambuf *file, const http::Headers& auth )
 {
 	// upload link missing means that file is read only
 	if ( m_upload_link.empty() )
@@ -178,17 +178,17 @@ std::cout << xml.Response() << std::endl ;
 	return true ;
 }
 
-std::string File::ResourceID() const
+std::string Entry::ResourceID() const
 {
 	return m_resource_id ;
 }
 
-std::string File::ETag() const
+std::string Entry::ETag() const
 {
 	return m_etag ;
 }
 
-void File::Delete( http::Agent *http, const http::Headers& auth )
+void Entry::Delete( http::Agent *http, const http::Headers& auth )
 {
 	http::Headers hdr( auth ) ;
 	hdr.push_back( "If-Match: " + m_etag ) ;

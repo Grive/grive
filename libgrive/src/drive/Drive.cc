@@ -20,7 +20,7 @@
 #include "Drive.hh"
 
 #include "CommonUri.hh"
-#include "File.hh"
+#include "Entry.hh"
 
 #include "http/HTTP.hh"
 #include "http/XmlResponse.hh"
@@ -187,7 +187,7 @@ void Drive::UpdateFile( const Json& entry )
 	// only handle uploaded files
 	if ( entry.Has( "docs$suggestedFilename" ) )
 	{
-		File file( entry ) ;
+		Entry file( entry ) ;
 	
 		bool changed = true ;
 		Path path = Path() / file.Filename() ;
@@ -199,7 +199,6 @@ void Drive::UpdateFile( const Json& entry )
 			if ( pit != m_coll.end() )
 				path = pit->Dir() / file.Filename() ;
 		}
-// std::cout << "2:" << path << std::endl;
 
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;

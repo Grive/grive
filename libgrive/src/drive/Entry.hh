@@ -32,11 +32,11 @@ class Json ;
 class OAuth2 ;
 class Path ;
 
-class File
+class Entry
 {
 public :
-	explicit File( const Path& file ) ;
-	explicit File( const Json& entry ) ;
+	explicit Entry( const Path& file ) ;
+	explicit Entry( const Json& entry ) ;
 
 	std::string Title() const ;
 	std::string Filename() const ;
