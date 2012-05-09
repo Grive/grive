@@ -22,7 +22,7 @@
 #include "JsonResponse.hh"
 #include "Json.hh"
 
-#include "http/HTTP.hh"
+#include "http/Agent.hh"
 
 // for debugging
 #include <iostream>

@@ -21,12 +21,17 @@
 
 #include <string>
 
-#include "http/HTTP.hh"
+#include "http/Agent.hh"
 #include "util/DateTime.hh"
 
 #include <iosfwd>
 
 namespace gr {
+
+namespace xml
+{
+	class Node ;
+}
 
 class Json ;
 class OAuth2 ;
@@ -37,6 +42,7 @@ class Entry
 public :
 	explicit Entry( const Path& file ) ;
 	explicit Entry( const Json& entry ) ;
+	explicit Entry( const xml::Node& n ) ;
 	Entry( const std::string& title, const std::string& href ) ;
 
 	std::string Title() const ;

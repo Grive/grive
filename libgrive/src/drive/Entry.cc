@@ -46,6 +46,10 @@ Entry::Entry( const Json& entry )
 	Update( entry ) ;
 }
 
+Entry::Entry( const xml::Node& n )
+{
+}
+
 Entry::Entry( const std::string& title, const std::string& href ) :
 	m_title( title ),
 	m_self_href( href )

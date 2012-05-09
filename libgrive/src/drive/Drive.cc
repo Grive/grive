@@ -22,7 +22,7 @@
 #include "CommonUri.hh"
 #include "Entry.hh"
 
-#include "http/HTTP.hh"
+#include "http/Agent.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/JsonResponse.hh"
@@ -188,12 +188,12 @@ void Drive::UpdateFile( const Json& entry )
 			if ( pit != m_coll.end() )
 				path = pit->Dir() / file.Filename() ;
 		}
-
+		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
 		if ( ifile && file.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
 			changed = false ;
-		
+
 		// if the checksum is different, file is changed and we need to update
 		if ( changed )
 		{
