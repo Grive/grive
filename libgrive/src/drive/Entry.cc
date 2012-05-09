@@ -46,6 +46,12 @@ Entry::Entry( const Json& entry )
 	Update( entry ) ;
 }
 
+Entry::Entry( const std::string& title, const std::string& href ) :
+	m_title( title ),
+	m_self_href( href )
+{
+}
+
 void Entry::Update( const Json& entry )
 {
 	m_title				= entry["title"]["$t"].Str() ;
@@ -53,8 +59,9 @@ void Entry::Update( const Json& entry )
 	m_filename			= entry.Has("docs$suggestedFilename") ?
 		entry["docs$suggestedFilename"]["$t"].Str() : "" ;
 	
-	m_href				= entry["content"]["src"].Str() ;
-	m_parent			= Parent( entry ) ;
+	m_content_src		= entry["content"]["src"].Str() ;
+	m_self_href			= entry["link"].FindInArray( "rel", "self" )["href"].Str() ;
+	m_parent_href		= Parent( entry ) ;
 	m_server_modified	= DateTime( entry["updated"]["$t"].Str() ) ;
 	m_etag				= entry["gd$etag"].Str() ;
 	
@@ -112,21 +119,21 @@ DateTime Entry::ServerModified() const
 	return m_server_modified ;
 }
 
-std::string Entry::Href() const
+std::string Entry::SelfHref() const
 {
-	return m_href ;
+	return m_self_href ;
 }
 
-std::string Entry::Parent() const
+std::string Entry::ParentHref() const
 {
-	return m_parent ;
+	return m_parent_href ;
 }
 
 void Entry::Download( const Path& file, const http::Headers& auth ) const
 {
 	gr::Download dl( file.Str(), Download::NoChecksum() ) ;
 	http::Agent http ;
-	long r = http.Get( m_href, &dl, auth ) ;
+	long r = http.Get( m_content_src, &dl, auth ) ;
 	if ( r <= 400 )
 		os::SetFileTime( file, m_server_modified ) ;
 }
@@ -197,6 +204,23 @@ std::cout << root_url + "/" + m_resource_id + "?delete=true" << std::endl ;
 	
 	http::StringResponse str ;
 	http->Custom( "DELETE", root_url + "/" + m_resource_id + "?delete=true", &str, hdr ) ;
+}
+
+void Entry::Swap( Entry& e )
+{
+	m_title.swap( e.m_title ) ;
+	m_filename.swap( e.m_filename ) ;
+	m_kind.swap( e.m_kind ) ;
+	m_server_md5.swap( e.m_server_md5 ) ;
+	m_etag.swap( e.m_etag ) ;
+	m_resource_id.swap( e.m_resource_id ) ;
+
+	m_self_href.swap( e.m_self_href ) ;
+	m_parent_href.swap( e.m_parent_href ) ;
+	m_content_src.swap( e.m_content_src ) ;	
+	m_upload_link.swap( e.m_upload_link ) ;
+
+	m_server_modified.Swap( e.m_server_modified ) ;
 }
 
 } // end of namespace

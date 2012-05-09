@@ -37,6 +37,7 @@ class Entry
 public :
 	explicit Entry( const Path& file ) ;
 	explicit Entry( const Json& entry ) ;
+	Entry( const std::string& title, const std::string& href ) ;
 
 	std::string Title() const ;
 	std::string Filename() const ;
@@ -47,12 +48,14 @@ public :
 	std::string ResourceID() const ;
 	std::string ETag() const ;
 	
-	std::string Href() const ;
-	std::string Parent() const ;
+	std::string SelfHref() const ;
+	std::string ParentHref() const ;
 	
 	void Download( const Path& file, const http::Headers& auth ) const ;
 	bool Upload( std::streambuf *file, const http::Headers& auth ) ;
 	void Delete( gr::http::Agent* http, const gr::http::Headers& auth ) ;
+	
+	void Swap( Entry& e ) ;
 	
 private :
 	void Update( const Json& entry ) ;
@@ -66,8 +69,9 @@ private :
 	std::string		m_etag ;
 	std::string		m_resource_id ;
 
-	std::string		m_href ;
-	std::string		m_parent ;
+	std::string		m_self_href ;
+	std::string		m_content_src ;
+	std::string		m_parent_href ;
 	std::string		m_upload_link ;
 
 	DateTime		m_server_modified ;

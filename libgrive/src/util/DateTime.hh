@@ -47,6 +47,8 @@ public :
 	bool operator<( const DateTime& dt ) const ;
 	bool operator<=( const DateTime& dt ) const ;
 	
+	void Swap( DateTime& dt ) ;
+	
 private :
 	std::time_t		m_sec ;
 	unsigned long	m_nsec ;

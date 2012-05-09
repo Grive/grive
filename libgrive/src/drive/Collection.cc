@@ -31,8 +31,7 @@
 namespace gr {
 
 Collection::Collection( const Json& entry ) :
-	m_title		( entry["title"]["$t"].As<std::string>() ),
-	m_href		( entry["link"].FindInArray( "rel", "self" )["href"].As<std::string>() ),
+	m_entry		( entry ),
 	m_parent	( 0 )
 {
 }
@@ -40,8 +39,7 @@ Collection::Collection( const Json& entry ) :
 Collection::Collection(
 	const std::string& title,
 	const std::string& href ) :
-	m_title	( title ),
-	m_href	( href ),
+	m_entry	( title, href ),
 	m_parent( 0 )
 {
 }
@@ -53,14 +51,14 @@ std::string Collection::ParentHref( const Json& entry )
 		 node["href"].As<std::string>() : std::string() ;
 }
 
-const std::string& Collection::Href() const
+std::string Collection::Href() const
 {
-	return m_href ;
+	return m_entry.SelfHref() ;
 }
 
-const std::string& Collection::Title() const
+std::string Collection::Title() const
 {
-	return m_title ;
+	return m_entry.Title() ;
 }
 
 const Collection* Collection::Parent() const
@@ -71,6 +69,11 @@ const Collection* Collection::Parent() const
 Collection* Collection::Parent()
 {
 	return m_parent ;
+}
+
+std::string Collection::ParentHref() const
+{
+	return m_entry.ParentHref() ;
 }
 
 void Collection::AddChild( Collection *child )
@@ -98,8 +101,7 @@ bool Collection::IsCollection( const Json& entry )
 
 void Collection::Swap( Collection& coll )
 {
-	m_title.swap( coll.m_title ) ;
-	m_href.swap( coll.m_href ) ;
+	m_entry.Swap( coll.m_entry ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
 	m_leaves.swap( coll.m_leaves ) ;
@@ -107,7 +109,7 @@ void Collection::Swap( Collection& coll )
 
 void Collection::CreateSubDir( const Path& prefix )
 {
-	Path dir = prefix / m_title ;
+	Path dir = prefix / m_entry.Title() ;
 	os::MakeDir( dir ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
@@ -126,7 +128,7 @@ void Collection::ForEachFile(
 Path Collection::Dir() const
 {
 	assert( m_parent != this ) ;
-	return m_parent != 0 ? (m_parent->Dir() / m_title) : Path() ;
+	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : Path() ;
 }
 
 } // end of namespace

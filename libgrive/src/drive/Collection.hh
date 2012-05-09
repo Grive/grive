@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "Entry.hh"
 #include "util/Function.hh"
 
 #include <string>
@@ -40,10 +41,11 @@ public :
 	static bool IsCollection( const Json& entry ) ;
 	static std::string ParentHref( const Json& entry ) ;
 	
-	const std::string& Title() const ;
-	const std::string& Href() const ;
+	std::string Title() const ;
+	std::string Href() const ;
 	const Collection* Parent() const ;
 	Collection* Parent() ;
+	std::string ParentHref() const ;
 	Path Dir() const ;
 
 	void AddChild( Collection *child ) ;
@@ -58,8 +60,7 @@ public :
 		const std::string& 					prefix = "." ) ;
 	
 private :
-	std::string					m_title ;
-	std::string					m_href ;
+	Entry						m_entry ;
 	
 	// not owned
 	Collection					*m_parent ;
