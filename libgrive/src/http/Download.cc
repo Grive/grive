@@ -58,6 +58,11 @@ Download::~Download( )
 		::EVP_MD_CTX_destroy( m_mdctx ) ;
 }
 
+void Download::Clear()
+{
+	// no need to do anything
+}
+
 std::string Download::Finish() const
 {
 	// Unregister the signal

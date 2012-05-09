@@ -77,7 +77,7 @@ Drive::Drive( OAuth2& auth ) :
 		
 		Json next ;
 		has_next = resp["feed"]["link"].FindInArray( "rel", "next", next ) ;
-		
+
 		if ( has_next )
 		{
 			http.Get( next["href"].Str(), &str, m_http_hdr ) ;
@@ -113,6 +113,12 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 
 void Drive::ConstructDirTree( http::Agent *http )
 {
+	http::XmlResponse xml ;
+	http->Get( root_url + "/-/folder?showroot=true&max-results=10", &xml, m_http_hdr ) ;
+
+	std::ofstream abc( "abc.xml" ) ;
+abc << xml.Response()["feed"] ;
+
 	http::JsonResponse jrsp ;
 	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;
 	Json resp = jrsp.Response() ;
@@ -145,7 +151,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 		http->Get( next["href"].Str(), &jrsp, m_http_hdr ) ;
 		resp = jrsp.Response() ;
 	}
-	
+
 	// second, build up linkage between parent and child 
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
@@ -170,7 +176,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 			}
 		}
 	}
-	
+
 	// lastly, iterating from the root, create the directories in the local file system
 	assert( m_root.Parent() == 0 ) ;
 	m_root.CreateSubDir( Path() ) ;
@@ -193,6 +199,7 @@ void Drive::UpdateFile( const Json& entry )
 			if ( pit != m_coll.end() )
 				path = pit->Dir() / file.Filename() ;
 		}
+// std::cout << "2:" << path << std::endl;
 
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;

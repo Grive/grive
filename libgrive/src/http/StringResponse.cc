@@ -25,6 +25,11 @@ StringResponse::StringResponse()
 {
 }
 
+void StringResponse::Clear()
+{
+	m_resp.clear() ;
+}
+
 std::size_t StringResponse::OnData( void *data, std::size_t count )
 {
 	m_resp.append( reinterpret_cast<char*>(data), count ) ;

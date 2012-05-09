@@ -31,6 +31,7 @@ public :
 	StringResponse() ;
 
 	std::size_t OnData( void *data, std::size_t count ) ;
+	void Clear() ;
 
 	const std::string& Response() const ;
 	

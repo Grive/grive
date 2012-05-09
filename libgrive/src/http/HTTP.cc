@@ -106,8 +106,12 @@ std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *
 	return size*nmemb ;
 }
 
+// std::ofstream g_log ;
+
 std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
 {
+// 	g_log.rdbuf()->sputn( (char*)ptr, size*nmemb ) ;
+
 	assert( recv != 0 ) ;
 	return recv->OnData( ptr, size * nmemb ) ;
 }
@@ -133,6 +137,7 @@ long Agent::Put(
 
 	SetHeader( hdr ) ;
 	
+	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
 	long http_code = 0;
@@ -165,9 +170,16 @@ long Agent::Get(
 	::curl_easy_setopt(curl, CURLOPT_HTTPGET, 		1L);
 
 	SetHeader( hdr ) ;
-	
+/*	
+	static int s_count = 0 ;
+	std::ostringstream logss ;
+	logss << "get" << s_count++ << ".txt" ;
+	g_log.open( logss.str().c_str() ) ;
+	*/
+	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
-
+// 	g_log.close() ;
+	
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
@@ -201,6 +213,7 @@ long Agent::Post(
 
 	SetHeader( hdr ) ;
 	
+	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
 	long http_code = 0;
@@ -232,6 +245,7 @@ long Agent::Custom(
 
 	SetHeader( hdr ) ;
 	
+	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
 	long http_code = 0;
