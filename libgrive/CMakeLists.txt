@@ -15,6 +15,7 @@ ENDIF ( CPPUNIT_FOUND )
 
 include_directories(
 	${libgrive_SOURCE_DIR}/src
+	${libgrive_SOURCE_DIR}/test
 	${OPT_INCS}
 )
 
