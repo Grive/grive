@@ -19,6 +19,7 @@
 
 #include <cppunit/ui/text/TestRunner.h>
 
+#include "drive/EntryTest.hh"
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
 #include "util/PathTest.hh"
@@ -30,6 +31,7 @@ int main( int argc, char **argv )
 	using namespace grut ;
 
 	CppUnit::TextUi::TestRunner runner;
+	runner.addTest( EntryTest::suite( ) ) ;
 	runner.addTest( DateTimeTest::suite( ) ) ;
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( PathTest::suite( ) ) ;

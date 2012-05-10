@@ -133,6 +133,11 @@ public :
 		return m_children.end() ;
 	}
 	
+	std::size_t Size() const
+	{
+		return m_children.size() ;
+	}
+	
 	std::pair<iterator, iterator> Attr()
 	{
 		return std::make_pair( m_attr.begin(), m_attr.end() ) ;
@@ -195,7 +200,10 @@ Node::iterator::iterator( ImplVec::iterator i ) : iterator_adaptor(i)
 
 Node::iterator::reference Node::iterator::dereference() const
 {
-	return Node( (*base_reference())->AddRef() ) ;
+	Impl *p = *base_reference() ;
+	assert( p != 0 ) ;
+	
+	return Node( p->AddRef() ) ;
 }
 
 Node::Node() : m_ptr( new Impl )
@@ -380,16 +388,25 @@ std::ostream& Node::PrintChar( std::ostream& os, char c )
 
 Node::iterator Node::begin() const
 {
+	assert( m_ptr != 0 ) ;
 	return iterator( m_ptr->Begin() ) ;
 }
 
 Node::iterator Node::end() const
 {
+	assert( m_ptr != 0 ) ;
 	return iterator( m_ptr->End() ) ;
+}
+
+std::size_t Node::size() const
+{
+	assert( m_ptr != 0 ) ;
+	return m_ptr->Size() ;
 }
 
 Node::Range Node::Attr() const
 {
+	assert( m_ptr != 0 ) ;
 	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Attr() ;
 
 	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
@@ -397,6 +414,7 @@ Node::Range Node::Attr() const
 
 Node::Range Node::Children( const std::string& name ) const
 {
+	assert( m_ptr != 0 ) ;
 	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Children( name ) ;
 
 	return std::make_pair( iterator(is.first), iterator(is.second) ) ;

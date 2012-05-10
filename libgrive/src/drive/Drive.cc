@@ -115,12 +115,9 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-	http::ResponseLog log( "dir-", &xml ) ;
+	http::ResponseLog log( "dir-", ".xml", &xml ) ;
 	
 	http->Get( root_url + "/-/folder?showroot=true&max-results=10", &log, m_http_hdr ) ;
-
-std::ofstream abc( "abc.xml" ) ;
-abc << xml.Response()["feed"]["entry"] ;
 
 	http::JsonResponse jrsp ;
 	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;

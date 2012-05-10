@@ -57,7 +57,10 @@ void NodeTest::TestTree( )
 
 void NodeTest::TestParseFile( )
 {
-	Node n = TreeBuilder::Parse( "<entry><link href=\"q\"><href>abc</href></link><link></link></entry>" ) ;
+	Node n ;
+	n.AddNode( TreeBuilder::Parse( "<entry><link href=\"q\"><href>abc</href></link><link></link></entry>" ) ) ;
+	
+	
 	CPPUNIT_ASSERT_EQUAL( std::string("entry"), n["entry"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("link"), n["entry"]["link"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("q"), n["entry"]["link"]["@href"].Value() ) ;

@@ -80,8 +80,13 @@ Node TreeBuilder::Parse( const std::string& xml )
 
 Node TreeBuilder::Result() const
 {
+	// the node on the stack should be the dummy node with only one child
 	assert( m_impl->stack.size() == 1 ) ;
-	return m_impl->stack.front() ;
+	
+	if ( m_impl->stack.front().size() != 1 )
+		throw std::runtime_error( "invalid node" ) ;
+		
+	return *m_impl->stack.front().begin() ;
 }
 
 void TreeBuilder::StartElement( void *pvthis, const char *name, const char **attr )

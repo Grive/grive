@@ -17,38 +17,25 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ResponseLog.hh"
+#pragma once
 
-#include "util/DateTime.hh"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <cassert>
+namespace grut {
 
-namespace gr { namespace http {
-
-ResponseLog::ResponseLog(
-	const std::string&	prefix,
-	const std::string&	suffix,
-	Receivable			*next ) :
-	m_log( Filename(prefix, suffix).c_str() ),
-	m_next( next )
+class EntryTest : public CppUnit::TestFixture
 {
-}
+public :
+	EntryTest( ) ;
 
-std::size_t ResponseLog::OnData( void *data, std::size_t count )
-{
-	m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
-	return m_next->OnData( data, count ) ;
-}
+	// declare suit function
+	CPPUNIT_TEST_SUITE( EntryTest ) ;
+		CPPUNIT_TEST( TestXml ) ;
+	CPPUNIT_TEST_SUITE_END();
 
-void ResponseLog::Clear()
-{
-	assert( m_next != 0 ) ;
-	m_next->Clear() ;
-}
+private :
+	void TestXml( ) ;
+} ;
 
-std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
-{
-	return prefix + DateTime::Now().Format( "%H%M%S" ) + suffix ;
-}
-
-}} // end of namespace
+} // end of namespace

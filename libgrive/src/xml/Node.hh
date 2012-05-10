@@ -70,6 +70,7 @@ public :
 
 	iterator begin() const ;
 	iterator end() const ;
+	std::size_t size() const ;
 	
 	Range Attr() const ;
 	Range Children( const std::string& name ) const ;

@@ -17,38 +17,34 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ResponseLog.hh"
+#include "EntryTest.hh"
 
-#include "util/DateTime.hh"
+#include "Assert.hh"
 
-#include <cassert>
+#include "drive/Entry.hh"
+#include "xml/Node.hh"
+#include "xml/TreeBuilder.hh"
 
-namespace gr { namespace http {
+#include <iostream>
 
-ResponseLog::ResponseLog(
-	const std::string&	prefix,
-	const std::string&	suffix,
-	Receivable			*next ) :
-	m_log( Filename(prefix, suffix).c_str() ),
-	m_next( next )
+namespace grut {
+
+using namespace gr ;
+
+EntryTest::EntryTest( )
 {
 }
 
-std::size_t ResponseLog::OnData( void *data, std::size_t count )
+void EntryTest::TestXml( )
 {
-	m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
-	return m_next->OnData( data, count ) ;
+	xml::Node root = xml::TreeBuilder::ParseFile( TEST_DATA "entry.xml" )  ;
+	
+	xml::Node::Range entries = root.Children( "entry" ) ;
+	CPPUNIT_ASSERT( entries.first != entries.second ) ;
+	
+	Entry subject( *entries.first ) ;
+	GRUT_ASSERT_EQUAL( "snes", subject.Title() ) ;
+	GRUT_ASSERT_EQUAL( "\"WxYPGE8CDyt7ImBk\"", subject.ETag() ) ;
 }
 
-void ResponseLog::Clear()
-{
-	assert( m_next != 0 ) ;
-	m_next->Clear() ;
-}
-
-std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
-{
-	return prefix + DateTime::Now().Format( "%H%M%S" ) + suffix ;
-}
-
-}} // end of namespace
+} // end of namespace grut

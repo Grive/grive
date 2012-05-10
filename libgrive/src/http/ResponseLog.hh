@@ -29,13 +29,16 @@ namespace gr { namespace http {
 class ResponseLog : public Receivable
 {
 public :
-	ResponseLog( const std::string& prefix, Receivable *next ) ;
+	ResponseLog(
+		const std::string&	prefix,
+		const std::string&	suffix,
+		Receivable			*next ) ;
 
 	std::size_t OnData( void *data, std::size_t count ) ;
 	void Clear() ;
 
 private :
-	static std::string Filename( const std::string& prefix ) ;
+	static std::string Filename( const std::string& prefix, const std::string& suffix ) ;
 	
 private :
 	std::ofstream	m_log ;

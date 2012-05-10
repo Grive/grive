@@ -48,6 +48,8 @@ Entry::Entry( const Json& entry )
 
 Entry::Entry( const xml::Node& n )
 {
+	m_title		= n["title"].Value() ;
+	m_etag		= n["@gd:etag"].Value() ;
 }
 
 Entry::Entry( const std::string& title, const std::string& href ) :

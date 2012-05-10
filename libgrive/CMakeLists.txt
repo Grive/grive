@@ -43,7 +43,7 @@ file (GLOB LIBGRIVE_SRC
 	src/xml/*.cc
 )
 
-add_definitions( -DVERSION="${GRIVE_VERSION}" )
+add_definitions( -DVERSION="${GRIVE_VERSION}" -DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/" )
 
 add_library( grive SHARED ${LIBGRIVE_SRC} )
 
@@ -75,6 +75,7 @@ IF ( CPPUNIT_FOUND )
     
     # list of test source files here
 	file(GLOB TEST_SRC
+		test/drive/*.cc
 		test/util/*.cc
 		test/xml/*.cc
 	)
