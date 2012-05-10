@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <boost/iterator_adaptors.hpp>
+
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -28,9 +30,13 @@ namespace gr { namespace xml {
 
 class Node
 {
+private :
+	class	Impl ;
+	typedef std::vector<Impl*>	ImplVec ;
+	
 public :
 	class iterator ;
-	typedef std::pair<Node::iterator, Node::iterator> Range ;
+	typedef std::pair<iterator, iterator> Range ;
 
 public :
 	Node() ;
@@ -66,40 +72,30 @@ public :
 	iterator end() const ;
 	
 	Range Attr() const ;
-	
-private :
-	class	Impl ;
-	typedef std::vector<Impl*>	ImplVec ;
-	
-public :
-	class iterator
-	{
-	public :
-		iterator() ;
-		explicit iterator( std::vector< gr::xml::Node::Impl* >::iterator it ) ;
-		
-		typedef Node value_type ;
-		typedef std::forward_iterator_tag	iterator_category ;
-		typedef std::ptrdiff_t				difference_type;
-		typedef Node*						pointer;
-		typedef Node&						reference;
-
-		value_type operator*() const ;
-		iterator operator++() ;
-		iterator operator++(int) ;
-		
-		bool operator==( const iterator& i ) const ;
-		bool operator!=( const iterator& i ) const ;
-	
-	private :
-		ImplVec::iterator	m_it ;
-	} ;
+	Range Children( const std::string& name ) const ;
 	
 private :
 	explicit Node( Impl *impl ) ;
 
 private :
 	Impl *m_ptr ;
+} ;
+
+class Node::iterator : public boost::iterator_adaptor<
+	Node::iterator,
+	Node::ImplVec::iterator,
+	Node,
+	boost::random_access_traversal_tag,
+	Node
+>
+{
+public :
+	explicit iterator( ImplVec::iterator i ) ;		
+
+private :
+	friend class boost::iterator_core_access;
+	
+	reference dereference() const ;
 } ;
 
 std::ostream& operator<<( std::ostream& os, const Node& node ) ;

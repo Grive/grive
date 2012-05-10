@@ -55,7 +55,7 @@ void NodeTest::TestTree( )
 
 void NodeTest::TestParseFile( )
 {
-	Node n = TreeBuilder::Parse( "<entry><link href=\"q\"><href>abc</href></link></entry>" ) ;
+	Node n = TreeBuilder::Parse( "<entry><link href=\"q\"><href>abc</href></link><link></link></entry>" ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("entry"), n["entry"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("link"), n["entry"]["link"].Name() ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string("q"), n["entry"]["link"]["@href"].Value() ) ;
@@ -70,7 +70,8 @@ void NodeTest::TestParseFile( )
 		++i ;
 	}
 	
-	std::cout << n << std::endl ;
+	Node::Range r = n["entry"].Children("link") ;
+// 	CPPUNIT_ASSERT_EQUAL( 2, r.second - r.first ) ;
 }
 
 } // end of namespace grut

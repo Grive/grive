@@ -85,14 +85,14 @@ public :
 		if ( map[child->m_type] != 0 )
 		{
 			ImplVec& vec = *map[child->m_type] ;
-			iterator p = std::lower_bound( vec.begin(), vec.end(), child, Comp() ) ;
+			std::pair<iterator,iterator> p =
+				std::equal_range( vec.begin(), vec.end(), child, Comp() ) ;
 
 			// cannot allow duplicate attribute nodes
-			if ( child->m_type	== attr && p 			!= vec.end() &&
-				 (*p)->m_type	== attr && (*p)->m_name == child->m_name )
+			if ( child->m_type	== attr && p.first != p.second )
 				throw std::runtime_error( "duplicate attribute " + child->m_name ) ;
 			
-			vec.insert( p, child ) ;
+			vec.insert( p.second, child ) ;
 		}
 		
 		m_children.push_back( child ) ;
@@ -107,12 +107,10 @@ public :
 			: Find( m_element, name ) ;
 	}
 	
-	Impl* Find( ImplVec& map, const std::string& name )
+	std::pair<iterator,iterator> Children( const std::string& name )
 	{
 		Impl tmp( name , element ) ;
-		iterator i = std::lower_bound( map.begin(), map.end(), &tmp, Comp() ) ;
-
-		return i != map.end() && (*i)->m_name == name ? *i : 0 ;
+		return std::equal_range( m_element.begin(), m_element.end(), &tmp, Comp() ) ;
 	}
 	
 	iterator Begin()
@@ -173,6 +171,15 @@ public :
 	} ;
 
 private :
+	Impl* Find( ImplVec& map, const std::string& name )
+	{
+		Impl tmp( name , element ) ;
+		iterator i = std::lower_bound( map.begin(), map.end(), &tmp, Comp() ) ;
+
+		return i != map.end() && (*i)->m_name == name ? *i : 0 ;
+	}
+
+private :
 	std::size_t		m_ref ;
 	
 	Type			m_type ;
@@ -182,40 +189,13 @@ private :
 	ImplVec			m_children ;
 } ;
 
-Node::iterator::iterator( )
+Node::iterator::iterator( ImplVec::iterator i ) : iterator_adaptor(i)
 {
 }
 
-Node::iterator::iterator( ImplVec::iterator it ) : m_it( it )
+Node::iterator::reference Node::iterator::dereference() const
 {
-}
-
-Node::iterator::value_type Node::iterator::operator*() const
-{
-	return Node( (*m_it)->AddRef() ) ;
-}
-
-Node::iterator Node::iterator::operator++()
-{
-	m_it++ ;
-	return *this ;
-}
-
-Node::iterator Node::iterator::operator++(int)
-{
-	iterator tmp( *this ) ;
-	++tmp ;
-	return tmp ;
-}
-
-bool Node::iterator::operator==( const iterator& i ) const
-{
-	return m_it == i.m_it ;
-}
-
-bool Node::iterator::operator!=( const iterator& i ) const
-{
-	return m_it != i.m_it ;
+	return Node( (*base_reference())->AddRef() ) ;
 }
 
 Node::Node() : m_ptr( new Impl )
@@ -415,5 +395,11 @@ Node::Range Node::Attr() const
 	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
 }
 
+Node::Range Node::Children( const std::string& name ) const
+{
+	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Children( name ) ;
+
+	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
+}
 
 } } // end namespace

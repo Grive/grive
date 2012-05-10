@@ -37,6 +37,11 @@ class Json ;
 class OAuth2 ;
 class Path ;
 
+/*!	\brief	corresponds to an "entry" in the resource feed
+
+	This class is decodes an entry in the resource feed. It will stored the properties like
+	title, filename and ETag etc in member variables.
+*/
 class Entry
 {
 public :

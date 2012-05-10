@@ -7,6 +7,7 @@ find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(CppUnit)
+find_package(Boost REQUIRED)
 
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
