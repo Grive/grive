@@ -69,7 +69,7 @@ namespace gr
 		}
 		catch ( std::runtime_error& e )
 		{
-			throw ConfigError( std::string("cannot open config file ") + e.what() ) ;
+			throw ConfigError( std::string("Cannot open config file ") + e.what() ) ;
 		}
 	}
 	
@@ -95,13 +95,13 @@ int main( int argc, char **argv )
 			{
 				std::cout
 					<< "-----------------------\n"
-					<< "Please go to this URL and get an authenication code:\n\n"
+					<< "Please go to this URL and get an authentication code:\n\n"
 					<< OAuth2::MakeAuthURL( client_id )
 					<< std::endl ;
 				
 				std::cout
 					<< "\n-----------------------\n"
-					<< "Please input the authenication code here" << std::endl ;
+					<< "Please input the authentication code here: " << std::endl ;
 				std::string code ;
 				std::cin >> code ;
 				
