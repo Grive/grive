@@ -30,6 +30,10 @@ namespace http
 {
 	class Agent ;
 }
+namespace xml
+{
+	class Node ;
+}
 
 class OAuth2 ;
 class Json ;
@@ -45,7 +49,7 @@ public :
 	~Drive( ) ;
 
 private :
-	void UpdateFile( const Json& entry, http::Agent *http ) ;
+	void UpdateFile( const xml::Node& entry, http::Agent *http ) ;
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	

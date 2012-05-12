@@ -85,7 +85,7 @@ void Entry::Update( const Json& entry )
 		FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-edit-media", node )
 		? node["href"].Str() : std::string() ;
 
-  	// convert to lower case for easy comparison
+	// convert to lower case for easy comparison
 	std::transform(
 		m_server_md5.begin(),
 		m_server_md5.end(),
@@ -111,6 +111,16 @@ void Entry::Update( const xml::Node& n )
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
 		m_parent_hrefs.push_back( (*i)["@href"] ) ;
+	
+	if ( !m_parent_hrefs.empty() )
+		m_parent_href = m_parent_hrefs.front() ;
+
+	// convert to lower case for easy comparison
+	std::transform(
+		m_server_md5.begin(),
+		m_server_md5.end(),
+		m_server_md5.begin(),
+		tolower ) ;
 }
 
 std::string Entry::Parent( const Json& entry )

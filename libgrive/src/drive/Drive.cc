@@ -33,6 +33,7 @@
 #include "util/OS.hh"
 #include "util/Path.hh"
 #include "xml/Node.hh"
+#include "xml/NodeSet.hh"
 
 // standard C++ library
 #include <algorithm>
@@ -56,19 +57,20 @@ Drive::Drive( OAuth2& auth ) :
 	http::Agent http ;
 	ConstructDirTree( &http ) ;
 	
-	http::JsonResponse str ;
-	http.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
-	Json resp = str.Response() ;
+	http::XmlResponse xrsp ;
+	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
 	
-	Json resume_link ;
-	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
-		m_resume_link = resume_link["href"].As<std::string>() ;
+	http.Get( root_url + "?showfolders=true", &log, m_http_hdr ) ;
+	xml::Node resp = xrsp.Response() ;
 
+	m_resume_link = resp["link"].
+		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
+		
 	bool has_next = false ;
 	do
 	{
-		Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
-		for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
+		xml::NodeSet entries = resp["entry"] ;
+		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
 			if ( !Collection::IsCollection( *i ) )
 			{
@@ -76,13 +78,13 @@ Drive::Drive( OAuth2& auth ) :
 			}
 		}
 		
-		Json next ;
-		has_next = resp["feed"]["link"].FindInArray( "rel", "next", next ) ;
+		xml::NodeSet nss = resp["link"].Find( "@rel", "next" ) ;
+		has_next = !nss.empty() ;
 
 		if ( has_next )
 		{
-			http.Get( next["href"].Str(), &str, m_http_hdr ) ;
-			resp = str.Response() ;
+			http.Get( nss["@href"], &xrsp, m_http_hdr ) ;
+			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
 }
@@ -117,31 +119,36 @@ void Drive::ConstructDirTree( http::Agent *http )
 	http::XmlResponse xml ;
 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
 	
-	http->Get( root_url + "/-/folder?showroot=true&max-results=10", &log, m_http_hdr ) ;
+	http->Get( root_url + "/-/folder?max-results=10", &log, m_http_hdr ) ;
 
-	http::JsonResponse jrsp ;
-	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;
-	Json resp = jrsp.Response() ;
-	
+// 	http::JsonResponse jrsp ;
+// 	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;
+// 	Json resp = jrsp.Response() ;
+
+	xml::Node resp = xml.Response() ;
+
 	assert( m_coll.empty() ) ;
 	
 	while ( true )
 	{
-		Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
+		xml::NodeSet entries = resp["entry"] ;
 
 		// first, get all collections from the query result
-		for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
+		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
 			if ( Collection::IsCollection( *i ) )
 				m_coll.push_back( Collection( *i ) ) ;
 		}
 		
-		Json next ;
-		if ( !resp["feed"]["link"].FindInArray( "rel", "next", next ) )
+// 		Json next ;
+// 		if ( !resp["feed"]["link"].FindInArray( "rel", "next", next ) )
+// 			break ;
+		xml::NodeSet next = resp["link"].Find( "@rel", "next" ) ;
+		if ( next.empty() )
 			break ;
 
-		http->Get( next["href"].Str(), &jrsp, m_http_hdr ) ;
-		resp = jrsp.Response() ;
+		http->Get( next["@href"], &xml, m_http_hdr ) ;
+		resp = xml.Response() ;
 	}
 
 	// second, build up linkage between parent and child 
@@ -171,10 +178,10 @@ void Drive::ConstructDirTree( http::Agent *http )
 	m_root.CreateSubDir( Path() ) ;
 }
 
-void Drive::UpdateFile( const Json& entry, http::Agent *http )
+void Drive::UpdateFile( const xml::Node& entry, http::Agent *http )
 {
 	// only handle uploaded files
-	if ( entry.Has( "docs$suggestedFilename" ) )
+	if ( !entry["docs:suggestedFilename"].empty() )
 	{
 		Entry file( entry ) ;
 	

@@ -75,9 +75,11 @@ public :
 	iterator begin() const ;
 	iterator end() const ;
 	std::size_t size() const ;
+	NodeSet Children() const ;
 	
 	NodeSet Attr() const ;
 	std::string Attr( const std::string& attr ) const ;
+	bool HasAttr( const std::string& attr ) const ;
 	
 private :
 	explicit Node( Impl *impl ) ;

@@ -22,6 +22,8 @@
 #include "protocol/Json.hh"
 #include "util/Path.hh"
 #include "util/OS.hh"
+#include "xml/Node.hh"
+#include "xml/NodeSet.hh"
 
 #include <cassert>
 
@@ -36,6 +38,11 @@ Collection::Collection( const Json& entry ) :
 {
 }
 
+Collection::Collection( const xml::Node& entry ) :
+	m_entry		( entry ),
+	m_parent	( 0 )
+{
+}
 Collection::Collection(
 	const std::string& title,
 	const std::string& href ) :
@@ -97,6 +104,12 @@ bool Collection::IsCollection( const Json& entry )
 	return
 		entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node ) &&
 		node["label"].As<std::string>() == "folder" ;
+}
+
+bool Collection::IsCollection( const xml::Node& entry )
+{
+	return entry["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"].front().Value()
+		== "folder" ;
 }
 
 void Collection::Swap( Collection& coll )

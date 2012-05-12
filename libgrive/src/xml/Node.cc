@@ -416,6 +416,12 @@ std::size_t Node::size() const
 	return m_ptr->Size() ;
 }
 
+NodeSet Node::Children() const
+{
+	assert( m_ptr != 0 ) ;
+	return NodeSet( begin(), end() ) ;
+}
+
 NodeSet Node::Attr() const
 {
 	assert( m_ptr != 0 ) ;

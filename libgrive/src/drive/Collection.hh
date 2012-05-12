@@ -34,11 +34,13 @@ class Collection
 {
 public :
 	explicit Collection( const Json& entry ) ;
+	explicit Collection( const xml::Node& entry ) ;
 	Collection( const std::string& title, const std::string& href ) ;
 	
 	// default copy ctor & op= are fine
 	
 	static bool IsCollection( const Json& entry ) ;
+	static bool IsCollection( const xml::Node& entry ) ;
 	static std::string ParentHref( const Json& entry ) ;
 	
 	std::string Title() const ;
