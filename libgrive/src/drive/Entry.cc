@@ -48,8 +48,7 @@ Entry::Entry( const Json& entry )
 
 Entry::Entry( const xml::Node& n )
 {
-	m_title		= n["title"].Value() ;
-	m_etag		= n["@gd:etag"].Value() ;
+	Update( n ) ;
 }
 
 Entry::Entry( const std::string& title, const std::string& href ) :
@@ -91,6 +90,13 @@ void Entry::Update( const Json& entry )
 		m_server_md5.end(),
 		m_server_md5.begin(),
 		tolower ) ;
+}
+
+void Entry::Update( const xml::Node& n )
+{
+	m_title		= n["title"].Value() ;
+	m_etag		= n["@gd:etag"].Value() ;
+	m_filename	= n.ChildValue( "docs:suggestedFilename" ) ;
 }
 
 std::string Entry::Parent( const Json& entry )

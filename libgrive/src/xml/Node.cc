@@ -18,6 +18,7 @@
 */
 
 #include "Node.hh"
+#include "NodeSet.hh"
 
 #include <algorithm>
 #include <cassert>
@@ -107,6 +108,11 @@ public :
 			: Find( m_element, name ) ;
 	}
 	
+	Impl* FindAttr( const std::string& name )
+	{
+		return Find( m_attr, name ) ;
+	}
+	
 	std::pair<iterator,iterator> Children( const std::string& name )
 	{
 		Impl tmp( name , element ) ;
@@ -150,6 +156,8 @@ public :
 	
 	std::string Value() const
 	{
+		assert( m_type != element || m_value.empty() ) ;
+	
 		std::string value = m_value ;
 		for ( const_iterator i = Begin() ; i != End() ; ++i )
 			value += (*i)->Value() ;
@@ -336,11 +344,9 @@ std::ostream& operator<<( std::ostream& os, const Node& node )
 		os << '<' << node.Name() ;
 		
 		// print attributes
-		Node::Range attrs = node.Attr() ;
-		if ( attrs.first != attrs.second )
-			os << ' ' ;
-		
-		std::copy( attrs.first, attrs.second, std::ostream_iterator<Node>(os, " ") ) ;
+		NodeSet attrs = node.Attr() ;
+		if ( !attrs.empty() )
+			os << ' ' << attrs ;
 		os << '>' ;
 		
 		// recursively print children
@@ -404,20 +410,33 @@ std::size_t Node::size() const
 	return m_ptr->Size() ;
 }
 
-Node::Range Node::Attr() const
+NodeSet Node::Attr() const
 {
 	assert( m_ptr != 0 ) ;
 	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Attr() ;
 
-	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
+	return NodeSet( iterator(is.first), iterator(is.second) ) ;
 }
 
-Node::Range Node::Children( const std::string& name ) const
+std::string Node::Attr( const std::string& attr ) const
+{
+	assert( m_ptr != 0 ) ;
+	Impl *imp = m_ptr->FindAttr( attr ) ;
+	return imp != 0 ? imp->Value() : "" ;
+}
+
+NodeSet Node::Children( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
 	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Children( name ) ;
 
-	return std::make_pair( iterator(is.first), iterator(is.second) ) ;
+	return NodeSet( iterator(is.first), iterator(is.second) ) ;
+}
+
+std::string Node::ChildValue( const std::string& name ) const
+{
+	NodeSet r = Children( name ) ;
+	return r.empty() ? "" : r.begin()->Value() ;
 }
 
 } } // end namespace

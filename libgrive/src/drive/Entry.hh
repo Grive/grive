@@ -70,6 +70,7 @@ public :
 	
 private :
 	void Update( const Json& entry ) ;
+	void Update( const xml::Node& entry ) ;
 	static std::string Parent( const Json& entry ) ;
 
 private :

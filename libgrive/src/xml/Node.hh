@@ -28,6 +28,8 @@
 
 namespace gr { namespace xml {
 
+class NodeSet ;
+
 class Node
 {
 private :
@@ -36,7 +38,6 @@ private :
 	
 public :
 	class iterator ;
-	typedef std::pair<iterator, iterator> Range ;
 
 public :
 	Node() ;
@@ -72,8 +73,11 @@ public :
 	iterator end() const ;
 	std::size_t size() const ;
 	
-	Range Attr() const ;
-	Range Children( const std::string& name ) const ;
+	NodeSet Attr() const ;
+	std::string Attr( const std::string& attr ) const ;
+	NodeSet Children( const std::string& name ) const ;
+	
+	std::string ChildValue( const std::string& name ) const ;
 	
 private :
 	explicit Node( Impl *impl ) ;

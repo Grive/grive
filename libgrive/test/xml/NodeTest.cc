@@ -22,6 +22,7 @@
 #include "Assert.hh"
 
 #include "xml/Node.hh"
+#include "xml/NodeSet.hh"
 #include "xml/TreeBuilder.hh"
 
 #include <iostream>
@@ -75,9 +76,8 @@ void NodeTest::TestParseFile( )
 		++i ;
 	}
 	
-	Node::Range r = n["entry"].Children("link") ;
-	std::ptrdiff_t count = r.second - r.first ;
-	GRUT_ASSERT_EQUAL( 2, count ) ;
+	NodeSet r = n["entry"].Children("link") ;
+	GRUT_ASSERT_EQUAL( 2, r.size() ) ;
 }
 
 } // end of namespace grut

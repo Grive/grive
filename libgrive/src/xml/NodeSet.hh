@@ -17,35 +17,37 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "EntryTest.hh"
+#pragma once
 
-#include "Assert.hh"
+#include "Node.hh"
 
-#include "drive/Entry.hh"
-#include "xml/Node.hh"
-#include "xml/NodeSet.hh"
-#include "xml/TreeBuilder.hh"
+#include <cstddef>
+#include <iosfwd>
 
-#include <iostream>
+namespace gr { namespace xml {
 
-namespace grut {
-
-using namespace gr ;
-
-EntryTest::EntryTest( )
+class NodeSet
 {
-}
+public :
+	typedef Node::iterator iterator ;
 
-void EntryTest::TestXml( )
-{
-	xml::Node root = xml::TreeBuilder::ParseFile( TEST_DATA "entry.xml" )  ;
+public :
+	NodeSet( iterator first, iterator last ) ;
 	
-	xml::NodeSet entries = root.Children( "entry" ) ;
-	CPPUNIT_ASSERT( !entries.empty() ) ;
+	iterator begin() const ;
+	iterator end() const ;
+	bool empty() const ;
+	std::size_t size() const ;
 	
-	Entry subject( *entries.begin() ) ;
-	GRUT_ASSERT_EQUAL( "snes", subject.Title() ) ;
-	GRUT_ASSERT_EQUAL( "\"WxYPGE8CDyt7ImBk\"", subject.ETag() ) ;
-}
+	Node Find( const std::string& attr, const std::string& value ) const ;
 
-} // end of namespace grut
+	operator Node() const ;
+	
+private :
+	iterator	m_first ;
+	iterator	m_last ;
+} ;
+
+std::ostream& operator<<( std::ostream& os, const NodeSet& node ) ;
+
+} } // end of namespace
