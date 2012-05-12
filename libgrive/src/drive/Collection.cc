@@ -45,7 +45,7 @@ Collection::Collection(
 {
 }
 
-std::string Collection::Href() const
+std::string Collection::SelfHref() const
 {
 	return m_entry.SelfHref() ;
 }

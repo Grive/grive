@@ -42,7 +42,7 @@ public :
 	static bool IsCollection( const xml::Node& entry ) ;
 	
 	std::string Title() const ;
-	std::string Href() const ;
+	std::string SelfHref() const ;
 	const Collection* Parent() const ;
 	Collection* Parent() ;
 	std::string ParentHref() const ;

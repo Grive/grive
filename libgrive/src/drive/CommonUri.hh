@@ -23,5 +23,8 @@
 
 namespace gr
 {
-	const std::string root_url = "https://docs.google.com/feeds/default/private/full" ;
+	const std::string feed_base = "https://docs.google.com/feeds/default/private/full" ;
+	
+	const std::string root_href =
+		"https://docs.google.com/feeds/default/private/full/folder%3Aroot" ;
 }

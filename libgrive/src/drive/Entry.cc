@@ -191,10 +191,10 @@ void Entry::Delete( http::Agent *http, const http::Headers& auth )
 	http::Headers hdr( auth ) ;
 	hdr.push_back( "If-Match: " + m_etag ) ;
 	
-std::cout << root_url + "/" + m_resource_id + "?delete=true" << std::endl ;
+std::cout << feed_base + "/" + m_resource_id + "?delete=true" << std::endl ;
 	
 	http::StringResponse str ;
-	http->Custom( "DELETE", root_url + "/" + m_resource_id + "?delete=true", &str, hdr ) ;
+	http->Custom( "DELETE", feed_base + "/" + m_resource_id + "?delete=true", &str, hdr ) ;
 }
 
 void Entry::Swap( Entry& e )

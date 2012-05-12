@@ -47,7 +47,7 @@ namespace gr {
 
 Drive::Drive( OAuth2& auth ) :
 	m_auth( auth ),
-	m_root( ".", "https://docs.google.com/feeds/default/private/full/folder%3Aroot" )
+	m_root( ".", root_href )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
@@ -58,7 +58,7 @@ Drive::Drive( OAuth2& auth ) :
 	http::XmlResponse xrsp ;
 	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
 	
-	http.Get( root_url + "?showfolders=true", &log, m_http_hdr ) ;
+	http.Get( feed_base + "?showfolders=true", &log, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
 	m_resume_link = resp["link"].
@@ -95,7 +95,7 @@ struct SortCollectionByHref
 {
 	bool operator()( const Collection& c1, const Collection& c2 ) const
 	{
-		return c1.Href() < c2.Href() ;
+		return c1.SelfHref() < c2.SelfHref() ;
 	}
 } ;
 
@@ -109,7 +109,7 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 			Collection( "", href ),
 			SortCollectionByHref() ) ;
 	
-	 return (it != m_coll.end() && it->Href() == href) ? it : m_coll.end() ;
+	 return (it != m_coll.end() && it->SelfHref() == href) ? it : m_coll.end() ;
 }
 
 void Drive::ConstructDirTree( http::Agent *http )
@@ -117,7 +117,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 	http::XmlResponse xml ;
 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
 	
-	http->Get( root_url + "/-/folder?max-results=10", &log, m_http_hdr ) ;
+	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &log, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 
@@ -147,6 +147,10 @@ void Drive::ConstructDirTree( http::Agent *http )
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
 		if ( i->ParentHref().empty() )
+		{
+			std::cout << "folder \"" << i->Title() << "\" not in root folder, ignored" << std::endl ;
+		}
+		else if ( i->ParentHref() == root_href )
 			m_root.AddChild( &*i ) ;
 		else
 		{
@@ -161,6 +165,8 @@ void Drive::ConstructDirTree( http::Agent *http )
 				else
 					pit->AddChild( &*i ) ;
 			}
+			else
+				std::cout << "can't find folder " << i->Title() << " " << i->ParentHref() << std::endl ;
 		}
 	}
 
