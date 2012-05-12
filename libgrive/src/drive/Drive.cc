@@ -25,8 +25,6 @@
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
-#include "protocol/Json.hh"
-#include "protocol/JsonResponse.hh"
 #include "protocol/OAuth2.hh"
 #include "util/Crypt.hh"
 #include "util/DateTime.hh"
@@ -121,10 +119,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 	
 	http->Get( root_url + "/-/folder?max-results=10", &log, m_http_hdr ) ;
 
-// 	http::JsonResponse jrsp ;
-// 	http->Get( root_url + "/-/folder?alt=json", &jrsp, m_http_hdr ) ;
-// 	Json resp = jrsp.Response() ;
-
 	xml::Node resp = xml.Response() ;
 
 	assert( m_coll.empty() ) ;
@@ -140,9 +134,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 				m_coll.push_back( Collection( *i ) ) ;
 		}
 		
-// 		Json next ;
-// 		if ( !resp["feed"]["link"].FindInArray( "rel", "next", next ) )
-// 			break ;
 		xml::NodeSet next = resp["link"].Find( "@rel", "next" ) ;
 		if ( next.empty() )
 			break ;

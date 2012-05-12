@@ -24,7 +24,6 @@
 #include "http/Download.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
-#include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
@@ -42,11 +41,6 @@ Entry::Entry( const Path& file )
 {
 }
 
-Entry::Entry( const Json& entry )
-{
-	Update( entry ) ;
-}
-
 Entry::Entry( const xml::Node& n )
 {
 	Update( n ) ;
@@ -56,41 +50,6 @@ Entry::Entry( const std::string& title, const std::string& href ) :
 	m_title( title ),
 	m_self_href( href )
 {
-}
-
-void Entry::Update( const Json& entry )
-{
-	m_title				= entry["title"]["$t"].Str() ;
-	
-	m_filename			= entry.Has("docs$suggestedFilename") ?
-		entry["docs$suggestedFilename"]["$t"].Str() : "" ;
-	
-	m_content_src		= entry["content"]["src"].Str() ;
-	m_self_href			= entry["link"].FindInArray( "rel", "self" )["href"].Str() ;
-	m_parent_href		= Parent( entry ) ;
-	m_server_modified	= DateTime( entry["updated"]["$t"].Str() ) ;
-	m_etag				= entry["gd$etag"].Str() ;
-	
-	m_resource_id		= entry["gd$resourceId"]["$t"].Str() ;
-	
-	m_server_md5		= entry.Has("docs$md5Checksum") ?
-		entry["docs$md5Checksum"]["$t"].Str() : "" ;
-
-	Json node ;
-	m_kind				= entry["category"].
-		FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node )
-		? node["label"].Str() : std::string() ;
-	
-	m_upload_link		= entry["link"].
-		FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-edit-media", node )
-		? node["href"].Str() : std::string() ;
-
-	// convert to lower case for easy comparison
-	std::transform(
-		m_server_md5.begin(),
-		m_server_md5.end(),
-		m_server_md5.begin(),
-		tolower ) ;
 }
 
 void Entry::Update( const xml::Node& n )
@@ -121,13 +80,6 @@ void Entry::Update( const xml::Node& n )
 		m_server_md5.end(),
 		m_server_md5.begin(),
 		tolower ) ;
-}
-
-std::string Entry::Parent( const Json& entry )
-{
-	Json node ;
-	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
-		 node["href"].Str() : std::string() ;
 }
 
 const std::vector<std::string>& Entry::ParentHrefs() const

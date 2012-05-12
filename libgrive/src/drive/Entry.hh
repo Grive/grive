@@ -46,7 +46,6 @@ class Entry
 {
 public :
 	explicit Entry( const Path& file ) ;
-	explicit Entry( const Json& entry ) ;
 	explicit Entry( const xml::Node& n ) ;
 	Entry( const std::string& title, const std::string& href ) ;
 
@@ -71,9 +70,7 @@ public :
 	void Swap( Entry& e ) ;
 	
 private :
-	void Update( const Json& entry ) ;
 	void Update( const xml::Node& entry ) ;
-	static std::string Parent( const Json& entry ) ;
 
 private :
 	std::string		m_title ;

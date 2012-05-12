@@ -32,12 +32,6 @@
 
 namespace gr {
 
-Collection::Collection( const Json& entry ) :
-	m_entry		( entry ),
-	m_parent	( 0 )
-{
-}
-
 Collection::Collection( const xml::Node& entry ) :
 	m_entry		( entry ),
 	m_parent	( 0 )
@@ -49,13 +43,6 @@ Collection::Collection(
 	m_entry	( title, href ),
 	m_parent( 0 )
 {
-}
-
-std::string Collection::ParentHref( const Json& entry )
-{
-	Json node ;
-	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
-		 node["href"].As<std::string>() : std::string() ;
 }
 
 std::string Collection::Href() const
