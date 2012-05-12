@@ -293,6 +293,12 @@ void Node::AddNode( const Node& node )
 	m_ptr->Add( node.m_ptr->AddRef() ) ;
 }
 
+void Node::AddNode( iterator first, iterator last )
+{
+	for ( iterator i = first ; i != last ; ++i )
+		AddNode( *i ) ;
+}
+
 NodeSet Node::operator[]( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
@@ -325,6 +331,11 @@ std::string Node::Value() const
 	assert( m_ptr != 0 ) ;
 	
 	return m_ptr->Value() ;
+}
+
+Node::operator std::string() const
+{
+	return Value() ;
 }
 
 std::ostream& operator<<( std::ostream& os, const Node& node )
@@ -413,12 +424,6 @@ std::string Node::Attr( const std::string& attr ) const
 	assert( m_ptr != 0 ) ;
 	Impl *imp = m_ptr->FindAttr( attr ) ;
 	return imp != 0 ? imp->Value() : "" ;
-}
-
-std::string Node::ChildValue( const std::string& name ) const
-{
-	NodeSet r = operator[]( name ) ;
-	return r.empty() ? "" : r.begin()->Value() ;
 }
 
 } } // end namespace

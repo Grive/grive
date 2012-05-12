@@ -33,7 +33,10 @@ public :
 	typedef Node::iterator iterator ;
 
 public :
+	NodeSet() ;
 	NodeSet( iterator first, iterator last ) ;
+
+	void Add( const Node& n ) ;
 	
 	iterator begin() const ;
 	iterator end() const ;
@@ -41,13 +44,14 @@ public :
 	std::size_t size() const ;
 	Node front() const ;
 	
-	Node Find( const std::string& attr, const std::string& value ) const ;
+	NodeSet Find( const std::string& name, const std::string& value ) const ;
 
 	// forwarding common Node operations to Node
 	operator std::string() const ;
 	NodeSet operator[]( const std::string& name ) const ;
 	
 private :
+	Node		m_tmp ;
 	iterator	m_first ;
 	iterator	m_last ;
 } ;

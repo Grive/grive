@@ -95,9 +95,15 @@ void Entry::Update( const Json& entry )
 
 void Entry::Update( const xml::Node& n )
 {
-	m_title		= n["title"] ;
-	m_etag		= n["@gd:etag"] ;
-	m_filename	= n.ChildValue( "docs:suggestedFilename" ) ;
+	m_title			= n["title"] ;
+	m_etag			= n["@gd:etag"] ;
+	m_filename		= n["docs:suggestedFilename"] ;
+	m_content_src	= n["content"]["@src"] ;
+	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
+	
+	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
+	m_parent_hrefs.resize( parents.size() ) ;
+	std::copy( parents.begin(), parents.end(), m_parent_hrefs.begin() ) ;
 }
 
 std::string Entry::Parent( const Json& entry )

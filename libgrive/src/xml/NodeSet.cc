@@ -22,7 +22,15 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include <iostream>
+
 namespace gr { namespace xml {
+
+NodeSet::NodeSet() :
+	m_first( m_tmp.begin() ),
+	m_last( m_tmp.end() )
+{
+}
 
 NodeSet::NodeSet( iterator first, iterator last ) :
 	m_first( first ),
@@ -39,15 +47,45 @@ NodeSet::iterator NodeSet::end() const
 {
 	return m_last ;
 }
-	
-Node NodeSet::Find( const std::string& attr, const std::string& value ) const
+
+/*!	This function search the members in the node set. If any members in the node
+	set has a children named \a name , with value equal to \a value , it will
+	be returned.
+	\param	name	name to be found. prefix with '@' for attributes
+	\param	value	value to be matched.
+	\return	the node set contained all children nodes that matches \a name and \a value
+*/
+NodeSet NodeSet::Find( const std::string& name, const std::string& value ) const
 {
+	NodeSet result ;
 	for ( iterator i = m_first ; i != m_last ; ++i )
 	{
-		if ( i->Attr( attr ) == value )
-			return *i ;
+		NodeSet cand = (*i)[name] ;
+		for ( iterator j = cand.m_first ; j != cand.m_last ; ++j )
+		{
+			if ( j->Value() == value )
+			{
+				result.Add( *i ) ;
+				break ;
+			}
+		}
 	}
-	throw std::runtime_error( "can't find element with " + attr + " is " + value ) ;
+	return result ;
+}
+
+void NodeSet::Add( const Node& n )
+{
+	// the tmp node is not used, that means the first,last iterators points to elsewhere
+	if ( m_tmp.size() == 0 )
+	{
+		m_tmp.AddNode( m_first, m_last ) ;
+	}
+
+	m_tmp.AddNode( n ) ;
+	
+	// the iterators may be invalidated after adding the node
+	m_first = m_tmp.begin() ;
+	m_last  = m_tmp.end() ;
 }
 
 NodeSet NodeSet::operator[]( const std::string& name ) const
@@ -71,7 +109,7 @@ Node NodeSet::front() const
 
 NodeSet::operator std::string() const
 {
-	return front().Value() ;
+	return empty() ? "" : front().Value() ;
 }
 
 bool NodeSet::empty() const

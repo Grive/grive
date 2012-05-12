@@ -45,6 +45,8 @@ void EntryTest::TestXml( )
 	Entry subject( root["entry"].front() ) ;
 	GRUT_ASSERT_EQUAL( "snes", subject.Title() ) ;
 	GRUT_ASSERT_EQUAL( "\"WxYPGE8CDyt7ImBk\"", subject.ETag() ) ;
+	GRUT_ASSERT_EQUAL( "https://docs.google.com/feeds/default/private/full/folder%3A0B5KhdsbryVeGMl83OEV1ZVc3cUE",
+		subject.SelfHref() ) ;
 }
 
 } // end of namespace grut

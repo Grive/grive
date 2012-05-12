@@ -52,9 +52,11 @@ public :
 	Node AddElement( const std::string& name ) ;
 	Node AddText( const std::string& text ) ;
 	void AddNode( const Node& node ) ;
+	void AddNode( iterator first, iterator last ) ;
 	void AddAttribute( const std::string& name, const std::string& val ) ;
 
 	NodeSet operator[]( const std::string& name ) const ;
+	operator std::string() const ;
 	
 	const std::string& Name() const ;
 	std::string Value() const ;
@@ -75,8 +77,6 @@ public :
 	
 	NodeSet Attr() const ;
 	std::string Attr( const std::string& attr ) const ;
-	
-	std::string ChildValue( const std::string& name ) const ;
 	
 private :
 	explicit Node( Impl *impl ) ;

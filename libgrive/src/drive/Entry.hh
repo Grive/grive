@@ -81,6 +81,8 @@ private :
 	std::string		m_etag ;
 	std::string		m_resource_id ;
 
+	std::vector<std::string>	m_parent_hrefs ;
+	
 	std::string		m_self_href ;
 	std::string		m_content_src ;
 	std::string		m_parent_href ;
