@@ -87,7 +87,7 @@ namespace grut {
 	                       CPPUNIT_SOURCELINE(),	\
 	                       "["#actualFirst","#actualLast") == "#expectFirst) )
 
-#define GRUT_ASSERT_EQUAL(actual, expected)	\
+#define GRUT_ASSERT_EQUAL(expected, actual)	\
   ( grut::AssertEquals( (expected),				\
                        (actual),				\
                        CPPUNIT_SOURCELINE(),	\

@@ -37,7 +37,28 @@ NodeSet::NodeSet( iterator first, iterator last ) :
 	m_last( last )
 {
 }
-	
+
+NodeSet::NodeSet( const NodeSet& n ) :
+	m_tmp( n.m_tmp ),
+	m_first( m_tmp.begin() + (n.m_first - n.m_tmp.begin()) ),
+	m_last( m_tmp.begin() + (n.m_last - n.m_tmp.begin()) )
+{
+}
+
+NodeSet& NodeSet::operator=( const NodeSet& ns )
+{
+	NodeSet tmp( ns ) ;
+	Swap( tmp ) ;
+	return *this ;
+}
+
+void NodeSet::Swap( NodeSet& ns )
+{
+	m_tmp.Swap( ns.m_tmp ) ;
+	std::swap( m_first, ns.m_first ) ;
+	std::swap( m_last, ns.m_last ) ;
+}
+
 NodeSet::iterator NodeSet::begin() const
 {
 	return m_first ;
@@ -96,7 +117,7 @@ NodeSet NodeSet::operator[]( const std::string& name ) const
 		if ( !r.empty() )
 			return r ;
 	}
-	throw std::runtime_error( "can't find node " + name ) ;
+	return NodeSet() ;
 }
 
 Node NodeSet::front() const

@@ -48,6 +48,7 @@ public :
 	static Node Text( const std::string& name ) ;
 	
 	Node& operator=( const Node& node ) ;
+	void Swap( Node& node ) ;
 	
 	Node AddElement( const std::string& name ) ;
 	Node AddText( const std::string& text ) ;

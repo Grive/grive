@@ -95,15 +95,22 @@ void Entry::Update( const Json& entry )
 
 void Entry::Update( const xml::Node& n )
 {
-	m_title			= n["title"] ;
-	m_etag			= n["@gd:etag"] ;
-	m_filename		= n["docs:suggestedFilename"] ;
-	m_content_src	= n["content"]["@src"] ;
-	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
-	
+	m_title				= n["title"] ;
+	m_etag				= n["@gd:etag"] ;
+	m_filename			= n["docs:suggestedFilename"] ;
+	m_content_src		= n["content"]["@src"] ;
+	m_self_href			= n["link"].Find( "@rel", "self" )["@href"] ;
+	m_server_modified	= DateTime( n["updated"] ) ;	
+
+	m_resource_id		= n["gd:resourceId"] ;
+	m_server_md5		= n["docs:md5Checksum"] ;
+	m_kind				= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
+	m_upload_link		= n["link"].Find( "!rel", "http://schemas.google.com/g/2005#resumable-edit-media")["href"] ;
+
+	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
-	m_parent_hrefs.resize( parents.size() ) ;
-	std::copy( parents.begin(), parents.end(), m_parent_hrefs.begin() ) ;
+	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
+		m_parent_hrefs.push_back( (*i)["@href"] ) ;
 }
 
 std::string Entry::Parent( const Json& entry )
@@ -111,6 +118,11 @@ std::string Entry::Parent( const Json& entry )
 	Json node ;
 	return entry["link"].FindInArray( "rel", "http://schemas.google.com/docs/2007#parent", node ) ?
 		 node["href"].Str() : std::string() ;
+}
+
+const std::vector<std::string>& Entry::ParentHrefs() const
+{
+	return m_parent_hrefs ;
 }
 
 std::string Entry::Title() const

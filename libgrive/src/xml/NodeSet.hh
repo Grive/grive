@@ -34,8 +34,12 @@ public :
 
 public :
 	NodeSet() ;
+	NodeSet( const NodeSet& n ) ;
 	NodeSet( iterator first, iterator last ) ;
 
+	NodeSet& operator=( const NodeSet& ns ) ;
+	void Swap( NodeSet& ns ) ;
+	
 	void Add( const Node& n ) ;
 	
 	iterator begin() const ;

@@ -62,6 +62,8 @@ public :
 	std::string SelfHref() const ;
 	std::string ParentHref() const ;
 	
+	const std::vector<std::string>& ParentHrefs() const ;
+	
 	void Download( gr::http::Agent* http, const Path& file, const http::Headers& auth ) const ;
 	bool Upload( gr::http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
 	void Delete( gr::http::Agent* http, const gr::http::Headers& auth ) ;

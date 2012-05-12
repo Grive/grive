@@ -238,8 +238,13 @@ Node::~Node()
 Node& Node::operator=( const Node& node )
 {
 	Node tmp( node ) ;
-	std::swap( tmp.m_ptr, m_ptr ) ;
+	Swap( tmp ) ;
 	return *this ;
+}
+
+void Node::Swap( Node& node )
+{
+	std::swap( node.m_ptr, m_ptr ) ;
 }
 
 bool Node::IsCompatible( Type parent, Type child )
