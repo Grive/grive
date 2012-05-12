@@ -53,6 +53,7 @@ public :
 	// forwarding common Node operations to Node
 	operator std::string() const ;
 	NodeSet operator[]( const std::string& name ) const ;
+	bool operator==( const std::string& value ) const ;
 	
 private :
 	Node		m_tmp ;

@@ -27,19 +27,16 @@
 
 namespace gr {
 
-class Json ;
 class Path ;
 
 class Collection
 {
 public :
 	explicit Collection( const xml::Node& entry ) ;
+	explicit Collection( const Entry& entry ) ;
 	Collection( const std::string& title, const std::string& href ) ;
 	
 	// default copy ctor & op= are fine
-	
-	static bool IsCollection( const Json& entry ) ;
-	static bool IsCollection( const xml::Node& entry ) ;
 	
 	std::string Title() const ;
 	std::string SelfHref() const ;
@@ -47,6 +44,7 @@ public :
 	Collection* Parent() ;
 	std::string ParentHref() const ;
 	Path Dir() const ;
+	bool IsInRootTree() const ;
 
 	void AddChild( Collection *child ) ;
 	void AddLeaf( const std::string& filename ) ;

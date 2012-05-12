@@ -58,6 +58,7 @@ public :
 
 	NodeSet operator[]( const std::string& name ) const ;
 	operator std::string() const ;
+	bool operator==( const std::string& value ) const ;
 	
 	const std::string& Name() const ;
 	std::string Value() const ;

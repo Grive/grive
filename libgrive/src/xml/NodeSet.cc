@@ -133,6 +133,11 @@ NodeSet::operator std::string() const
 	return empty() ? "" : front().Value() ;
 }
 
+bool NodeSet::operator==( const std::string& value ) const
+{
+	return operator std::string() == value ;
+}
+
 bool NodeSet::empty() const
 {
 	return m_first == m_last ;

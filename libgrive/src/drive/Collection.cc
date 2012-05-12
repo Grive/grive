@@ -18,8 +18,8 @@
 */
 
 #include "Collection.hh"
+#include "CommonUri.hh"
 
-#include "protocol/Json.hh"
 #include "util/Path.hh"
 #include "util/OS.hh"
 #include "xml/Node.hh"
@@ -37,6 +37,13 @@ Collection::Collection( const xml::Node& entry ) :
 	m_parent	( 0 )
 {
 }
+
+Collection::Collection( const Entry& entry ) :
+	m_entry		( entry ),
+	m_parent	( 0 )
+{
+}
+
 Collection::Collection(
 	const std::string& title,
 	const std::string& href ) :
@@ -85,20 +92,6 @@ void Collection::AddLeaf( const std::string& filename )
 	m_leaves.push_back( filename ) ;
 }
 
-bool Collection::IsCollection( const Json& entry )
-{
-	Json node ;
-	return
-		entry["category"].FindInArray( "scheme", "http://schemas.google.com/g/2005#kind", node ) &&
-		node["label"].As<std::string>() == "folder" ;
-}
-
-bool Collection::IsCollection( const xml::Node& entry )
-{
-	return entry["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"].front().Value()
-		== "folder" ;
-}
-
 void Collection::Swap( Collection& coll )
 {
 	m_entry.Swap( coll.m_entry ) ;
@@ -129,6 +122,11 @@ Path Collection::Dir() const
 {
 	assert( m_parent != this ) ;
 	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : Path() ;
+}
+
+bool Collection::IsInRootTree() const
+{
+	return m_parent == 0 ? (SelfHref() == root_href) : m_parent->IsInRootTree() ;
 }
 
 } // end of namespace

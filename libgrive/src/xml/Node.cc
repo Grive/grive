@@ -343,6 +343,11 @@ Node::operator std::string() const
 	return Value() ;
 }
 
+bool Node::operator==( const std::string& value ) const
+{
+	return Value() == value ;
+}
+
 std::ostream& operator<<( std::ostream& os, const Node& node )
 {
 	if ( node.GetType() == Node::element )

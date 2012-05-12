@@ -49,11 +49,12 @@ public :
 	~Drive( ) ;
 
 private :
-	void UpdateFile( const xml::Node& entry, http::Agent *http ) ;
+	void UpdateFile( Entry& file, const Collection& parent, http::Agent *http ) ;
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	
 	FolderListIterator FindFolder( const std::string& href ) ;
+	FolderListIterator Root( ) ;
 	
 private :
 	OAuth2&						m_auth ;
@@ -62,7 +63,6 @@ private :
 	std::string					m_resume_link ;
 	
 	FolderList					m_coll ;
-	Collection					m_root ;
 } ;
 
 } // end of namespace

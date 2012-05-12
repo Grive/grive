@@ -46,8 +46,7 @@
 namespace gr {
 
 Drive::Drive( OAuth2& auth ) :
-	m_auth( auth ),
-	m_root( ".", root_href )
+	m_auth( auth )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
@@ -58,7 +57,7 @@ Drive::Drive( OAuth2& auth ) :
 	http::XmlResponse xrsp ;
 	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
 	
-	http.Get( feed_base + "?showfolders=true", &log, m_http_hdr ) ;
+	http.Get( feed_base + "?showfolders=true&showroot=true", &log, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
 	m_resume_link = resp["link"].
@@ -70,9 +69,14 @@ Drive::Drive( OAuth2& auth ) :
 		xml::NodeSet entries = resp["entry"] ;
 		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
-			if ( !Collection::IsCollection( *i ) )
+			Entry file( *i ) ;
+			if ( file.Kind() != "folder" )
 			{
-				UpdateFile( *i, &http ) ;
+				FolderListIterator pit = FindFolder( file.ParentHref() ) ;
+				if ( pit != m_coll.end() && pit->IsInRootTree() )
+					UpdateFile( file, *pit, &http ) ;
+				else
+					std::cout << "file " << file.Title() << " parent doesn't exist, ignored" << std::endl ;
 			}
 		}
 		
@@ -81,7 +85,8 @@ Drive::Drive( OAuth2& auth ) :
 
 		if ( has_next )
 		{
-			http.Get( nss["@href"], &xrsp, m_http_hdr ) ;
+			http::ResponseLog log2( "second-", ".xml", &xrsp ) ;
+			http.Get( nss["@href"], &log2, m_http_hdr ) ;
 			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
@@ -102,14 +107,21 @@ struct SortCollectionByHref
 Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 {
 	// try to find the parent by its href
-	std::vector<Collection>::iterator it =
-		std::lower_bound(
+	std::pair<FolderListIterator,FolderListIterator> its =
+		std::equal_range(
 			m_coll.begin(),
 			m_coll.end(),
 			Collection( "", href ),
 			SortCollectionByHref() ) ;
 	
-	 return (it != m_coll.end() && it->SelfHref() == href) ? it : m_coll.end() ;
+	 return (its.first != its.second) ? its.first : m_coll.end() ;
+}
+
+Drive::FolderListIterator Drive::Root( )
+{
+	FolderListIterator root = FindFolder( root_href ) ;
+	assert( root != m_coll.end() ) ;
+	return root ;
 }
 
 void Drive::ConstructDirTree( http::Agent *http )
@@ -122,6 +134,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 	xml::Node resp = xml.Response() ;
 
 	assert( m_coll.empty() ) ;
+	m_coll.push_back( Collection( ".", root_href ) ) ;
 	
 	while ( true )
 	{
@@ -130,8 +143,14 @@ void Drive::ConstructDirTree( http::Agent *http )
 		// first, get all collections from the query result
 		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
-			if ( Collection::IsCollection( *i ) )
-				m_coll.push_back( Collection( *i ) ) ;
+			Entry e( *i ) ;
+			if ( e.Kind() == "folder" )
+			{
+				if ( e.ParentHrefs().size() == 1 )
+					m_coll.push_back( Collection( e ) ) ;
+				else
+					std::cout << e.Title() << " has multiple parents, ignored" << std::endl ;
+			}
 		}
 		
 		xml::NodeSet next = resp["link"].Find( "@rel", "next" ) ;
@@ -146,52 +165,33 @@ void Drive::ConstructDirTree( http::Agent *http )
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
-		if ( i->ParentHref().empty() )
+		FolderListIterator pit = FindFolder( i->ParentHref() ) ;
+		if ( pit != m_coll.end() )
 		{
-			std::cout << "folder \"" << i->Title() << "\" not in root folder, ignored" << std::endl ;
-		}
-		else if ( i->ParentHref() == root_href )
-			m_root.AddChild( &*i ) ;
-		else
-		{
-			FolderListIterator pit = FindFolder( i->ParentHref() ) ;
-			if ( pit != m_coll.end() )
-			{
-				// it shouldn't happen, just in case
-				if ( &*i == &*pit )
-					std::cout
-						<< "the parent of folder " << i->Title()
-						<< " is itself. ignored" << std::endl ;
-				else
-					pit->AddChild( &*i ) ;
-			}
+			// it shouldn't happen, just in case
+			if ( &*i == &*pit )
+				std::cout
+					<< "the parent of folder " << i->Title()
+					<< " is itself. ignored" << std::endl ;
 			else
-				std::cout << "can't find folder " << i->Title() << " " << i->ParentHref() << std::endl ;
+				pit->AddChild( &*i ) ;
 		}
+		else
+			std::cout << "can't find folder " << i->Title() << " \"" << i->ParentHref() << "\"" << std::endl ;
 	}
 
 	// lastly, iterating from the root, create the directories in the local file system
-	assert( m_root.Parent() == 0 ) ;
-	m_root.CreateSubDir( Path() ) ;
+	assert( Root()->Parent() == 0 ) ;
+	Root()->CreateSubDir( Path() ) ;
 }
 
-void Drive::UpdateFile( const xml::Node& entry, http::Agent *http )
+void Drive::UpdateFile( Entry& file, const Collection& parent, http::Agent *http )
 {
 	// only handle uploaded files
-	if ( !entry["docs:suggestedFilename"].empty() )
+	if ( !file.Filename().empty() )
 	{
-		Entry file( entry ) ;
-	
 		bool changed = true ;
-		Path path = Path() / file.Filename() ;
-
-		// determine which folder the file belongs to
-		if ( !file.ParentHref().empty() )
-		{
-			FolderListIterator pit = FindFolder( file.ParentHref() ) ;
-			if ( pit != m_coll.end() )
-				path = pit->Dir() / file.Filename() ;
-		}
+		Path path = parent.Dir() / file.Filename() ;
 		
 		// compare checksum first if file exists
 		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
@@ -220,6 +220,10 @@ std::cout << "local " << path << " is newer" << std::endl ;
 std::cout << path << " is read only" << std::endl ;
 			}
 		}
+	}
+	else
+	{
+std::cout << file.Title() << " is a google document, ignored" << std::endl ;
 	}
 }
 
