@@ -29,6 +29,7 @@
 #include "util/OS.hh"
 #include "util/Path.hh"
 #include "xml/Node.hh"
+#include "xml/NodeSet.hh"
 
 #include <algorithm>
 #include <iostream>
@@ -94,8 +95,8 @@ void Entry::Update( const Json& entry )
 
 void Entry::Update( const xml::Node& n )
 {
-	m_title		= n["title"].Value() ;
-	m_etag		= n["@gd:etag"].Value() ;
+	m_title		= n["title"] ;
+	m_etag		= n["@gd:etag"] ;
 	m_filename	= n.ChildValue( "docs:suggestedFilename" ) ;
 }
 

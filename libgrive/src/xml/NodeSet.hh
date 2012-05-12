@@ -23,6 +23,7 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include <string>
 
 namespace gr { namespace xml {
 
@@ -38,10 +39,13 @@ public :
 	iterator end() const ;
 	bool empty() const ;
 	std::size_t size() const ;
+	Node front() const ;
 	
 	Node Find( const std::string& attr, const std::string& value ) const ;
 
-	operator Node() const ;
+	// forwarding common Node operations to Node
+	operator std::string() const ;
+	NodeSet operator[]( const std::string& name ) const ;
 	
 private :
 	iterator	m_first ;

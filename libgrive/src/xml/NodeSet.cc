@@ -50,9 +50,28 @@ Node NodeSet::Find( const std::string& attr, const std::string& value ) const
 	throw std::runtime_error( "can't find element with " + attr + " is " + value ) ;
 }
 
-NodeSet::operator Node() const
+NodeSet NodeSet::operator[]( const std::string& name ) const
 {
-	return m_first != m_last ? *m_first : Node() ;
+	for ( iterator i = m_first ; i != m_last ; ++i )
+	{
+		NodeSet r = (*i)[name] ;
+		if ( !r.empty() )
+			return r ;
+	}
+	throw std::runtime_error( "can't find node " + name ) ;
+}
+
+Node NodeSet::front() const
+{
+	if ( empty() )
+		throw std::runtime_error( "empty node set" ) ;
+		
+	return *m_first ;
+}
+
+NodeSet::operator std::string() const
+{
+	return front().Value() ;
 }
 
 bool NodeSet::empty() const

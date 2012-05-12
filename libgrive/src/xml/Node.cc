@@ -99,7 +99,7 @@ public :
 		m_children.push_back( child ) ;
 	}
 
-	Impl* Find( const std::string& name )
+	Range Find( const std::string& name )
 	{
 		assert( !name.empty() ) ;
 
@@ -110,13 +110,8 @@ public :
 	
 	Impl* FindAttr( const std::string& name )
 	{
-		return Find( m_attr, name ) ;
-	}
-	
-	std::pair<iterator,iterator> Children( const std::string& name )
-	{
-		Impl tmp( name , element ) ;
-		return std::equal_range( m_element.begin(), m_element.end(), &tmp, Comp() ) ;
+		std::pair<iterator,iterator> r = Find( m_attr, name ) ;
+		return r.first != r.second ? *r.first : 0 ;
 	}
 	
 	iterator Begin()
@@ -144,7 +139,7 @@ public :
 		return m_children.size() ;
 	}
 	
-	std::pair<iterator, iterator> Attr()
+	Range Attr()
 	{
 		return std::make_pair( m_attr.begin(), m_attr.end() ) ;
 	}
@@ -184,12 +179,10 @@ public :
 	} ;
 
 private :
-	Impl* Find( ImplVec& map, const std::string& name )
+	Range Find( ImplVec& map, const std::string& name )
 	{
 		Impl tmp( name , element ) ;
-		iterator i = std::lower_bound( map.begin(), map.end(), &tmp, Comp() ) ;
-
-		return i != map.end() && (*i)->m_name == name ? *i : 0 ;
+		return std::equal_range( map.begin(), map.end(), &tmp, Comp() ) ;
 	}
 
 private :
@@ -300,16 +293,13 @@ void Node::AddNode( const Node& node )
 	m_ptr->Add( node.m_ptr->AddRef() ) ;
 }
 
-Node Node::operator[]( const std::string& name ) const
+NodeSet Node::operator[]( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
 	assert( !name.empty() ) ;
 	
-	Impl *i = m_ptr->Find( name ) ;
-	if ( i != 0 )
-		return Node( i->AddRef() ) ;
-
-	throw std::runtime_error( "node " + name + " can't be found" ) ;
+	Range is = m_ptr->Find( name ) ;
+	return NodeSet( iterator(is.first), iterator(is.second) ) ;
 }
 
 std::size_t Node::RefCount() const
@@ -413,7 +403,7 @@ std::size_t Node::size() const
 NodeSet Node::Attr() const
 {
 	assert( m_ptr != 0 ) ;
-	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Attr() ;
+	Range is = m_ptr->Attr() ;
 
 	return NodeSet( iterator(is.first), iterator(is.second) ) ;
 }
@@ -425,17 +415,9 @@ std::string Node::Attr( const std::string& attr ) const
 	return imp != 0 ? imp->Value() : "" ;
 }
 
-NodeSet Node::Children( const std::string& name ) const
-{
-	assert( m_ptr != 0 ) ;
-	std::pair<Impl::iterator, Impl::iterator> is = m_ptr->Children( name ) ;
-
-	return NodeSet( iterator(is.first), iterator(is.second) ) ;
-}
-
 std::string Node::ChildValue( const std::string& name ) const
 {
-	NodeSet r = Children( name ) ;
+	NodeSet r = operator[]( name ) ;
 	return r.empty() ? "" : r.begin()->Value() ;
 }
 

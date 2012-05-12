@@ -40,10 +40,9 @@ void EntryTest::TestXml( )
 {
 	xml::Node root = xml::TreeBuilder::ParseFile( TEST_DATA "entry.xml" )  ;
 	
-	xml::NodeSet entries = root.Children( "entry" ) ;
-	CPPUNIT_ASSERT( !entries.empty() ) ;
+	CPPUNIT_ASSERT( !root["entry"].empty() ) ;
 	
-	Entry subject( *entries.begin() ) ;
+	Entry subject( root["entry"].front() ) ;
 	GRUT_ASSERT_EQUAL( "snes", subject.Title() ) ;
 	GRUT_ASSERT_EQUAL( "\"WxYPGE8CDyt7ImBk\"", subject.ETag() ) ;
 }

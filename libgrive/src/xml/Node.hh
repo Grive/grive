@@ -54,7 +54,7 @@ public :
 	void AddNode( const Node& node ) ;
 	void AddAttribute( const std::string& name, const std::string& val ) ;
 
-	Node operator[]( const std::string& name ) const ;
+	NodeSet operator[]( const std::string& name ) const ;
 	
 	const std::string& Name() const ;
 	std::string Value() const ;
@@ -75,13 +75,14 @@ public :
 	
 	NodeSet Attr() const ;
 	std::string Attr( const std::string& attr ) const ;
-	NodeSet Children( const std::string& name ) const ;
 	
 	std::string ChildValue( const std::string& name ) const ;
 	
 private :
 	explicit Node( Impl *impl ) ;
 
+	typedef std::pair<ImplVec::iterator, ImplVec::iterator> Range ;
+	
 private :
 	Impl *m_ptr ;
 } ;
