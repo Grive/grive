@@ -23,44 +23,64 @@
 
 namespace gr {
 
-typedef boost::format Fmt ;
+namespace log
+{
+	enum Serverity { debug, info, warning, error, critical } ;
+	typedef boost::format Fmt ;
+}
 
 /*!	\brief	Base class and singleton of log facilities
 */
-class Log
+class LogBase
 {
 public :
-	enum Serverity { debug, info, warning, error, critical } ;
-
-public :
-	virtual void operator()( const Fmt& msg, Serverity s = debug ) = 0 ;
-	virtual void operator()( const char *str, Serverity s = debug ) = 0 ;
+	virtual void Log( const log::Fmt& msg, log::Serverity s = log::info ) = 0 ;
 	
-	static Log& Inst( Log *log = 0 ) ;
+	static LogBase* Inst( LogBase *log = 0 ) ;
 
 protected :
-	Log() ;
-	~Log() ;
+	LogBase() ;
+	~LogBase() ;
 } ;
 
-void Logs( const std::string& str, Log::Serverity s = Log::debug ) ;
+void Log( const std::string& str, log::Serverity s = log::info ) ;
 
 template <typename P1>
-void Logs( const std::string& fmt, const P1& p1, Log::Serverity s = Log::debug )
+void Log( const std::string& fmt, const P1& p1, log::Serverity s = log::info )
 {
-	Log::Inst()( Fmt(fmt) % p1, s ) ;
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1, s ) ;
 }
 
 template <typename P1, typename P2>
-void Logs( const std::string& fmt, const P1& p1, const P2& p2, Log::Serverity s = Log::debug )
+void Log( const std::string& fmt, const P1& p1, const P2& p2, log::Serverity s = log::info )
 {
-	Log::Inst()( Fmt(fmt) % p1 % p2, s ) ;
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2, s ) ;
 }
 
 template <typename P1, typename P2, typename P3>
-void Logs( const std::string& fmt, const P1& p1, const P2& p2, const P3& p3, Log::Serverity s = Log::debug )
+void Log( const std::string& fmt, const P1& p1, const P2& p2, const P3& p3, log::Serverity s = log::info )
 {
-	Log::Inst()( Fmt(fmt) % p1 % p2 % p3, s ) ;
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2 % p3, s ) ;
+}
+
+void Trace( const std::string& str ) ;
+
+template <typename P1>
+void Trace( const std::string& fmt, const P1& p1 )
+{
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1, log::debug ) ;
+}
+
+template <typename P1, typename P2>
+void Trace( const std::string& fmt, const P1& p1, const P2& p2 )
+{
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2, log::debug ) ;
+}
+
+template <typename P1, typename P2, typename P3>
+void Trace( const std::string& fmt, const P1& p1, const P2& p2, const P3& p3 )
+{
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2 % p3, log::debug ) ;
 }
 
 } // end of namespace

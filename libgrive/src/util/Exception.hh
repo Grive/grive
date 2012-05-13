@@ -22,7 +22,6 @@
 #include <boost/exception/exception.hpp>
 #include <boost/exception/info.hpp>
 
-#include <typeinfo>
 #include <exception>
 #include <string>
 

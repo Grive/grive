@@ -135,7 +135,8 @@ long Agent::ExecCurl(
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-	// throw exception when error
+	Log( "HTTP response %1%", http_code ) ;
+	
 	if ( curl_code != CURLE_OK || http_code >= 400 )
 	{
 		throw Error()
@@ -153,7 +154,7 @@ long Agent::Put(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log::Inst()( Fmt("HTTP PUT requesting \"%1%\"\n") % url, Log::info ) ;
+	Log("HTTP PUT \"%1%\"", url ) ;
 
 	CURL *curl = m_pimpl->curl ;
 
@@ -176,7 +177,7 @@ long Agent::Get(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log::Inst()( Fmt("HTTP GET requesting \"%1%\"\n") % url, Log::info ) ;
+	Log("HTTP GET \"%1%\"", url ) ;
 	
 	CURL *curl = m_pimpl->curl ;
 
@@ -195,7 +196,7 @@ long Agent::Post(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log::Inst()( Fmt("HTTP POST requesting \"%1%\" with \"%2%\"\n") % url % data, Log::info ) ;
+	Log("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
 
 	CURL *curl = m_pimpl->curl ;
 
@@ -217,7 +218,7 @@ long Agent::Custom(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log::Inst()( Fmt("HTTP %2% requesting \"%1%\"\n") % url % method, Log::info ) ;
+	Log("HTTP %2% \"%1%\"", url, method ) ;
 
 	CURL *curl = m_pimpl->curl ;
 

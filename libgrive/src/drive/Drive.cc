@@ -77,7 +77,7 @@ Drive::Drive( OAuth2& auth ) :
 				if ( pit != m_coll.end() && pit->IsInRootTree() )
 					UpdateFile( file, *pit, &http ) ;
 				else
-					Logs( "file %1% parent doesn't exist, ignored", file.Title(), Log::info ) ;
+					Log( "file %1% parent doesn't exist, ignored", file.Title() ) ;
 			}
 		}
 		
@@ -150,7 +150,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 				if ( e.ParentHrefs().size() == 1 )
 					m_coll.push_back( Collection( e ) ) ;
 				else
-					Logs( "%1% has multiple parents, ignored", e.Title(), Log::info ) ;
+					Log( "%1% has multiple parents, ignored", e.Title() ) ;
 			}
 		}
 		
@@ -171,12 +171,12 @@ void Drive::ConstructDirTree( http::Agent *http )
 		{
 			// it shouldn't happen, just in case
 			if ( &*i == &*pit )
-				Logs( "the parent of folder %1% is itself, ignored.", i->Title(), Log::warning ) ;
+				Log( "the parent of folder %1% is itself, ignored.", i->Title(), log::warning ) ;
 			else
 				pit->AddChild( &*i ) ;
 		}
 		else
-			Logs( "can't find folder %1% (\"%2%\")", i->Title(), i->ParentHref() ) ;
+			Log( "can't find folder %1% (\"%2%\")", i->Title(), i->ParentHref(), log::warning ) ;
 	}
 
 	// lastly, iterating from the root, create the directories in the local file system
@@ -205,24 +205,19 @@ void Drive::UpdateFile( Entry& file, const Collection& parent, http::Agent *http
 			
 			// remote file is newer, download file
 			if ( !ifile || remote > local )
-			{
-std::cout << "downloading " << path << std::endl ;
 				file.Download( http, path, m_http_hdr ) ;
-			}
+			
 			else
 			{
-std::cout << "local " << path << " is newer" << std::endl ;
 				// re-reading the file
 				ifile.seekg(0) ;
-				
-				if ( !file.Upload( http, ifile.rdbuf(), m_http_hdr ) )
-std::cout << path << " is read only" << std::endl ;
+				file.Upload( http, ifile.rdbuf(), m_http_hdr ) ;
 			}
 		}
 	}
 	else
 	{
-std::cout << file.Title() << " is a google document, ignored" << std::endl ;
+		Log( "%1% is a google document, ignored", file.Title() ) ;
 	}
 }
 

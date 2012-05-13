@@ -124,6 +124,7 @@ std::string Entry::ParentHref() const
 
 void Entry::Download( http::Agent* http, const Path& file, const http::Headers& auth ) const
 {
+	Log( "Downloading %1%", file ) ;
 	http::Download dl( file.Str(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_content_src, &dl, auth ) ;
 	if ( r <= 400 )
@@ -134,7 +135,12 @@ bool Entry::Upload( http::Agent* http, std::streambuf *file, const http::Headers
 {
 	// upload link missing means that file is read only
 	if ( m_upload_link.empty() )
+	{
+		Log( "Cannot upload %1%: file read-only.", m_title, log::warning ) ;
 		return false ;
+	}
+	
+	Log( "Uploading %1%", m_title ) ;
 
 	std::string meta =
 	"<?xml version='1.0' encoding='UTF-8'?>\n"
@@ -171,7 +177,7 @@ bool Entry::Upload( http::Agent* http, std::streambuf *file, const http::Headers
 	http::XmlResponse xml ;
 	http->Put( uplink, data, &xml, uphdr ) ;
 
-	Log::Inst()( Fmt("receipted response = %1%\n") % xml.Response() ) ;
+	Trace( "Receipted response = %1%", xml.Response() ) ;
 
 	return true ;
 }

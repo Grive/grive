@@ -139,10 +139,10 @@ int main( int argc, char **argv )
 	}
 	catch ( const std::runtime_error& error )
 	{
-		Logs(
+		Log(
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
-			Log::critical ) ;
+			log::critical ) ;
 		
 		return -1;
 	}
@@ -154,8 +154,7 @@ int main( int argc, char **argv )
 	}
 	catch ( gr::Exception& e )
 	{
-		Logs( "exception: %1%\n%2%", e.what(), *boost::get_error_info<expt::BacktraceInfo>( e ),
-			Log::critical ) ;
+		Log( "exception: %1%", boost::diagnostic_information(e), log::critical ) ;
 		return -1 ;
 	}
 	

@@ -24,50 +24,49 @@
 
 namespace gr {
 
-class DefaultLog : public Log
+class DefaultLog : public LogBase
 {
 public :
-	// do nothing
-	void operator()( const Fmt& msg, Serverity s )
-	{
-		operator()( msg.str().c_str(), s ) ;
-	}
-	
-	void operator()( const char *str, Serverity s )
+	void Log( const log::Fmt& msg, log::Serverity s )
 	{
 		switch ( s )
 		{
-			case debug:
-			case info:
-				std::cout << str << std::endl ;
+			case log::debug:
+			case log::info:
+				std::cout << msg << std::endl ;
 				break ;
 			
 			default:
-				std::cerr << str << std::endl ;
+				std::cerr << msg << std::endl ;
 				break ;
 		}
 	}
 } ;
 
-Log& Log::Inst( Log *log )
+LogBase* LogBase::Inst( LogBase *log )
 {
 	static DefaultLog mlog ;
-	static Log *inst = (log == 0 ? &mlog : log ) ;
+	static LogBase *inst = (log == 0 ? &mlog : log ) ;
 	assert( inst != 0 ) ;
-	return *inst ;
+	return inst ;
 }
 
-Log::Log()
+LogBase::LogBase()
 {
 }
 
-Log::~Log()
+LogBase::~LogBase()
 {
 }
 
-void Logs( const std::string& str, Log::Serverity s )
+void Log( const std::string& str, log::Serverity s )
 {
-	Log::Inst()( str.c_str(), s ) ;
+	LogBase::Inst()->Log( log::Fmt(str), s ) ;
+}
+
+void Trace( const std::string& str )
+{
+	LogBase::Inst()->Log( log::Fmt(str), log::debug ) ;
 }
 
 } // end of namespace
