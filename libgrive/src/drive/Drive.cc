@@ -26,6 +26,7 @@
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
+#include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
 #include "util/Log.hh"
@@ -38,6 +39,7 @@
 // standard C++ library
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -59,18 +61,52 @@ Drive::Drive( OAuth2& auth ) :
 	http::XmlResponse xrsp ;
 	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
 	
-	http.Get( feed_base + "?showfolders=true&showroot=true", &log, m_http_hdr ) ;
+	std::string change_stamp ;
+	
+	std::ifstream sfile( ".grive_state" ) ;
+	if ( sfile )
+	{
+		std::string state_str(
+			(std::istreambuf_iterator<char>( sfile )),
+			(std::istreambuf_iterator<char>()) ) ;
+		sfile.close() ;
+		
+		Json state = Json::Parse( state_str ) ;
+		change_stamp = state["change_stamp"].Str() ;
+		Trace( "config change stamp is %1%", change_stamp ) ;
+	}
+		
+	std::string uri = feed_changes + "?showfolders=true&showroot=true" ;
+	if ( !change_stamp.empty() )
+	{
+		int ichangestamp = std::atoi( change_stamp.c_str() ) + 1 ;
+		uri = (boost::format( "%1%&start-index=%2%" ) % uri % ichangestamp ).str() ;
+	}
+	
+	http.Get( uri, &log, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
 	m_resume_link = resp["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-		
+	
+	change_stamp = resp["docs:largestChangestamp"]["@value"] ;
+	Trace( "change stamp is %1%", change_stamp ) ;
+	
+	std::ofstream osfile( ".grive_state" ) ;
+	Json state ;
+	state.Add( "change_stamp", Json( change_stamp ) ) ;
+	osfile << state ;
+	osfile.close() ;
+	
 	bool has_next = false ;
 	do
 	{
 		xml::NodeSet entries = resp["entry"] ;
 		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
 		{
+			if ( (*i)["content"] == "" )
+				continue ;
+		
 			Entry file( *i ) ;
 			if ( file.Kind() != "folder" )
 			{
