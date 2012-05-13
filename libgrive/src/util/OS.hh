@@ -40,11 +40,6 @@ namespace os
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 	void SetFileTime( const Path& filename, const DateTime& t ) ;
-	
-	void SetXAttr(
-		const Path&			filename,
-		const std::string&	attr,
-		const std::string&	value ) ;
 }
 
 } // end of namespaces

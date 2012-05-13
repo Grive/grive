@@ -34,7 +34,6 @@
 
 // OS specific headers
 #include <errno.h>
-#include <attr/xattr.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -85,26 +84,7 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 {
 	struct timeval tvp[2] = { t.Tv(), t.Tv() } ;
 	if ( ::utimes( filename.c_str(), tvp ) != 0 )
-		throw Exception() << expt::ErrMsg( "cannot set file time" ) ;
-}
-
-void SetXAttr(
-	const Path&			filename,
-	const std::string&	attr,
-	const std::string&	value )
-{
-	if ( ::setxattr(
-		filename.Str().c_str(),
-		attr.c_str(),
-		value.c_str(),
-		value.size(),
-		0 ) != 0 )
-	{
-		int err_num = errno ;
-		throw Exception()
-			<< expt::ErrMsg( "cannot set file extended attribute of " + filename.Str() )
-			<< expt::ErrorNumber( err_num ) ;
-	}
+		throw expt::ErrMsg( "cannot set file time" ) ;
 }
 
 } } // end of namespaces
