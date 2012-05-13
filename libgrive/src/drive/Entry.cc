@@ -122,15 +122,15 @@ std::string Entry::ParentHref() const
 	return m_parent_href ;
 }
 
-void Entry::Download( gr::http::Agent* http, const Path& file, const http::Headers& auth ) const
+void Entry::Download( http::Agent* http, const Path& file, const http::Headers& auth ) const
 {
-	gr::Download dl( file.Str(), Download::NoChecksum() ) ;
+	http::Download dl( file.Str(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_content_src, &dl, auth ) ;
 	if ( r <= 400 )
 		os::SetFileTime( file, m_server_modified ) ;
 }
 
-bool Entry::Upload( gr::http::Agent* http, std::streambuf *file, const http::Headers& auth )
+bool Entry::Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth )
 {
 	// upload link missing means that file is read only
 	if ( m_upload_link.empty() )

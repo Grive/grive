@@ -18,8 +18,14 @@
 */
 
 #include "drive/Drive.hh"
+
 #include "protocol/OAuth2.hh"
 #include "protocol/Json.hh"
+
+#include "bfd/Backtrace.hh"
+#include "util/Exception.hh"
+
+#include <boost/exception/all.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -137,8 +143,18 @@ int main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	Drive drive( token ) ;
+	try
+	{
+		OAuth2 token( refresh_token, client_id, client_secret ) ;
+		Drive drive( token ) ;
+	}
+	catch ( gr::Exception& e )
+	{
+		std::cerr
+			<< "exception: " << e.what() << std::endl
+			<< *boost::get_error_info<gr::expt::BacktraceInfo>( e )
+			<< std::endl ;
+	}
 	
 	return 0 ;
 }

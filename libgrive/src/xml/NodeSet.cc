@@ -19,8 +19,9 @@
 
 #include "NodeSet.hh"
 
+#include "Error.hh"
+
 #include <algorithm>
-#include <stdexcept>
 
 #include <iostream>
 
@@ -123,7 +124,7 @@ NodeSet NodeSet::operator[]( const std::string& name ) const
 Node NodeSet::front() const
 {
 	if ( empty() )
-		throw std::runtime_error( "empty node set" ) ;
+		throw Error() << expt::ErrMsg( "empty node set" ) ;
 		
 	return *m_first ;
 }

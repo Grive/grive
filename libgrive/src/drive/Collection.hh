@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Entry.hh"
+#include "util/Exception.hh"
 #include "util/Function.hh"
 
 #include <string>
@@ -56,7 +57,9 @@ public :
 	void ForEachFile(
 		Function<void(const std::string&)>	callback,
 		const std::string& 					prefix = "." ) ;
-	
+
+	struct Error : virtual Exception {} ;
+
 private :
 	Entry						m_entry ;
 	

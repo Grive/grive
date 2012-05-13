@@ -18,13 +18,14 @@
 */
 
 #include "Node.hh"
+
+#include "Error.hh"
 #include "NodeSet.hh"
 
 #include <algorithm>
 #include <cassert>
 #include <functional>
 #include <iterator>
-#include <stdexcept>
 
 // debugging
 #include <iostream>
@@ -91,7 +92,7 @@ public :
 
 			// cannot allow duplicate attribute nodes
 			if ( child->m_type	== attr && p.first != p.second )
-				throw std::runtime_error( "duplicate attribute " + child->m_name ) ;
+				throw Error() << expt::ErrMsg( "duplicate attribute " + child->m_name ) ;
 			
 			vec.insert( p.second, child ) ;
 		}

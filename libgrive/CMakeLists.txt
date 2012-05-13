@@ -19,6 +19,7 @@ if ( BFD_FOUND )
 	file( GLOB OPT_SRC
 		src/bfd/*.cc
 	)
+	add_definitions( -DHAVE_BFD )
 
 endif ( BFD_FOUND )
 
@@ -52,7 +53,11 @@ file (GLOB LIBGRIVE_SRC
 	src/xml/*.cc
 )
 
-add_definitions( -DVERSION="${GRIVE_VERSION}" -DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/" )
+add_definitions(
+	-DVERSION="${GRIVE_VERSION}"
+	-DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/"
+	-DSRC_DIR="${libgrive_SOURCE_DIR}/src"
+)
 
 add_library( grive SHARED ${LIBGRIVE_SRC} ${OPT_SRC} )
 

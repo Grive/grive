@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <string>
 #include <map>
 #include <vector>
@@ -33,6 +35,8 @@ public :
 	typedef std::map<std::string, Json>	Object ;
 	typedef std::vector<Json>			Array ;
 
+	struct Error : virtual Exception {} ;
+	
 public :
 	template <typename T>
 	explicit Json( const T& val ) ;

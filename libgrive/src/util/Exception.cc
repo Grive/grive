@@ -17,19 +17,37 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "util/Exception.hh"
 
-#include <stdexcept>
+#include "bfd/Backtrace.hh"
+#include "bfd/Debug.hh"
 
-namespace gr { namespace http {
+#include <boost/exception/all.hpp>
 
-class Exception : public std::runtime_error
+#include <cstdlib>
+#include <iterator>
+#include <sstream>
+
+namespace gr {
+
+class Backtrace ;
+
+Exception::Exception( )
 {
-public :
-	Exception( int curl_code, int http_code, const char *err_buf ) ;
+#ifdef HAVE_BFD
+	*this << expt::BacktraceInfo( Backtrace() ) ;
+#endif
+}
 
-private :
-	static std::string Format( int curl_code, int http_code, const char *err_buf ) ;
-} ;
+const char* Exception::what() const throw()
+{
+	if ( const std::string *s = boost::get_error_info<expt::ErrMsg>(*this) )
+		return s->c_str() ;
+	else
+	{
+		static const char unknown[] = "unknown" ;
+		return unknown ;
+	}
+}
 
-} } // end of namespace
+} // end of namespace

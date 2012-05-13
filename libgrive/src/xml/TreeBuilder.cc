@@ -18,6 +18,8 @@
 */
 
 #include "TreeBuilder.hh"
+
+#include "Error.hh"
 #include "Node.hh"
 
 #include <expat.h>
@@ -25,7 +27,6 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
 
 namespace gr { namespace xml {
 
@@ -68,7 +69,7 @@ Node TreeBuilder::ParseFile( const std::string& file )
 void TreeBuilder::ParseData( const char *data, std::size_t count, bool last )
 {
 	if ( ::XML_Parse( m_impl->psr, data, count, last ) == 0 )
-		throw std::runtime_error( "XML parse error" ) ;
+		throw Error() << expt::ErrMsg( "XML parse error" ) ;
 }
 
 Node TreeBuilder::Parse( const std::string& xml )
@@ -84,7 +85,7 @@ Node TreeBuilder::Result() const
 	assert( m_impl->stack.size() == 1 ) ;
 	
 	if ( m_impl->stack.front().size() != 1 )
-		throw std::runtime_error( "invalid node" ) ;
+		throw Error() << expt::ErrMsg( "invalid node" ) ;
 		
 	return *m_impl->stack.front().begin() ;
 }

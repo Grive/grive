@@ -138,10 +138,7 @@ void SymbolInfo::BacktraceInfo::Callback( bfd *abfd, asection *section,
 
 std::size_t SymbolInfo::Backtrace( void **stack, std::size_t count )
 {
-std::cerr << "begin backtrace" << std::endl ;
 	std::size_t a = ::backtrace( stack, count ) ;
-std::cerr << "end backtrace" << std::endl ;
-
 	return a ;
 }
 
@@ -152,12 +149,10 @@ void SymbolInfo::PrintTrace( void *addr, std::ostream& os, std::size_t idx )
 		this, addr, 0, 0, 0, false
 	} ;
 	
-std::cerr << "begin bfd" << std::endl ;
 	Dl_info sym ;
 	bfd_map_over_sections( m_impl->m_bfd,
 							&SymbolInfo::BacktraceInfo::Callback,
 							&btinfo ) ;
-std::cerr << "end bfd" << std::endl ;
 
 if ( btinfo.m_is_found )
 	{

@@ -20,7 +20,7 @@
 #include "Agent.hh"
 
 #include "Download.hh"
-#include "Exception.hh"
+#include "Error.hh"
 #include "Receivable.hh"
 
 // dependent libraries
@@ -138,14 +138,13 @@ long Agent::ExecCurl(
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-	if ( curl_code != CURLE_OK )
+	
+	if ( curl_code != CURLE_OK || http_code >= 400 )
 	{
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
-	}
-	else if (http_code >= 400 )
-	{
-		std::cout << "http error " << http_code << std::endl ;
-		throw Exception( curl_code, http_code, m_pimpl->error ) ;
+		throw Error()
+			<< CurlCode( curl_code )
+			<< HttpResponse( http_code )
+			<< expt::ErrMsg( m_pimpl->error ) ;
 	}
 
 	return http_code ;

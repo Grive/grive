@@ -20,11 +20,11 @@
 #include "OS.hh"
 
 #include "DateTime.hh"
+#include "Exception.hh"
 #include "Path.hh"
 
-#include <stdexcept>
-
 // OS specific headers
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -50,7 +50,13 @@ DateTime FileMTime( const std::string& filename )
 {
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
-		throw std::runtime_error( "cannot get file attribute of " + filename ) ;
+	{
+		// save errno to prevend overwritten later
+		int err_num = errno ;
+		throw Exception()
+			<< expt::ErrMsg( "cannot get file attribute of " + filename )
+			<< expt::ErrorNumber( err_num ) ;
+	}
 	
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
 	return DateTime( s.st_mtimespec.tv_sec, s.st_mtimespec.tv_nsec ) ;
@@ -68,7 +74,7 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 {
 	struct timeval tvp[2] = { t.Tv(), t.Tv() } ;
 	if ( ::utimes( filename.c_str(), tvp ) != 0 )
-		throw std::runtime_error( "cannot set file time" ) ;
+		throw expt::ErrMsg( "cannot set file time" ) ;
 }
 
 } } // end of namespaces

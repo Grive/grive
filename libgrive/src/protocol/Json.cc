@@ -25,7 +25,6 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 
 namespace gr {
 
@@ -33,7 +32,7 @@ Json::Json( ) :
 	m_json( ::json_object_new_object() )
 {
 	if ( m_json == 0 )
-		throw std::runtime_error( "cannot create json object" ) ;
+		throw Error() << expt::ErrMsg( "cannot create json object" ) ;
 }
 
 template <>
@@ -41,7 +40,7 @@ Json::Json( const std::string& str ) :
 	m_json( ::json_object_new_string( str.c_str() ) )
 {
 	if ( m_json == 0 )
-		throw std::runtime_error( "cannot create json string \"" + str + "\"" ) ;
+		throw Error() << expt::ErrMsg( "cannot create json string \"" + str + "\"" ) ;
 
 	// paranoid check
 	assert( ::json_object_get_string( m_json ) == str ) ;
@@ -51,7 +50,7 @@ Json Json::Parse( const std::string& str )
 {
 	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
 	if ( json == 0 )
-		throw std::runtime_error( "json parse error" ) ;
+		throw Error() << expt::ErrMsg( "json parse error" ) ;
 	
 	return Json( json, NotOwned() ) ;
 }
@@ -103,7 +102,7 @@ Json Json::operator[]( const std::string& key ) const
 	
 	struct json_object *j = ::json_object_object_get( m_json, key.c_str() ) ;
 	if ( j == 0 )
-		throw std::runtime_error( "key: " + key + " is not found in object" ) ;
+		throw Error() << expt::ErrMsg( "key: " + key + " is not found in object" ) ;
 	
 	return Json( j ) ;
 }
@@ -117,7 +116,7 @@ Json Json::operator[]( const std::size_t& idx ) const
 	{
 		std::ostringstream ss ;
 		ss << "index " << idx << " is not found in array" ;
-		throw std::runtime_error( ss.str() ) ;
+		throw Error() << expt::ErrMsg( ss.str() ) ;
 	}
 	
 	return Json( j ) ;
@@ -241,7 +240,7 @@ Json Json::FindInArray( const std::string& key, const std::string& value ) const
 		if ( item.Has(key) && item[key].As<std::string>() == value )
 			return item ;
 	}
-	throw std::runtime_error( "cannot find " + key + " = " + value + " in array" ) ;
+	throw Error() << expt::ErrMsg( "cannot find " + key + " = " + value + " in array" ) ;
 }
 
 bool Json::FindInArray( const std::string& key, const std::string& value, Json& result ) const
@@ -251,7 +250,7 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 		result = FindInArray( key, value ) ;
 		return true ;
 	}
-	catch ( std::runtime_error& )
+	catch ( Error& )
 	{
 		return false ;
 	}

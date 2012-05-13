@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Collection.hh"
+#include "util/Exception.hh"
 
 #include <string>
 #include <vector>
@@ -48,6 +49,8 @@ public :
 	Drive( OAuth2& auth ) ;
 	~Drive( ) ;
 
+	struct Error : virtual Exception {} ;
+	
 private :
 	void UpdateFile( Entry& file, const Collection& parent, http::Agent *http ) ;
 	

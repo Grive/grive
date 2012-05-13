@@ -20,6 +20,8 @@
 #include "Download.hh"
 // #include "util/SignalHandler.hh"
 
+#include "Error.hh"
+
 #include <openssl/evp.h>
 
 #include <cassert>
@@ -28,7 +30,7 @@
 
 #include <signal.h>
 
-namespace gr {
+namespace gr { namespace http {
 
 Download::Download( const std::string& filename ) :
 	m_file( filename.c_str(), std::ios::out | std::ios::binary ),
@@ -38,10 +40,10 @@ Download::Download( const std::string& filename ) :
 		throw std::bad_alloc() ;
 	
 	if ( ::EVP_DigestInit_ex( m_mdctx, ::EVP_md5(), 0 ) != 1 )
-		throw std::runtime_error( "cannot create MD5 digest context" ) ;
+		throw Error() << expt::ErrMsg( "cannot create MD5 digest context" ) ;
 
 	if ( !m_file )
-		throw std::runtime_error( "cannot open file " + filename + " for writing" ) ;
+		throw Error() << expt::ErrMsg( "cannot open file " + filename + " for writing" ) ;
 }
 
 Download::Download( const std::string& filename, NoChecksum ) :
@@ -49,7 +51,7 @@ Download::Download( const std::string& filename, NoChecksum ) :
 	m_mdctx( 0 )
 {
 	if ( !m_file )
-		throw std::runtime_error( "cannot open file " + filename + " for writing" ) ;
+		throw Error() << expt::ErrMsg( "cannot open file " + filename + " for writing" ) ;
 }
 
 Download::~Download( )
@@ -77,7 +79,7 @@ std::string Download::Finish() const
 		result.resize( size ) ;
 		
 		if ( ::EVP_DigestFinal_ex( m_mdctx, reinterpret_cast<unsigned char*>(&result[0]), &size ) != 1 )
-			throw std::runtime_error( "cannot calculate checksum" ) ;
+			throw Error() << expt::ErrMsg( "cannot calculate checksum" ) ;
 		
 		result.resize( size ) ;
 	}
@@ -108,4 +110,4 @@ std::size_t Download::OnData( void *data, std::size_t count )
 	return m_file.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
 }
 
-} // end of namespace
+} } // end of namespace

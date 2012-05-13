@@ -26,7 +26,7 @@
 
 #include <openssl/evp.h>
 
-namespace gr {
+namespace gr { namespace http {
 
 class Download : public http::Receivable
 {
@@ -48,4 +48,4 @@ private :
 	EVP_MD_CTX		*m_mdctx ;
 } ;
 
-} // end of namespace
+} } // end of namespace
