@@ -135,7 +135,7 @@ long Agent::ExecCurl(
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-	Log( "HTTP response %1%", http_code ) ;
+	Trace( "HTTP response %1%", http_code ) ;
 	
 	if ( curl_code != CURLE_OK || http_code >= 400 )
 	{
@@ -154,7 +154,7 @@ long Agent::Put(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log("HTTP PUT \"%1%\"", url ) ;
+	Trace("HTTP PUT \"%1%\"", url ) ;
 
 	CURL *curl = m_pimpl->curl ;
 
@@ -177,7 +177,7 @@ long Agent::Get(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log("HTTP GET \"%1%\"", url ) ;
+	Trace("HTTP GET \"%1%\"", url ) ;
 	
 	CURL *curl = m_pimpl->curl ;
 
@@ -196,7 +196,7 @@ long Agent::Post(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
+	Trace("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
 
 	CURL *curl = m_pimpl->curl ;
 
@@ -218,7 +218,7 @@ long Agent::Custom(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
-	Log("HTTP %2% \"%1%\"", url, method ) ;
+	Trace("HTTP %2% \"%1%\"", url, method ) ;
 
 	CURL *curl = m_pimpl->curl ;
 

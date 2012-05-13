@@ -163,6 +163,8 @@ int main( int argc, char **argv )
 	{
 		OAuth2 token( refresh_token, client_id, client_secret ) ;
 		Drive drive( token ) ;
+		
+		drive.Update() ;
 	}
 	catch ( gr::Exception& e )
 	{

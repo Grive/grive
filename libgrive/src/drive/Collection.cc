@@ -87,9 +87,9 @@ void Collection::AddChild( Collection *child )
 	m_child.push_back( child ) ;
 }
 
-void Collection::AddLeaf( const std::string& filename )
+void Collection::AddLeaf( File *file )
 {
-	m_leaves.push_back( filename ) ;
+	m_leaf.push_back( file ) ;
 }
 
 void Collection::Swap( Collection& coll )
@@ -97,7 +97,7 @@ void Collection::Swap( Collection& coll )
 	m_entry.Swap( coll.m_entry ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
-	m_leaves.swap( coll.m_leaves ) ;
+	m_leaf.swap( coll.m_leaf ) ;
 }
 
 void Collection::CreateSubDir( const Path& prefix )

@@ -19,12 +19,11 @@
 
 #pragma once
 
-#include <string>
-
-#include "http/Agent.hh"
 #include "util/DateTime.hh"
 
 #include <iosfwd>
+#include <string>
+#include <vector>
 
 namespace gr {
 
@@ -33,8 +32,6 @@ namespace xml
 	class Node ;
 }
 
-class Json ;
-class OAuth2 ;
 class Path ;
 
 /*!	\brief	corresponds to an "entry" in the resource feed
@@ -60,12 +57,10 @@ public :
 	
 	std::string SelfHref() const ;
 	std::string ParentHref() const ;
+	std::string ContentSrc() const ;
+	std::string UploadLink() const ;
 	
 	const std::vector<std::string>& ParentHrefs() const ;
-	
-	void Download( http::Agent* http, const Path& file, const http::Headers& auth ) const ;
-	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
-	void Delete( http::Agent* http, const gr::http::Headers& auth ) ;
 	
 	void Swap( Entry& e ) ;
 	

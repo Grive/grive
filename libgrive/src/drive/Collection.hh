@@ -29,6 +29,7 @@
 namespace gr {
 
 class Path ;
+class File ;
 
 class Collection
 {
@@ -48,7 +49,7 @@ public :
 	bool IsInRootTree() const ;
 
 	void AddChild( Collection *child ) ;
-	void AddLeaf( const std::string& filename ) ;
+	void AddLeaf( File *file ) ;
 	
 	void Swap( Collection& coll ) ;
 
@@ -66,8 +67,7 @@ private :
 	// not owned
 	Collection					*m_parent ;
 	std::vector<Collection*>	m_child ;
-	
-	std::vector<std::string>	m_leaves ;
+	std::vector<File*>			m_leaf ;
 } ;
 
 } // end of namespace

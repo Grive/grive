@@ -19,11 +19,10 @@
 
 #pragma once
 
-#include "Collection.hh"
-#include "util/Exception.hh"
+#include "Entry.hh"
+#include "http/Agent.hh"
 
-#include <string>
-#include <vector>
+#include <iosfwd>
 
 namespace gr {
 
@@ -31,44 +30,23 @@ namespace http
 {
 	class Agent ;
 }
-namespace xml
-{
-	class Node ;
-}
 
-class OAuth2 ;
-class File ;
+class Collection ;
 
-class Drive
+class File
 {
 public :
-	typedef std::vector<Collection>				FolderList ;
-	typedef std::vector<Collection>::iterator	FolderListIterator ;
+	explicit File( const Entry& e, const Collection *parent ) ;
 
-public :
-	Drive( OAuth2& auth ) ;
-	~Drive( ) ;
-
-	void Update() ;
+	void Update( http::Agent *http, const http::Headers& auth ) ;
 	
-	struct Error : virtual Exception {} ;
+	void Download( http::Agent* http, const Path& file, const http::Headers& auth ) const ;
+	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
+	void Delete( http::Agent* http, const http::Headers& auth ) ;
 	
 private :
-	void UpdateFile( Entry& file, Collection& parent, http::Agent *http ) ;
-	
-	void ConstructDirTree( http::Agent *http ) ;
-	
-	FolderListIterator FindFolder( const std::string& href ) ;
-	FolderListIterator Root( ) ;
-	
-private :
-	OAuth2&						m_auth ;
-	std::vector<std::string>	m_http_hdr ;
-
-	std::string					m_resume_link ;
-	
-	FolderList					m_coll ;
-	std::vector<File*>			m_files ;
+	Entry				m_entry ;
+	const Collection	*m_parent ;
 } ;
 
 } // end of namespace

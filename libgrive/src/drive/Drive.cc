@@ -21,18 +21,19 @@
 
 #include "CommonUri.hh"
 #include "Entry.hh"
+#include "File.hh"
 
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/OAuth2.hh"
-#include "util/Crypt.hh"
-#include "util/DateTime.hh"
+#include "util/Destroy.hh"
 #include "util/Log.hh"
-#include "util/OS.hh"
 #include "util/Path.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
+
+#include <boost/bind.hpp>
 
 // standard C++ library
 #include <algorithm>
@@ -95,6 +96,7 @@ Drive::Drive( OAuth2& auth ) :
 
 Drive::~Drive( )
 {
+	std::for_each( m_files.begin(), m_files.end(), Destroy() ) ;
 }
 
 struct SortCollectionByHref
@@ -184,41 +186,28 @@ void Drive::ConstructDirTree( http::Agent *http )
 	Root()->CreateSubDir( Path() ) ;
 }
 
-void Drive::UpdateFile( Entry& file, const Collection& parent, http::Agent *http )
+void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
 {
 	// only handle uploaded files
-	if ( !file.Filename().empty() )
+	if ( !entry.Filename().empty() )
 	{
-		bool changed = true ;
-		Path path = parent.Dir() / file.Filename() ;
+		File *file = new File( entry, &parent ) ;
+		m_files.push_back( file ) ;
+		parent.AddLeaf( file ) ;
 		
-		// compare checksum first if file exists
-		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
-		if ( ifile && file.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
-			changed = false ;
-
-		// if the checksum is different, file is changed and we need to update
-		if ( changed )
-		{
-			DateTime remote	= file.ServerModified() ;
-			DateTime local	= ifile ? os::FileMTime( path ) : DateTime() ;
-			
-			// remote file is newer, download file
-			if ( !ifile || remote > local )
-				file.Download( http, path, m_http_hdr ) ;
-			
-			else
-			{
-				// re-reading the file
-				ifile.seekg(0) ;
-				file.Upload( http, ifile.rdbuf(), m_http_hdr ) ;
-			}
-		}
+// 		file->Update( http, m_http_hdr ) ;
 	}
 	else
 	{
-		Log( "file \"%1%\" is a google document, ignored", file.Title() ) ;
+		Log( "file \"%1%\" is a google document, ignored", entry.Title() ) ;
 	}
+}
+
+void Drive::Update()
+{
+	http::Agent http ;
+	std::for_each( m_files.begin(), m_files.end(),
+		boost::bind( &File::Update, _1, &http, m_http_hdr ) ) ;
 }
 
 } // end of namespace

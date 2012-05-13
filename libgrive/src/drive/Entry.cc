@@ -19,12 +19,6 @@
 
 #include "Entry.hh"
 
-#include "CommonUri.hh"
-
-#include "http/Download.hh"
-#include "http/StringResponse.hh"
-#include "http/XmlResponse.hh"
-#include "protocol/OAuth2.hh"
 #include "util/Log.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
@@ -33,7 +27,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 
 namespace gr {
 
@@ -122,66 +115,6 @@ std::string Entry::ParentHref() const
 	return m_parent_href ;
 }
 
-void Entry::Download( http::Agent* http, const Path& file, const http::Headers& auth ) const
-{
-	Log( "Downloading %1%", file ) ;
-	http::Download dl( file.Str(), http::Download::NoChecksum() ) ;
-	long r = http->Get( m_content_src, &dl, auth ) ;
-	if ( r <= 400 )
-		os::SetFileTime( file, m_server_modified ) ;
-}
-
-bool Entry::Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth )
-{
-	// upload link missing means that file is read only
-	if ( m_upload_link.empty() )
-	{
-		Log( "Cannot upload %1%: file read-only.", m_title, log::warning ) ;
-		return false ;
-	}
-	
-	Log( "Uploading %1%", m_title ) ;
-
-	std::string meta =
-	"<?xml version='1.0' encoding='UTF-8'?>\n"
-	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
-		"term=\"http://schemas.google.com/docs/2007#file\"/>"
-		"<title>" + m_filename + "</title>"
-	"</entry>" ;
-
-	std::string data(
-		(std::istreambuf_iterator<char>(file)),
-		(std::istreambuf_iterator<char>()) ) ;
-	
-	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
-	
-	http::Headers hdr( auth ) ;
-	hdr.push_back( "Content-Type: application/atom+xml" ) ;
-	hdr.push_back( "X-Upload-Content-Type: application/octet-stream" ) ;
-	hdr.push_back( xcontent_len.str() ) ;
-  	hdr.push_back( "If-Match: " + m_etag ) ;
-	hdr.push_back( "Expect:" ) ;
-	
-	http::StringResponse str ;
-	http->Put( m_upload_link, meta, &str, hdr ) ;
-	
-	std::string uplink = http->RedirLocation() ;
-	
-	// parse the header and find "Location"
-	http::Headers uphdr ;
-	uphdr.push_back( "Expect:" ) ;
-	uphdr.push_back( "Accept:" ) ;
-	
-	http::XmlResponse xml ;
-	http->Put( uplink, data, &xml, uphdr ) ;
-
-	Trace( "Receipted response = %1%", xml.Response() ) ;
-
-	return true ;
-}
-
 std::string Entry::ResourceID() const
 {
 	return m_resource_id ;
@@ -192,13 +125,14 @@ std::string Entry::ETag() const
 	return m_etag ;
 }
 
-void Entry::Delete( http::Agent *http, const http::Headers& auth )
+std::string Entry::ContentSrc() const
 {
-	http::Headers hdr( auth ) ;
-	hdr.push_back( "If-Match: " + m_etag ) ;
-	
-	http::StringResponse str ;
-	http->Custom( "DELETE", feed_base + "/" + m_resource_id + "?delete=true", &str, hdr ) ;
+	return m_content_src ;
+}
+
+std::string Entry::UploadLink() const
+{
+	return m_upload_link ;
 }
 
 void Entry::Swap( Entry& e )
