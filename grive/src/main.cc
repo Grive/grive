@@ -37,20 +37,14 @@
 #include <iterator>
 
 #include <exception>
-#include <stdexcept>
 
+// registered keys from google
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 namespace gr
 {
-	class ConfigError : public std::runtime_error
-	{
-	public :
-		ConfigError( const std::string& msg ) : runtime_error( msg )
-		{
-		}
-	} ;
+	struct ConfigError : virtual Exception {} ;
 
 	const std::string& ConfigFilename()
 	{
@@ -75,9 +69,9 @@ namespace gr
 			
 			return Json::Parse( cfg_str ) ;
 		}
-		catch ( std::runtime_error& e )
+		catch ( Exception& e )
 		{
-			throw ConfigError( std::string("Cannot open config file ") + e.what() ) ;
+			throw ConfigError() << expt::ErrMsg( std::string("Cannot open config file ") + e.what() ) ;
 		}
 	}
 	

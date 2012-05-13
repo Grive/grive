@@ -9,6 +9,7 @@ find_package(EXPAT REQUIRED)
 find_package(CppUnit)
 find_package(Boost REQUIRED)
 find_package(BFD)
+find_package(Attr REQUIRED)
 
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
@@ -65,6 +66,7 @@ target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
+	${ATTR_LIBRARY}
 	${OPT_LIBS}
 	expat
 )
