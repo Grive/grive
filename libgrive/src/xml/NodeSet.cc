@@ -151,6 +151,7 @@ std::size_t NodeSet::size() const
 std::ostream& operator<<( std::ostream& os, const NodeSet& node )
 {
 	std::copy( node.begin(), node.end(), std::ostream_iterator<Node>(os, " ") ) ;
+	return os ;
 }
 
 } } // end of namespace

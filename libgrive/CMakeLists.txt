@@ -8,10 +8,19 @@ find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(CppUnit)
 find_package(Boost REQUIRED)
+find_package(BFD)
 
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
 ENDIF ( CPPUNIT_FOUND )
+
+if ( BFD_FOUND )
+	set( OPT_LIBS	${DL_LIBRARY} ${BFD_LIBRARY} )
+	file( GLOB OPT_SRC
+		src/bfd/*.cc
+	)
+
+endif ( BFD_FOUND )
 
 include_directories(
 	${libgrive_SOURCE_DIR}/src
@@ -45,12 +54,13 @@ file (GLOB LIBGRIVE_SRC
 
 add_definitions( -DVERSION="${GRIVE_VERSION}" -DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/" )
 
-add_library( grive SHARED ${LIBGRIVE_SRC} )
+add_library( grive SHARED ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
+	${OPT_LIBS}
 	expat
 )
 

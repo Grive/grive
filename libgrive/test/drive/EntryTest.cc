@@ -48,7 +48,7 @@ void EntryTest::TestXml( )
 	GRUT_ASSERT_EQUAL( "https://docs.google.com/feeds/default/private/full/folder%3A0B5KhdsbryVeGMl83OEV1ZVc3cUE",
 		subject.SelfHref() ) ;
 	
-	GRUT_ASSERT_EQUAL( 1, subject.ParentHrefs().size() ) ;
+	GRUT_ASSERT_EQUAL( 1U, subject.ParentHrefs().size() ) ;
 	GRUT_ASSERT_EQUAL( "https://docs.google.com/feeds/default/private/full/folder%3A0B5KhdsbryVeGNEZjdUxzZHl3Sjg",
 		subject.ParentHrefs().front() ) ;
 	

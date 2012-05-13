@@ -78,7 +78,7 @@ void NodeTest::TestParseFile( )
 	}
 	
 	NodeSet r = n["entry"]["link"] ;
-	GRUT_ASSERT_EQUAL( 2, r.size() ) ;
+	GRUT_ASSERT_EQUAL( 2U, r.size() ) ;
 }
 
 } // end of namespace grut
