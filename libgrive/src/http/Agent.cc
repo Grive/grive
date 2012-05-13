@@ -23,13 +23,14 @@
 #include "Error.hh"
 #include "Receivable.hh"
 
+#include "util/Log.hh"
+
 // dependent libraries
 #include <curl/curl.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <sstream>
 #include <streambuf>
 
@@ -113,12 +114,8 @@ std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *
 	return size*nmemb ;
 }
 
-// std::ofstream g_log ;
-
 std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
 {
-// 	g_log.rdbuf()->sputn( (char*)ptr, size*nmemb ) ;
-
 	assert( recv != 0 ) ;
 	return recv->OnData( ptr, size * nmemb ) ;
 }
@@ -138,7 +135,7 @@ long Agent::ExecCurl(
 	long http_code = 0;
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-	
+	// throw exception when error
 	if ( curl_code != CURLE_OK || http_code >= 400 )
 	{
 		throw Error()
@@ -156,6 +153,8 @@ long Agent::Put(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
+	Log::Inst()( Fmt("HTTP PUT requesting \"%1%\"\n") % url, Log::info ) ;
+
 	CURL *curl = m_pimpl->curl ;
 
 	std::string put_data = data ;
@@ -177,6 +176,8 @@ long Agent::Get(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
+	Log::Inst()( Fmt("HTTP GET requesting \"%1%\"\n") % url, Log::info ) ;
+	
 	CURL *curl = m_pimpl->curl ;
 
 	// set common options
@@ -194,6 +195,8 @@ long Agent::Post(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
+	Log::Inst()( Fmt("HTTP POST requesting \"%1%\" with \"%2%\"\n") % url % data, Log::info ) ;
+
 	CURL *curl = m_pimpl->curl ;
 
 	std::string post_data = data ;
@@ -214,6 +217,8 @@ long Agent::Custom(
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
+	Log::Inst()( Fmt("HTTP %2% requesting \"%1%\"\n") % url % method, Log::info ) ;
+
 	CURL *curl = m_pimpl->curl ;
 
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );

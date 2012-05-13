@@ -24,6 +24,7 @@
 
 #include "bfd/Backtrace.hh"
 #include "util/Exception.hh"
+#include "util/Log.hh"
 
 #include <boost/exception/all.hpp>
 
@@ -138,8 +139,11 @@ int main( int argc, char **argv )
 	}
 	catch ( const std::runtime_error& error )
 	{
-		std::cerr << "Please run grive with the \"-a\" option if this is the "
-				<< "first time you're accessing your Google Drive!\n";
+		Logs(
+			"Please run grive with the \"-a\" option if this is the "
+			"first time you're accessing your Google Drive!",
+			Log::critical ) ;
+		
 		return -1;
 	}
 	
@@ -150,10 +154,9 @@ int main( int argc, char **argv )
 	}
 	catch ( gr::Exception& e )
 	{
-		std::cerr
-			<< "exception: " << e.what() << std::endl
-			<< *boost::get_error_info<gr::expt::BacktraceInfo>( e )
-			<< std::endl ;
+		Logs( "exception: %1%\n%2%", e.what(), *boost::get_error_info<expt::BacktraceInfo>( e ),
+			Log::critical ) ;
+		return -1 ;
 	}
 	
 	return 0 ;

@@ -25,13 +25,13 @@
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/OAuth2.hh"
+#include "util/Log.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
 #include <algorithm>
-#include <iostream>
 #include <iterator>
 #include <sstream>
 
@@ -171,7 +171,7 @@ bool Entry::Upload( http::Agent* http, std::streambuf *file, const http::Headers
 	http::XmlResponse xml ;
 	http->Put( uplink, data, &xml, uphdr ) ;
 
-std::cout << xml.Response() << std::endl ;
+	Log::Inst()( Fmt("receipted response = %1%\n") % xml.Response() ) ;
 
 	return true ;
 }
@@ -190,8 +190,6 @@ void Entry::Delete( http::Agent *http, const http::Headers& auth )
 {
 	http::Headers hdr( auth ) ;
 	hdr.push_back( "If-Match: " + m_etag ) ;
-	
-std::cout << feed_base + "/" + m_resource_id + "?delete=true" << std::endl ;
 	
 	http::StringResponse str ;
 	http->Custom( "DELETE", feed_base + "/" + m_resource_id + "?delete=true", &str, hdr ) ;

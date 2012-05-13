@@ -28,6 +28,7 @@
 #include "protocol/OAuth2.hh"
 #include "util/Crypt.hh"
 #include "util/DateTime.hh"
+#include "util/Log.hh"
 #include "util/OS.hh"
 #include "util/Path.hh"
 #include "xml/Node.hh"
@@ -76,7 +77,7 @@ Drive::Drive( OAuth2& auth ) :
 				if ( pit != m_coll.end() && pit->IsInRootTree() )
 					UpdateFile( file, *pit, &http ) ;
 				else
-					std::cout << "file " << file.Title() << " parent doesn't exist, ignored" << std::endl ;
+					Logs( "file %1% parent doesn't exist, ignored", file.Title(), Log::info ) ;
 			}
 		}
 		
@@ -149,7 +150,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 				if ( e.ParentHrefs().size() == 1 )
 					m_coll.push_back( Collection( e ) ) ;
 				else
-					std::cout << e.Title() << " has multiple parents, ignored" << std::endl ;
+					Logs( "%1% has multiple parents, ignored", e.Title(), Log::info ) ;
 			}
 		}
 		
@@ -170,14 +171,12 @@ void Drive::ConstructDirTree( http::Agent *http )
 		{
 			// it shouldn't happen, just in case
 			if ( &*i == &*pit )
-				std::cout
-					<< "the parent of folder " << i->Title()
-					<< " is itself. ignored" << std::endl ;
+				Logs( "the parent of folder %1% is itself, ignored.", i->Title(), Log::warning ) ;
 			else
 				pit->AddChild( &*i ) ;
 		}
 		else
-			std::cout << "can't find folder " << i->Title() << " \"" << i->ParentHref() << "\"" << std::endl ;
+			Logs( "can't find folder %1% (\"%2%\")", i->Title(), i->ParentHref() ) ;
 	}
 
 	// lastly, iterating from the root, create the directories in the local file system
