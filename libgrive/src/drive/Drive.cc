@@ -77,7 +77,7 @@ Drive::Drive( OAuth2& auth ) :
 				if ( pit != m_coll.end() && pit->IsInRootTree() )
 					UpdateFile( file, *pit, &http ) ;
 				else
-					Log( "file %1% parent doesn't exist, ignored", file.Title() ) ;
+					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title() ) ;
 			}
 		}
 		
@@ -150,7 +150,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 				if ( e.ParentHrefs().size() == 1 )
 					m_coll.push_back( Collection( e ) ) ;
 				else
-					Log( "%1% has multiple parents, ignored", e.Title() ) ;
+					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
 			}
 		}
 		
@@ -176,7 +176,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 				pit->AddChild( &*i ) ;
 		}
 		else
-			Log( "can't find folder %1% (\"%2%\")", i->Title(), i->ParentHref(), log::warning ) ;
+			Log( "can't find folder \"%1%\" (\"%2%\")", i->Title(), i->ParentHref(), log::warning ) ;
 	}
 
 	// lastly, iterating from the root, create the directories in the local file system
@@ -217,7 +217,7 @@ void Drive::UpdateFile( Entry& file, const Collection& parent, http::Agent *http
 	}
 	else
 	{
-		Log( "%1% is a google document, ignored", file.Title() ) ;
+		Log( "file \"%1%\" is a google document, ignored", file.Title() ) ;
 	}
 }
 

@@ -64,7 +64,7 @@ void Entry::Update( const xml::Node& n )
 	m_resource_id		= n["gd:resourceId"] ;
 	m_server_md5		= n["docs:md5Checksum"] ;
 	m_kind				= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
-	m_upload_link		= n["link"].Find( "!rel", "http://schemas.google.com/g/2005#resumable-edit-media")["href"] ;
+	m_upload_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
 
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;

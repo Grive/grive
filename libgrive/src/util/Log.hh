@@ -35,6 +35,7 @@ class LogBase
 {
 public :
 	virtual void Log( const log::Fmt& msg, log::Serverity s = log::info ) = 0 ;
+	virtual void Enable( log::Serverity s, bool enable = true ) = 0 ;
 	
 	static LogBase* Inst( LogBase *log = 0 ) ;
 

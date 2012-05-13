@@ -25,6 +25,7 @@
 #include "bfd/Backtrace.hh"
 #include "util/Exception.hh"
 #include "util/Log.hh"
+#include "util/DefaultLog.hh"
 
 #include <boost/exception/all.hpp>
 
@@ -93,8 +94,11 @@ int main( int argc, char **argv )
 
 	Json config = ReadConfig() ;
 	
+	DefaultLog nofile_log ;
+	LogBase::Inst( &nofile_log ) ;
+	
 	int c ;
-	while ((c = getopt (argc, argv, "ac:v")) != -1)
+	while ((c = getopt(argc, argv, "al:v")) != -1)
 	{
 		switch ( c )
 		{
@@ -123,6 +127,13 @@ int main( int argc, char **argv )
 				break ;
 			}
 			
+			case 'l' :
+			{
+				static DefaultLog log( optarg ) ;
+				LogBase::Inst( &log ) ;
+				break ;
+			}
+			
 			case 'v' :
 			{
 				std::cout
@@ -131,6 +142,7 @@ int main( int argc, char **argv )
 			}
 		}
 	}
+		
 	
 	std::string refresh_token ;
 	try

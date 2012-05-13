@@ -17,53 +17,31 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#pragma once
+
 #include "Log.hh"
 
-#include <cassert>
+#include <bitset>
+#include <fstream>
+#include <string>
 
 namespace gr {
 
-class MockLog : public LogBase
+class DefaultLog : public LogBase
 {
 public :
-	void Log( const log::Fmt&, log::Serverity )
-	{
-	}
-	
-	void Enable( log::Serverity s, bool enable )
-	{
-	}
+	DefaultLog() ;
+	explicit DefaultLog( const std::string& filename ) ;
 
+	void Log( const log::Fmt& msg, log::Serverity s ) ;
+	void Enable( log::Serverity s, bool enable ) ;
+	
+private :
+	std::ofstream	m_file ;
+	std::ostream&	m_log ;
+
+	std::bitset<5>	m_enabled ;
 } ;
 
-LogBase* LogBase::Inst( LogBase *log )
-{
-	static MockLog mlog ;
-	static LogBase *inst = &mlog ;
-	
-	if ( log != 0 )
-		inst = log ;
-		
-	assert( inst != 0 ) ;
-	return inst ;
-}
-
-LogBase::LogBase()
-{
-}
-
-LogBase::~LogBase()
-{
-}
-
-void Log( const std::string& str, log::Serverity s )
-{
-	LogBase::Inst()->Log( log::Fmt(str), s ) ;
-}
-
-void Trace( const std::string& str )
-{
-	LogBase::Inst()->Log( log::Fmt(str), log::debug ) ;
-}
 
 } // end of namespace
