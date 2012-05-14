@@ -19,31 +19,30 @@
 
 #pragma once
 
-#include "Receivable.hh"
-#include "util/StdioFile.hh"
+#include "Exception.hh"
 
+#include <cstdio>
 #include <string>
 
-#include <openssl/evp.h>
+namespace gr {
 
-namespace gr { namespace http {
-
-class Download : public http::Receivable
+class StdioFile
 {
 public :
-	struct NoChecksum {} ;
-	Download( const std::string& filename ) ;
-	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
+	struct Error : virtual Exception {} ;
+
+public :
+	StdioFile( const std::string& filename, const char *mode ) ;
+	~StdioFile( ) ;
 	
-	std::string Finish() const ;
-	
-	void Clear() ;
-	std::size_t OnData( void *data, std::size_t count ) ;
+	std::size_t Read( void *ptr, std::size_t size ) ;
+	std::size_t Write( const void *ptr, std::size_t size ) ;
+
+	int Seek( long offset, int whence ) ;
+	long Tell() const ;
 	
 private :
-	StdioFile	m_file ;
-	EVP_MD_CTX	*m_mdctx ;
+	std::FILE	*m_file ;
 } ;
-
-} } // end of namespace
+	
+} // end of namespace

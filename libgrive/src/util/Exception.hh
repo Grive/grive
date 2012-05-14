@@ -41,8 +41,6 @@ struct Exception :
 	virtual public boost::exception
 {
 	Exception( ) ;
-	
-	const char* what() const throw() ;
 } ;
 
 struct FileError	: virtual Exception {} ;
@@ -72,12 +70,6 @@ namespace expt
 
 	// generic error message
 	typedef boost::error_info<struct MsgTag, std::string>		ErrMsg ;
-
-	// errno as in C
-	typedef boost::error_info<struct ErrorNumberTag, int>		ErrorNumber ;
-
-	// the filename of the file that caused the error
-	typedef boost::error_info<struct FileNameTag, std::string>	FileName ;
 }
 
 } // end of namespace

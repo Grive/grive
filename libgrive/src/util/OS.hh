@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "Exception.hh"
+
 #include <string>
 
 namespace gr {
@@ -28,6 +30,8 @@ class Path ;
 
 namespace os
 {
+	struct Error : virtual Exception {} ;
+
 	void MakeDir( const std::string& dir ) ;
 	void MakeDir( const Path& dir ) ;
 	

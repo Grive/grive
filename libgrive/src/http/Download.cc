@@ -22,36 +22,40 @@
 
 #include "Error.hh"
 
+// boost headers
+#include <boost/throw_exception.hpp>
+#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_at_line.hpp>
+#include <boost/exception/errinfo_errno.hpp>
+#include <boost/exception/errinfo_file_handle.hpp>
+#include <boost/exception/errinfo_file_name.hpp>
+#include <boost/exception/errinfo_file_open_mode.hpp>
+#include <boost/exception/info.hpp>
+
 #include <openssl/evp.h>
 
 #include <cassert>
 #include <new>
-#include <stdexcept>
 
 #include <signal.h>
 
 namespace gr { namespace http {
 
 Download::Download( const std::string& filename ) :
-	m_file( filename.c_str(), std::ios::out | std::ios::binary ),
+	m_file( filename, "wb" ),
 	m_mdctx( ::EVP_MD_CTX_create() )
 {
 	if ( m_mdctx == 0 )
 		throw std::bad_alloc() ;
 	
 	if ( ::EVP_DigestInit_ex( m_mdctx, ::EVP_md5(), 0 ) != 1 )
-		throw Error() << expt::ErrMsg( "cannot create MD5 digest context" ) ;
-
-	if ( !m_file )
-		throw Error() << expt::ErrMsg( "cannot open file " + filename + " for writing" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create MD5 digest context" ) ) ;
 }
 
 Download::Download( const std::string& filename, NoChecksum ) :
-	m_file( filename.c_str(), std::ios::out | std::ios::binary ),
+	m_file( filename, "wb" ),
 	m_mdctx( 0 )
 {
-	if ( !m_file )
-		throw Error() << expt::ErrMsg( "cannot open file " + filename + " for writing" ) ;
 }
 
 Download::~Download( )
@@ -87,19 +91,6 @@ std::string Download::Finish() const
 	return result ;
 }
 
-std::size_t Download::Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis )
-{
-	assert( pthis != 0 ) ;
-	assert( data != 0 ) ;
-	
-	std::size_t count = size * nmemb ;
-	
-	if ( pthis->m_mdctx != 0 )
-		::EVP_DigestUpdate( pthis->m_mdctx, data, count ) ;
-	
-	return pthis->m_file.rdbuf()->sputn( data, count ) ;
-}
-
 std::size_t Download::OnData( void *data, std::size_t count )
 {
 	assert( data != 0 ) ;
@@ -107,7 +98,7 @@ std::size_t Download::OnData( void *data, std::size_t count )
 	if ( m_mdctx != 0 )
 		::EVP_DigestUpdate( m_mdctx, data, count ) ;
 	
-	return m_file.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
+	return m_file.Write( data, count ) ;
 }
 
 } } // end of namespace

@@ -23,6 +23,15 @@
 #include "Exception.hh"
 #include "Path.hh"
 
+// boost headers
+#include <boost/throw_exception.hpp>
+#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_at_line.hpp>
+#include <boost/exception/errinfo_errno.hpp>
+#include <boost/exception/errinfo_file_name.hpp>
+#include <boost/exception/errinfo_file_open_mode.hpp>
+#include <boost/exception/info.hpp>
+
 // OS specific headers
 #include <errno.h>
 #include <sys/stat.h>
@@ -51,11 +60,12 @@ DateTime FileMTime( const std::string& filename )
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
 	{
-		// save errno to prevend overwritten later
-		int err_num = errno ;
-		throw Exception()
-			<< expt::ErrMsg( "cannot get file attribute of " + filename )
-			<< expt::ErrorNumber( err_num ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("stat")
+				<< boost::errinfo_errno(errno)
+				<< boost::errinfo_file_name(filename)
+		) ;
 	}
 	
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T

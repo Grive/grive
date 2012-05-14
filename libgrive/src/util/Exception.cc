@@ -39,15 +39,4 @@ Exception::Exception( )
 #endif
 }
 
-const char* Exception::what() const throw()
-{
-	if ( const std::string *s = boost::get_error_info<expt::ErrMsg>(*this) )
-		return s->c_str() ;
-	else
-	{
-		static const char unknown[] = "unknown" ;
-		return unknown ;
-	}
-}
-
 } // end of namespace
