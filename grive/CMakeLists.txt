@@ -7,8 +7,12 @@ include_directories(
 
 add_definitions( -DVERSION="${GRIVE_VERSION}" )
 
+file (GLOB GRIVE_EXE_SRC
+    ${grive_SOURCE_DIR}/src/*.cc
+)
+
 add_executable( grive_executable
-	src/main.cc
+	${GRIVE_EXE_SRC}
 )
 
 target_link_libraries( grive_executable

@@ -70,6 +70,9 @@ namespace expt
 
 	// generic error message
 	typedef boost::error_info<struct MsgTag, std::string>		ErrMsg ;
+	
+	// nested exception
+	typedef boost::error_info<struct ExceptionTag, Exception>	Nested ;
 }
 
 } // end of namespace

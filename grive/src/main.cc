@@ -17,6 +17,8 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "Config.hh"
+
 #include "drive/Drive.hh"
 
 #include "protocol/OAuth2.hh"
@@ -31,68 +33,17 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <unistd.h>
-#include <iterator>
-
-#include <exception>
-#include <stdexcept>
 
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
-
-namespace gr
-{
-	class ConfigError : public std::runtime_error
-	{
-	public :
-		ConfigError( const std::string& msg ) : runtime_error( msg )
-		{
-		}
-	} ;
-
-	const std::string& ConfigFilename()
-	{
-		static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
-		static const std::string filename =
-			(env_cfg != 0) ? env_cfg : std::string( ::getenv( "HOME") ) + "/.grive" ;
-
-		return filename ;
-	}
-
-	Json ReadConfig()
-	{
-		std::ifstream ifile( ConfigFilename().c_str() ) ;
-		if ( !ifile )
-			return Json() ;
-		
-		try
-		{
-			std::string cfg_str(
-				(std::istreambuf_iterator<char>( ifile )),
-				(std::istreambuf_iterator<char>()) ) ;
-			
-			return Json::Parse( cfg_str ) ;
-		}
-		catch ( std::runtime_error& e )
-		{
-			throw ConfigError( std::string("Cannot open config file ") + e.what() ) ;
-		}
-	}
-	
-	void SaveConfig( const Json& config )
-	{
-		std::ofstream ofile( ConfigFilename().c_str() ) ;
-		ofile << config ;
-	}
-}
 
 int main( int argc, char **argv )
 {
 	using namespace gr ;
 
-	Json config = ReadConfig() ;
+	Config config ;
 	
 	DefaultLog nofile_log ;
 	LogBase::Inst( &nofile_log ) ;
@@ -120,9 +71,9 @@ int main( int argc, char **argv )
 				token.Auth( code ) ;
 				
 				// save to config
-				config.Add( "refresh_token", Json( token.RefreshToken() ) ) ;
-				assert( config["refresh_token"].As<std::string>() == token.RefreshToken() ) ;
-				SaveConfig( config ) ;
+				config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
+				assert( config.Get()["refresh_token"].Str() == token.RefreshToken() ) ;
+				config.Save( ) ;
 				
 				break ;
 			}
@@ -147,7 +98,7 @@ int main( int argc, char **argv )
 	std::string refresh_token ;
 	try
 	{
-		refresh_token = config["refresh_token"].As<std::string>() ;
+		refresh_token = config.Get()["refresh_token"].Str() ;
 	}
 	catch ( const std::runtime_error& error )
 	{
