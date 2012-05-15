@@ -73,7 +73,7 @@ int main( int argc, char **argv )
 				// save to config
 				config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
 				assert( config.Get()["refresh_token"].Str() == token.RefreshToken() ) ;
-				config.Save( ) ;
+				config.Save() ;
 				
 				break ;
 			}
@@ -113,9 +113,11 @@ int main( int argc, char **argv )
 	try
 	{
 		OAuth2 token( refresh_token, client_id, client_secret ) ;
-		Drive drive( token ) ;
+		Drive drive( token, config.Get() ) ;
 		
 		drive.Update() ;
+		
+		config.Save() ;
 	}
 	catch ( gr::Exception& e )
 	{

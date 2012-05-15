@@ -46,18 +46,20 @@ public :
 	~Json( ) ;
 	
 	static Json Parse( const std::string& str ) ;
+	static Json ParseFile( const std::string& filename ) ;
 	
 	Json operator[]( const std::string& key ) const ;
 	Json operator[]( const std::size_t& idx ) const ;
 	Json& operator=( const Json& rhs ) ;
 	
 	void Swap( Json& other ) ;
-	
-	template <typename T>
-	T As() const ;
-	
-	// As<std::string>() shortcut
+
 	std::string Str() const ;
+	int		Int() const ;
+	double	Double() const ;
+	bool	Bool() const ;
+	Array	AsArray() const ;
+	Object	AsObject() const ;
 
 	template <typename T>
 	bool Is() const ;

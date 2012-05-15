@@ -38,6 +38,9 @@ public :
 	void Save() ;
 
 private :
+	Json Read( const std::string& filename ) ;
+
+private :
 	Json m_cfg ;
 } ;
 	

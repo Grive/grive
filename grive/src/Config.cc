@@ -28,32 +28,14 @@ const std::string& Config::Filename()
 {
 	static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
 	static const std::string filename =
-		(env_cfg != 0) ? env_cfg : std::string( ::getenv( "HOME") ) + "/.grive" ;
+		(env_cfg != 0) ? env_cfg : /*std::string( ::getenv( "HOME") ) +*/ ".grive_state" ;
 
 	return filename ;
 }
 
-Config::Config()
+Config::Config() :
+	m_cfg( Read( Filename() ) )
 {
-	std::ifstream ifile( Filename().c_str() ) ;
-	if ( ifile )
-	{
-		try
-		{
-			std::string cfg_str(
-				(std::istreambuf_iterator<char>( ifile )),
-				(std::istreambuf_iterator<char>()) ) ;
-			
-			m_cfg = Json::Parse( cfg_str ) ;
-		}
-		catch ( Exception& e )
-		{
-			throw Error()
-				<< File( Filename() )
-				<< expt::ErrMsg("Cannot open config file ")
-				<< expt::Nested(e) ;
-		}
-	}
 }
 
 void Config::Save( )
@@ -65,6 +47,21 @@ void Config::Save( )
 Json& Config::Get()
 {
 	return m_cfg ;
+}
+
+Json Config::Read( const std::string& filename )
+{
+	try
+	{
+		return Json::ParseFile( filename ) ;
+	}
+	catch ( Exception& e )
+	{
+		throw Error()
+			<< File( filename )
+			<< expt::ErrMsg("Cannot open config file ")
+			<< expt::Nested(e) ;
+	}
 }
 
 } // end of namespace

@@ -65,8 +65,8 @@ void OAuth2::Auth( const std::string&	auth_code )
 	http.Post( token_url, post, &resp ) ;
 
 	Json jresp	= resp.Response() ;
-	m_access	= jresp["access_token"].As<std::string>() ;
-	m_refresh	= jresp["refresh_token"].As<std::string>() ;
+	m_access	= jresp["access_token"].Str() ;
+	m_refresh	= jresp["refresh_token"].Str() ;
 }
 
 std::string OAuth2::MakeAuthURL(
@@ -81,8 +81,7 @@ std::string OAuth2::MakeAuthURL(
 			h.Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
 			h.Escape( "https://docs.google.com/feeds/" )					+ "+" + 
 			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
-			h.Escape( "https://spreadsheets.google.com/feeds/" )			+ /*"+" +
-			h.Escape( "https://www.googleapis.com/auth/drive.file/" )		+*/
+			h.Escape( "https://spreadsheets.google.com/feeds/" )			+
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
 		"&client_id=" + client_id ;
@@ -101,7 +100,7 @@ void OAuth2::Refresh( )
 
 	http.Post( token_url, post, &resp ) ;
 
-	m_access	= resp.Response()["access_token"].As<std::string>() ;
+	m_access	= resp.Response()["access_token"].Str() ;
 }
 
 std::string OAuth2::RefreshToken( ) const

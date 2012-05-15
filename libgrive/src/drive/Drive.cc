@@ -49,54 +49,50 @@
 
 namespace gr {
 
-Drive::Drive( OAuth2& auth ) :
-	m_auth( auth )
+Drive::Drive( OAuth2& auth, const Json& state ) :
+	m_auth( auth ),
+	m_state( state )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
-	
+
+	std::string prev_change_stamp ;
+	if ( m_state.Has( "change_stamp" ) )
+		prev_change_stamp = m_state["change_stamp"].Str() ;
+
 	http::Agent http ;
+	http::XmlResponse xrsp ;
+	http.Get( feed_metadata, &xrsp, m_http_hdr ) ;
+	
+	std::string change_stamp = xrsp.Response()["docs:largestChangestamp"]["@value"] ;
+	Trace( "change stamp is %1%", change_stamp ) ;
+
+	m_state.Add( "change_stamp", Json( change_stamp ) ) ;
+	
 	ConstructDirTree( &http ) ;
 	
-	http::XmlResponse xrsp ;
-	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
+// 	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
 	
-	std::string change_stamp ;
-	
-	std::ifstream sfile( ".grive_state" ) ;
-	if ( sfile )
-	{
-		std::string state_str(
-			(std::istreambuf_iterator<char>( sfile )),
-			(std::istreambuf_iterator<char>()) ) ;
-		sfile.close() ;
-		
-		Json state = Json::Parse( state_str ) ;
-		change_stamp = state["change_stamp"].Str() ;
-		Trace( "config change stamp is %1%", change_stamp ) ;
-	}
-		
-	std::string uri = feed_changes + "?showfolders=true&showroot=true" ;
-	if ( !change_stamp.empty() )
+	std::string uri = feed_base + "?showfolders=true&showroot=true" ;
+/*	if ( !change_stamp.empty() )
 	{
 		int ichangestamp = std::atoi( change_stamp.c_str() ) + 1 ;
 		uri = (boost::format( "%1%&start-index=%2%" ) % uri % ichangestamp ).str() ;
 	}
-	
-	http.Get( uri, &log, m_http_hdr ) ;
+*/
+	http.Get( uri, &xrsp, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
 	m_resume_link = resp["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
 	
-	change_stamp = resp["docs:largestChangestamp"]["@value"] ;
-	Trace( "change stamp is %1%", change_stamp ) ;
+// 	change_stamp = resp["docs:largestChangestamp"]["@value"] ;
 	
-	std::ofstream osfile( ".grive_state" ) ;
-	Json state ;
-	state.Add( "change_stamp", Json( change_stamp ) ) ;
-	osfile << state ;
-	osfile.close() ;
+// 	std::ofstream osfile( ".grive_state" ) ;
+// 	Json state ;
+// 	state.Add( "change_stamp", Json( change_stamp ) ) ;
+// 	osfile << state ;
+// 	osfile.close() ;
 	
 	bool has_next = false ;
 	do

@@ -19,6 +19,8 @@
 
 #include "Json.hh"
 
+#include "util/StdioFile.hh"
+
 #include <json/json_tokener.h>
 #include <json/linkhash.h>
 
@@ -51,6 +53,27 @@ Json Json::Parse( const std::string& str )
 	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
 	if ( json == 0 )
 		throw Error() << expt::ErrMsg( "json parse error" ) ;
+	
+	return Json( json, NotOwned() ) ;
+}
+
+Json Json::ParseFile( const std::string& filename )
+{
+	StdioFile file( filename, "r" ) ;
+	struct json_tokener *tok = ::json_tokener_new() ;
+	
+	struct json_object *json = 0 ;
+	
+	char buf[80] ;
+	std::size_t count = 0 ;
+
+	while ( (count = file.Read( buf, sizeof(buf) ) ) > 0 )
+		json = ::json_tokener_parse_ex( tok, buf, count ) ;
+
+	if ( json == 0 )
+		throw Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ;
+	
+	::json_tokener_free( tok ) ;
 	
 	return Json( json, NotOwned() ) ;
 }
@@ -137,8 +160,7 @@ void Json::Add( const std::string& key, const Json& json )
 	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
 }
 
-template <>
-bool Json::As<bool>() const
+bool Json::Bool() const
 {
 	assert( m_json != 0 ) ;
 	return ::json_object_get_boolean( m_json ) ;
@@ -151,8 +173,7 @@ bool Json::Is<bool>() const
 	return ::json_object_is_type( m_json, json_type_boolean ) ;
 }
 
-template <>
-std::string Json::As<std::string>() const
+std::string Json::Str() const
 {
 	assert( m_json != 0 ) ;
 	return ::json_object_get_string( m_json ) ;
@@ -165,8 +186,7 @@ bool Json::Is<std::string>() const
 	return ::json_object_is_type( m_json, json_type_string ) ;
 }
 
-template <>
-int Json::As<int>() const
+int Json::Int() const
 {
 	assert( m_json != 0 ) ;
 	return ::json_object_get_int( m_json ) ;
@@ -191,8 +211,7 @@ Json::Type Json::DataType() const
 	return static_cast<Type>( ::json_object_get_type( m_json ) ) ;
 }
 
-template <>
-Json::Object Json::As<Json::Object>() const
+Json::Object Json::AsObject() const
 {
 	Object result ;
 	
@@ -211,8 +230,7 @@ bool Json::Is<Json::Object>() const
 	return ::json_object_is_type( m_json, json_type_object ) ;
 }
 
-template <>
-Json::Array Json::As<Json::Array>() const
+Json::Array Json::AsArray() const
 {
 	std::size_t count = ::json_object_array_length( m_json ) ;
 	Array result ;
@@ -237,7 +255,7 @@ Json Json::FindInArray( const std::string& key, const std::string& value ) const
 	for ( std::size_t i = 0 ; i < count ; ++i )
 	{
 		Json item( ::json_object_array_get_idx( m_json, i ) ) ;
-		if ( item.Has(key) && item[key].As<std::string>() == value )
+		if ( item.Has(key) && item[key].Str() == value )
 			return item ;
 	}
 	throw Error() << expt::ErrMsg( "cannot find " + key + " = " + value + " in array" ) ;
@@ -255,11 +273,5 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 		return false ;
 	}
 }
-
-std::string Json::Str() const
-{
-	return As<std::string>() ;
-}
-
 
 }
