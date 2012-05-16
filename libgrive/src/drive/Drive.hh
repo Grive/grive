@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Collection.hh"
+#include "State.hh"
 
 #include "protocol/Json.hh"
 #include "util/Exception.hh"
@@ -48,13 +49,11 @@ public :
 	typedef std::vector<Collection>::iterator	FolderListIterator ;
 
 public :
-	Drive( OAuth2& auth, const Json& state ) ;
+	Drive( OAuth2& auth ) ;
 	~Drive( ) ;
 
 	void Update() ;
 	void Sync() ;
-	
-	Json State() const ;
 	
 	struct Error : virtual Exception {} ;
 	
@@ -75,7 +74,7 @@ private :
 	FolderList					m_coll ;
 	std::vector<File*>			m_files ;
 	
-	Json						m_state ;
+	State						m_state ;
 } ;
 
 } // end of namespace

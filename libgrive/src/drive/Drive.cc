@@ -49,16 +49,17 @@
 
 namespace gr {
 
-Drive::Drive( OAuth2& auth, const Json& state ) :
+namespace
+{
+	const std::string state_file = ".grive_state" ;
+}
+
+Drive::Drive( OAuth2& auth ) :
 	m_auth( auth ),
-	m_state( state )
+	m_state( state_file )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
-
-	std::string prev_change_stamp ;
-	if ( m_state.Has( "change_stamp" ) )
-		prev_change_stamp = m_state["change_stamp"].Str() ;
 
 	http::Agent http ;
 	http::XmlResponse xrsp ;
@@ -67,7 +68,8 @@ Drive::Drive( OAuth2& auth, const Json& state ) :
 	std::string change_stamp = xrsp.Response()["docs:largestChangestamp"]["@value"] ;
 	Trace( "change stamp is %1%", change_stamp ) ;
 
-	m_state.Add( "change_stamp", Json( change_stamp ) ) ;
+	m_state.ChangeStamp( change_stamp ) ;
+	m_state.Sync( "." ) ;
 	
 	ConstructDirTree( &http ) ;
 	
@@ -122,6 +124,8 @@ Drive::Drive( OAuth2& auth, const Json& state ) :
 			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
+	
+	m_state.Write( state_file ) ;
 }
 
 Drive::~Drive( )

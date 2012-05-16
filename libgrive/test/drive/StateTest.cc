@@ -37,6 +37,7 @@ void StateTest::TestSync( )
 {
 	State s( ".grive_state" ) ;
 	s.Sync( TEST_DATA ) ;
+	s.Write( "" ) ;
 }
 
 } // end of namespace grut

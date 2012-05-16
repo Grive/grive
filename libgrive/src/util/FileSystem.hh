@@ -19,33 +19,9 @@
 
 #pragma once
 
-#include "util/FileSystem.hh"
+#include <boost/filesystem.hpp>
 
-#include <memory>
-
-namespace gr {
-
-class Json ;
-
-class State
+namespace gr
 {
-public :
-	explicit State( const fs::path& filename ) ;
-	
-	void Sync( const fs::path& p ) ;
-	
-	void Read( const fs::path& filename ) ;
-	void Write( const fs::path& filename ) const ;
-
-	std::string ChangeStamp() const ;
-	void ChangeStamp( const std::string& cs ) ;
-	
-private :
-	static Json FileInfo( const fs::path& p ) ;
-	
-private :
-	struct Impl ;
-	std::auto_ptr<Impl>	m_impl ;
-} ;
-
-} // end of namespace
+	namespace fs = boost::filesystem ;
+}

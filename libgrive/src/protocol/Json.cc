@@ -64,6 +64,17 @@ Json::Json( const long& l ) :
 		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
 }
 
+template <>
+Json::Json( const std::vector<Json>& arr ) :
+	m_json( ::json_object_new_array( ) )
+{
+	if ( m_json == 0 )
+		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+	
+	for ( std::vector<Json>::const_iterator i = arr.begin() ; i != arr.end() ; ++i )
+		Add( *i ) ;
+}
+
 Json Json::Parse( const std::string& str )
 {
 	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
@@ -174,6 +185,15 @@ void Json::Add( const std::string& key, const Json& json )
 	
 	::json_object_get( json.m_json ) ;
 	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
+}
+
+void Json::Add( const Json& json )
+{
+	assert( m_json != 0 ) ;
+	assert( json.m_json != 0 ) ;
+	
+	::json_object_get( json.m_json ) ;
+	::json_object_array_add( m_json, json.m_json ) ;
 }
 
 bool Json::Bool() const
