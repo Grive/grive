@@ -71,8 +71,6 @@ Drive::Drive( OAuth2& auth, const Json& state ) :
 	
 	ConstructDirTree( &http ) ;
 	
-// 	http::ResponseLog log( "first-", ".xml", &xrsp ) ;
-	
 	std::string uri = feed_base + "?showfolders=true&showroot=true" ;
 /*	if ( !change_stamp.empty() )
 	{

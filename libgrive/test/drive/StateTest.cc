@@ -17,19 +17,26 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "StateTest.hh"
 
-#include <string>
-#include <iosfwd>
+#include "Assert.hh"
 
-#include <boost/filesystem.hpp>
+#include "drive/State.hh"
 
-namespace gr {
+#include <iostream>
 
-namespace crypt
+namespace grut {
+
+using namespace gr ;
+
+StateTest::StateTest( )
 {
-	std::string MD5( std::streambuf *file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
 }
 
-} // end of namespace gr
+void StateTest::TestSync( )
+{
+	State s( ".grive_state" ) ;
+	s.Sync( TEST_DATA ) ;
+}
+
+} // end of namespace grut

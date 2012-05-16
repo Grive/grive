@@ -17,19 +17,38 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "GdbmTest.hh"
 
-#include <string>
-#include <iosfwd>
+#include "Assert.hh"
 
-#include <boost/filesystem.hpp>
+#include "util/Gdbm.hh"
 
-namespace gr {
+#include <unistd.h>
 
-namespace crypt
+namespace grut {
+
+using namespace gr ;
+
+GdbmTest::GdbmTest( )
 {
-	std::string MD5( std::streambuf *file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
 }
 
-} // end of namespace gr
+void GdbmTest::Test( )
+{
+	{
+		Gdbm db( "test.db" ) ;
+		db.Set( "key", "value" ) ;
+		GRUT_ASSERT_EQUAL( db.Get("key"), "value" ) ;
+	}
+	
+	// re-open and verify
+	Gdbm db( "test.db" ) ;
+	GRUT_ASSERT_EQUAL( db.Get("key"), "value" ) ;
+}
+
+void GdbmTest::tearDown()
+{
+	unlink( "test.db" ) ;
+}
+
+} // end of namespace grut

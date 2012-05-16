@@ -19,17 +19,31 @@
 
 #pragma once
 
-#include <string>
-#include <iosfwd>
+#include "Exception.hh"
 
-#include <boost/filesystem.hpp>
+#include <memory>
+#include <vector>
 
 namespace gr {
 
-namespace crypt
+class Gdbm
 {
-	std::string MD5( std::streambuf *file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
-}
+public :
+	struct Error : virtual Exception {} ;
+	
+public :
+	explicit Gdbm( const std::string& filename ) ;
+	~Gdbm() ;
+	
+	std::string Get( const std::string& key ) const ;
+	void Set( const std::string& key, const std::string& val ) ;
 
-} // end of namespace gr
+private :
+	static void OnError( ) ;
+	
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
+} ;
+
+} // end of namespace

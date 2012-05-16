@@ -6,9 +6,10 @@ find_package(OpenSSL REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(CppUnit)
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(GDBM REQUIRED)
 find_package(BFD)
+find_package(CppUnit)
 
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
@@ -26,6 +27,7 @@ endif ( BFD_FOUND )
 include_directories(
 	${libgrive_SOURCE_DIR}/src
 	${libgrive_SOURCE_DIR}/test
+	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
 )
 
@@ -65,6 +67,8 @@ target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${OPENSSL_LIBRARIES}
+	${GDBM_LIBRARIES}
+	${Boost_LIBRARIES}
 	${OPT_LIBS}
 	expat
 )

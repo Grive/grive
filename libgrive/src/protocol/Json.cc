@@ -48,6 +48,22 @@ Json::Json( const std::string& str ) :
 	assert( ::json_object_get_string( m_json ) == str ) ;
 }
 
+template <>
+Json::Json( const int& l ) :
+	m_json( ::json_object_new_int( l ) )
+{
+	if ( m_json == 0 )
+		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+}
+
+template <>
+Json::Json( const long& l ) :
+	m_json( ::json_object_new_int( static_cast<int>(l) ) )
+{
+	if ( m_json == 0 )
+		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+}
+
 Json Json::Parse( const std::string& str )
 {
 	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;

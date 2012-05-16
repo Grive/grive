@@ -19,17 +19,26 @@
 
 #pragma once
 
-#include <string>
-#include <iosfwd>
+#include "util/Gdbm.hh"
 
 #include <boost/filesystem.hpp>
 
 namespace gr {
 
-namespace crypt
-{
-	std::string MD5( std::streambuf *file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
-}
+class Json ;
 
-} // end of namespace gr
+class State
+{
+public :
+	explicit State( const std::string& filename ) ;
+	
+	void Sync( const boost::filesystem::path& p ) ;
+
+private :
+	static Json FileInfo( const boost::filesystem::path& p ) ;
+	
+private :
+	Gdbm	m_db ;
+} ;
+
+} // end of namespace

@@ -19,17 +19,26 @@
 
 #pragma once
 
-#include <string>
-#include <iosfwd>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <boost/filesystem.hpp>
+namespace grut {
 
-namespace gr {
-
-namespace crypt
+class GdbmTest : public CppUnit::TestFixture
 {
-	std::string MD5( std::streambuf *file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
-}
+public :
+	GdbmTest( ) ;
 
-} // end of namespace gr
+	// declare suit function
+	CPPUNIT_TEST_SUITE( GdbmTest ) ;
+		CPPUNIT_TEST( Test ) ;
+	CPPUNIT_TEST_SUITE_END();
+
+public :
+	void tearDown() ;
+	
+private :
+	void Test( ) ;
+} ;
+
+} // end of namespace

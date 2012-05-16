@@ -21,11 +21,18 @@
 
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 
 // dependent libraries
 #include <openssl/evp.h>
 
 namespace gr { namespace crypt {
+
+std::string MD5( const boost::filesystem::path& file )
+{
+	std::ifstream ifile( file.string().c_str(), std::ios::binary | std::ios::in ) ;
+	return MD5( ifile.rdbuf() ) ;
+}
 
 std::string MD5( std::streambuf *file )
 {
