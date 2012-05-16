@@ -33,6 +33,7 @@
 #include <cstring>
 #include <sstream>
 #include <streambuf>
+#include <iostream>
 
 #include <signal.h>
 
