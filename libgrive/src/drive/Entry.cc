@@ -21,7 +21,6 @@
 
 #include "util/Log.hh"
 #include "util/OS.hh"
-#include "util/Path.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 

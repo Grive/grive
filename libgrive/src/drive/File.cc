@@ -28,7 +28,6 @@
 #include "protocol/OAuth2.hh"
 #include "util/Crypt.hh"
 #include "util/DateTime.hh"
-#include "util/Path.hh"
 #include "util/OS.hh"
 #include "util/Log.hh"
 #include "xml/Node.hh"
@@ -49,10 +48,10 @@ void File::Update( http::Agent *http, const http::Headers& auth )
 	assert( m_parent != 0 ) ;
 
 	bool changed = true ;
-	Path path = m_parent->Dir() / m_entry.Filename() ;
+	fs::path path = m_parent->Dir() / m_entry.Filename() ;
 
 	// compare checksum first if file exists
-	std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
+	std::ifstream ifile( path.string().c_str(), std::ios::binary | std::ios::in ) ;
 	if ( ifile && m_entry.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
 		changed = false ;
 
@@ -85,10 +84,10 @@ void File::Delete( http::Agent *http, const http::Headers& auth )
 }
 
 
-void File::Download( http::Agent* http, const Path& file, const http::Headers& auth ) const
+void File::Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const
 {
 	Log( "Downloading %1%", file ) ;
-	http::Download dl( file.Str(), http::Download::NoChecksum() ) ;
+	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
 	if ( r <= 400 )
 		os::SetFileTime( file, m_entry.ServerModified() ) ;
@@ -141,8 +140,21 @@ bool File::Upload( http::Agent* http, std::streambuf *file, const http::Headers&
 	http->Put( uplink, data, &xml, uphdr ) ;
 
 	Trace( "Receipted response = %1%", xml.Response() ) ;
-
+	
+	m_entry.Update( xml.Response() ) ;
+	
 	return true ;
+}
+
+fs::path File::Path() const
+{
+	assert( m_parent != 0 ) ;
+	return m_parent->Dir() / m_entry.Filename() ;
+}
+
+std::string File::ResourceID() const
+{
+	return m_entry.ResourceID() ;
 }
 
 } // end of namespace

@@ -34,14 +34,13 @@ public :
 	
 	void Sync( const fs::path& p ) ;
 	
+	void SetId( const fs::path& p, const std::string& id ) ;
+	
 	void Read( const fs::path& filename ) ;
 	void Write( const fs::path& filename ) const ;
 
 	std::string ChangeStamp() const ;
 	void ChangeStamp( const std::string& cs ) ;
-	
-private :
-	static Json FileInfo( const fs::path& p ) ;
 	
 private :
 	struct Impl ;

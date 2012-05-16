@@ -131,6 +131,7 @@ void State::ChangeStamp( const std::string& cs )
 
 void State::Sync( const fs::path& p )
 {
+	Trace( "synchronizing = %1%", p ) ;
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
 		Trace( "file found = %1%", i->path() ) ;
@@ -161,11 +162,21 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-Json State::FileInfo( const boost::filesystem::path& p )
+void State::SetId( const fs::path& p, const std::string& id )
 {
-	Json info ;
-	info.Add( "mtime", Json( fs::last_write_time(p) ) ) ;
-	return info ;
+	PathIdx& pidx = m_impl->rs.get<ByPath>() ;
+	PathIdx::iterator it = pidx.find( p ) ;
+	if ( it != pidx.end() )
+	{
+		Resource r = *it ;
+		r.id = id ;
+		pidx.replace( it, r ) ;
+	}
+	else
+	{
+		Trace( "can't find %1%", p ) ;
+	}
 }
+
 
 } // end of namespace

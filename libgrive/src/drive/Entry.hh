@@ -64,7 +64,6 @@ public :
 	
 	void Swap( Entry& e ) ;
 	
-private :
 	void Update( const xml::Node& entry ) ;
 
 private :

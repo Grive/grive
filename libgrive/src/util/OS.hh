@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Exception.hh"
+#include "FileSystem.hh"
 
 #include <string>
 
@@ -31,15 +32,12 @@ class Path ;
 namespace os
 {
 	struct Error : virtual Exception {} ;
-
-	void MakeDir( const std::string& dir ) ;
-	void MakeDir( const Path& dir ) ;
 	
 	DateTime FileMTime( const std::string& filename ) ;
-	DateTime FileMTime( const Path& filename ) ;
+	DateTime FileMTime( const fs::path& filename ) ;
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
-	void SetFileTime( const Path& filename, const DateTime& t ) ;
+	void SetFileTime( const fs::path& filename, const DateTime& t ) ;
 }
 
 } // end of namespaces

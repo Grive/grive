@@ -30,7 +30,7 @@
 #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
 #include "util/Log.hh"
-#include "util/Path.hh"
+//#include "util/Path.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
@@ -69,7 +69,7 @@ Drive::Drive( OAuth2& auth ) :
 	Trace( "change stamp is %1%", change_stamp ) ;
 
 	m_state.ChangeStamp( change_stamp ) ;
-	m_state.Sync( "." ) ;
+	m_state.Sync( fs::current_path() ) ;
 	
 	ConstructDirTree( &http ) ;
 	
@@ -217,7 +217,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 
 	// lastly, iterating from the root, create the directories in the local file system
 	assert( Root()->Parent() == 0 ) ;
-	Root()->CreateSubDir( Path() ) ;
+	Root()->CreateSubDir( fs::current_path() ) ;
 }
 
 void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
@@ -228,6 +228,10 @@ void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
 		File *file = new File( entry, &parent ) ;
 		m_files.push_back( file ) ;
 		parent.AddLeaf( file ) ;
+		
+		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
+		
+		m_state.SetId( file->Path(), file->ResourceID() ) ;
 		
 // 		file->Update( http, m_http_hdr ) ;
 	}

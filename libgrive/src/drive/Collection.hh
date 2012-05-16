@@ -22,13 +22,13 @@
 #include "Entry.hh"
 #include "util/Exception.hh"
 #include "util/Function.hh"
+#include "util/FileSystem.hh"
 
 #include <string>
 #include <vector>
 
 namespace gr {
 
-class Path ;
 class File ;
 
 class Collection
@@ -45,7 +45,7 @@ public :
 	const Collection* Parent() const ;
 	Collection* Parent() ;
 	std::string ParentHref() const ;
-	Path Dir() const ;
+	fs::path Dir() const ;
 	bool IsInRootTree() const ;
 
 	void AddChild( Collection *child ) ;
@@ -54,7 +54,7 @@ public :
 	void Swap( Collection& coll ) ;
 
 	// traversing the tree
-	void CreateSubDir( const Path& prefix ) ;
+	void CreateSubDir( const fs::path& prefix ) ;
 	void ForEachFile(
 		Function<void(const std::string&)>	callback,
 		const std::string& 					prefix = "." ) ;

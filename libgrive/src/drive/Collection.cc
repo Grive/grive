@@ -20,7 +20,6 @@
 #include "Collection.hh"
 #include "CommonUri.hh"
 
-#include "util/Path.hh"
 #include "util/OS.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
@@ -100,10 +99,10 @@ void Collection::Swap( Collection& coll )
 	m_leaf.swap( coll.m_leaf ) ;
 }
 
-void Collection::CreateSubDir( const Path& prefix )
+void Collection::CreateSubDir( const fs::path& prefix )
 {
-	Path dir = prefix / m_entry.Title() ;
-	os::MakeDir( dir ) ;
+	fs::path dir = prefix / m_entry.Title() ;
+	fs::create_directories( dir ) ;
 	
 	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
@@ -118,10 +117,10 @@ void Collection::ForEachFile(
 {
 }
 
-Path Collection::Dir() const
+fs::path Collection::Dir() const
 {
 	assert( m_parent != this ) ;
-	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : Path() ;
+	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : fs::current_path() ;
 }
 
 bool Collection::IsInRootTree() const
