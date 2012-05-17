@@ -69,9 +69,10 @@ Drive::Drive( OAuth2& auth ) :
 	Trace( "change stamp is %1%", change_stamp ) ;
 
 	m_state.ChangeStamp( change_stamp ) ;
-	m_state.Sync( fs::current_path() ) ;
+	m_state.Sync( "." ) ;
 	
 	ConstructDirTree( &http ) ;
+	return ;
 	
 	std::string uri = feed_base + "?showfolders=true&showroot=true" ;
 /*	if ( !change_stamp.empty() )
@@ -85,15 +86,7 @@ Drive::Drive( OAuth2& auth ) :
 
 	m_resume_link = resp["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-	
-// 	change_stamp = resp["docs:largestChangestamp"]["@value"] ;
-	
-// 	std::ofstream osfile( ".grive_state" ) ;
-// 	Json state ;
-// 	state.Add( "change_stamp", Json( change_stamp ) ) ;
-// 	osfile << state ;
-// 	osfile.close() ;
-	
+
 	bool has_next = false ;
 	do
 	{
@@ -184,7 +177,10 @@ void Drive::ConstructDirTree( http::Agent *http )
 			if ( e.Kind() == "folder" )
 			{
 				if ( e.ParentHrefs().size() == 1 )
+				{
+					m_state.OnEntry( e ) ;
 					m_coll.push_back( Collection( e ) ) ;
+				}
 				else
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
 			}
@@ -198,11 +194,19 @@ void Drive::ConstructDirTree( http::Agent *http )
 		resp = xml.Response() ;
 	}
 
+	m_state.ResolveEntry() ;
+	
 	// second, build up linkage between parent and child 
 	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
 		FolderListIterator pit = FindFolder( i->ParentHref() ) ;
+		Collection *scoll = m_state.FindFolderByHref( i->SelfHref() ) ;
+		if ( scoll )
+			Trace( "found folder %1% in state", scoll->Title() ) ;
+		else
+			Trace( "can't found folder %1% in state", i->Title() ) ;
+		
 		if ( pit != m_coll.end() )
 		{
 			// it shouldn't happen, just in case
@@ -217,7 +221,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 
 	// lastly, iterating from the root, create the directories in the local file system
 	assert( Root()->Parent() == 0 ) ;
-	Root()->CreateSubDir( fs::current_path() ) ;
+	Root()->CreateSubDir( "." ) ;
 }
 
 void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
@@ -229,9 +233,9 @@ void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
 		m_files.push_back( file ) ;
 		parent.AddLeaf( file ) ;
 		
-		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
+// 		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
 		
-		m_state.SetId( file->Path(), file->ResourceID() ) ;
+// 		m_state.SetId( file->Path(), file->ResourceID() ) ;
 		
 // 		file->Update( http, m_http_hdr ) ;
 	}

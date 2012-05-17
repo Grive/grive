@@ -51,6 +51,11 @@ Collection::Collection(
 {
 }
 
+void Collection::Update( const Entry& e )
+{
+	m_entry = e ;
+}
+
 std::string Collection::SelfHref() const
 {
 	return m_entry.SelfHref() ;
@@ -59,6 +64,11 @@ std::string Collection::SelfHref() const
 std::string Collection::Title() const
 {
 	return m_entry.Title() ;
+}
+
+std::string Collection::ResourceID() const
+{
+	return m_entry.ResourceID() ;
 }
 
 const Collection* Collection::Parent() const
@@ -120,12 +130,23 @@ void Collection::ForEachFile(
 fs::path Collection::Dir() const
 {
 	assert( m_parent != this ) ;
-	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : fs::current_path() ;
+	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : "." ;
 }
 
 bool Collection::IsInRootTree() const
 {
 	return m_parent == 0 ? (SelfHref() == root_href) : m_parent->IsInRootTree() ;
+}
+
+Collection* Collection::FindChild( const std::string& title )
+{
+	for ( std::vector<Collection*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
+	{
+		assert( (*i)->m_parent == this ) ;
+		if ( (*i)->Title() == title )
+			return *i ;
+	}
+	return 0 ;
 }
 
 } // end of namespace

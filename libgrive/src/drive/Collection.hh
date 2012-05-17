@@ -37,6 +37,7 @@ public :
 	explicit Collection( const xml::Node& entry ) ;
 	explicit Collection( const Entry& entry ) ;
 	Collection( const std::string& title, const std::string& href ) ;
+	Collection( const std::string& title, Collection *parent ) ;
 	
 	// default copy ctor & op= are fine
 	
@@ -47,6 +48,7 @@ public :
 	std::string ParentHref() const ;
 	fs::path Dir() const ;
 	bool IsInRootTree() const ;
+	std::string ResourceID() const ;
 
 	void AddChild( Collection *child ) ;
 	void AddLeaf( File *file ) ;
@@ -61,6 +63,9 @@ public :
 
 	struct Error : virtual Exception {} ;
 
+	Collection* FindChild( const std::string& title ) ;
+	void Update( const Entry& e ) ;
+	
 private :
 	Entry						m_entry ;
 	

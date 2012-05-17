@@ -40,14 +40,15 @@ public :
 	explicit File( const Entry& e, const Collection *parent ) ;
 
 	void Update( http::Agent *http, const http::Headers& auth ) ;
-	
-	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
-	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
 	
 	fs::path Path() const ;
 	std::string ResourceID() const ;
-	
+
+private :
+	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
+	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
+
 private :
 	Entry				m_entry ;
 	const Collection	*m_parent ;

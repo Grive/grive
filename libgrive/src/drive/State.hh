@@ -26,6 +26,8 @@
 namespace gr {
 
 class Json ;
+class Collection ;
+class Entry ;
 
 class State
 {
@@ -33,6 +35,9 @@ public :
 	explicit State( const fs::path& filename ) ;
 	
 	void Sync( const fs::path& p ) ;
+	
+	void OnEntry( const Entry& e ) ;
+	void ResolveEntry() ;
 	
 	void SetId( const fs::path& p, const std::string& id ) ;
 	
@@ -42,6 +47,14 @@ public :
 	std::string ChangeStamp() const ;
 	void ChangeStamp( const std::string& cs ) ;
 	
+	Collection* FindFolderByHref( const std::string& href ) ;
+	Collection* FindFolderByID( const std::string& id ) ;
+
+private :
+	void Sync( const fs::path& p, Collection *folder ) ;
+	bool Update( const Entry& e ) ;
+	std::size_t TryResolveEntry() ;
+
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_impl ;
