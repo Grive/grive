@@ -27,8 +27,7 @@ namespace gr {
 const std::string& Config::Filename()
 {
 	static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
-	static const std::string filename =
-		(env_cfg != 0) ? env_cfg : /*std::string( ::getenv( "HOME") ) +*/ ".grive_state" ;
+	static const std::string filename = (env_cfg != 0) ? env_cfg : ".grive" ;
 
 	return filename ;
 }
@@ -57,10 +56,11 @@ Json Config::Read( const std::string& filename )
 	}
 	catch ( Exception& e )
 	{
-		throw Error()
-			<< File( filename )
-			<< expt::ErrMsg("Cannot open config file ")
-			<< expt::Nested(e) ;
+// 		throw Error()
+// 			<< File( filename )
+// 			<< expt::ErrMsg("Cannot open config file ")
+// 			<< expt::Nested(e) ;
+		return Json() ;
 	}
 }
 
