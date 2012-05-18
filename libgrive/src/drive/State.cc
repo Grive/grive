@@ -110,7 +110,7 @@ namespace
 	> Folders ;
 	
 	typedef Folders::index<ByHref>::type		FoldersByHref ;
-	typedef Folders::index<ByIdentity>::type	FolderSet ;
+	typedef Folders::index<ByIdentity>::type	FSet ;
 }
 
 struct State::Impl
@@ -274,8 +274,8 @@ bool State::Update( const Entry& e )
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			FolderSet& fs = m_impl->folders.get<ByIdentity>() ;
-			FolderSet::iterator c = fs.find( child ) ;
+			FSet& fs = m_impl->folders.get<ByIdentity>() ;
+			FSet::iterator c = fs.find( child ) ;
 			
 			if ( c != fs.end() )
 				fs.erase( c ) ;

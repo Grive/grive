@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "FolderSet.hh"
 #include "util/FileSystem.hh"
 
 #include <memory>
@@ -58,6 +59,8 @@ private :
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_impl ;
+	
+	FolderSet	m_folders ;
 } ;
 
 } // end of namespace
