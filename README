@@ -1,4 +1,4 @@
-Grive 0.0.5
+Grive 0.1.0
 
 Grive is still considered experimental. It just download all the files in your google drive
 in the current directory. After you make some changes to the local files, run grive and
