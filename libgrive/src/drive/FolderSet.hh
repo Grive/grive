@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Collection.hh"
+#include "Resource.hh"
 
 #include "util/FileSystem.hh"
 
@@ -38,11 +38,11 @@ namespace details
 	struct ByIdentity {} ;
 
 	typedef multi_index_container<
-		Collection*,
+		Resource*,
 		indexed_by<
-			hashed_non_unique<tag<ByHref>,	const_mem_fun<Collection, std::string,	&Collection::SelfHref> >,
-			hashed_non_unique<tag<ByID>,	const_mem_fun<Collection, std::string,	&Collection::ResourceID> >,
-			hashed_unique<tag<ByIdentity>,	identity<Collection*> >
+			hashed_non_unique<tag<ByHref>,	const_mem_fun<Resource, std::string,	&Resource::SelfHref> >,
+			hashed_non_unique<tag<ByID>,	const_mem_fun<Resource, std::string,	&Resource::ResourceID> >,
+			hashed_unique<tag<ByIdentity>,	identity<Resource*> >
 		>
 	> Folders ;
 	
@@ -66,23 +66,23 @@ public :
 	void Swap( FolderSet& fs ) ;
 	FolderSet& operator=( const FolderSet& fs ) ;
 	
-	Collection* FindByHref( const std::string& href ) ;
-	const Collection* FindByHref( const std::string& href ) const ;
+	Resource* FindByHref( const std::string& href ) ;
+	const Resource* FindByHref( const std::string& href ) const ;
 
-	bool ReInsert( Collection *coll ) ;
+	bool ReInsert( Resource *coll ) ;
 // 	void SetID( Collection *coll, const std::string& id ) ;
 // 	void SetHref( Collection *coll, const std::string& href ) ;
 	
-	void Insert( Collection *coll ) ;
-	void Erase( Collection *coll ) ;
-	void Update( Collection *coll, const Entry& e ) ;
+	void Insert( Resource *coll ) ;
+	void Erase( Resource *coll ) ;
+	void Update( Resource *coll, const Entry& e ) ;
 	
-	Collection* Root() ;
-	const Collection* Root() const ;
+	Resource* Root() ;
+	const Resource* Root() const ;
 		
 private :
 	details::Folders	m_set ;
-	Collection*			m_root ;
+	Resource*			m_root ;
 } ;
 
 } // end of namespace

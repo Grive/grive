@@ -29,7 +29,7 @@ namespace gr {
 using namespace details ;
 
 FolderSet::FolderSet( ) :
-	m_root( new Collection( ".", root_href ) )
+	m_root( new Resource( ".", root_href ) )
 {
 	m_set.insert( m_root ) ;
 }
@@ -39,7 +39,7 @@ FolderSet::FolderSet( const FolderSet& fs )
 	const Set& s = fs.m_set.get<ByIdentity>() ;
 	for ( Set::const_iterator i = s.begin() ; i != s.end() ; ++i )
 	{
-		Collection *c = new Collection( **i ) ;
+		Resource *c = new Resource( **i ) ;
 		if ( c->SelfHref() == root_href )
 			m_root = c ;
 		
@@ -54,12 +54,12 @@ FolderSet::~FolderSet( )
 	std::for_each( s.begin(), s.end(), Destroy() ) ;
 }
 
-Collection* FolderSet::Root()
+Resource* FolderSet::Root()
 {
 	return m_root ;
 }
 
-const Collection* FolderSet::Root() const
+const Resource* FolderSet::Root() const
 {
 	return m_root ;
 }
@@ -76,14 +76,14 @@ FolderSet& FolderSet::operator=( const FolderSet& fs )
 	return *this ;
 }
 
-Collection* FolderSet::FindByHref( const std::string& href )
+Resource* FolderSet::FindByHref( const std::string& href )
 {
 	HrefMap& map = m_set.get<ByHref>() ;
 	HrefMap::iterator i = map.find( href ) ;
 	return i != map.end() ? *i : 0 ;
 }
 
-const Collection* FolderSet::FindByHref( const std::string& href ) const
+const Resource* FolderSet::FindByHref( const std::string& href ) const
 {
 	const HrefMap& map = m_set.get<ByHref>() ;
 	HrefMap::const_iterator i = map.find( href ) ;
@@ -91,7 +91,7 @@ const Collection* FolderSet::FindByHref( const std::string& href ) const
 }
 
 ///	Reinsert should be called when the ID/HREF were updated
-bool FolderSet::ReInsert( Collection *coll )
+bool FolderSet::ReInsert( Resource *coll )
 {
 	Set& s = m_set.get<ByIdentity>() ;
 	Set::iterator i = s.find( coll ) ;
@@ -105,18 +105,18 @@ bool FolderSet::ReInsert( Collection *coll )
 		return false ;
 }
 
-void FolderSet::Insert( Collection *coll )
+void FolderSet::Insert( Resource *coll )
 {
 	m_set.insert( coll ) ;
 }
 
-void FolderSet::Erase( Collection *coll )
+void FolderSet::Erase( Resource *coll )
 {
 	Set& s = m_set.get<ByIdentity>() ;
 	s.erase( s.find( coll ) ) ;
 }
 
-void FolderSet::Update( Collection *coll, const Entry& e )
+void FolderSet::Update( Resource *coll, const Entry& e )
 {
 	coll->Update( e ) ;
 	ReInsert( coll ) ;

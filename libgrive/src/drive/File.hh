@@ -32,12 +32,12 @@ namespace http
 	class Agent ;
 }
 
-class Collection ;
+class Resource ;
 
 class File
 {
 public :
-	explicit File( const Entry& e, const Collection *parent ) ;
+	explicit File( const Entry& e, const Resource *parent ) ;
 
 	void Update( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
@@ -51,7 +51,7 @@ private :
 
 private :
 	Entry				m_entry ;
-	const Collection	*m_parent ;
+	const Resource	*m_parent ;
 } ;
 
 } // end of namespace

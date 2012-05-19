@@ -27,7 +27,7 @@
 namespace gr {
 
 class Json ;
-class Collection ;
+class Resource ;
 class Entry ;
 
 class State
@@ -48,11 +48,11 @@ public :
 	std::string ChangeStamp() const ;
 	void ChangeStamp( const std::string& cs ) ;
 	
-	Collection* FindFolderByHref( const std::string& href ) ;
-	Collection* FindFolderByID( const std::string& id ) ;
+	Resource* FindFolderByHref( const std::string& href ) ;
+	Resource* FindFolderByID( const std::string& id ) ;
 
 private :
-	void Sync( const fs::path& p, Collection *folder ) ;
+	void Sync( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 

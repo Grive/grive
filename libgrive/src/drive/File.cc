@@ -19,7 +19,7 @@
 
 #include "File.hh"
 
-#include "Collection.hh"
+#include "Resource.hh"
 #include "CommonUri.hh"
 
 #include "http/Download.hh"
@@ -37,7 +37,7 @@
 
 namespace gr {
 
-File::File( const Entry& entry, const Collection *parent ) :
+File::File( const Entry& entry, const Resource *parent ) :
 	m_entry		( entry ),
 	m_parent	( parent )
 {

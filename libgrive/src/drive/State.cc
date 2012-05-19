@@ -19,7 +19,7 @@
 
 #include "State.hh"
 
-#include "Collection.hh"
+#include "Resource.hh"
 #include "CommonUri.hh"
 
 #include "util/Crypt.hh"
@@ -40,82 +40,67 @@ namespace gr {
 
 namespace
 {
-	struct Resource
-	{
-		std::string		id ;
-		fs::path		path ;
-		std::string		md5sum ;
-		std::time_t		mtime ;
-		
-		explicit Resource( const fs::path& p ) :
-			path( p ),
-			md5sum( crypt::MD5( p ) ),
-			mtime( fs::last_write_time( p ) )
-		{
-		}
-		
-		explicit Resource( const Json& json ) :
-			id(		json["id"].Str() ),
-			path(	json["path"].Str() ),
-			md5sum(	json["md5"].Str() ),
-			mtime(	json["mtime"].Int() )
-		{
-		}
-		
-		Json Get() const
-		{
-			Json entry ;
-			entry.Add( "id",	Json( id ) ) ;
-			entry.Add( "path",	Json( path.string() ) ) ;
-			entry.Add( "md5",	Json( md5sum ) ) ;
-			entry.Add( "mtime",	Json( mtime ) ) ;
-			return entry ;
-		}
-	} ;
-
-	struct PathHash
-	{
-		std::size_t operator()( const fs::path& p ) const
-		{
-			return boost::hash_value( p.string() ) ;
-		}
-	} ;
-	
-	using namespace boost::multi_index ;
-	
-	struct ByID {} ;
-	struct ByPath {} ;
-	
-	typedef multi_index_container<
-		Resource,
-		indexed_by<
-			hashed_non_unique<	tag<ByID>,	member<Resource, std::string,	&Resource::id> >,
-			hashed_unique<		tag<ByPath>,member<Resource, fs::path,		&Resource::path>, PathHash >
-		> 
-	> ResourceSet ;
-	
-	typedef ResourceSet::index<ByID>::type		IDIdx ;
-	typedef ResourceSet::index<ByPath>::type	PathIdx ;
-/*	
-	struct ByHref {} ;
-	struct ByIdentity {} ;
-	
-	typedef multi_index_container<
-		Collection*,
-		indexed_by<
-			hashed_non_unique<tag<ByHref>,	const_mem_fun<Collection, std::string,	&Collection::SelfHref> >,
-			hashed_non_unique<tag<ByID>,	const_mem_fun<Collection, std::string,	&Collection::ResourceID> >,
-			hashed_unique<tag<ByIdentity>,	identity<Collection*> >
-		>
-	> Folders ;
-	
-	typedef Folders::index<ByHref>::type		FoldersByHref ;
-	typedef Folders::index<ByIdentity>::type	FSet ;*/
+// 	struct Resource
+// 	{
+// 		std::string		id ;
+// 		fs::path		path ;
+// 		std::string		md5sum ;
+// 		std::time_t		mtime ;
+// 		
+// 		explicit Resource( const fs::path& p ) :
+// 			path( p ),
+// 			md5sum( crypt::MD5( p ) ),
+// 			mtime( fs::last_write_time( p ) )
+// 		{
+// 		}
+// 		
+// 		explicit Resource( const Json& json ) :
+// 			id(		json["id"].Str() ),
+// 			path(	json["path"].Str() ),
+// 			md5sum(	json["md5"].Str() ),
+// 			mtime(	json["mtime"].Int() )
+// 		{
+// 		}
+// 		
+// 		Json Get() const
+// 		{
+// 			Json entry ;
+// 			entry.Add( "id",	Json( id ) ) ;
+// 			entry.Add( "path",	Json( path.string() ) ) ;
+// 			entry.Add( "md5",	Json( md5sum ) ) ;
+// 			entry.Add( "mtime",	Json( mtime ) ) ;
+// 			return entry ;
+// 		}
+// 	} ;
+// 
+// 	struct PathHash
+// 	{
+// 		std::size_t operator()( const fs::path& p ) const
+// 		{
+// 			return boost::hash_value( p.string() ) ;
+// 		}
+// 	} ;
+// 	
+// 	using namespace boost::multi_index ;
+// 	
+// 	struct ByID {} ;
+// 	struct ByPath {} ;
+// 	
+// 	typedef multi_index_container<
+// 		Resource,
+// 		indexed_by<
+// 			hashed_non_unique<	tag<ByID>,	member<Resource, std::string,	&Resource::id> >,
+// 			hashed_unique<		tag<ByPath>,member<Resource, fs::path,		&Resource::path>, PathHash >
+// 		> 
+// 	> ResourceSet ;
+// 	
+// 	typedef ResourceSet::index<ByID>::type		IDIdx ;
+// 	typedef ResourceSet::index<ByPath>::type	PathIdx ;
 }
 
 struct State::Impl
 {
-	ResourceSet		rs ;
+// 	ResourceSet		rs ;
 	FolderSet		folders ;
 	std::string		change_stamp ;
 	
@@ -132,13 +117,13 @@ State::State( const fs::path& filename ) :
 void State::Read( const fs::path& filename )
 {
 Trace( "reading %1%", filename ) ;
-	Json json = Json::ParseFile( filename.string() ) ;
-	std::vector<Json> res = json["resources"].AsArray() ;
-	
-	for ( std::vector<Json>::iterator i = res.begin() ; i != res.end() ; ++i )
-		m_impl->rs.insert( Resource( *i ) ) ;
-	
-	m_impl->change_stamp = json["change_stamp"].Str() ;
+// 	Json json = Json::ParseFile( filename.string() ) ;
+// 	std::vector<Json> res = json["resources"].AsArray() ;
+// 	
+// 	for ( std::vector<Json>::iterator i = res.begin() ; i != res.end() ; ++i )
+// 		m_impl->rs.insert( Resource( *i ) ) ;
+// 	
+// 	m_impl->change_stamp = json["change_stamp"].Str() ;
 }
 
 std::string State::ChangeStamp() const
@@ -153,15 +138,10 @@ void State::ChangeStamp( const std::string& cs )
 
 void State::Sync( const fs::path& p )
 {
-// 	FoldersByHref& idx = m_impl->folders.get<ByHref>() ;
-// 	FoldersByHref::iterator it = idx.find( root_href ) ;
-
-// 	Collection *root = m_impl->folders.FindByHref( root_href ) ;
-// 	assert( root != 0 ) ;
 	Sync( p, m_impl->folders.Root() ) ;
 }
 
-void State::Sync( const fs::path& p, Collection *folder )
+void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
 
@@ -171,13 +151,13 @@ void State::Sync( const fs::path& p, Collection *folder )
 // 		Trace( "file found = %2% (%1%)", i->path(), i->path().filename() ) ;
 		if ( fs::is_directory( i->path() ) )
 		{
-			Collection *c = new Collection( i->path().filename().string(), "" ) ;
+			Resource *c = new Resource( i->path().filename().string(), "" ) ;
 			folder->AddChild( c ) ;
 			
 			Sync( *i, c ) ;
 		}
-		else if ( i->path().filename().string()[0] != '.' )
-			m_impl->rs.insert( Resource( i->path() ) ) ;
+// 		else if ( i->path().filename().string()[0] != '.' )
+// 			m_impl->rs.insert( Resource( i->path() ) ) ;
 	}
 }
 
@@ -186,14 +166,14 @@ void State::Write( const fs::path& filename ) const
 	Json result ;
 	result.Add( "change_stamp", Json( m_impl->change_stamp ) ) ;
 	
-	IDIdx& idx = m_impl->rs.get<ByID>() ;
-	
-	std::vector<Json> res ;
-	std::transform( idx.begin(), idx.end(),
-		std::back_inserter(res),
-		boost::bind( &Resource::Get, _1 ) ) ;
-	
-	result.Add( "resources", Json(res) ) ;
+// 	IDIdx& idx = m_impl->rs.get<ByID>() ;
+// 	
+// 	std::vector<Json> res ;
+// 	std::transform( idx.begin(), idx.end(),
+// 		std::back_inserter(res),
+// 		boost::bind( &Resource::Get, _1 ) ) ;
+// 	
+// 	result.Add( "resources", Json(res) ) ;
 	
 // 	Trace( "%1%", result ) ;
 	
@@ -203,18 +183,18 @@ void State::Write( const fs::path& filename ) const
 
 void State::SetId( const fs::path& p, const std::string& id )
 {
-	PathIdx& pidx = m_impl->rs.get<ByPath>() ;
-	PathIdx::iterator it = pidx.find( p ) ;
-	if ( it != pidx.end() )
-	{
-		Resource r = *it ;
-		r.id = id ;
-		pidx.replace( it, r ) ;
-	}
-	else
-	{
-		Trace( "can't find %1%", p ) ;
-	}
+// 	PathIdx& pidx = m_impl->rs.get<ByPath>() ;
+// 	PathIdx::iterator it = pidx.find( p ) ;
+// 	if ( it != pidx.end() )
+// 	{
+// 		Resource r = *it ;
+// 		r.id = id ;
+// 		pidx.replace( it, r ) ;
+// 	}
+// 	else
+// 	{
+// 		Trace( "can't find %1%", p ) ;
+// 	}
 }
 
 void State::OnEntry( const Entry& e )
@@ -263,33 +243,23 @@ std::size_t State::TryResolveEntry()
 
 bool State::Update( const Entry& e )
 {
-// 	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
-// 	FoldersByHref::iterator i = folders.find( e.ParentHref() ) ;
-	Collection *parent = m_impl->folders.FindByHref( e.ParentHref() ) ;
+	Resource *parent = m_impl->folders.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
 	{
 		Trace( "found parent of folder %1%: %2%", e.Title(), parent->Title() ) ;
 		
 		// see if the entry already exist in local
-		Collection *child = parent->FindChild( e.Title() ) ;
+		Resource *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
 			m_impl->folders.Update( child, e ) ;
-// 			FSet& fs = m_impl->folders.get<ByIdentity>() ;
-// 			FSet::iterator c = fs.find( child ) ;
-// 			
-// 			if ( c != fs.end() )
-// 				fs.erase( c ) ;
-// 				
-// 			child->Update( e ) ;
-// 			folders.insert( child ) ;
 		}
 		
 		// folder entry exist in google drive, but not local.
 		else
 		{
-			child = new Collection( e ) ;
+			child = new Resource( e ) ;
 			parent->AddChild( child ) ;
 			m_impl->folders.Insert( child ) ;
 		}
@@ -299,11 +269,8 @@ bool State::Update( const Entry& e )
 		return false ;
 }
 
-Collection* State::FindFolderByHref( const std::string& href )
+Resource* State::FindFolderByHref( const std::string& href )
 {
-// 	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
-// 	FoldersByHref::iterator i = folders.find( href ) ;
-// 	return i != folders.end() ? *i : 0 ;
 	return m_impl->folders.FindByHref( href ) ;
 }
 

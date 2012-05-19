@@ -128,7 +128,7 @@ Drive::~Drive( )
 
 struct SortCollectionByHref
 {
-	bool operator()( const Collection& c1, const Collection& c2 ) const
+	bool operator()( const Resource& c1, const Resource& c2 ) const
 	{
 		return c1.SelfHref() < c2.SelfHref() ;
 	}
@@ -141,7 +141,7 @@ Drive::FolderListIterator Drive::FindFolder( const std::string& href )
 		std::equal_range(
 			m_coll.begin(),
 			m_coll.end(),
-			Collection( "", href ),
+			Resource( "", href ),
 			SortCollectionByHref() ) ;
 	
 	 return (its.first != its.second) ? its.first : m_coll.end() ;
@@ -164,7 +164,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 	xml::Node resp = xml.Response() ;
 
 	assert( m_coll.empty() ) ;
-	m_coll.push_back( Collection( ".", root_href ) ) ;
+	m_coll.push_back( Resource( ".", root_href ) ) ;
 	
 	while ( true )
 	{
@@ -179,7 +179,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 				if ( e.ParentHrefs().size() == 1 )
 				{
 					m_state.OnEntry( e ) ;
-					m_coll.push_back( Collection( e ) ) ;
+					m_coll.push_back( Resource( e ) ) ;
 				}
 				else
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
@@ -201,7 +201,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
 	{
 		FolderListIterator pit = FindFolder( i->ParentHref() ) ;
-		Collection *scoll = m_state.FindFolderByHref( i->SelfHref() ) ;
+		Resource *scoll = m_state.FindFolderByHref( i->SelfHref() ) ;
 		if ( scoll )
 			Trace( "found folder %1% in state", scoll->Title() ) ;
 		else
@@ -224,7 +224,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 	Root()->CreateSubDir( "." ) ;
 }
 
-void Drive::UpdateFile( Entry& entry, Collection& parent, http::Agent *http )
+void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
 {
 	// only handle uploaded files
 	if ( !entry.Filename().empty() )

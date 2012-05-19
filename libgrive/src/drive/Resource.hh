@@ -21,7 +21,6 @@
 
 #include "Entry.hh"
 #include "util/Exception.hh"
-#include "util/Function.hh"
 #include "util/FileSystem.hh"
 
 #include <string>
@@ -31,53 +30,50 @@ namespace gr {
 
 class File ;
 
-class Collection
+class Resource
 {
 public :
-	explicit Collection( const xml::Node& entry ) ;
-	explicit Collection( const Entry& entry ) ;
-	Collection( const std::string& title, const std::string& href ) ;
-	Collection( const std::string& title, Collection *parent ) ;
+	explicit Resource( const xml::Node& entry ) ;
+	explicit Resource( const Entry& entry ) ;
+	Resource( const std::string& title, const std::string& href ) ;
+	Resource( const std::string& title, Resource *parent ) ;
 	
 	// default copy ctor & op= are fine
 	
 	std::string Title() const ;
 	std::string SelfHref() const ;
-	const Collection* Parent() const ;
-	Collection* Parent() ;
+	const Resource* Parent() const ;
+	Resource* Parent() ;
 	std::string ParentHref() const ;
 	fs::path Dir() const ;
 	bool IsInRootTree() const ;
 	std::string ResourceID() const ;
 
-	void AddChild( Collection *child ) ;
+	void AddChild( Resource *child ) ;
 	void AddLeaf( File *file ) ;
 	
-	void Swap( Collection& coll ) ;
+	void Swap( Resource& coll ) ;
 
 	// traversing the tree
 	void CreateSubDir( const fs::path& prefix ) ;
-	void ForEachFile(
-		Function<void(const std::string&)>	callback,
-		const std::string& 					prefix = "." ) ;
 
 	struct Error : virtual Exception {} ;
 
-	Collection* FindChild( const std::string& title ) ;
+	Resource* FindChild( const std::string& title ) ;
 	void Update( const Entry& e ) ;
 	
 private :
 	Entry						m_entry ;
 	
 	// not owned
-	Collection					*m_parent ;
-	std::vector<Collection*>	m_child ;
-	std::vector<File*>			m_leaf ;
+	Resource				*m_parent ;
+	std::vector<Resource*>	m_child ;
+	std::vector<File*>		m_leaf ;
 } ;
 
 } // end of namespace
 
 namespace std
 {
-	void swap( gr::Collection& c1, gr::Collection& c2 ) ;
+	void swap( gr::Resource& c1, gr::Resource& c2 ) ;
 }

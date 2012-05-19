@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Collection.hh"
+#include "Resource.hh"
 #include "State.hh"
 
 #include "protocol/Json.hh"
@@ -45,8 +45,8 @@ class File ;
 class Drive
 {
 public :
-	typedef std::vector<Collection>				FolderList ;
-	typedef std::vector<Collection>::iterator	FolderListIterator ;
+	typedef std::vector<Resource>			FolderList ;
+	typedef std::vector<Resource>::iterator	FolderListIterator ;
 
 public :
 	Drive( OAuth2& auth ) ;
@@ -58,7 +58,7 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void UpdateFile( Entry& file, Collection& parent, http::Agent *http ) ;
+	void UpdateFile( Entry& file, Resource& parent, http::Agent *http ) ;
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	
