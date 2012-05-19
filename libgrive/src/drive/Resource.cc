@@ -118,12 +118,14 @@ bool Resource::IsFolder() const
 fs::path Resource::Path() const
 {
 	assert( m_parent != this ) ;
-	
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
+
 	return m_parent != 0 ? (m_parent->Path() / Name()) : "." ;
 }
 
 bool Resource::IsInRootTree() const
 {
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 	return m_parent == 0 ? (SelfHref() == root_href) : m_parent->IsInRootTree() ;
 }
 
@@ -140,6 +142,10 @@ Resource* Resource::FindChild( const std::string& name )
 
 void Resource::Update( http::Agent *http, const http::Headers& auth )
 {
+	// no need to update for folders
+	if ( IsFolder() )
+		return ;
+
 	assert( m_parent != 0 ) ;
 
 	bool changed = true ;

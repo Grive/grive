@@ -146,11 +146,13 @@ void Entry::Swap( Entry& e )
 	m_etag.swap( e.m_etag ) ;
 	m_resource_id.swap( e.m_resource_id ) ;
 
+	m_parent_hrefs.swap( e.m_parent_hrefs ) ;
+	
 	m_self_href.swap( e.m_self_href ) ;
 	m_parent_href.swap( e.m_parent_href ) ;
 	m_content_src.swap( e.m_content_src ) ;	
 	m_upload_link.swap( e.m_upload_link ) ;
-
+	
 	m_server_modified.Swap( e.m_server_modified ) ;
 }
 

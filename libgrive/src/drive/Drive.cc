@@ -98,8 +98,7 @@ Drive::Drive( OAuth2& auth ) :
 			{
 				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
 				if ( p != 0 && p->IsInRootTree() )
-// 					m_state.OnEntry( file ) ;
-					UpdateFile( file, p, &http ) ;
+					m_state.OnEntry( file ) ;
 				else
 					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title() ) ;
 			}
@@ -117,11 +116,6 @@ Drive::Drive( OAuth2& auth ) :
 	} while ( has_next ) ;
 	
 	m_state.Write( state_file ) ;
-}
-
-Drive::~Drive( )
-{
-	std::for_each( m_files.begin(), m_files.end(), Destroy() ) ;
 }
 
 void Drive::ConstructDirTree( http::Agent *http )
@@ -162,7 +156,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 
 	m_state.ResolveEntry() ;
 }
-
+/*
 void Drive::UpdateFile( Entry& entry, Resource *parent, http::Agent *http )
 {
 	assert( parent != 0 ) ;
@@ -181,11 +175,11 @@ void Drive::UpdateFile( Entry& entry, Resource *parent, http::Agent *http )
 		Log( "file \"%1%\" is a google document, ignored", entry.Title() ) ;
 	}
 }
-
+*/
 void Drive::Update()
 {
 	http::Agent http ;
-	std::for_each( m_files.begin(), m_files.end(),
+	std::for_each( m_state.begin(), m_state.end(),
 		boost::bind( &Resource::Update, _1, &http, m_http_hdr ) ) ;
 }
 

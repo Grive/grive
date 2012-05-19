@@ -17,7 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "FolderSet.hh"
+#include "ResourceTree.hh"
 #include "CommonUri.hh"
 
 #include "util/Destroy.hh"
@@ -29,13 +29,13 @@ namespace gr {
 
 using namespace details ;
 
-FolderSet::FolderSet( ) :
+ResourceTree::ResourceTree( ) :
 	m_root( new Resource( ".", "folder", root_href ) )
 {
 	m_set.insert( m_root ) ;
 }
 
-FolderSet::FolderSet( const FolderSet& fs ) :
+ResourceTree::ResourceTree( const ResourceTree& fs ) :
 	m_root( 0 )
 {
 	const Set& s = fs.m_set.get<ByIdentity>() ;
@@ -51,45 +51,48 @@ FolderSet::FolderSet( const FolderSet& fs ) :
 	assert( m_root != 0 ) ;
 }
 
-FolderSet::~FolderSet( )
+ResourceTree::~ResourceTree( )
 {
 	// delete all pointers
 	const Set& s = m_set.get<ByIdentity>() ;
 	std::for_each( s.begin(), s.end(), Destroy() ) ;
 }
 
-Resource* FolderSet::Root()
+Resource* ResourceTree::Root()
 {
 	assert( m_root != 0 ) ;
 	return m_root ;
 }
 
-const Resource* FolderSet::Root() const
+const Resource* ResourceTree::Root() const
 {
 	assert( m_root != 0 ) ;
 	return m_root ;
 }
 
-void FolderSet::Swap( FolderSet& fs )
+void ResourceTree::Swap( ResourceTree& fs )
 {
 	m_set.swap( fs.m_set ) ;
 }
 
-FolderSet& FolderSet::operator=( const FolderSet& fs )
+ResourceTree& ResourceTree::operator=( const ResourceTree& fs )
 {
-	FolderSet tmp( fs ) ;
+	ResourceTree tmp( fs ) ;
 	Swap( tmp ) ;
 	return *this ;
 }
 
-Resource* FolderSet::FindByHref( const std::string& href )
+Resource* ResourceTree::FindByHref( const std::string& href )
 {
+	if ( href.empty() )
+		return 0 ;
+
 	HrefMap& map = m_set.get<ByHref>() ;
 	HrefMap::iterator i = map.find( href ) ;
 	return i != map.end() ? *i : 0 ;
 }
 
-const Resource* FolderSet::FindByHref( const std::string& href ) const
+const Resource* ResourceTree::FindByHref( const std::string& href ) const
 {
 	const HrefMap& map = m_set.get<ByHref>() ;
 	HrefMap::const_iterator i = map.find( href ) ;
@@ -97,7 +100,7 @@ const Resource* FolderSet::FindByHref( const std::string& href ) const
 }
 
 ///	Reinsert should be called when the ID/HREF were updated
-bool FolderSet::ReInsert( Resource *coll )
+bool ResourceTree::ReInsert( Resource *coll )
 {
 	Set& s = m_set.get<ByIdentity>() ;
 	Set::iterator i = s.find( coll ) ;
@@ -111,29 +114,29 @@ bool FolderSet::ReInsert( Resource *coll )
 		return false ;
 }
 
-void FolderSet::Insert( Resource *coll )
+void ResourceTree::Insert( Resource *coll )
 {
 	m_set.insert( coll ) ;
 }
 
-void FolderSet::Erase( Resource *coll )
+void ResourceTree::Erase( Resource *coll )
 {
 	Set& s = m_set.get<ByIdentity>() ;
 	s.erase( s.find( coll ) ) ;
 }
 
-void FolderSet::Update( Resource *coll, const Entry& e )
+void ResourceTree::Update( Resource *coll, const Entry& e )
 {
 	coll->Update( e ) ;
 	ReInsert( coll ) ;
 }
 
-FolderSet::iterator FolderSet::begin()
+ResourceTree::iterator ResourceTree::begin()
 {
 	return m_set.get<ByIdentity>().begin() ;
 }
 
-FolderSet::iterator FolderSet::end()
+ResourceTree::iterator ResourceTree::end()
 {
 	return m_set.get<ByIdentity>().end() ;
 }

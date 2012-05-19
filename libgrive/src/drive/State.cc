@@ -64,9 +64,10 @@ void State::Sync( const fs::path& p )
 	Sync( p, m_folders.Root() ) ;
 }
 
-void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
+void State::Sync( const fs::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
+	assert( folder->IsFolder() ) ;
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
@@ -78,8 +79,13 @@ void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
 
 			Sync( *i, c ) ;
 		}
-// 		else if ( i->path().filename().string()[0] != '.' )
-// 			m_impl->rs.insert( Resource( i->path() ) ) ;
+		else if ( i->path().filename().string()[0] != '.' )
+		{
+Trace( "file: %1% %2%", i->path().filename().string(), folder->Path() ) ;
+			Resource *c = new Resource( i->path().filename().string(), "file", "" ) ;
+			folder->AddChild( c ) ;
+			m_folders.Insert( c ) ;
+		}
 	}
 }
 
@@ -135,9 +141,25 @@ std::size_t State::TryResolveEntry()
 
 bool State::Update( const Entry& e )
 {
+	if ( e.Kind() != "folder" && e.Filename().empty() )
+	{
+		Log( "file \"%1%\" is a google document, ignored", e.Title() ) ;
+		return true ;
+	}
+	
+	if ( e.ParentHref().empty() )
+	{
+		Log( "\"%1%\" has no parent, ignored", e.Title() ) ;
+		return true ;
+	}
+	
 	Resource *parent = m_folders.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
 	{
+if ( !parent->IsFolder() )
+Trace( "name = \"%1%\" \"%2%\"", e.Title(), parent->Name() ) ;
+		assert( parent->IsFolder() ) ;
+	
 		// see if the entry already exist in local
 		Resource *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
@@ -154,10 +176,13 @@ bool State::Update( const Entry& e )
 			parent->AddChild( child ) ;
 			m_folders.Insert( child ) ;
 			
-			if ( child->IsFolder() )
+			fs::path child_path = child->Path() ;
+			Trace( "added %1%", child_path ) ;
+			
+			if ( child->IsFolder() && !fs::is_directory( child_path ) )
 			{
-				Log( "creating %1% directory", child->Path(), log::info ) ;
-				fs::create_directories( child->Path() ) ;
+				Log( "creating %1% directory", child_path, log::info ) ;
+				fs::create_directories( child_path ) ;
 			}
 		}
 		return true ;

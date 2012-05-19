@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "FolderSet.hh"
+#include "ResourceTree.hh"
 #include "util/FileSystem.hh"
 
 #include <memory>
@@ -33,7 +33,7 @@ class Entry ;
 class State
 {
 public :
-	typedef FolderSet::iterator iterator ;
+	typedef ResourceTree::iterator iterator ;
 
 public :
 	explicit State( const fs::path& filename ) ;
@@ -63,7 +63,7 @@ private :
 	std::size_t TryResolveEntry() ;
 
 private :
-	FolderSet		m_folders ;
+	ResourceTree	m_folders ;
 	std::string		m_change_stamp ;
 	
 	std::vector<Entry>	m_unresolved ;

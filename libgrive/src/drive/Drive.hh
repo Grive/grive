@@ -19,10 +19,8 @@
 
 #pragma once
 
-#include "Resource.hh"
 #include "State.hh"
 
-#include "protocol/Json.hh"
 #include "util/Exception.hh"
 
 #include <string>
@@ -34,23 +32,13 @@ namespace http
 {
 	class Agent ;
 }
-namespace xml
-{
-	class Node ;
-}
 
 class OAuth2 ;
-class File ;
 
 class Drive
 {
 public :
-	typedef std::vector<Resource>			FolderList ;
-	typedef std::vector<Resource>::iterator	FolderListIterator ;
-
-public :
 	Drive( OAuth2& auth ) ;
-	~Drive( ) ;
 
 	void Update() ;
 	void Sync() ;
@@ -58,8 +46,6 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void UpdateFile( Entry& file, Resource *parent, http::Agent *http ) ;
-	
 	void ConstructDirTree( http::Agent *http ) ;
 	
 private :
@@ -67,8 +53,6 @@ private :
 	std::vector<std::string>	m_http_hdr ;
 
 	std::string					m_resume_link ;
-
-	std::vector<Resource*>		m_files ;
 	State						m_state ;
 } ;
 

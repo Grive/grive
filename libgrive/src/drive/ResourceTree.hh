@@ -56,18 +56,18 @@ namespace details
 	This class stores a set of folders and provide fast search access from ID, HREF etc.
 	It is a wrapper around multi_index_container from Boost library.
 */
-class FolderSet
+class ResourceTree
 {
 public :
 	typedef details::Set::iterator iterator ;
 
 public :
-	FolderSet( ) ;
-	FolderSet( const FolderSet& fs ) ;
-	~FolderSet( ) ;
+	ResourceTree( ) ;
+	ResourceTree( const ResourceTree& fs ) ;
+	~ResourceTree( ) ;
 	
-	void Swap( FolderSet& fs ) ;
-	FolderSet& operator=( const FolderSet& fs ) ;
+	void Swap( ResourceTree& fs ) ;
+	ResourceTree& operator=( const ResourceTree& fs ) ;
 	
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
