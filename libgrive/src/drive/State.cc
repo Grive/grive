@@ -96,7 +96,7 @@ namespace
 	
 	typedef ResourceSet::index<ByID>::type		IDIdx ;
 	typedef ResourceSet::index<ByPath>::type	PathIdx ;
-	
+/*	
 	struct ByHref {} ;
 	struct ByIdentity {} ;
 	
@@ -110,14 +110,14 @@ namespace
 	> Folders ;
 	
 	typedef Folders::index<ByHref>::type		FoldersByHref ;
-	typedef Folders::index<ByIdentity>::type	FSet ;
+	typedef Folders::index<ByIdentity>::type	FSet ;*/
 }
 
 struct State::Impl
 {
-	ResourceSet rs ;
-	Folders		folders ;
-	std::string	change_stamp ;
+	ResourceSet		rs ;
+	FolderSet		folders ;
+	std::string		change_stamp ;
 	
 	std::vector<Entry>	unresolved ;
 } ;
@@ -125,9 +125,6 @@ struct State::Impl
 State::State( const fs::path& filename ) :
 	m_impl( new Impl )
 {
-	Collection *root = new Collection( ".", root_href ) ;
-	m_impl->folders.insert( root ) ;
-
 	if ( fs::exists( filename ) )
 		Read( filename );
 }
@@ -156,15 +153,18 @@ void State::ChangeStamp( const std::string& cs )
 
 void State::Sync( const fs::path& p )
 {
-	FoldersByHref& idx = m_impl->folders.get<ByHref>() ;
-	FoldersByHref::iterator it = idx.find( root_href ) ;
-	
-	assert( it != idx.end() ) ;
-	Sync( p, *it ) ;
+// 	FoldersByHref& idx = m_impl->folders.get<ByHref>() ;
+// 	FoldersByHref::iterator it = idx.find( root_href ) ;
+
+// 	Collection *root = m_impl->folders.FindByHref( root_href ) ;
+// 	assert( root != 0 ) ;
+	Sync( p, m_impl->folders.Root() ) ;
 }
 
 void State::Sync( const fs::path& p, Collection *folder )
 {
+	assert( folder != 0 ) ;
+
 // 	Trace( "synchronizing = %1%", p ) ;
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
@@ -263,33 +263,35 @@ std::size_t State::TryResolveEntry()
 
 bool State::Update( const Entry& e )
 {
-	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
-	FoldersByHref::iterator i = folders.find( e.ParentHref() ) ;
-	if ( i != folders.end() )
+// 	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
+// 	FoldersByHref::iterator i = folders.find( e.ParentHref() ) ;
+	Collection *parent = m_impl->folders.FindByHref( e.ParentHref() ) ;
+	if ( parent != 0 )
 	{
-		Trace( "found parent of folder %1%: %2%", e.Title(), (*i)->Title() ) ;
+		Trace( "found parent of folder %1%: %2%", e.Title(), parent->Title() ) ;
 		
 		// see if the entry already exist in local
-		Collection *child = (*i)->FindChild( e.Title() ) ;
+		Collection *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			FSet& fs = m_impl->folders.get<ByIdentity>() ;
-			FSet::iterator c = fs.find( child ) ;
-			
-			if ( c != fs.end() )
-				fs.erase( c ) ;
-				
-			child->Update( e ) ;
-			folders.insert( child ) ;
+			m_impl->folders.Update( child, e ) ;
+// 			FSet& fs = m_impl->folders.get<ByIdentity>() ;
+// 			FSet::iterator c = fs.find( child ) ;
+// 			
+// 			if ( c != fs.end() )
+// 				fs.erase( c ) ;
+// 				
+// 			child->Update( e ) ;
+// 			folders.insert( child ) ;
 		}
 		
 		// folder entry exist in google drive, but not local.
 		else
 		{
 			child = new Collection( e ) ;
-			(*i)->AddChild( child ) ;
-			folders.insert( child ) ;
+			parent->AddChild( child ) ;
+			m_impl->folders.Insert( child ) ;
 		}
 		return true ;
 	}
@@ -299,9 +301,10 @@ bool State::Update( const Entry& e )
 
 Collection* State::FindFolderByHref( const std::string& href )
 {
-	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
-	FoldersByHref::iterator i = folders.find( href ) ;
-	return i != folders.end() ? *i : 0 ;
+// 	FoldersByHref& folders = m_impl->folders.get<ByHref>() ;
+// 	FoldersByHref::iterator i = folders.find( href ) ;
+// 	return i != folders.end() ? *i : 0 ;
+	return m_impl->folders.FindByHref( href ) ;
 }
 
 } // end of namespace

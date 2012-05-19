@@ -73,8 +73,16 @@ public :
 // 	void SetID( Collection *coll, const std::string& id ) ;
 // 	void SetHref( Collection *coll, const std::string& href ) ;
 	
+	void Insert( Collection *coll ) ;
+	void Erase( Collection *coll ) ;
+	void Update( Collection *coll, const Entry& e ) ;
+	
+	Collection* Root() ;
+	const Collection* Root() const ;
+		
 private :
 	details::Folders	m_set ;
+	Collection*			m_root ;
 } ;
 
 } // end of namespace

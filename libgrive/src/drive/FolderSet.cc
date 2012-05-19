@@ -18,6 +18,7 @@
 */
 
 #include "FolderSet.hh"
+#include "CommonUri.hh"
 
 #include "util/Destroy.hh"
 
@@ -27,15 +28,23 @@ namespace gr {
 
 using namespace details ;
 
-FolderSet::FolderSet( )
+FolderSet::FolderSet( ) :
+	m_root( new Collection( ".", root_href ) )
 {
+	m_set.insert( m_root ) ;
 }
 
 FolderSet::FolderSet( const FolderSet& fs )
 {
 	const Set& s = fs.m_set.get<ByIdentity>() ;
 	for ( Set::const_iterator i = s.begin() ; i != s.end() ; ++i )
-		m_set.insert( new Collection( **i ) ) ;
+	{
+		Collection *c = new Collection( **i ) ;
+		if ( c->SelfHref() == root_href )
+			m_root = c ;
+		
+		m_set.insert( c ) ;
+	}
 }
 
 FolderSet::~FolderSet( )
@@ -43,6 +52,16 @@ FolderSet::~FolderSet( )
 	// delete all pointers
 	const Set& s = m_set.get<ByIdentity>() ;
 	std::for_each( s.begin(), s.end(), Destroy() ) ;
+}
+
+Collection* FolderSet::Root()
+{
+	return m_root ;
+}
+
+const Collection* FolderSet::Root() const
+{
+	return m_root ;
 }
 
 void FolderSet::Swap( FolderSet& fs )
@@ -84,6 +103,23 @@ bool FolderSet::ReInsert( Collection *coll )
 	}
 	else
 		return false ;
+}
+
+void FolderSet::Insert( Collection *coll )
+{
+	m_set.insert( coll ) ;
+}
+
+void FolderSet::Erase( Collection *coll )
+{
+	Set& s = m_set.get<ByIdentity>() ;
+	s.erase( s.find( coll ) ) ;
+}
+
+void FolderSet::Update( Collection *coll, const Entry& e )
+{
+	coll->Update( e ) ;
+	ReInsert( coll ) ;
 }
 
 } // end of namespace
