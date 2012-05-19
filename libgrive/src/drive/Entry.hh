@@ -44,7 +44,7 @@ class Entry
 public :
 	explicit Entry( const Path& file ) ;
 	explicit Entry( const xml::Node& n ) ;
-	Entry( const std::string& title, const std::string& href ) ;
+	Entry( const std::string& title, const std::string& kind, const std::string& href ) ;
 
 	std::string Title() const ;
 	std::string Filename() const ;

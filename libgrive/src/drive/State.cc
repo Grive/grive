@@ -38,17 +38,7 @@
 
 namespace gr {
 
-struct State::Impl
-{
-// 	ResourceSet		rs ;
-	FolderSet		folders ;
-	std::string		change_stamp ;
-	
-	std::vector<Entry>	unresolved ;
-} ;
-
-State::State( const fs::path& filename ) :
-	m_impl( new Impl )
+State::State( const fs::path& filename )
 {
 	if ( fs::exists( filename ) )
 		Read( filename );
@@ -56,22 +46,22 @@ State::State( const fs::path& filename ) :
 
 void State::Read( const fs::path& filename )
 {
-Trace( "reading %1%", filename ) ;
+	Trace( "reading %1%", filename ) ;
 }
 
 std::string State::ChangeStamp() const
 {
-	return m_impl->change_stamp ;
+	return m_change_stamp ;
 }
 
 void State::ChangeStamp( const std::string& cs )
 {
-	m_impl->change_stamp = cs ;
+	m_change_stamp = cs ;
 }
 
 void State::Sync( const fs::path& p )
 {
-	Sync( p, m_impl->folders.Root() ) ;
+	Sync( p, m_folders.Root() ) ;
 }
 
 void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
@@ -82,9 +72,9 @@ void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
 	{
 		if ( fs::is_directory( i->path() ) )
 		{
-			Resource *c = new Resource( i->path().filename().string(), "" ) ;
+			Resource *c = new Resource( i->path().filename().string(), "folder", "" ) ;
 			folder->AddChild( c ) ;
-			m_impl->folders.Insert( c ) ;
+			m_folders.Insert( c ) ;
 
 			Sync( *i, c ) ;
 		}
@@ -96,7 +86,7 @@ void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
 void State::Write( const fs::path& filename ) const
 {
 	Json result ;
-	result.Add( "change_stamp", Json( m_impl->change_stamp ) ) ;
+	result.Add( "change_stamp", Json( m_change_stamp ) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;
@@ -110,36 +100,28 @@ void State::OnEntry( const Entry& e )
 {
 	if ( !Update( e ) )
 	{
-		Trace( "can't resolve folder %1%", e.Title() ) ;
-		m_impl->unresolved.push_back( e ) ;
+		m_unresolved.push_back( e ) ;
 	}
 }
 
 void State::ResolveEntry()
 {
-	Trace( "trying to resolve %1% entries", m_impl->unresolved.size() ) ;
-	while ( !m_impl->unresolved.empty() )
+	while ( !m_unresolved.empty() )
 	{
 		if ( TryResolveEntry() == 0 )
-		{
-			Trace( "cannot make progress" ) ;
 			break ;
-		}
 	}
-	
-	Trace( "entries left = %1%", m_impl->unresolved.size() ) ;
 }
 
 std::size_t State::TryResolveEntry()
 {
-	assert( !m_impl->unresolved.empty() ) ;
+	assert( !m_unresolved.empty() ) ;
 
 	std::size_t count = 0 ;
-	std::vector<Entry>& en = m_impl->unresolved ;
+	std::vector<Entry>& en = m_unresolved ;
 	
 	for ( std::vector<Entry>::iterator i = en.begin() ; i != en.end() ; )
 	{
-		Trace( "resolving %1%", i->Title() ) ;
 		if ( Update( *i ) )
 		{
 			i = en.erase( i ) ;
@@ -153,29 +135,30 @@ std::size_t State::TryResolveEntry()
 
 bool State::Update( const Entry& e )
 {
-	Resource *parent = m_impl->folders.FindByHref( e.ParentHref() ) ;
+	Resource *parent = m_folders.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
 	{
-		Trace( "found parent of folder %1%: %2%", e.Title(), parent->Title() ) ;
-		
 		// see if the entry already exist in local
 		Resource *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			m_impl->folders.Update( child, e ) ;
+			m_folders.Update( child, e ) ;
 		}
 		
 		// folder entry exist in google drive, but not local. we should create
 		// the directory
-		else
+		else if ( e.Kind() == "folder" || !e.Filename().empty() )
 		{
 			child = new Resource( e ) ;
 			parent->AddChild( child ) ;
-			m_impl->folders.Insert( child ) ;
+			m_folders.Insert( child ) ;
 			
-			Trace( "creating %1% directory", child->Path() ) ;
-			fs::create_directories( child->Path() ) ;
+			if ( child->IsFolder() )
+			{
+				Log( "creating %1% directory", child->Path(), log::info ) ;
+				fs::create_directories( child->Path() ) ;
+			}
 		}
 		return true ;
 	}
@@ -185,7 +168,17 @@ bool State::Update( const Entry& e )
 
 Resource* State::FindFolderByHref( const std::string& href )
 {
-	return m_impl->folders.FindByHref( href ) ;
+	return m_folders.FindByHref( href ) ;
+}
+
+State::iterator State::begin()
+{
+	return m_folders.begin() ;
+}
+
+State::iterator State::end()
+{
+	return m_folders.end() ;
 }
 
 } // end of namespace

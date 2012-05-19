@@ -33,6 +33,9 @@ class Entry ;
 class State
 {
 public :
+	typedef FolderSet::iterator iterator ;
+
+public :
 	explicit State( const fs::path& filename ) ;
 	
 	void Sync( const fs::path& p ) ;
@@ -51,16 +54,19 @@ public :
 	Resource* FindFolderByHref( const std::string& href ) ;
 	Resource* FindFolderByID( const std::string& id ) ;
 
+	iterator begin() ;
+	iterator end() ;
+
 private :
 	void Sync( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 
 private :
-	struct Impl ;
-	std::auto_ptr<Impl>	m_impl ;
+	FolderSet		m_folders ;
+	std::string		m_change_stamp ;
 	
-	FolderSet	m_folders ;
+	std::vector<Entry>	m_unresolved ;
 } ;
 
 } // end of namespace

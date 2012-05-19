@@ -59,6 +59,9 @@ namespace details
 class FolderSet
 {
 public :
+	typedef details::Set::iterator iterator ;
+
+public :
 	FolderSet( ) ;
 	FolderSet( const FolderSet& fs ) ;
 	~FolderSet( ) ;
@@ -79,7 +82,10 @@ public :
 	
 	Resource* Root() ;
 	const Resource* Root() const ;
-		
+	
+	iterator begin() ;
+	iterator end() ;
+	
 private :
 	details::Folders	m_set ;
 	Resource*			m_root ;

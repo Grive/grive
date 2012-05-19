@@ -21,7 +21,6 @@
 
 #include "CommonUri.hh"
 #include "Entry.hh"
-#include "File.hh"
 
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
@@ -99,7 +98,8 @@ Drive::Drive( OAuth2& auth ) :
 			{
 				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
 				if ( p != 0 && p->IsInRootTree() )
-					UpdateFile( file, *p, &http ) ;
+// 					m_state.OnEntry( file ) ;
+					UpdateFile( file, p, &http ) ;
 				else
 					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title() ) ;
 			}
@@ -163,14 +163,16 @@ void Drive::ConstructDirTree( http::Agent *http )
 	m_state.ResolveEntry() ;
 }
 
-void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
+void Drive::UpdateFile( Entry& entry, Resource *parent, http::Agent *http )
 {
+	assert( parent != 0 ) ;
+
 	// only handle uploaded files
 	if ( !entry.Filename().empty() )
 	{
-		Resource *file = new Resource( entry, &parent ) ;
+		Resource *file = new Resource( entry ) ;
+		parent->AddChild( file ) ;
 		m_files.push_back( file ) ;
-		parent.AddLeaf( file ) ;
 		
 		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
 	}
@@ -182,8 +184,6 @@ void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
 
 void Drive::Update()
 {
-	Trace( "updating %1% files", m_files.size() ) ;
-
 	http::Agent http ;
 	std::for_each( m_files.begin(), m_files.end(),
 		boost::bind( &Resource::Update, _1, &http, m_http_hdr ) ) ;

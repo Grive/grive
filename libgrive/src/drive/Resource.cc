@@ -50,9 +50,10 @@ Resource::Resource( const Entry& entry, Resource *parent ) :
 }
 
 Resource::Resource(
-	const std::string& title,
+	const std::string& name,
+	const std::string& kind,
 	const std::string& href ) :
-	m_entry	( title, href ),
+	m_entry	( name, kind, href ),
 	m_parent( 0 )
 {
 }
@@ -67,9 +68,9 @@ std::string Resource::SelfHref() const
 	return m_entry.SelfHref() ;
 }
 
-std::string Resource::Title() const
+std::string Resource::Name() const
 {
-	return m_entry.Title() ;
+	return IsFolder() ? m_entry.Title() : m_entry.Filename() ;
 }
 
 std::string Resource::ResourceID() const
@@ -102,35 +103,11 @@ void Resource::AddChild( Resource *child )
 	m_child.push_back( child ) ;
 }
 
-void Resource::AddLeaf( Resource *file )
-{
-	assert( file != 0 ) ;
-	assert( !file->IsFolder() ) ;
-	m_leaf.push_back( file ) ;
-}
-
 void Resource::Swap( Resource& coll )
 {
 	m_entry.Swap( coll.m_entry ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
-	m_leaf.swap( coll.m_leaf ) ;
-}
-
-void Resource::CreateSubDir( const fs::path& prefix )
-{
-	fs::path dir = prefix / m_entry.Title() ;
-// 	Trace( "dir = %1%, path = %2%", dir, Path() ) ;
-// 	assert( dir == Path() ) ;
-	
-	fs::create_directories( dir ) ;
-	
-	for ( std::vector<Resource*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
-	{
-		assert( (*i)->m_parent == this ) ;
-		if ( (*i)->IsFolder() )
-			(*i)->CreateSubDir( dir ) ;
-	}
 }
 
 bool Resource::IsFolder() const
@@ -141,9 +118,8 @@ bool Resource::IsFolder() const
 fs::path Resource::Path() const
 {
 	assert( m_parent != this ) ;
-	std::string name = (IsFolder() ? m_entry.Title() : m_entry.Filename() ) ;
 	
-	return m_parent != 0 ? (m_parent->Path() / name) : "." ;
+	return m_parent != 0 ? (m_parent->Path() / Name()) : "." ;
 }
 
 bool Resource::IsInRootTree() const
@@ -151,17 +127,16 @@ bool Resource::IsInRootTree() const
 	return m_parent == 0 ? (SelfHref() == root_href) : m_parent->IsInRootTree() ;
 }
 
-Resource* Resource::FindChild( const std::string& title )
+Resource* Resource::FindChild( const std::string& name )
 {
 	for ( std::vector<Resource*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
 		assert( (*i)->m_parent == this ) ;
-		if ( (*i)->Title() == title )
+		if ( (*i)->Name() == name )
 			return *i ;
 	}
 	return 0 ;
 }
-
 
 void Resource::Update( http::Agent *http, const http::Headers& auth )
 {

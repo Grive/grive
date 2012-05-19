@@ -18,6 +18,7 @@
 */
 
 #include "Entry.hh"
+#include "CommonUri.hh"
 
 #include "util/Log.hh"
 #include "util/OS.hh"
@@ -38,9 +39,11 @@ Entry::Entry( const xml::Node& n )
 	Update( n ) ;
 }
 
-Entry::Entry( const std::string& title, const std::string& href ) :
-	m_title( title ),
-	m_self_href( href )
+Entry::Entry( const std::string& title, const std::string& kind, const std::string& href ) :
+	m_title		( title ),
+	m_filename	( title ),
+	m_kind		( kind ),
+	m_self_href	( href )
 {
 }
 

@@ -58,7 +58,7 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void UpdateFile( Entry& file, Resource& parent, http::Agent *http ) ;
+	void UpdateFile( Entry& file, Resource *parent, http::Agent *http ) ;
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	

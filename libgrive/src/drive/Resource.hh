@@ -33,14 +33,20 @@ namespace gr {
 class Resource
 {
 public :
+	struct Error : virtual Exception {} ;
+
+public :
 	explicit Resource( const xml::Node& entry ) ;
 	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
-	Resource( const std::string& title, const std::string& href ) ;
-	Resource( const std::string& title, Resource *parent ) ;
+	Resource(
+		const std::string& name,
+		const std::string& kind,
+		const std::string& href ) ;
+	void Swap( Resource& coll ) ;
 	
 	// default copy ctor & op= are fine
 	
-	std::string Title() const ;
+	std::string Name() const ;
 	std::string SelfHref() const ;
 	std::string ResourceID() const ;
 	
@@ -54,14 +60,6 @@ public :
 	bool IsFolder() const ;
 	
 	void AddChild( Resource *child ) ;
-	void AddLeaf( Resource *file ) ;
-	
-	void Swap( Resource& coll ) ;
-
-	// traversing the tree
-	void CreateSubDir( const fs::path& prefix ) ;
-
-	struct Error : virtual Exception {} ;
 
 	Resource* FindChild( const std::string& title ) ;
 	void Update( const Entry& e ) ;
@@ -74,12 +72,11 @@ private :
 	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
 
 private :
-	Entry						m_entry ;
+	Entry					m_entry ;
 	
 	// not owned
 	Resource				*m_parent ;
 	std::vector<Resource*>	m_child ;
-	std::vector<Resource*>	m_leaf ;
 } ;
 
 } // end of namespace

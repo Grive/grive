@@ -30,7 +30,7 @@ namespace gr {
 using namespace details ;
 
 FolderSet::FolderSet( ) :
-	m_root( new Resource( ".", root_href ) )
+	m_root( new Resource( ".", "folder", root_href ) )
 {
 	m_set.insert( m_root ) ;
 }
@@ -126,6 +126,16 @@ void FolderSet::Update( Resource *coll, const Entry& e )
 {
 	coll->Update( e ) ;
 	ReInsert( coll ) ;
+}
+
+FolderSet::iterator FolderSet::begin()
+{
+	return m_set.get<ByIdentity>().begin() ;
+}
+
+FolderSet::iterator FolderSet::end()
+{
+	return m_set.get<ByIdentity>().end() ;
 }
 
 } // end of namespace
