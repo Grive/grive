@@ -100,8 +100,9 @@ int main( int argc, char **argv )
 	{
 		refresh_token = config.Get()["refresh_token"].Str() ;
 	}
-	catch ( const std::runtime_error& error )
+	catch ( Exception& e )
 	{
+		Trace( "cannot read config: %1%", boost::diagnostic_information(e) ) ;
 		Log(
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
