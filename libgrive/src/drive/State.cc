@@ -38,66 +38,6 @@
 
 namespace gr {
 
-namespace
-{
-// 	struct Resource
-// 	{
-// 		std::string		id ;
-// 		fs::path		path ;
-// 		std::string		md5sum ;
-// 		std::time_t		mtime ;
-// 		
-// 		explicit Resource( const fs::path& p ) :
-// 			path( p ),
-// 			md5sum( crypt::MD5( p ) ),
-// 			mtime( fs::last_write_time( p ) )
-// 		{
-// 		}
-// 		
-// 		explicit Resource( const Json& json ) :
-// 			id(		json["id"].Str() ),
-// 			path(	json["path"].Str() ),
-// 			md5sum(	json["md5"].Str() ),
-// 			mtime(	json["mtime"].Int() )
-// 		{
-// 		}
-// 		
-// 		Json Get() const
-// 		{
-// 			Json entry ;
-// 			entry.Add( "id",	Json( id ) ) ;
-// 			entry.Add( "path",	Json( path.string() ) ) ;
-// 			entry.Add( "md5",	Json( md5sum ) ) ;
-// 			entry.Add( "mtime",	Json( mtime ) ) ;
-// 			return entry ;
-// 		}
-// 	} ;
-// 
-// 	struct PathHash
-// 	{
-// 		std::size_t operator()( const fs::path& p ) const
-// 		{
-// 			return boost::hash_value( p.string() ) ;
-// 		}
-// 	} ;
-// 	
-// 	using namespace boost::multi_index ;
-// 	
-// 	struct ByID {} ;
-// 	struct ByPath {} ;
-// 	
-// 	typedef multi_index_container<
-// 		Resource,
-// 		indexed_by<
-// 			hashed_non_unique<	tag<ByID>,	member<Resource, std::string,	&Resource::id> >,
-// 			hashed_unique<		tag<ByPath>,member<Resource, fs::path,		&Resource::path>, PathHash >
-// 		> 
-// 	> ResourceSet ;
-// 	
-// 	typedef ResourceSet::index<ByID>::type		IDIdx ;
-// 	typedef ResourceSet::index<ByPath>::type	PathIdx ;
-}
-
 struct State::Impl
 {
 // 	ResourceSet		rs ;
@@ -117,13 +57,6 @@ State::State( const fs::path& filename ) :
 void State::Read( const fs::path& filename )
 {
 Trace( "reading %1%", filename ) ;
-// 	Json json = Json::ParseFile( filename.string() ) ;
-// 	std::vector<Json> res = json["resources"].AsArray() ;
-// 	
-// 	for ( std::vector<Json>::iterator i = res.begin() ; i != res.end() ; ++i )
-// 		m_impl->rs.insert( Resource( *i ) ) ;
-// 	
-// 	m_impl->change_stamp = json["change_stamp"].Str() ;
 }
 
 std::string State::ChangeStamp() const
@@ -145,15 +78,14 @@ void State::Sync( const boost::filesystem3::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
 
-// 	Trace( "synchronizing = %1%", p ) ;
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
-// 		Trace( "file found = %2% (%1%)", i->path(), i->path().filename() ) ;
 		if ( fs::is_directory( i->path() ) )
 		{
 			Resource *c = new Resource( i->path().filename().string(), "" ) ;
 			folder->AddChild( c ) ;
-			
+			m_impl->folders.Insert( c ) ;
+
 			Sync( *i, c ) ;
 		}
 // 		else if ( i->path().filename().string()[0] != '.' )
@@ -166,42 +98,19 @@ void State::Write( const fs::path& filename ) const
 	Json result ;
 	result.Add( "change_stamp", Json( m_impl->change_stamp ) ) ;
 	
-// 	IDIdx& idx = m_impl->rs.get<ByID>() ;
-// 	
-// 	std::vector<Json> res ;
-// 	std::transform( idx.begin(), idx.end(),
-// 		std::back_inserter(res),
-// 		boost::bind( &Resource::Get, _1 ) ) ;
-// 	
-// 	result.Add( "resources", Json(res) ) ;
-	
-// 	Trace( "%1%", result ) ;
-	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;
 }
 
 void State::SetId( const fs::path& p, const std::string& id )
 {
-// 	PathIdx& pidx = m_impl->rs.get<ByPath>() ;
-// 	PathIdx::iterator it = pidx.find( p ) ;
-// 	if ( it != pidx.end() )
-// 	{
-// 		Resource r = *it ;
-// 		r.id = id ;
-// 		pidx.replace( it, r ) ;
-// 	}
-// 	else
-// 	{
-// 		Trace( "can't find %1%", p ) ;
-// 	}
 }
 
 void State::OnEntry( const Entry& e )
 {
 	if ( !Update( e ) )
 	{
-		Trace( "can't find parent of %1%", e.Title() ) ;
+		Trace( "can't resolve folder %1%", e.Title() ) ;
 		m_impl->unresolved.push_back( e ) ;
 	}
 }
@@ -230,6 +139,7 @@ std::size_t State::TryResolveEntry()
 	
 	for ( std::vector<Entry>::iterator i = en.begin() ; i != en.end() ; )
 	{
+		Trace( "resolving %1%", i->Title() ) ;
 		if ( Update( *i ) )
 		{
 			i = en.erase( i ) ;
@@ -261,7 +171,6 @@ bool State::Update( const Entry& e )
 		{
 			child = new Resource( e ) ;
 			parent->AddChild( child ) ;
-			m_impl->folders.Insert( child ) ;
 		}
 		return true ;
 	}

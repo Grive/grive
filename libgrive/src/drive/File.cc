@@ -48,7 +48,7 @@ void File::Update( http::Agent *http, const http::Headers& auth )
 	assert( m_parent != 0 ) ;
 
 	bool changed = true ;
-	fs::path path = m_parent->Dir() / m_entry.Filename() ;
+	fs::path path = Path() ;
 
 	// compare checksum first if file exists
 	std::ifstream ifile( path.string().c_str(), std::ios::binary | std::ios::in ) ;
@@ -149,7 +149,7 @@ bool File::Upload( http::Agent* http, std::streambuf *file, const http::Headers&
 fs::path File::Path() const
 {
 	assert( m_parent != 0 ) ;
-	return m_parent->Dir() / m_entry.Filename() ;
+	return m_parent->Path() / m_entry.Filename() ;
 }
 
 std::string File::ResourceID() const

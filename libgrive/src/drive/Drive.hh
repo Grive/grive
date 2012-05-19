@@ -72,7 +72,7 @@ private :
 	std::string					m_resume_link ;
 	
 	FolderList					m_coll ;
-	std::vector<File*>			m_files ;
+	std::vector<Resource*>		m_files ;
 	
 	State						m_state ;
 } ;

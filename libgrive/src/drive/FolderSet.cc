@@ -23,6 +23,7 @@
 #include "util/Destroy.hh"
 
 #include <algorithm>
+#include <cassert>
 
 namespace gr {
 
@@ -34,7 +35,8 @@ FolderSet::FolderSet( ) :
 	m_set.insert( m_root ) ;
 }
 
-FolderSet::FolderSet( const FolderSet& fs )
+FolderSet::FolderSet( const FolderSet& fs ) :
+	m_root( 0 )
 {
 	const Set& s = fs.m_set.get<ByIdentity>() ;
 	for ( Set::const_iterator i = s.begin() ; i != s.end() ; ++i )
@@ -45,6 +47,8 @@ FolderSet::FolderSet( const FolderSet& fs )
 		
 		m_set.insert( c ) ;
 	}
+	
+	assert( m_root != 0 ) ;
 }
 
 FolderSet::~FolderSet( )
@@ -56,11 +60,13 @@ FolderSet::~FolderSet( )
 
 Resource* FolderSet::Root()
 {
+	assert( m_root != 0 ) ;
 	return m_root ;
 }
 
 const Resource* FolderSet::Root() const
 {
+	assert( m_root != 0 ) ;
 	return m_root ;
 }
 

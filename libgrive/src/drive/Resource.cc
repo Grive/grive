@@ -20,11 +20,17 @@
 #include "Resource.hh"
 #include "CommonUri.hh"
 
+#include "http/Download.hh"
+#include "http/StringResponse.hh"
+#include "http/XmlResponse.hh"
+#include "util/Crypt.hh"
+#include "util/Log.hh"
 #include "util/OS.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
 #include <cassert>
+#include <fstream>
 
 // for debugging
 #include <iostream>
@@ -37,9 +43,9 @@ Resource::Resource( const xml::Node& entry ) :
 {
 }
 
-Resource::Resource( const Entry& entry ) :
+Resource::Resource( const Entry& entry, Resource *parent ) :
 	m_entry		( entry ),
-	m_parent	( 0 )
+	m_parent	( parent )
 {
 }
 
@@ -96,8 +102,10 @@ void Resource::AddChild( Resource *child )
 	m_child.push_back( child ) ;
 }
 
-void Resource::AddLeaf( File *file )
+void Resource::AddLeaf( Resource *file )
 {
+	assert( file != 0 ) ;
+	assert( !file->IsFolder() ) ;
 	m_leaf.push_back( file ) ;
 }
 
@@ -112,19 +120,30 @@ void Resource::Swap( Resource& coll )
 void Resource::CreateSubDir( const fs::path& prefix )
 {
 	fs::path dir = prefix / m_entry.Title() ;
+// 	Trace( "dir = %1%, path = %2%", dir, Path() ) ;
+// 	assert( dir == Path() ) ;
+	
 	fs::create_directories( dir ) ;
 	
 	for ( std::vector<Resource*>::iterator i = m_child.begin() ; i != m_child.end() ; ++i )
 	{
 		assert( (*i)->m_parent == this ) ;
-		(*i)->CreateSubDir( dir ) ;
+		if ( (*i)->IsFolder() )
+			(*i)->CreateSubDir( dir ) ;
 	}
 }
 
-fs::path Resource::Dir() const
+bool Resource::IsFolder() const
+{
+	return m_entry.Kind() == "folder" ;
+}
+
+fs::path Resource::Path() const
 {
 	assert( m_parent != this ) ;
-	return m_parent != 0 ? (m_parent->Dir() / m_entry.Title()) : "." ;
+	std::string name = (IsFolder() ? m_entry.Title() : m_entry.Filename() ) ;
+	
+	return m_parent != 0 ? (m_parent->Path() / name) : "." ;
 }
 
 bool Resource::IsInRootTree() const
@@ -141,6 +160,112 @@ Resource* Resource::FindChild( const std::string& title )
 			return *i ;
 	}
 	return 0 ;
+}
+
+
+void Resource::Update( http::Agent *http, const http::Headers& auth )
+{
+	assert( m_parent != 0 ) ;
+
+	bool changed = true ;
+	fs::path path = Path() ;
+
+	Trace( "updating %1%", path ) ;
+	
+	// compare checksum first if file exists
+	std::ifstream ifile( path.string().c_str(), std::ios::binary | std::ios::in ) ;
+	if ( ifile && m_entry.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
+		changed = false ;
+
+	// if the checksum is different, file is changed and we need to update
+	if ( changed )
+	{
+		DateTime remote	= m_entry.ServerModified() ;
+		DateTime local	= ifile ? os::FileMTime( path ) : DateTime() ;
+		
+		// remote file is newer, download file
+		if ( !ifile || remote > local )
+			Download( http, path, auth ) ;
+		
+		else
+		{
+			// re-reading the file
+			ifile.seekg(0) ;
+			Upload( http, ifile.rdbuf(), auth ) ;
+		}
+	}
+}
+
+void Resource::Delete( http::Agent *http, const http::Headers& auth )
+{
+	http::Headers hdr( auth ) ;
+	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
+	
+	http::StringResponse str ;
+	http->Custom( "DELETE", feed_base + "/" + m_entry.ResourceID() + "?delete=true", &str, hdr ) ;
+}
+
+
+void Resource::Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const
+{
+	Log( "Downloading %1%", file ) ;
+	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
+	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
+	if ( r <= 400 )
+		os::SetFileTime( file, m_entry.ServerModified() ) ;
+}
+
+bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth )
+{
+	// upload link missing means that file is read only
+	if ( m_entry.UploadLink().empty() )
+	{
+		Log( "Cannot upload %1%: file read-only.", m_entry.Title(), log::warning ) ;
+		return false ;
+	}
+	
+	Log( "Uploading %1%", m_entry.Title() ) ;
+
+	std::string meta =
+	"<?xml version='1.0' encoding='UTF-8'?>\n"
+	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
+		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
+		"term=\"http://schemas.google.com/docs/2007#file\"/>"
+		"<title>" + m_entry.Filename() + "</title>"
+	"</entry>" ;
+
+	std::string data(
+		(std::istreambuf_iterator<char>(file)),
+		(std::istreambuf_iterator<char>()) ) ;
+	
+	std::ostringstream xcontent_len ;
+	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
+	
+	http::Headers hdr( auth ) ;
+	hdr.push_back( "Content-Type: application/atom+xml" ) ;
+	hdr.push_back( "X-Upload-Content-Type: application/octet-stream" ) ;
+	hdr.push_back( xcontent_len.str() ) ;
+  	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
+	hdr.push_back( "Expect:" ) ;
+	
+	http::StringResponse str ;
+	http->Put( m_entry.UploadLink(), meta, &str, hdr ) ;
+	
+	std::string uplink = http->RedirLocation() ;
+	
+	// parse the header and find "Location"
+	http::Headers uphdr ;
+	uphdr.push_back( "Expect:" ) ;
+	uphdr.push_back( "Accept:" ) ;
+	
+	http::XmlResponse xml ;
+	http->Put( uplink, data, &xml, uphdr ) ;
+
+	Trace( "Receipted response = %1%", xml.Response() ) ;
+	
+	m_entry.Update( xml.Response() ) ;
+	
+	return true ;
 }
 
 } // end of namespace

@@ -30,7 +30,6 @@
 #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
 #include "util/Log.hh"
-//#include "util/Path.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
@@ -229,11 +228,11 @@ void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
 	// only handle uploaded files
 	if ( !entry.Filename().empty() )
 	{
-		File *file = new File( entry, &parent ) ;
+		Resource *file = new Resource( entry, &parent ) ;
 		m_files.push_back( file ) ;
 		parent.AddLeaf( file ) ;
 		
-// 		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
+		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
 		
 // 		m_state.SetId( file->Path(), file->ResourceID() ) ;
 		
@@ -247,9 +246,11 @@ void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
 
 void Drive::Update()
 {
+	Trace( "updating %1% files", m_files.size() ) ;
+
 	http::Agent http ;
 	std::for_each( m_files.begin(), m_files.end(),
-		boost::bind( &File::Update, _1, &http, m_http_hdr ) ) ;
+		boost::bind( &Resource::Update, _1, &http, m_http_hdr ) ) ;
 }
 
 } // end of namespace

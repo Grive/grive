@@ -20,21 +20,21 @@
 #pragma once
 
 #include "Entry.hh"
+#include "http/Agent.hh"
 #include "util/Exception.hh"
 #include "util/FileSystem.hh"
 
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 namespace gr {
-
-class File ;
 
 class Resource
 {
 public :
 	explicit Resource( const xml::Node& entry ) ;
-	explicit Resource( const Entry& entry ) ;
+	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
 	Resource( const std::string& title, const std::string& href ) ;
 	Resource( const std::string& title, Resource *parent ) ;
 	
@@ -42,15 +42,19 @@ public :
 	
 	std::string Title() const ;
 	std::string SelfHref() const ;
+	std::string ResourceID() const ;
+	
 	const Resource* Parent() const ;
 	Resource* Parent() ;
 	std::string ParentHref() const ;
-	fs::path Dir() const ;
+	
+	fs::path Path() const ;
 	bool IsInRootTree() const ;
-	std::string ResourceID() const ;
 
+	bool IsFolder() const ;
+	
 	void AddChild( Resource *child ) ;
-	void AddLeaf( File *file ) ;
+	void AddLeaf( Resource *file ) ;
 	
 	void Swap( Resource& coll ) ;
 
@@ -62,13 +66,20 @@ public :
 	Resource* FindChild( const std::string& title ) ;
 	void Update( const Entry& e ) ;
 	
+	void Update( http::Agent *http, const http::Headers& auth ) ;
+	void Delete( http::Agent* http, const http::Headers& auth ) ;
+
+private :
+	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
+	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
+
 private :
 	Entry						m_entry ;
 	
 	// not owned
 	Resource				*m_parent ;
 	std::vector<Resource*>	m_child ;
-	std::vector<File*>		m_leaf ;
+	std::vector<Resource*>	m_leaf ;
 } ;
 
 } // end of namespace
