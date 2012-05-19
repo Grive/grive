@@ -81,7 +81,7 @@ void State::Sync( const fs::path& p, gr::Resource* folder )
 		}
 		else if ( i->path().filename().string()[0] != '.' )
 		{
-Trace( "file: %1% %2%", i->path().filename().string(), folder->Path() ) ;
+// Trace( "file: %1% %2%", i->path().filename().string(), folder->Path() ) ;
 			Resource *c = new Resource( i->path().filename().string(), "file", "" ) ;
 			folder->AddChild( c ) ;
 			m_folders.Insert( c ) ;
@@ -141,25 +141,13 @@ std::size_t State::TryResolveEntry()
 
 bool State::Update( const Entry& e )
 {
-	if ( e.Kind() != "folder" && e.Filename().empty() )
-	{
-		Log( "file \"%1%\" is a google document, ignored", e.Title() ) ;
-		return true ;
-	}
-	
-	if ( e.ParentHref().empty() )
-	{
-		Log( "\"%1%\" has no parent, ignored", e.Title() ) ;
-		return true ;
-	}
+	assert( !e.ParentHref().empty() ) ;
 	
 	Resource *parent = m_folders.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
 	{
-if ( !parent->IsFolder() )
-Trace( "name = \"%1%\" \"%2%\"", e.Title(), parent->Name() ) ;
 		assert( parent->IsFolder() ) ;
-	
+		
 		// see if the entry already exist in local
 		Resource *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
