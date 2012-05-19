@@ -166,11 +166,16 @@ bool State::Update( const Entry& e )
 			m_impl->folders.Update( child, e ) ;
 		}
 		
-		// folder entry exist in google drive, but not local.
+		// folder entry exist in google drive, but not local. we should create
+		// the directory
 		else
 		{
 			child = new Resource( e ) ;
 			parent->AddChild( child ) ;
+			m_impl->folders.Insert( child ) ;
+			
+			Trace( "creating %1% directory", child->Path() ) ;
+			fs::create_directories( child->Path() ) ;
 		}
 		return true ;
 	}

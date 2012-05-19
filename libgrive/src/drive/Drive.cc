@@ -71,7 +71,6 @@ Drive::Drive( OAuth2& auth ) :
 	m_state.Sync( "." ) ;
 	
 	ConstructDirTree( &http ) ;
-	return ;
 	
 	std::string uri = feed_base + "?showfolders=true&showroot=true" ;
 /*	if ( !change_stamp.empty() )
@@ -98,9 +97,9 @@ Drive::Drive( OAuth2& auth ) :
 			Entry file( *i ) ;
 			if ( file.Kind() != "folder" )
 			{
-				FolderListIterator pit = FindFolder( file.ParentHref() ) ;
-				if ( pit != m_coll.end() && pit->IsInRootTree() )
-					UpdateFile( file, *pit, &http ) ;
+				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
+				if ( p != 0 && p->IsInRootTree() )
+					UpdateFile( file, *p, &http ) ;
 				else
 					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title() ) ;
 			}
@@ -125,34 +124,6 @@ Drive::~Drive( )
 	std::for_each( m_files.begin(), m_files.end(), Destroy() ) ;
 }
 
-struct SortCollectionByHref
-{
-	bool operator()( const Resource& c1, const Resource& c2 ) const
-	{
-		return c1.SelfHref() < c2.SelfHref() ;
-	}
-} ;
-
-Drive::FolderListIterator Drive::FindFolder( const std::string& href )
-{
-	// try to find the parent by its href
-	std::pair<FolderListIterator,FolderListIterator> its =
-		std::equal_range(
-			m_coll.begin(),
-			m_coll.end(),
-			Resource( "", href ),
-			SortCollectionByHref() ) ;
-	
-	 return (its.first != its.second) ? its.first : m_coll.end() ;
-}
-
-Drive::FolderListIterator Drive::Root( )
-{
-	FolderListIterator root = FindFolder( root_href ) ;
-	assert( root != m_coll.end() ) ;
-	return root ;
-}
-
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
@@ -162,9 +133,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 
 	xml::Node resp = xml.Response() ;
 
-	assert( m_coll.empty() ) ;
-	m_coll.push_back( Resource( ".", root_href ) ) ;
-	
 	while ( true )
 	{
 		xml::NodeSet entries = resp["entry"] ;
@@ -178,7 +146,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 				if ( e.ParentHrefs().size() == 1 )
 				{
 					m_state.OnEntry( e ) ;
-					m_coll.push_back( Resource( e ) ) ;
 				}
 				else
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
@@ -194,33 +161,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 	}
 
 	m_state.ResolveEntry() ;
-	
-	// second, build up linkage between parent and child 
-	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
-	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
-	{
-		FolderListIterator pit = FindFolder( i->ParentHref() ) ;
-		Resource *scoll = m_state.FindFolderByHref( i->SelfHref() ) ;
-		if ( scoll )
-			Trace( "found folder %1% in state", scoll->Title() ) ;
-		else
-			Trace( "can't found folder %1% in state", i->Title() ) ;
-		
-		if ( pit != m_coll.end() )
-		{
-			// it shouldn't happen, just in case
-			if ( &*i == &*pit )
-				Log( "the parent of folder %1% is itself, ignored.", i->Title(), log::warning ) ;
-			else
-				pit->AddChild( &*i ) ;
-		}
-		else
-			Log( "can't find folder \"%1%\" (\"%2%\")", i->Title(), i->ParentHref(), log::warning ) ;
-	}
-
-	// lastly, iterating from the root, create the directories in the local file system
-	assert( Root()->Parent() == 0 ) ;
-	Root()->CreateSubDir( "." ) ;
 }
 
 void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
@@ -233,10 +173,6 @@ void Drive::UpdateFile( Entry& entry, Resource& parent, http::Agent *http )
 		parent.AddLeaf( file ) ;
 		
 		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
-		
-// 		m_state.SetId( file->Path(), file->ResourceID() ) ;
-		
-// 		file->Update( http, m_http_hdr ) ;
 	}
 	else
 	{

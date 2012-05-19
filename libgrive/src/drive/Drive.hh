@@ -62,18 +62,13 @@ private :
 	
 	void ConstructDirTree( http::Agent *http ) ;
 	
-	FolderListIterator FindFolder( const std::string& href ) ;
-	FolderListIterator Root( ) ;
-	
 private :
 	OAuth2&						m_auth ;
 	std::vector<std::string>	m_http_hdr ;
 
 	std::string					m_resume_link ;
-	
-	FolderList					m_coll ;
+
 	std::vector<Resource*>		m_files ;
-	
 	State						m_state ;
 } ;
 
