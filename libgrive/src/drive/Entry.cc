@@ -20,6 +20,7 @@
 #include "Entry.hh"
 #include "CommonUri.hh"
 
+#include "util/Crypt.hh"
 #include "util/Log.hh"
 #include "util/OS.hh"
 #include "xml/Node.hh"
@@ -29,10 +30,6 @@
 #include <iterator>
 
 namespace gr {
-
-Entry::Entry( const Path& file )
-{
-}
 
 Entry::Entry( const xml::Node& n )
 {
@@ -44,6 +41,16 @@ Entry::Entry( const std::string& title, const std::string& kind, const std::stri
 	m_filename	( title ),
 	m_kind		( kind ),
 	m_self_href	( href )
+{
+}
+
+/// construct an entry from a file or folder in local directory
+Entry::Entry( const fs::path& path ) :
+	m_title			( path.filename().string() ),
+	m_filename		( path.filename().string() ),
+	m_kind			( fs::is_directory(path) ? "folder" : "file" ),
+	m_server_md5	( crypt::MD5( path ) ),
+	m_server_modified( os::FileMTime( path ) )
 {
 }
 

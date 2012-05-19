@@ -67,7 +67,7 @@ Drive::Drive( OAuth2& auth ) :
 	Trace( "change stamp is %1%", change_stamp ) ;
 
 	m_state.ChangeStamp( change_stamp ) ;
-	m_state.Sync( "." ) ;
+	m_state.FromLocal( "." ) ;
 	
 	ConstructDirTree( &http ) ;
 	
@@ -108,7 +108,7 @@ Drive::Drive( OAuth2& auth ) :
 						file.Title(), p->Name() ) ;
 				
 				else
-					m_state.OnEntry( file ) ;
+					m_state.FromRemote( file ) ;
 			}
 		}
 		
@@ -146,9 +146,8 @@ void Drive::ConstructDirTree( http::Agent *http )
 			if ( e.Kind() == "folder" )
 			{
 				if ( e.ParentHrefs().size() == 1 )
-				{
-					m_state.OnEntry( e ) ;
-				}
+					m_state.FromRemote( e ) ;
+
 				else
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
 			}
@@ -164,26 +163,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 
 	m_state.ResolveEntry() ;
 }
-/*
-void Drive::UpdateFile( Entry& entry, Resource *parent, http::Agent *http )
-{
-	assert( parent != 0 ) ;
 
-	// only handle uploaded files
-	if ( !entry.Filename().empty() )
-	{
-		Resource *file = new Resource( entry ) ;
-		parent->AddChild( file ) ;
-		m_files.push_back( file ) ;
-		
-		Trace( "%1% ID = %2%", file->Path(), file->ResourceID() ) ;
-	}
-	else
-	{
-		Log( "file \"%1%\" is a google document, ignored", entry.Title() ) ;
-	}
-}
-*/
 void Drive::Update()
 {
 	http::Agent http ;

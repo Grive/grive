@@ -20,6 +20,7 @@
 #pragma once
 
 #include "util/DateTime.hh"
+#include "util/FileSystem.hh"
 
 #include <iosfwd>
 #include <string>
@@ -32,8 +33,6 @@ namespace xml
 	class Node ;
 }
 
-class Path ;
-
 /*!	\brief	corresponds to an "entry" in the resource feed
 
 	This class is decodes an entry in the resource feed. It will stored the properties like
@@ -42,7 +41,7 @@ class Path ;
 class Entry
 {
 public :
-	explicit Entry( const Path& file ) ;
+	explicit Entry( const fs::path& path ) ;
 	explicit Entry( const xml::Node& n ) ;
 	Entry( const std::string& title, const std::string& kind, const std::string& href ) ;
 

@@ -38,9 +38,8 @@ public :
 public :
 	explicit State( const fs::path& filename ) ;
 	
-	void Sync( const fs::path& p ) ;
-	
-	void OnEntry( const Entry& e ) ;
+	void FromLocal( const fs::path& p ) ;
+	void FromRemote( const Entry& e ) ;
 	void ResolveEntry() ;
 	
 	void SetId( const fs::path& p, const std::string& id ) ;
@@ -58,7 +57,7 @@ public :
 	iterator end() ;
 
 private :
-	void Sync( const fs::path& p, Resource *folder ) ;
+	void FromLocal( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 

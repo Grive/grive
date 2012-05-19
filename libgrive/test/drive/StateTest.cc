@@ -36,7 +36,7 @@ StateTest::StateTest( )
 void StateTest::TestSync( )
 {
 	State s( ".grive_state" ) ;
-	s.Sync( TEST_DATA ) ;
+	s.FromLocal( TEST_DATA ) ;
 	s.Write( "" ) ;
 }
 

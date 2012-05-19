@@ -30,6 +30,11 @@
 
 namespace gr {
 
+/*!	\brief	A resource can be a file or a folder in the google drive
+
+	The google drive contains a number of resources, which is represented by this class.
+	It also contains linkage to other resources, such as parent and childrens.
+*/
 class Resource
 {
 public :
@@ -45,28 +50,42 @@ public :
 	void Swap( Resource& coll ) ;
 	
 	// default copy ctor & op= are fine
-	
+
+	bool IsFolder() const ;
+
 	std::string Name() const ;
 	std::string SelfHref() const ;
 	std::string ResourceID() const ;
+	std::string ParentHref() const ;
 	
 	const Resource* Parent() const ;
 	Resource* Parent() ;
-	std::string ParentHref() const ;
+	void AddChild( Resource *child ) ;
+	Resource* FindChild( const std::string& title ) ;
 	
 	fs::path Path() const ;
 	bool IsInRootTree() const ;
 
-	bool IsFolder() const ;
-	
-	void AddChild( Resource *child ) ;
-
-	Resource* FindChild( const std::string& title ) ;
-	void Update( const Entry& e ) ;
-	
+	void FromRemote( const Entry& e ) ;
 	void Update( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
 
+private :
+	/// State of the resource. indicating what to do with the resource
+	enum State
+	{
+		/// The best state: the file is the same in google drive and in local.
+		sync,
+		
+		/// Resource created in local, but google drive does not have it.
+		/// We should create the resource in google drive and upload new content
+		new_local,
+		
+		/// Resource created in google drive, but not exist in local.
+		/// We should download the file.
+		new_remote
+	} ;
+	
 private :
 	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
 	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
@@ -77,6 +96,8 @@ private :
 	// not owned
 	Resource				*m_parent ;
 	std::vector<Resource*>	m_child ;
+	
+	State					m_state ;
 } ;
 
 } // end of namespace

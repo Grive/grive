@@ -99,6 +99,15 @@ const Resource* ResourceTree::FindByHref( const std::string& href ) const
 	return i != map.end() ? *i : 0 ;
 }
 
+/// Unlike other search functions, this one does not depend on the multi-index
+/// container. It traverses the tree instead.
+Resource* ResourceTree::FindByPath( const fs::path& path )
+{
+	// not yet implemented
+	assert( false ) ;
+	return false ;
+}
+
 ///	Reinsert should be called when the ID/HREF were updated
 bool ResourceTree::ReInsert( Resource *coll )
 {
@@ -127,7 +136,9 @@ void ResourceTree::Erase( Resource *coll )
 
 void ResourceTree::Update( Resource *coll, const Entry& e )
 {
-	coll->Update( e ) ;
+	assert( coll != 0 ) ;
+
+	coll->FromRemote( e ) ;
 	ReInsert( coll ) ;
 }
 

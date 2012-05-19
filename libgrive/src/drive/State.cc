@@ -59,12 +59,14 @@ void State::ChangeStamp( const std::string& cs )
 	m_change_stamp = cs ;
 }
 
-void State::Sync( const fs::path& p )
+/// Synchronize local directory. Build up the resource tree from files and folders
+/// of local directory.
+void State::FromLocal( const fs::path& p )
 {
-	Sync( p, m_folders.Root() ) ;
+	FromLocal( p, m_folders.Root() ) ;
 }
 
-void State::Sync( const fs::path& p, gr::Resource* folder )
+void State::FromLocal( const fs::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
@@ -77,11 +79,12 @@ void State::Sync( const fs::path& p, gr::Resource* folder )
 			folder->AddChild( c ) ;
 			m_folders.Insert( c ) ;
 
-			Sync( *i, c ) ;
+			FromLocal( *i, c ) ;
 		}
-		else if ( i->path().filename().string()[0] != '.' )
+		else if ( i->path().filename().string()[0] == '.' )
+			Log( "file %1% is ignored by grive", i->path().filename().string(), log::info ) ;
+		else
 		{
-// Trace( "file: %1% %2%", i->path().filename().string(), folder->Path() ) ;
 			Resource *c = new Resource( i->path().filename().string(), "file", "" ) ;
 			folder->AddChild( c ) ;
 			m_folders.Insert( c ) ;
@@ -102,7 +105,7 @@ void State::SetId( const fs::path& p, const std::string& id )
 {
 }
 
-void State::OnEntry( const Entry& e )
+void State::FromRemote( const Entry& e )
 {
 	if ( !Update( e ) )
 	{
@@ -152,6 +155,8 @@ bool State::Update( const Entry& e )
 		Resource *child = parent->FindChild( e.Title() ) ;
 		if ( child != 0 )
 		{
+			assert( child == m_folders.FindByHref( e.SelfHref() ) ) ;
+		
 			// since we are updating the ID and Href, we need to remove it and re-add it.
 			m_folders.Update( child, e ) ;
 		}
@@ -165,8 +170,6 @@ bool State::Update( const Entry& e )
 			m_folders.Insert( child ) ;
 			
 			fs::path child_path = child->Path() ;
-			Trace( "added %1%", child_path ) ;
-			
 			if ( child->IsFolder() && !fs::is_directory( child_path ) )
 			{
 				Log( "creating %1% directory", child_path, log::info ) ;

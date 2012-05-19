@@ -38,14 +38,16 @@
 namespace gr {
 
 Resource::Resource( const xml::Node& entry ) :
-	m_entry		( entry ),
-	m_parent	( 0 )
+	m_entry	( entry ),
+	m_parent( 0 ),
+	m_state	( new_remote )
 {
 }
 
 Resource::Resource( const Entry& entry, Resource *parent ) :
-	m_entry		( entry ),
-	m_parent	( parent )
+	m_entry	( entry ),
+	m_parent( parent ),
+	m_state	( new_remote )
 {
 }
 
@@ -54,12 +56,15 @@ Resource::Resource(
 	const std::string& kind,
 	const std::string& href ) :
 	m_entry	( name, kind, href ),
-	m_parent( 0 )
+	m_parent( 0 ),
+	m_state	( new_local )
 {
 }
 
-void Resource::Update( const Entry& e )
+void Resource::FromRemote( const Entry& e )
 {
+	Trace( "%1% state is %2%", e.Title(), m_state ) ;
+	m_state = sync ;
 	m_entry = e ;
 }
 
@@ -201,7 +206,7 @@ bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Head
 	// upload link missing means that file is read only
 	if ( m_entry.UploadLink().empty() )
 	{
-		Log( "Cannot upload %1%: file read-only.", m_entry.Title(), log::warning ) ;
+		Log( "Cannot upload %1%: file read-only. %2%", m_entry.Title(), m_state, log::warning ) ;
 		return false ;
 	}
 	

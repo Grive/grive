@@ -72,9 +72,9 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 
+	Resource* FindByPath( const fs::path& path ) ;
+	
 	bool ReInsert( Resource *coll ) ;
-// 	void SetID( Collection *coll, const std::string& id ) ;
-// 	void SetHref( Collection *coll, const std::string& href ) ;
 	
 	void Insert( Resource *coll ) ;
 	void Erase( Resource *coll ) ;
