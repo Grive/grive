@@ -37,35 +37,61 @@
 
 namespace gr {
 
+/// default constructor creates the root folder
+Resource::Resource() :
+	m_parent( 0 ),
+	m_state	( sync )
+{
+}
+
 Resource::Resource( const xml::Node& entry ) :
 	m_entry	( entry ),
 	m_parent( 0 ),
-	m_state	( new_remote )
+	m_state	( remote_new )
 {
 }
 
 Resource::Resource( const Entry& entry, Resource *parent ) :
 	m_entry	( entry ),
 	m_parent( parent ),
-	m_state	( new_remote )
+	m_state	( remote_new )
 {
 }
 
-Resource::Resource(
-	const std::string& name,
-	const std::string& kind,
-	const std::string& href ) :
-	m_entry	( name, kind, href ),
+// Resource::Resource(
+// 	const std::string& name,
+// 	const std::string& kind,
+// 	const std::string& href ) :
+// 	m_entry	( name, kind, href ),
+// 	m_parent( 0 ),
+// 	m_state	( local_new )
+// {
+// }
+
+Resource::Resource( const fs::path& path ) :
+	m_entry	( path ),
 	m_parent( 0 ),
-	m_state	( new_local )
+	m_state	( local_new )
 {
+	
 }
 
-void Resource::FromRemote( const Entry& e )
+/// Update the state according to information (i.e. Entry) from remote. This function
+/// compares the modification time and checksum of both copies and determine which
+/// one is newer.
+void Resource::FromRemote( const Entry& remote )
 {
-	Trace( "%1% state is %2%", e.Title(), m_state ) ;
-	m_state = sync ;
-	m_entry = e ;
+	// if checksum is equal, no need to compare the mtime
+	if ( remote.MD5() == m_entry.MD5() )
+		m_state = sync ;
+	
+	// use mtime to check which one is more recent
+	else
+	{
+		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : local_changed ) ;
+	}
+	
+	m_entry = remote ;
 }
 
 std::string Resource::SelfHref() const
@@ -145,40 +171,39 @@ Resource* Resource::FindChild( const std::string& name )
 	return 0 ;
 }
 
-void Resource::Update( http::Agent *http, const http::Headers& auth )
+// try to change the state to "sync"
+void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
 	// no need to update for folders
 	if ( IsFolder() )
 		return ;
 
 	assert( m_parent != 0 ) ;
-
-	bool changed = true ;
-	fs::path path = Path() ;
-
-	Trace( "updating %1%", path ) ;
 	
-	// compare checksum first if file exists
-	std::ifstream ifile( path.string().c_str(), std::ios::binary | std::ios::in ) ;
-	if ( ifile && m_entry.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
-		changed = false ;
-
-	// if the checksum is different, file is changed and we need to update
-	if ( changed )
+	switch ( m_state )
 	{
-		DateTime remote	= m_entry.ServerModified() ;
-		DateTime local	= ifile ? os::FileMTime( path ) : DateTime() ;
-		
-		// remote file is newer, download file
-		if ( !ifile || remote > local )
-			Download( http, path, auth ) ;
-		
-		else
-		{
-			// re-reading the file
-			ifile.seekg(0) ;
-			Upload( http, ifile.rdbuf(), auth ) ;
-		}
+	case local_new :
+		Trace( "file %1% doesn't exist in server. upload?", m_entry.Filename() ) ;
+		break ;
+	
+	case local_changed :
+		Trace( "file %1% changed in local", m_entry.Filename() ) ;
+		if ( Upload( http, auth ) )
+			m_state = sync ;
+		break ;
+	
+	case remote_new :
+	case remote_changed :
+		Trace( "file %1% changed in remote", m_entry.Filename() ) ;
+		Download( http, Path(), auth ) ;
+		m_state = sync ;
+		break ;
+	
+	case sync :
+		Trace( "file %1% already in sync", m_entry.Filename() ) ;
+
+	default :
+		break ;
 	}
 }
 
@@ -198,7 +223,13 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
 	if ( r <= 400 )
-		os::SetFileTime( file, m_entry.ServerModified() ) ;
+		os::SetFileTime( file, m_entry.MTime() ) ;
+}
+
+bool Resource::Upload( http::Agent* http, const http::Headers& auth )
+{
+	std::ifstream ifile( Path().string().c_str(), std::ios::binary | std::ios::in ) ;
+	return Upload( http, ifile.rdbuf(), auth ) ;
 }
 
 bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth )

@@ -168,7 +168,7 @@ void Drive::Update()
 {
 	http::Agent http ;
 	std::for_each( m_state.begin(), m_state.end(),
-		boost::bind( &Resource::Update, _1, &http, m_http_hdr ) ) ;
+		boost::bind( &Resource::Sync, _1, &http, m_http_hdr ) ) ;
 }
 
 } // end of namespace

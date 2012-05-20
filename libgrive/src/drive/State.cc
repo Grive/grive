@@ -75,7 +75,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 	{
 		if ( fs::is_directory( i->path() ) )
 		{
-			Resource *c = new Resource( i->path().filename().string(), "folder", "" ) ;
+			Resource *c = new Resource( i->path() ) ;
 			folder->AddChild( c ) ;
 			m_folders.Insert( c ) ;
 
@@ -85,7 +85,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 			Log( "file %1% is ignored by grive", i->path().filename().string(), log::info ) ;
 		else
 		{
-			Resource *c = new Resource( i->path().filename().string(), "file", "" ) ;
+			Resource *c = new Resource( i->path() ) ;
 			folder->AddChild( c ) ;
 			m_folders.Insert( c ) ;
 		}
@@ -150,12 +150,15 @@ bool State::Update( const Entry& e )
 	if ( parent != 0 )
 	{
 		assert( parent->IsFolder() ) ;
-		
+
+Trace( "remote entry title %1%, filename %2%", e.Title(), e.Filename() ) ;
 		// see if the entry already exist in local
-		Resource *child = parent->FindChild( e.Title() ) ;
+		std::string name = ( e.Kind() == "folder" ? e.Title() : e.Filename() ) ;
+		Resource *child = parent->FindChild( name ) ;
 		if ( child != 0 )
 		{
-			assert( child == m_folders.FindByHref( e.SelfHref() ) ) ;
+// 			Trace( "remote entry %1%, local %2%", e.Title(), child->Name() ) ;
+// 			assert( child == m_folders.FindByHref( e.SelfHref() ) ) ;
 		
 			// since we are updating the ID and Href, we need to remove it and re-add it.
 			m_folders.Update( child, e ) ;
@@ -176,6 +179,11 @@ bool State::Update( const Entry& e )
 				fs::create_directories( child_path ) ;
 			}
 		}
+		else
+		{
+			Trace( "what here? %1%", e.Title() ) ;
+		}
+		
 		return true ;
 	}
 	else

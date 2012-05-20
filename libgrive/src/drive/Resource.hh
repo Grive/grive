@@ -41,12 +41,14 @@ public :
 	struct Error : virtual Exception {} ;
 
 public :
+	Resource() ;
 	explicit Resource( const xml::Node& entry ) ;
 	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
-	Resource(
-		const std::string& name,
-		const std::string& kind,
-		const std::string& href ) ;
+	explicit Resource( const fs::path& path ) ;
+// 	Resource(
+// 		const std::string& name,
+// 		const std::string& kind,
+// 		const std::string& href ) ;
 	void Swap( Resource& coll ) ;
 	
 	// default copy ctor & op= are fine
@@ -67,27 +69,35 @@ public :
 	bool IsInRootTree() const ;
 
 	void FromRemote( const Entry& e ) ;
-	void Update( http::Agent *http, const http::Headers& auth ) ;
+	void Sync( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
 
 private :
 	/// State of the resource. indicating what to do with the resource
 	enum State
 	{
-		/// The best state: the file is the same in google drive and in local.
+		/// The best state: the file is the same in remote and in local.
 		sync,
 		
-		/// Resource created in local, but google drive does not have it.
+		/// Resource created in local, but remote does not have it.
 		/// We should create the resource in google drive and upload new content
-		new_local,
+		local_new,
+		
+		/// Resource exists in both local & remote, but changes in local is newer
+		/// than remote. We should upload local copy to overwrite remote.
+		local_changed,
 		
 		/// Resource created in google drive, but not exist in local.
 		/// We should download the file.
-		new_remote
+		remote_new,
+		
+		/// Resource exists in both local & remote, but remote is newer.		
+		remote_changed
 	} ;
 	
 private :
 	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
+	bool Upload( http::Agent* http, const http::Headers& auth ) ;
 	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
 
 private :

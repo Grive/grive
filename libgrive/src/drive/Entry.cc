@@ -31,57 +31,52 @@
 
 namespace gr {
 
+/// construct an entry for the root folder
+Entry::Entry( ) :
+	m_title			( "." ),
+	m_kind			( "folder" ),
+	m_resource_id	( "folder:root" ),
+	m_self_href		( root_href )
+{
+}
+
+/// construct an entry for remote
 Entry::Entry( const xml::Node& n )
 {
 	Update( n ) ;
 }
 
-Entry::Entry( const std::string& title, const std::string& kind, const std::string& href ) :
-	m_title		( title ),
-	m_filename	( title ),
-	m_kind		( kind ),
-	m_self_href	( href )
-{
-}
-
 /// construct an entry from a file or folder in local directory
 Entry::Entry( const fs::path& path ) :
-	m_title			( path.filename().string() ),
-	m_filename		( path.filename().string() ),
-	m_kind			( fs::is_directory(path) ? "folder" : "file" ),
-	m_server_md5	( crypt::MD5( path ) ),
-	m_server_modified( os::FileMTime( path ) )
+	m_title		( path.filename().string() ),
+	m_filename	( path.filename().string() ),
+	m_kind		( fs::is_directory(path) ? "folder" : "file" ),
+	m_md5		( fs::is_directory(path) ? "" : crypt::MD5( path ) ),
+	m_mtime		( os::FileMTime( path ) )
 {
 }
 
 void Entry::Update( const xml::Node& n )
 {
-	m_title				= n["title"] ;
-	m_etag				= n["@gd:etag"] ;
-	m_filename			= n["docs:suggestedFilename"] ;
-	m_content_src		= n["content"]["@src"] ;
-	m_self_href			= n["link"].Find( "@rel", "self" )["@href"] ;
-	m_server_modified	= DateTime( n["updated"] ) ;	
+	m_title			= n["title"] ;
+	m_etag			= n["@gd:etag"] ;
+	m_filename		= n["docs:suggestedFilename"] ;
+	m_content_src	= n["content"]["@src"] ;
+	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
+	m_mtime			= DateTime( n["updated"] ) ;	
 
-	m_resource_id		= n["gd:resourceId"] ;
-	m_server_md5		= n["docs:md5Checksum"] ;
-	m_kind				= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
-	m_upload_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
+	m_resource_id	= n["gd:resourceId"] ;
+	m_md5			= n["docs:md5Checksum"] ;
+	m_kind			= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
+	m_upload_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
 
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
 		m_parent_hrefs.push_back( (*i)["@href"] ) ;
 	
-	if ( !m_parent_hrefs.empty() )
-		m_parent_href = m_parent_hrefs.front() ;
-
 	// convert to lower case for easy comparison
-	std::transform(
-		m_server_md5.begin(),
-		m_server_md5.end(),
-		m_server_md5.begin(),
-		tolower ) ;
+	std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
 }
 
 const std::vector<std::string>& Entry::ParentHrefs() const
@@ -104,14 +99,14 @@ std::string Entry::Kind() const
 	return m_kind ;
 }
 
-std::string Entry::ServerMD5() const
+std::string Entry::MD5() const
 {
-	return m_server_md5 ;
+	return m_md5 ;
 }
 
-DateTime Entry::ServerModified() const
+DateTime Entry::MTime() const
 {
-	return m_server_modified ;
+	return m_mtime ;
 }
 
 std::string Entry::SelfHref() const
@@ -121,7 +116,7 @@ std::string Entry::SelfHref() const
 
 std::string Entry::ParentHref() const
 {
-	return m_parent_href ;
+	return m_parent_hrefs.empty() ? "" : m_parent_hrefs.front() ;
 }
 
 std::string Entry::ResourceID() const
@@ -149,18 +144,17 @@ void Entry::Swap( Entry& e )
 	m_title.swap( e.m_title ) ;
 	m_filename.swap( e.m_filename ) ;
 	m_kind.swap( e.m_kind ) ;
-	m_server_md5.swap( e.m_server_md5 ) ;
+	m_md5.swap( e.m_md5 ) ;
 	m_etag.swap( e.m_etag ) ;
 	m_resource_id.swap( e.m_resource_id ) ;
 
 	m_parent_hrefs.swap( e.m_parent_hrefs ) ;
 	
 	m_self_href.swap( e.m_self_href ) ;
-	m_parent_href.swap( e.m_parent_href ) ;
 	m_content_src.swap( e.m_content_src ) ;	
 	m_upload_link.swap( e.m_upload_link ) ;
 	
-	m_server_modified.Swap( e.m_server_modified ) ;
+	m_mtime.Swap( e.m_mtime ) ;
 }
 
 } // end of namespace

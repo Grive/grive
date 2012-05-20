@@ -36,20 +36,21 @@ namespace xml
 /*!	\brief	corresponds to an "entry" in the resource feed
 
 	This class is decodes an entry in the resource feed. It will stored the properties like
-	title, filename and ETag etc in member variables.
+	title, filename and ETag etc in member variables. Normally entries are created by
+	parsing the resource feed
 */
 class Entry
 {
 public :
+	Entry( ) ;
 	explicit Entry( const fs::path& path ) ;
 	explicit Entry( const xml::Node& n ) ;
-	Entry( const std::string& title, const std::string& kind, const std::string& href ) ;
 
 	std::string Title() const ;
 	std::string Filename() const ;
 	std::string Kind() const ;
-	std::string ServerMD5() const ;
-	DateTime ServerModified() const ;
+	std::string MD5() const ;
+	DateTime MTime() const ;
 	
 	std::string ResourceID() const ;
 	std::string ETag() const ;
@@ -69,7 +70,7 @@ private :
 	std::string		m_title ;
 	std::string		m_filename ;
 	std::string		m_kind ;
-	std::string		m_server_md5 ;
+	std::string		m_md5 ;
 	std::string		m_etag ;
 	std::string		m_resource_id ;
 
@@ -80,7 +81,7 @@ private :
 	std::string		m_parent_href ;
 	std::string		m_upload_link ;
 
-	DateTime		m_server_modified ;
+	DateTime		m_mtime ;
 } ;
 
 } // end of namespace

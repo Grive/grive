@@ -30,7 +30,7 @@ namespace gr {
 using namespace details ;
 
 ResourceTree::ResourceTree( ) :
-	m_root( new Resource( ".", "folder", root_href ) )
+	m_root( new Resource )
 {
 	m_set.insert( m_root ) ;
 }
