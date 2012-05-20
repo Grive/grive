@@ -108,12 +108,14 @@ private :
 		/// Resource exists in both local & remote, but remote is newer.		
 		remote_changed
 	} ;
+
+	friend std::ostream& operator<<( std::ostream& os, State s ) ;
 	
 private :
 	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
 	bool Upload( http::Agent* http, const http::Headers& auth ) ;
 	bool Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth ) ;
-
+	
 private :
 	Entry					m_entry ;
 	

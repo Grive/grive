@@ -24,6 +24,7 @@
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
+#include "util/CArray.hh"
 #include "util/Crypt.hh"
 #include "util/Log.hh"
 #include "util/OS.hh"
@@ -94,14 +95,17 @@ void Resource::FromRemote( const Entry& remote )
 {
 	// if checksum is equal, no need to compare the mtime
 	if ( remote.MD5() == m_entry.MD5() )
+	{
+		Log( "MD5 matches: %1% is already in sync", Name(), log::verbose ) ;
 		m_state = sync ;
-	
+	}
 	// use mtime to check which one is more recent
 	else
 	{
 		assert( m_state == local_new || m_state == local_changed || m_state == local_deleted ) ;
 		
 		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : m_state ) ;
+		Log( "%1% state is %2%", Name(), m_state, log::verbose ) ;
 	}
 	
 	m_entry = remote ;
@@ -111,18 +115,30 @@ void Resource::FromLocal()
 {
 	fs::path path = Path() ;
 	if ( !fs::exists( path ) )
+	{
 		m_state = local_deleted ;
+		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
+	}
 	
 	// to save time, compare mtime before checksum
-	else if ( m_entry.MTime() > os::FileMTime( path ) )
+	else if ( os::FileMTime( path ) > m_entry.MTime() )
 	{
 		if ( m_entry.MD5() == crypt::MD5( path ) )
+		{
 			m_state = local_new ;
+			Log( "%1% mtime newer on disk but unchanged: %2%", Name(), m_state ) ;
+		}
 		else
+		{
 			m_state = local_changed ;
+			Log( "%1% changed on disk: %2%", Name(), m_state ) ;
+		}
 	}
 	else
-		m_state = local_changed ;
+	{
+		m_state = local_new ;
+		Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
+	}
 }
 
 std::string Resource::SelfHref() const
@@ -214,25 +230,30 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	switch ( m_state )
 	{
 	case local_new :
-		Trace( "file %1% doesn't exist in server. upload?", m_entry.Filename() ) ;
+		Log( "sync %1% doesn't exist in server. upload?", m_entry.Filename(), log::verbose ) ;
+		break ;
+	
+	case local_deleted :
+		Log( "sync %1% deleted in local. delete?", m_entry.Filename(), log::verbose ) ;
 		break ;
 	
 	case local_changed :
-		Trace( "file %1% changed in local", m_entry.Filename() ) ;
+		Log( "sync %1% changed in local", m_entry.Filename(), log::verbose ) ;
 		if ( Upload( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 	case remote_changed :
-		Trace( "file %1% changed in remote", m_entry.Filename() ) ;
+		Log( "sync %1% changed in remote. download?", m_entry.Filename(), log::verbose ) ;
 		Download( http, Path(), auth ) ;
 		m_state = sync ;
 		break ;
 	
 	case sync :
-		Trace( "file %1% already in sync", m_entry.Filename() ) ;
-
+		Log( "sync %1% already in sync", m_entry.Filename(), log::verbose ) ;
+		break ;
+		
 	default :
 		break ;
 	}
@@ -354,6 +375,16 @@ Resource::iterator Resource::end() const
 std::size_t Resource::size() const
 {
 	return m_child.size() ;
+}
+
+std::ostream& operator<<( std::ostream& os, Resource::State s )
+{
+	static const char *state[] =
+	{
+		"sync",	"local_new", "local_changed", "local_deleted", "remote_new", "remote_changed"
+	} ;
+	assert( s >= 0 && s < Count(state) ) ;
+	return os << state[s] ;
 }
 
 } // end of namespace

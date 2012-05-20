@@ -25,7 +25,7 @@ namespace gr {
 
 namespace log
 {
-	enum Serverity { debug, info, warning, error, critical } ;
+	enum Serverity { debug, verbose, info, warning, error, critical } ;
 	typedef boost::format Fmt ;
 }
 

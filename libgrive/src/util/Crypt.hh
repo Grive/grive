@@ -20,15 +20,16 @@
 #pragma once
 
 #include <string>
-#include <iosfwd>
 
 #include <boost/filesystem.hpp>
 
 namespace gr {
 
+class StdioFile ;
+
 namespace crypt
 {
-	std::string MD5( std::streambuf *file ) ;
+	std::string MD5( StdioFile& file ) ;
 	std::string MD5( const boost::filesystem::path& file ) ;
 }
 

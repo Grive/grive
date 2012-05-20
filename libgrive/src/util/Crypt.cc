@@ -19,22 +19,30 @@
 
 #include "Crypt.hh"
 
+#include "StdioFile.hh"
+
 #include <iomanip>
 #include <sstream>
-#include <fstream>
 
 // dependent libraries
 #include <openssl/evp.h>
 
 namespace gr { namespace crypt {
 
-std::string MD5( const boost::filesystem::path& file )
+std::string MD5( const fs::path& file )
 {
-	std::ifstream ifile( file.string().c_str(), std::ios::binary | std::ios::in ) ;
-	return MD5( ifile.rdbuf() ) ;
+	try
+	{
+		StdioFile sfile( file, "rb" ) ;
+		return MD5( sfile ) ;
+	}
+	catch ( StdioFile::Error& )
+	{
+		return "" ;
+	}
 }
 
-std::string MD5( std::streambuf *file )
+std::string MD5( StdioFile& file )
 {
 	char buf[64 * 1024] ;
 	EVP_MD_CTX	md ;
@@ -42,7 +50,7 @@ std::string MD5( std::streambuf *file )
 	EVP_DigestInit_ex( &md, EVP_md5(), 0 ) ;
 	
 	std::size_t count = 0 ;
-	while ( (count = file->sgetn( buf, sizeof(buf) )) > 0 )
+	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
 	{
 		EVP_DigestUpdate( &md, buf, count ) ;
 	}

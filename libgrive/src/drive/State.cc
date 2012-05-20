@@ -74,9 +74,12 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 		
 		else
 		{
+			// if the Resource object of the child already exists, it should
+			// have been so no need to do anything here
 			Resource *c = folder->FindChild( fname ) ;
 			if ( c == 0 )
 			{
+				Log( "detected new file %1% in local", fname, log::verbose ) ;
 				c = new Resource( i->path() ) ;
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;

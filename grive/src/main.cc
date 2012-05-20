@@ -49,7 +49,7 @@ int main( int argc, char **argv )
 	LogBase::Inst( &nofile_log ) ;
 	
 	int c ;
-	while ((c = getopt(argc, argv, "al:v")) != -1)
+	while ((c = getopt(argc, argv, "al:vV")) != -1)
 	{
 		switch ( c )
 		{
@@ -91,6 +91,12 @@ int main( int argc, char **argv )
 					<< "grive version " VERSION " " __DATE__ " " __TIME__ << std::endl ;
 				return 0 ;
 			}
+			
+			case 'V' :
+			{
+				LogBase::Inst()->Enable( log::verbose ) ;
+				break ;
+			}
 		}
 	}
 		
@@ -117,9 +123,9 @@ int main( int argc, char **argv )
 		Drive drive( token ) ;
 		
 		drive.Update() ;
-// 		drive.SaveState() ;
+		drive.SaveState() ;
 		
-		config.Save() ;
+// 		config.Save() ;
 	}
 	catch ( gr::Exception& e )
 	{

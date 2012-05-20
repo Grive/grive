@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Exception.hh"
+#include "FileSystem.hh"
 
 #include <cstdio>
 #include <string>
@@ -33,7 +34,13 @@ public :
 
 public :
 	StdioFile( const std::string& filename, const char *mode ) ;
+	StdioFile( const fs::path& path, const char *mode ) ;
 	~StdioFile( ) ;
+
+	void Open( const std::string& filename, const char *mode ) ;
+	void Open( const boost::filesystem3::path& path, const char* mode ) ;
+	void Close() ;
+	bool IsOpened() const ;
 	
 	std::size_t Read( void *ptr, std::size_t size ) ;
 	std::size_t Write( const void *ptr, std::size_t size ) ;

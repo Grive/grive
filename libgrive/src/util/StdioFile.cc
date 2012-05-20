@@ -32,9 +32,29 @@
 
 namespace gr {
 
-StdioFile::StdioFile( const std::string& filename, const char *mode ) :
-	m_file( std::fopen( filename.c_str(), mode ) )
+StdioFile::StdioFile( const std::string& filename, const char *mode ) : m_file( 0 )
 {
+	Open( filename, mode ) ;
+}
+
+StdioFile::StdioFile( const fs::path& path, const char *mode ) : m_file( 0 )
+{
+	Open( path, mode ) ;
+}
+
+StdioFile::~StdioFile( )
+{
+	Close() ;
+}
+
+void StdioFile::Open( const std::string& filename, const char *mode )
+{
+	if ( IsOpened() )
+		Close() ;
+	
+	assert( m_file == 0 ) ;
+	m_file = std::fopen( filename.c_str(), mode ) ;
+	
 	if ( m_file == 0 )
 	{
 		BOOST_THROW_EXCEPTION(
@@ -47,10 +67,23 @@ StdioFile::StdioFile( const std::string& filename, const char *mode ) :
 	}
 }
 
-StdioFile::~StdioFile( )
+void StdioFile::Open( const fs::path& path, const char *mode )
 {
-	assert( m_file != 0 ) ;
-	std::fclose( m_file ) ;
+	Open( path.string(), mode ) ;
+}
+
+void StdioFile::Close()
+{
+	if ( IsOpened() )
+	{
+		std::fclose( m_file ) ;
+		m_file = 0 ;
+	}
+}
+
+bool StdioFile::IsOpened() const
+{
+	return m_file != 0 ;
 }
 
 std::size_t StdioFile::Read( void *ptr, std::size_t size )
