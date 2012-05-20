@@ -28,11 +28,11 @@
 #include "util/Crypt.hh"
 #include "util/Log.hh"
 #include "util/OS.hh"
+#include "util/StdioFile.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
 #include <cassert>
-#include <fstream>
 
 // for debugging
 #include <iostream>
@@ -103,12 +103,14 @@ void Resource::FromRemote( const Entry& remote )
 	else
 	{
 		assert( m_state == local_new || m_state == local_changed || m_state == local_deleted ) ;
-		
+				
 		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : m_state ) ;
+		m_state = ( m_state == local_new ? local_changed : m_state ) ;
+		
 		Log( "%1% state is %2%", Name(), m_state, log::verbose ) ;
 	}
 	
-	m_entry = remote ;
+	m_entry.AssignID( remote ) ;
 }
 
 void Resource::FromLocal()
@@ -119,25 +121,19 @@ void Resource::FromLocal()
 		m_state = local_deleted ;
 		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
 	}
-	
-	// to save time, compare mtime before checksum
-	else if ( os::FileMTime( path ) > m_entry.MTime() )
-	{
-		if ( m_entry.MD5() == crypt::MD5( path ) )
-		{
-			m_state = local_new ;
-			Log( "%1% mtime newer on disk but unchanged: %2%", Name(), m_state ) ;
-		}
-		else
-		{
-			m_state = local_changed ;
-			Log( "%1% changed on disk: %2%", Name(), m_state ) ;
-		}
-	}
 	else
 	{
 		m_state = local_new ;
-		Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
+	
+		// to save time, compare mtime before checksum
+		DateTime mtime = os::FileMTime( path ) ;
+		if ( mtime > m_entry.MTime() )
+		{
+			Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
+			m_entry.Update( crypt::MD5( path ), mtime ) ;
+		}
+		else
+			Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
 	}
 }
 
@@ -280,12 +276,6 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 
 bool Resource::Upload( http::Agent* http, const http::Headers& auth )
 {
-	std::ifstream ifile( Path().string().c_str(), std::ios::binary | std::ios::in ) ;
-	return Upload( http, ifile.rdbuf(), auth ) ;
-}
-
-bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Headers& auth )
-{
 	// upload link missing means that file is read only
 	if ( m_entry.UploadLink().empty() )
 	{
@@ -294,6 +284,7 @@ bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Head
 	}
 	
 	Log( "Uploading %1%", m_entry.Title() ) ;
+// 	std::ifstream ifile( Path().string().c_str(), std::ios::binary | std::ios::in ) ;
 
 	std::string meta =
 	"<?xml version='1.0' encoding='UTF-8'?>\n"
@@ -303,10 +294,20 @@ bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Head
 		"<title>" + m_entry.Filename() + "</title>"
 	"</entry>" ;
 
-	std::string data(
-		(std::istreambuf_iterator<char>(file)),
-		(std::istreambuf_iterator<char>()) ) ;
+// 	std::string data(
+// 		(std::istreambuf_iterator<char>(ifile)),
+// 		(std::istreambuf_iterator<char>()) ) ;
+	StdioFile file( Path(), "rb" ) ;
 	
+	std::string data ;
+	char buf[4096] ;
+	std::size_t count = 0 ;
+	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
+		data.append( buf, count ) ;
+
+Trace( "%1% bytes: \"%2%\"", data.size(), data ) ;
+Trace( "etag \"%1%\"", m_entry.ETag() ) ;
+		
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
 	
@@ -320,18 +321,16 @@ bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Head
 	http::StringResponse str ;
 	http->Put( m_entry.UploadLink(), meta, &str, hdr ) ;
 	
-	std::string uplink = http->RedirLocation() ;
-	
-	// parse the header and find "Location"
 	http::Headers uphdr ;
 	uphdr.push_back( "Expect:" ) ;
 	uphdr.push_back( "Accept:" ) ;
-	
-	http::XmlResponse xml ;
-	http->Put( uplink, data, &xml, uphdr ) ;
+// 	uphdr.push_back( "If-Match: " + m_entry.ETag() ) ;
 
-	Trace( "Receipted response = %1%", xml.Response() ) ;
+	// the content upload URL is in the "Location" HTTP header
+	std::string uplink = http->RedirLocation() ;
+	http::XmlResponse xml ;
 	
+	http->Put( uplink, data, &xml, uphdr ) ;
 	m_entry.Update( xml.Response() ) ;
 	
 	return true ;

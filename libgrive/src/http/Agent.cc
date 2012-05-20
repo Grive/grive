@@ -72,8 +72,6 @@ struct Agent::Impl
 {
 	CURL			*curl ;
 	std::string		location ;
-	char error[CURL_ERROR_SIZE] ;
-	
 	std::string		log_prefix ;
 } ;
 
@@ -85,7 +83,6 @@ Agent::Agent() :
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&Agent::HeaderCallback ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_ERRORBUFFER, 	m_pimpl->error ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER, 			0L ) ;
 }
 
@@ -127,9 +124,12 @@ long Agent::ExecCurl(
 {
 	CURL *curl = m_pimpl->curl ;
 	assert( curl != 0 ) ;
+	
+	char error[CURL_ERROR_SIZE] ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_ERRORBUFFER, 	error ) ;
 
 	SetHeader( hdr ) ;
-	
+
 	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
@@ -143,7 +143,7 @@ long Agent::ExecCurl(
 		throw Error()
 			<< CurlCode( curl_code )
 			<< HttpResponse( http_code )
-			<< expt::ErrMsg( m_pimpl->error ) ;
+			<< expt::ErrMsg( error ) ;
 	}
 
 	return http_code ;

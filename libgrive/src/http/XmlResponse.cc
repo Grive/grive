@@ -19,6 +19,7 @@
 
 #include "XmlResponse.hh"
 
+#include "util/Log.hh"
 #include "xml/Node.hh"
 #include "xml/TreeBuilder.hh"
 

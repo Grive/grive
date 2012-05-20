@@ -54,6 +54,8 @@ public :
 		const DateTime&		mtime,
 		const std::string&	parent_href ) ;
 
+	void AssignID( const Entry& entry ) ;
+	
 	std::string Title() const ;
 	std::string Filename() const ;
 	std::string Kind() const ;
@@ -73,6 +75,7 @@ public :
 	void Swap( Entry& e ) ;
 	
 	void Update( const xml::Node& entry ) ;
+	void Update( const std::string& md5, const DateTime& mtime ) ;
 
 private :
 	std::string		m_title ;

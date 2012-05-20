@@ -103,6 +103,22 @@ const std::vector<std::string>& Entry::ParentHrefs() const
 	return m_parent_hrefs ;
 }
 
+/// only assign the key members
+void Entry::AssignID( const Entry& entry )
+{
+	m_self_href		= entry.m_self_href ;
+	m_resource_id	= entry.m_resource_id ;
+	m_parent_hrefs	= entry.m_parent_hrefs ;
+	m_upload_link	= entry.m_upload_link ;
+	m_etag			= entry.m_etag ;
+}
+
+void Entry::Update( const std::string& md5, const DateTime& mtime )
+{
+	m_mtime = mtime ;
+	m_md5	= md5 ;
+}
+
 std::string Entry::Title() const
 {
 	return m_title ;
