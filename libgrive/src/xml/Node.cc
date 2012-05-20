@@ -196,8 +196,9 @@ private :
 	ImplVec			m_children ;
 } ;
 
-Node::iterator::iterator( ImplVec::iterator i ) : iterator_adaptor(i)
+Node::iterator::iterator( ImplVec::iterator i )// : iterator_adaptor(i)
 {
+	base_reference() = i ;
 }
 
 Node::iterator::reference Node::iterator::dereference() const
