@@ -75,11 +75,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 		else
 		{
 			Resource *c = folder->FindChild( fname ) ;
-			if ( c != 0 )
-			{
-				Trace( "wow! file %1% is loaded from previous state", fname ) ;
-			}
-			else
+			if ( c == 0 )
 			{
 				c = new Resource( i->path() ) ;
 				folder->AddChild( c ) ;
@@ -133,14 +129,12 @@ bool State::Update( const Entry& e )
 {
 	assert( !e.ParentHref().empty() ) ;
 	
-	Resource *r = m_res.FindByHref( e.SelfHref() ) ;
-	if ( r != 0 )
+	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
 	{
-Trace( "wow! find %1% from state file?", r->Name() ) ;
+		m_res.Update( res, e ) ;
+		return true ;
 	}
-	
-	Resource *parent = m_res.FindByHref( e.ParentHref() ) ;
-	if ( parent != 0 )
+	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
 		assert( parent->IsFolder() ) ;
 

@@ -45,7 +45,10 @@ Resource::Resource() :
 {
 }
 
-/// construct from previously serialized JSON object
+/// Construct from previously serialized JSON object. The state of the
+/// resource is treated as local_deleted by default. It is because the
+/// state will be updated by scanning the local directory. If the state
+/// is not updated during scanning, that means the resource is deleted.
 Resource::Resource( const Json& json, Resource *parent ) :
 	m_entry	(
 		json["name"].Str(),
@@ -56,8 +59,11 @@ Resource::Resource( const Json& json, Resource *parent ) :
 		DateTime( json["mtime"]["sec"].Int(), json["mtime"]["nsec"].Int() ),
 		parent != 0 ? parent->SelfHref() : "" ),
 	m_parent( parent ),
-	m_state( local_new )
+	m_state( local_deleted )
 {
+	// if the file exists in local directory, FromLocal() will mark the
+	// state as local_changed
+	FromLocal() ;
 }
 
 Resource::Resource( const xml::Node& entry ) :
@@ -79,7 +85,6 @@ Resource::Resource( const fs::path& path ) :
 	m_parent( 0 ),
 	m_state	( local_new )
 {
-	
 }
 
 /// Update the state according to information (i.e. Entry) from remote. This function
@@ -94,10 +99,30 @@ void Resource::FromRemote( const Entry& remote )
 	// use mtime to check which one is more recent
 	else
 	{
-		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : local_changed ) ;
+		assert( m_state == local_new || m_state == local_changed || m_state == local_deleted ) ;
+		
+		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : m_state ) ;
 	}
 	
 	m_entry = remote ;
+}
+
+void Resource::FromLocal()
+{
+	fs::path path = Path() ;
+	if ( !fs::exists( path ) )
+		m_state = local_deleted ;
+	
+	// to save time, compare mtime before checksum
+	else if ( m_entry.MTime() > os::FileMTime( path ) )
+	{
+		if ( m_entry.MD5() == crypt::MD5( path ) )
+			m_state = local_new ;
+		else
+			m_state = local_changed ;
+	}
+	else
+		m_state = local_changed ;
 }
 
 std::string Resource::SelfHref() const

@@ -23,7 +23,7 @@
 #include "Entry.hh"
 
 #include "http/Agent.hh"
-#include "http/ResponseLog.hh"
+// #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
@@ -97,7 +97,6 @@ Drive::Drive( OAuth2& auth ) :
 			if ( file.Kind() != "folder" )
 			{
 				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
-Trace( "finding parent of %1%: %2%", file.Title(), (void*)p ) ;
 				if ( file.Filename().empty() )
 					Log( "file \"%1%\" is a google document, ignored", file.Title() ) ;
 				
@@ -118,8 +117,8 @@ Trace( "finding parent of %1%: %2%", file.Title(), (void*)p ) ;
 
 		if ( has_next )
 		{
-			http::ResponseLog log2( "second-", ".xml", &xrsp ) ;
-			http.Get( nss["@href"], &log2, m_http_hdr ) ;
+// 			http::ResponseLog log2( "second-", ".xml", &xrsp ) ;
+			http.Get( nss["@href"], &xrsp, m_http_hdr ) ;
 			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
@@ -133,9 +132,9 @@ void Drive::SaveState()
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-	http::ResponseLog log( "dir-", ".xml", &xml ) ;
+// 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
 	
-	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &log, m_http_hdr ) ;
+	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &xml, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 

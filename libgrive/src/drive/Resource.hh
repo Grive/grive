@@ -71,6 +71,8 @@ public :
 	bool IsInRootTree() const ;
 
 	void FromRemote( const Entry& e ) ;
+	void FromLocal() ;
+	
 	void Sync( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
 
@@ -95,6 +97,9 @@ private :
 		/// Resource exists in both local & remote, but changes in local is newer
 		/// than remote. We should upload local copy to overwrite remote.
 		local_changed,
+		
+		/// Resource deleted from local since last time grive has checked.
+		local_deleted,
 		
 		/// Resource created in google drive, but not exist in local.
 		/// We should download the file.
