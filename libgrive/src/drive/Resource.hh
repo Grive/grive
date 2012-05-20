@@ -113,7 +113,9 @@ private :
 	
 private :
 	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
-	bool Upload( http::Agent* http, const http::Headers& auth ) ;
+	bool EditContent( http::Agent* http, const http::Headers& auth ) ;
+	bool Create( http::Agent* http, const http::Headers& auth ) ;
+	bool Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post ) ;
 	
 private :
 	Entry					m_entry ;

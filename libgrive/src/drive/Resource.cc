@@ -226,7 +226,10 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% doesn't exist in server. upload?", m_entry.Filename(), log::verbose ) ;
+		Log( "sync %1% %2% doesn't exist in server. upload \"%3%\"?",
+			m_entry.Title(), m_entry.Filename(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		if ( Create( http, auth ) )
+			m_state = sync ;
 		break ;
 	
 	case local_deleted :
@@ -235,7 +238,7 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	
 	case local_changed :
 		Log( "sync %1% changed in local", m_entry.Filename(), log::verbose ) ;
-		if ( Upload( http, auth ) )
+		if ( EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
@@ -274,18 +277,28 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 		os::SetFileTime( file, m_entry.MTime() ) ;
 }
 
-bool Resource::Upload( http::Agent* http, const http::Headers& auth )
+bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 {
 	// upload link missing means that file is read only
-	if ( m_entry.UploadLink().empty() )
+	if ( m_entry.EditLink().empty() )
 	{
 		Log( "Cannot upload %1%: file read-only. %2%", m_entry.Title(), m_state, log::warning ) ;
 		return false ;
 	}
 	
-	Log( "Uploading %1%", m_entry.Title() ) ;
-// 	std::ifstream ifile( Path().string().c_str(), std::ios::binary | std::ios::in ) ;
+	return Upload( http, m_entry.EditLink(), auth, false ) ;
+}
 
+bool Resource::Create( http::Agent* http, const http::Headers& auth )
+{
+	assert( m_parent != 0 ) ;
+	return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
+}
+
+bool Resource::Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post )
+{
+	Log( "Uploading %1%", m_entry.Title() ) ;
+	
 	std::string meta =
 	"<?xml version='1.0' encoding='UTF-8'?>\n"
 	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
@@ -294,9 +307,6 @@ bool Resource::Upload( http::Agent* http, const http::Headers& auth )
 		"<title>" + m_entry.Filename() + "</title>"
 	"</entry>" ;
 
-// 	std::string data(
-// 		(std::istreambuf_iterator<char>(ifile)),
-// 		(std::istreambuf_iterator<char>()) ) ;
 	StdioFile file( Path(), "rb" ) ;
 	
 	std::string data ;
@@ -305,9 +315,6 @@ bool Resource::Upload( http::Agent* http, const http::Headers& auth )
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
 		data.append( buf, count ) ;
 
-Trace( "%1% bytes: \"%2%\"", data.size(), data ) ;
-Trace( "etag \"%1%\"", m_entry.ETag() ) ;
-		
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
 	
@@ -319,12 +326,14 @@ Trace( "etag \"%1%\"", m_entry.ETag() ) ;
 	hdr.push_back( "Expect:" ) ;
 	
 	http::StringResponse str ;
-	http->Put( m_entry.UploadLink(), meta, &str, hdr ) ;
+	if ( post )
+		http->Post( link, meta, &str, hdr ) ;
+	else
+		http->Put( link, meta, &str, hdr ) ;
 	
 	http::Headers uphdr ;
 	uphdr.push_back( "Expect:" ) ;
 	uphdr.push_back( "Accept:" ) ;
-// 	uphdr.push_back( "If-Match: " + m_entry.ETag() ) ;
 
 	// the content upload URL is in the "Location" HTTP header
 	std::string uplink = http->RedirLocation() ;

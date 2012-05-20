@@ -36,7 +36,8 @@ Entry::Entry( ) :
 	m_title			( "." ),
 	m_kind			( "folder" ),
 	m_resource_id	( "folder:root" ),
-	m_self_href		( root_href )
+	m_self_href		( root_href ),
+	m_create_link	( root_create )
 {
 }
 
@@ -87,7 +88,8 @@ void Entry::Update( const xml::Node& n )
 	m_resource_id	= n["gd:resourceId"] ;
 	m_md5			= n["docs:md5Checksum"] ;
 	m_kind			= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
-	m_upload_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
+	m_edit_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
+	m_create_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media")["@href"] ;
 
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
@@ -109,7 +111,8 @@ void Entry::AssignID( const Entry& entry )
 	m_self_href		= entry.m_self_href ;
 	m_resource_id	= entry.m_resource_id ;
 	m_parent_hrefs	= entry.m_parent_hrefs ;
-	m_upload_link	= entry.m_upload_link ;
+	m_edit_link		= entry.m_edit_link ;
+	m_create_link	= entry.m_create_link ;
 	m_etag			= entry.m_etag ;
 }
 
@@ -169,9 +172,14 @@ std::string Entry::ContentSrc() const
 	return m_content_src ;
 }
 
-std::string Entry::UploadLink() const
+std::string Entry::EditLink() const
 {
-	return m_upload_link ;
+	return m_edit_link ;
+}
+
+std::string Entry::CreateLink() const
+{
+	return m_create_link ;
 }
 
 void Entry::Swap( Entry& e )
@@ -187,7 +195,8 @@ void Entry::Swap( Entry& e )
 	
 	m_self_href.swap( e.m_self_href ) ;
 	m_content_src.swap( e.m_content_src ) ;	
-	m_upload_link.swap( e.m_upload_link ) ;
+	m_edit_link.swap( e.m_edit_link ) ;
+	m_create_link.swap( e.m_create_link ) ;
 	
 	m_mtime.Swap( e.m_mtime ) ;
 }

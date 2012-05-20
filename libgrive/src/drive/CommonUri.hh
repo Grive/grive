@@ -29,4 +29,6 @@ namespace gr
 	
 	const std::string root_href =
 		"https://docs.google.com/feeds/default/private/full/folder%3Aroot" ;
+	const std::string root_create =
+		"https://docs.google.com/feeds/upload/create-session/default/private/full" ;
 }
