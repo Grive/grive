@@ -44,11 +44,6 @@ State::State( const fs::path& filename )
 		Read( filename );
 }
 
-void State::Read( const fs::path& filename )
-{
-	Trace( "reading %1%", filename ) ;
-}
-
 std::string State::ChangeStamp() const
 {
 	return m_change_stamp ;
@@ -63,7 +58,7 @@ void State::ChangeStamp( const std::string& cs )
 /// of local directory.
 void State::FromLocal( const fs::path& p )
 {
-	FromLocal( p, m_folders.Root() ) ;
+	FromLocal( p, m_res.Root() ) ;
 }
 
 void State::FromLocal( const fs::path& p, gr::Resource* folder )
@@ -73,36 +68,19 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
-		if ( fs::is_directory( i->path() ) )
-		{
-			Resource *c = new Resource( i->path() ) ;
-			folder->AddChild( c ) ;
-			m_folders.Insert( c ) ;
-
-			FromLocal( *i, c ) ;
-		}
-		else if ( i->path().filename().string()[0] == '.' )
+		if ( i->path().filename().string()[0] == '.' )
 			Log( "file %1% is ignored by grive", i->path().filename().string(), log::info ) ;
+		
 		else
 		{
 			Resource *c = new Resource( i->path() ) ;
 			folder->AddChild( c ) ;
-			m_folders.Insert( c ) ;
+			m_res.Insert( c ) ;
+
+			if ( fs::is_directory( i->path() ) )
+				FromLocal( *i, c ) ;
 		}
 	}
-}
-
-void State::Write( const fs::path& filename ) const
-{
-	Json result ;
-	result.Add( "change_stamp", Json( m_change_stamp ) ) ;
-	
-	std::ofstream fs( filename.string().c_str() ) ;
-	fs << result ;
-}
-
-void State::SetId( const fs::path& p, const std::string& id )
-{
 }
 
 void State::FromRemote( const Entry& e )
@@ -146,22 +124,20 @@ bool State::Update( const Entry& e )
 {
 	assert( !e.ParentHref().empty() ) ;
 	
-	Resource *parent = m_folders.FindByHref( e.ParentHref() ) ;
+//	Resource *r = m_res.FindByID( e.ResourceID() ) ;
+	
+	Resource *parent = m_res.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
 	{
 		assert( parent->IsFolder() ) ;
 
-Trace( "remote entry title %1%, filename %2%", e.Title(), e.Filename() ) ;
 		// see if the entry already exist in local
 		std::string name = ( e.Kind() == "folder" ? e.Title() : e.Filename() ) ;
 		Resource *child = parent->FindChild( name ) ;
 		if ( child != 0 )
 		{
-// 			Trace( "remote entry %1%, local %2%", e.Title(), child->Name() ) ;
-// 			assert( child == m_folders.FindByHref( e.SelfHref() ) ) ;
-		
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			m_folders.Update( child, e ) ;
+			m_res.Update( child, e ) ;
 		}
 		
 		// folder entry exist in google drive, but not local. we should create
@@ -170,7 +146,7 @@ Trace( "remote entry title %1%, filename %2%", e.Title(), e.Filename() ) ;
 		{
 			child = new Resource( e ) ;
 			parent->AddChild( child ) ;
-			m_folders.Insert( child ) ;
+			m_res.Insert( child ) ;
 			
 			fs::path child_path = child->Path() ;
 			if ( child->IsFolder() && !fs::is_directory( child_path ) )
@@ -192,17 +168,31 @@ Trace( "remote entry title %1%, filename %2%", e.Title(), e.Filename() ) ;
 
 Resource* State::FindFolderByHref( const std::string& href )
 {
-	return m_folders.FindByHref( href ) ;
+	return m_res.FindByHref( href ) ;
 }
 
 State::iterator State::begin()
 {
-	return m_folders.begin() ;
+	return m_res.begin() ;
 }
 
 State::iterator State::end()
 {
-	return m_folders.end() ;
+	return m_res.end() ;
+}
+
+void State::Read( const fs::path& filename )
+{
+	Trace( "reading %1%", filename ) ;
+}
+
+void State::Write( const fs::path& filename ) const
+{
+	Json result ;
+	result.Add( "change_stamp", Json( m_change_stamp ) ) ;
+	
+	std::ofstream fs( filename.string().c_str() ) ;
+	fs << result ;
 }
 
 } // end of namespace

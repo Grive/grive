@@ -42,8 +42,6 @@ public :
 	void FromRemote( const Entry& e ) ;
 	void ResolveEntry() ;
 	
-	void SetId( const fs::path& p, const std::string& id ) ;
-	
 	void Read( const fs::path& filename ) ;
 	void Write( const fs::path& filename ) const ;
 
@@ -62,8 +60,8 @@ private :
 	std::size_t TryResolveEntry() ;
 
 private :
-	ResourceTree	m_folders ;
-	std::string		m_change_stamp ;
+	ResourceTree		m_res ; ;
+	std::string			m_change_stamp ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;

@@ -196,8 +196,10 @@ private :
 	ImplVec			m_children ;
 } ;
 
-Node::iterator::iterator( ImplVec::iterator i )// : iterator_adaptor(i)
+Node::iterator::iterator( ImplVec::iterator i )
 {
+	// for some reason, gcc 4.4.4 doesn't allow me to initialize the base class
+	// in the initializer. I have no choice but to initialize here.
 	base_reference() = i ;
 }
 
