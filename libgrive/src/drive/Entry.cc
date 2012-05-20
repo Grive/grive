@@ -56,6 +56,25 @@ Entry::Entry( const fs::path& path ) :
 {
 }
 
+Entry::Entry(
+	const std::string&	name,
+	const std::string&	resource_id,
+	const std::string&	href,
+	const std::string&	md5,
+	const std::string&	kind,
+	const DateTime&		mtime,
+	const std::string&	parent_href ) :
+	m_title			( name ),
+	m_filename		( name ),
+	m_kind			( kind ),
+	m_md5			( md5 ),
+	m_resource_id	( resource_id ),
+	m_parent_hrefs	( 1, parent_href ),
+	m_self_href		( href ),
+	m_mtime			( mtime )
+{
+}
+
 void Entry::Update( const xml::Node& n )
 {
 	m_title			= n["title"] ;

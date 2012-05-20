@@ -36,6 +36,7 @@ public :
 	typedef std::vector<Json>			Array ;
 
 	struct Error : virtual Exception {} ;
+	typedef boost::error_info<struct JsonTag, Json>	JsonInfo ;
 	
 public :
 	template <typename T>

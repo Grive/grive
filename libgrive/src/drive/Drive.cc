@@ -97,6 +97,7 @@ Drive::Drive( OAuth2& auth ) :
 			if ( file.Kind() != "folder" )
 			{
 				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
+Trace( "finding parent of %1%: %2%", file.Title(), (void*)p ) ;
 				if ( file.Filename().empty() )
 					Log( "file \"%1%\" is a google document, ignored", file.Title() ) ;
 				
@@ -122,7 +123,10 @@ Drive::Drive( OAuth2& auth ) :
 			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
-	
+}
+
+void Drive::SaveState()
+{
 	m_state.Write( state_file ) ;
 }
 

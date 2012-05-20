@@ -92,7 +92,7 @@ public :
 
 			// cannot allow duplicate attribute nodes
 			if ( child->m_type	== attr && p.first != p.second )
-				throw Error() << expt::ErrMsg( "duplicate attribute " + child->m_name ) ;
+				BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "duplicate attribute " + child->m_name ) ) ;
 			
 			vec.insert( p.second, child ) ;
 		}

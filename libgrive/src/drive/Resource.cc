@@ -23,6 +23,7 @@
 #include "http/Download.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
+#include "protocol/Json.hh"
 #include "util/Crypt.hh"
 #include "util/Log.hh"
 #include "util/OS.hh"
@@ -44,6 +45,21 @@ Resource::Resource() :
 {
 }
 
+/// construct from previously serialized JSON object
+Resource::Resource( const Json& json, Resource *parent ) :
+	m_entry	(
+		json["name"].Str(),
+		json["id"].Str(),
+		json["href"].Str(),
+		json["md5"].Str(),
+		json["kind"].Str(),
+		DateTime( json["mtime"]["sec"].Int(), json["mtime"]["nsec"].Int() ),
+		parent != 0 ? parent->SelfHref() : "" ),
+	m_parent( parent ),
+	m_state( local_new )
+{
+}
+
 Resource::Resource( const xml::Node& entry ) :
 	m_entry	( entry ),
 	m_parent( 0 ),
@@ -57,16 +73,6 @@ Resource::Resource( const Entry& entry, Resource *parent ) :
 	m_state	( remote_new )
 {
 }
-
-// Resource::Resource(
-// 	const std::string& name,
-// 	const std::string& kind,
-// 	const std::string& href ) :
-// 	m_entry	( name, kind, href ),
-// 	m_parent( 0 ),
-// 	m_state	( local_new )
-// {
-// }
 
 Resource::Resource( const fs::path& path ) :
 	m_entry	( path ),
@@ -127,7 +133,7 @@ std::string Resource::ParentHref() const
 void Resource::AddChild( Resource *child )
 {
 	assert( child != 0 ) ;
-	assert( child->m_parent == 0 ) ;
+	assert( child->m_parent == 0 || child->m_parent == this ) ;
 	assert( child != this ) ;
 
 	child->m_parent = this ;
@@ -283,6 +289,46 @@ bool Resource::Upload( http::Agent* http, std::streambuf *file, const http::Head
 	m_entry.Update( xml.Response() ) ;
 	
 	return true ;
+}
+
+Json Resource::Serialize() const
+{
+	Json result ;
+	result.Add( "name",	Json(Name()) ) ;
+	result.Add( "id",	Json(ResourceID()) ) ;
+	result.Add( "href",	Json(SelfHref()) ) ;
+	result.Add( "md5",	Json(m_entry.MD5()) ) ;
+	result.Add( "kind",	Json(m_entry.Kind()) ) ;
+	
+	Json mtime ;
+	mtime.Add( "sec",	Json(m_entry.MTime().Sec() ) );
+	mtime.Add( "nsec",	Json(m_entry.MTime().NanoSec() ) );
+	
+	result.Add( "mtime",mtime ) ;
+	
+	std::vector<Json> array ;
+	for ( std::vector<Resource*>::const_iterator i = m_child.begin() ; i != m_child.end() ; ++i )
+		array.push_back( (*i)->Serialize() ) ;
+	
+	result.Add( "child", Json(array) ) ;
+		
+	return result ;
+
+}
+
+Resource::iterator Resource::begin() const
+{
+	return m_child.begin() ;
+}
+
+Resource::iterator Resource::end() const
+{
+	return m_child.end() ;
+}
+
+std::size_t Resource::size() const
+{
+	return m_child.size() ;
 }
 
 } // end of namespace

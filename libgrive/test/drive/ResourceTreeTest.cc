@@ -17,44 +17,26 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "ResourceTreeTest.hh"
 
-#include "State.hh"
+#include "Assert.hh"
 
-#include "util/Exception.hh"
+#include "drive/ResourceTree.hh"
+#include "drive/Resource.hh"
 
-#include <string>
-#include <vector>
+#include <iostream>
 
-namespace gr {
+namespace grut {
 
-namespace http
+using namespace gr ;
+
+ResourceTreeTest::ResourceTreeTest( )
 {
-	class Agent ;
 }
 
-class OAuth2 ;
-
-class Drive
+void ResourceTreeTest::TestSerialize( )
 {
-public :
-	Drive( OAuth2& auth ) ;
-
-	void Update() ;
-	void Sync() ;
-	void SaveState() ;
 	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void ConstructDirTree( http::Agent *http ) ;
-	
-private :
-	OAuth2&						m_auth ;
-	std::vector<std::string>	m_http_hdr ;
+}
 
-	std::string					m_resume_link ;
-	State						m_state ;
-} ;
-
-} // end of namespace
+} // end of namespace grut

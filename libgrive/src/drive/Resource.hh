@@ -30,6 +30,8 @@
 
 namespace gr {
 
+class Json ;
+
 /*!	\brief	A resource can be a file or a folder in the google drive
 
 	The google drive contains a number of resources, which is represented by this class.
@@ -40,15 +42,15 @@ class Resource
 public :
 	struct Error : virtual Exception {} ;
 
+	typedef std::vector<Resource*> Children ;
+	typedef Children::const_iterator iterator ;
+	
 public :
 	Resource() ;
 	explicit Resource( const xml::Node& entry ) ;
 	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
 	explicit Resource( const fs::path& path ) ;
-// 	Resource(
-// 		const std::string& name,
-// 		const std::string& kind,
-// 		const std::string& href ) ;
+	explicit Resource( const Json& json, Resource *parent = 0 ) ;
 	void Swap( Resource& coll ) ;
 	
 	// default copy ctor & op= are fine
@@ -72,6 +74,13 @@ public :
 	void Sync( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
 
+	Json Serialize() const ;
+	
+	// children access
+	iterator begin() const ;
+	iterator end() const ;
+	std::size_t size() const ;
+	
 private :
 	/// State of the resource. indicating what to do with the resource
 	enum State

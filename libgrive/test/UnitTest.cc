@@ -22,6 +22,7 @@
 #include "util/DefaultLog.hh"
 
 #include "drive/EntryTest.hh"
+#include "drive/ResourceTreeTest.hh"
 #include "drive/StateTest.hh"
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
@@ -40,6 +41,7 @@ int main( int argc, char **argv )
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest( EntryTest::suite( ) ) ;
 	runner.addTest( StateTest::suite( ) ) ;
+	runner.addTest( ResourceTreeTest::suite( ) ) ;
 	runner.addTest( DateTimeTest::suite( ) ) ;
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;

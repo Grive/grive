@@ -30,6 +30,8 @@
 
 namespace gr {
 
+class Json ;
+
 namespace details
 {
 	using namespace boost::multi_index ;
@@ -73,6 +75,7 @@ public :
 	const Resource* FindByHref( const std::string& href ) const ;
 
 	Resource* FindByPath( const fs::path& path ) ;
+	Resource* FindByID( const std::string& id ) ;
 	
 	bool ReInsert( Resource *coll ) ;
 	
@@ -85,7 +88,14 @@ public :
 	
 	iterator begin() ;
 	iterator end() ;
-	
+
+	void Read( const Json& json ) ;
+	Json Serialize() const ;
+
+private :
+	void Clear() ;
+	void AddTree( Resource *node, const Json& json ) ;
+
 private :
 	details::Folders	m_set ;
 	Resource*			m_root ;

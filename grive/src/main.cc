@@ -117,6 +117,7 @@ int main( int argc, char **argv )
 		Drive drive( token ) ;
 		
 		drive.Update() ;
+// 		drive.SaveState() ;
 		
 		config.Save() ;
 	}

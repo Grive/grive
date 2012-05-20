@@ -40,8 +40,7 @@ namespace gr {
 
 State::State( const fs::path& filename )
 {
-	if ( fs::exists( filename ) )
-		Read( filename );
+	Read( filename ) ;
 }
 
 std::string State::ChangeStamp() const
@@ -68,15 +67,25 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
-		if ( i->path().filename().string()[0] == '.' )
-			Log( "file %1% is ignored by grive", i->path().filename().string(), log::info ) ;
+		std::string fname = i->path().filename().string() ;
+	
+		if ( fname[0] == '.' )
+			Log( "file %1% is ignored by grive", fname, log::info ) ;
 		
 		else
 		{
-			Resource *c = new Resource( i->path() ) ;
-			folder->AddChild( c ) ;
-			m_res.Insert( c ) ;
-
+			Resource *c = folder->FindChild( fname ) ;
+			if ( c != 0 )
+			{
+				Trace( "wow! file %1% is loaded from previous state", fname ) ;
+			}
+			else
+			{
+				c = new Resource( i->path() ) ;
+				folder->AddChild( c ) ;
+				m_res.Insert( c ) ;
+			}
+			
 			if ( fs::is_directory( i->path() ) )
 				FromLocal( *i, c ) ;
 		}
@@ -124,7 +133,11 @@ bool State::Update( const Entry& e )
 {
 	assert( !e.ParentHref().empty() ) ;
 	
-//	Resource *r = m_res.FindByID( e.ResourceID() ) ;
+	Resource *r = m_res.FindByHref( e.SelfHref() ) ;
+	if ( r != 0 )
+	{
+Trace( "wow! find %1% from state file?", r->Name() ) ;
+	}
 	
 	Resource *parent = m_res.FindByHref( e.ParentHref() ) ;
 	if ( parent != 0 )
@@ -183,13 +196,20 @@ State::iterator State::end()
 
 void State::Read( const fs::path& filename )
 {
-	Trace( "reading %1%", filename ) ;
+	if ( fs::exists( filename ) )
+	{
+		Json json = Json::ParseFile( filename.string() ) ;
+		
+		m_change_stamp = json["change_stamp"].Str() ;
+		m_res.Read( json["rtree"] ) ;
+	}
 }
 
 void State::Write( const fs::path& filename ) const
 {
 	Json result ;
 	result.Add( "change_stamp", Json( m_change_stamp ) ) ;
+	result.Add( "rtree",		m_res.Serialize() ) ;	
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;

@@ -19,6 +19,8 @@
 
 #include "DateTime.hh"
 
+#include <sstream>
+
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -147,6 +149,13 @@ void DateTime::Swap( DateTime& dt )
 {
 	std::swap( m_sec, dt.m_sec ) ;
 	std::swap( m_nsec, dt.m_nsec ) ;
+}
+
+std::string DateTime::ToString() const
+{
+	std::ostringstream ss ;
+	ss << *this ;
+	return ss.str() ;
 }
 
 } // end of namespace

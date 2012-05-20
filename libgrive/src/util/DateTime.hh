@@ -51,6 +51,7 @@ public :
 	bool operator<=( const DateTime& dt ) const ;
 	
 	void Swap( DateTime& dt ) ;
+	std::string ToString() const ;
 	
 private :
 	std::time_t		m_sec ;

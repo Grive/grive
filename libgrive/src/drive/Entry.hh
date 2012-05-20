@@ -45,6 +45,14 @@ public :
 	Entry( ) ;
 	explicit Entry( const fs::path& path ) ;
 	explicit Entry( const xml::Node& n ) ;
+	explicit Entry(
+		const std::string&	name,
+		const std::string&	resource_id,
+		const std::string&	href,
+		const std::string&	md5,
+		const std::string&	kind,
+		const DateTime&		mtime,
+		const std::string&	parent_href ) ;
 
 	std::string Title() const ;
 	std::string Filename() const ;
@@ -78,7 +86,6 @@ private :
 	
 	std::string		m_self_href ;
 	std::string		m_content_src ;
-	std::string		m_parent_href ;
 	std::string		m_upload_link ;
 
 	DateTime		m_mtime ;

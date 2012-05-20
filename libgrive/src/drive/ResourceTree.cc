@@ -20,7 +20,9 @@
 #include "ResourceTree.hh"
 #include "CommonUri.hh"
 
+#include "protocol/Json.hh"
 #include "util/Destroy.hh"
+#include "util/Log.hh"
 
 #include <algorithm>
 #include <cassert>
@@ -53,9 +55,17 @@ ResourceTree::ResourceTree( const ResourceTree& fs ) :
 
 ResourceTree::~ResourceTree( )
 {
+	Clear() ;
+}
+
+void ResourceTree::Clear()
+{
 	// delete all pointers
 	const Set& s = m_set.get<ByIdentity>() ;
 	std::for_each( s.begin(), s.end(), Destroy() ) ;
+	
+	m_set.clear() ;
+	m_root = 0 ;
 }
 
 Resource* ResourceTree::Root()
@@ -150,6 +160,32 @@ ResourceTree::iterator ResourceTree::begin()
 ResourceTree::iterator ResourceTree::end()
 {
 	return m_set.get<ByIdentity>().end() ;
+}
+
+void ResourceTree::Read( const Json& json )
+{
+	Clear() ;
+	m_root = new Resource( json ) ;
+	AddTree( m_root, json ) ;
+}
+
+void ResourceTree::AddTree( Resource *node, const Json& json )
+{
+	assert( node != 0 ) ;
+	m_set.insert( node ) ;
+	
+	std::vector<Json> array = json["child"].AsArray() ;
+	for ( std::vector<Json>::iterator i = array.begin() ; i != array.end() ; ++i )
+	{
+		Resource *c = new Resource( *i, node ) ;
+		node->AddChild( c ) ;
+		AddTree( c, *i ) ;
+	}
+}
+
+Json ResourceTree::Serialize() const
+{
+	return m_root->Serialize() ;
 }
 
 } // end of namespace

@@ -19,42 +19,23 @@
 
 #pragma once
 
-#include "State.hh"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "util/Exception.hh"
+namespace grut {
 
-#include <string>
-#include <vector>
-
-namespace gr {
-
-namespace http
-{
-	class Agent ;
-}
-
-class OAuth2 ;
-
-class Drive
+class ResourceTreeTest : public CppUnit::TestFixture
 {
 public :
-	Drive( OAuth2& auth ) ;
+	ResourceTreeTest( ) ;
 
-	void Update() ;
-	void Sync() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void ConstructDirTree( http::Agent *http ) ;
-	
-private :
-	OAuth2&						m_auth ;
-	std::vector<std::string>	m_http_hdr ;
+	// declare suit function
+	CPPUNIT_TEST_SUITE( ResourceTreeTest ) ;
+		CPPUNIT_TEST( TestSerialize ) ;
+	CPPUNIT_TEST_SUITE_END();
 
-	std::string					m_resume_link ;
-	State						m_state ;
+private :
+	void TestSerialize( ) ;
 } ;
 
 } // end of namespace

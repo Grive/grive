@@ -34,7 +34,7 @@ Json::Json( ) :
 	m_json( ::json_object_new_object() )
 {
 	if ( m_json == 0 )
-		throw Error() << expt::ErrMsg( "cannot create json object" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json object" ) ) ;
 }
 
 template <>
@@ -42,7 +42,8 @@ Json::Json( const std::string& str ) :
 	m_json( ::json_object_new_string( str.c_str() ) )
 {
 	if ( m_json == 0 )
-		throw Error() << expt::ErrMsg( "cannot create json string \"" + str + "\"" ) ;
+		BOOST_THROW_EXCEPTION( 
+			Error() << expt::ErrMsg( "cannot create json string \"" + str + "\"" ) ) ;
 
 	// paranoid check
 	assert( ::json_object_get_string( m_json ) == str ) ;
@@ -53,7 +54,7 @@ Json::Json( const int& l ) :
 	m_json( ::json_object_new_int( l ) )
 {
 	if ( m_json == 0 )
-		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json int" ) ) ;
 }
 
 template <>
@@ -61,7 +62,15 @@ Json::Json( const long& l ) :
 	m_json( ::json_object_new_int( static_cast<int>(l) ) )
 {
 	if ( m_json == 0 )
-		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json int" ) ) ;
+}
+
+template <>
+Json::Json( const unsigned long& l ) :
+	m_json( ::json_object_new_int( static_cast<int>(l) ) )
+{
+	if ( m_json == 0 )
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json int" ) ) ;
 }
 
 template <>
@@ -69,7 +78,7 @@ Json::Json( const std::vector<Json>& arr ) :
 	m_json( ::json_object_new_array( ) )
 {
 	if ( m_json == 0 )
-		throw Error() << expt::ErrMsg( "cannot create json int" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json int" ) ) ;
 	
 	for ( std::vector<Json>::const_iterator i = arr.begin() ; i != arr.end() ; ++i )
 		Add( *i ) ;
@@ -79,7 +88,7 @@ Json Json::Parse( const std::string& str )
 {
 	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
 	if ( json == 0 )
-		throw Error() << expt::ErrMsg( "json parse error" ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "json parse error" ) ) ;
 	
 	return Json( json, NotOwned() ) ;
 }
@@ -98,7 +107,7 @@ Json Json::ParseFile( const std::string& filename )
 		json = ::json_tokener_parse_ex( tok, buf, count ) ;
 
 	if ( json == 0 )
-		throw Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ;
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ) ;
 	
 	::json_tokener_free( tok ) ;
 	
@@ -152,7 +161,10 @@ Json Json::operator[]( const std::string& key ) const
 	
 	struct json_object *j = ::json_object_object_get( m_json, key.c_str() ) ;
 	if ( j == 0 )
-		throw Error() << expt::ErrMsg( "key: " + key + " is not found in object" ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< expt::ErrMsg( "key: " + key + " is not found in object" )
+				<< JsonInfo( *this ) ) ;
 	
 	return Json( j ) ;
 }
@@ -166,7 +178,10 @@ Json Json::operator[]( const std::size_t& idx ) const
 	{
 		std::ostringstream ss ;
 		ss << "index " << idx << " is not found in array" ;
-		throw Error() << expt::ErrMsg( ss.str() ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< expt::ErrMsg( ss.str() )
+				<< JsonInfo( *this ) ) ;
 	}
 	
 	return Json( j ) ;
@@ -294,7 +309,8 @@ Json Json::FindInArray( const std::string& key, const std::string& value ) const
 		if ( item.Has(key) && item[key].Str() == value )
 			return item ;
 	}
-	throw Error() << expt::ErrMsg( "cannot find " + key + " = " + value + " in array" ) ;
+	BOOST_THROW_EXCEPTION(
+		Error() << expt::ErrMsg( "cannot find " + key + " = " + value + " in array" ) ) ;
 }
 
 bool Json::FindInArray( const std::string& key, const std::string& value, Json& result ) const
