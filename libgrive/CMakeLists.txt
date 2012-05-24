@@ -7,10 +7,9 @@ find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(Boost COMPONENTS filesystem system REQUIRED)
-find_package(GDBM REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
-find_package(Iberty REQUIRED)
+find_package(Iberty)
 
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
@@ -26,6 +25,10 @@ if ( BFD_FOUND )
 	add_definitions( -DHAVE_BFD )
 
 endif ( BFD_FOUND )
+
+if ( IBERTY_FOUND )
+	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
+endif ( IBERTY_FOUND )
 
 include_directories(
 	${libgrive_SOURCE_DIR}/src
