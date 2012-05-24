@@ -25,6 +25,7 @@
 #include <json/linkhash.h>
 
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 
@@ -254,6 +255,12 @@ std::ostream& operator<<( std::ostream& os, const Json& json )
 {
 	assert( json.m_json != 0 ) ;
 	return os << ::json_object_to_json_string( json.m_json ) ;
+}
+
+void Json::Write( StdioFile& file ) const
+{
+	const char *str = ::json_object_to_json_string( m_json ) ;
+	file.Write( str, std::strlen(str) ) ;
 }
 
 Json::Type Json::DataType() const

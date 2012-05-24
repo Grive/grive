@@ -29,6 +29,8 @@ struct json_object ;
 
 namespace gr {
 
+class StdioFile ;
+
 class Json
 {
 public :
@@ -72,6 +74,7 @@ public :
 	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
 	
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
+	void Write( StdioFile& file ) const ;
 
 	enum Type { null_type, bool_type, double_type, int_type, object_type, array_type, string_type } ;
 	

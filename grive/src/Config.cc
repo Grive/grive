@@ -19,7 +19,8 @@
 
 #include "Config.hh"
 
-#include <fstream>
+#include "util/StdioFile.hh"
+
 #include <iterator>
 
 namespace gr {
@@ -39,8 +40,9 @@ Config::Config() :
 
 void Config::Save( )
 {
-	std::ofstream ofile( Filename().c_str() ) ;
-	ofile << m_cfg ;
+	StdioFile file( Filename(), "w" ) ;
+	file.Chmod( 0600 ) ;
+	m_cfg.Write( file ) ;
 }
 
 Json& Config::Get()

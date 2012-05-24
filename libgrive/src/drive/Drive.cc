@@ -117,7 +117,6 @@ Drive::Drive( OAuth2& auth ) :
 
 		if ( has_next )
 		{
-// 			http::ResponseLog log2( "second-", ".xml", &xrsp ) ;
 			http.Get( nss["@href"], &xrsp, m_http_hdr ) ;
 			resp = xrsp.Response() ;
 		}
@@ -132,8 +131,6 @@ void Drive::SaveState()
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-// 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
-	
 	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &xml, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
