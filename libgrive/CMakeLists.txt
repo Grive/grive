@@ -10,11 +10,14 @@ find_package(Boost COMPONENTS filesystem system REQUIRED)
 find_package(GDBM REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
+find_package(Iberty REQUIRED)
 
+# additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
 ENDIF ( CPPUNIT_FOUND )
 
+# build bfd classes if libbfd is found
 if ( BFD_FOUND )
 	set( OPT_LIBS	${DL_LIBRARY} ${BFD_LIBRARY} )
 	file( GLOB OPT_SRC
@@ -69,9 +72,9 @@ target_link_libraries( grive
 	${OPENSSL_LIBRARIES}
 	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
+	${IBERTY_LIBRARY}
+	${EXPAT_LIBRARY}
 	${OPT_LIBS}
-	expat
-	stdc++
 )
 
 set_target_properties(grive PROPERTIES
