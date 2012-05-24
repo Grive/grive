@@ -31,7 +31,10 @@ typedef boost::error_info<struct CurlCodeTag, int>			CurlCode ;
 // HTTP response code
 typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;
 
-// HTTP response code
+// HTTP response body
 typedef boost::error_info<struct HttpResponseStrTag, std::string>	HttpResponseText ;
+
+// URL
+typedef boost::error_info<struct UrlTag, std::string>		Url ;
 
 } } // end of namespace

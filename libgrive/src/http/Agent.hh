@@ -77,6 +77,7 @@ private :
 	
 	void SetHeader( const http::Headers& hdr ) ;
 	long ExecCurl(
+		const std::string&		url,
 		Receivable				*dest,
 		const http::Headers&	hdr) ;
 		

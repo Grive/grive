@@ -25,6 +25,8 @@
 
 #include "util/Log.hh"
 
+#include <boost/throw_exception.hpp>
+
 // dependent libraries
 #include <curl/curl.h>
 
@@ -119,14 +121,18 @@ std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *re
 }
 
 long Agent::ExecCurl(
+	const std::string&		url,
 	Receivable				*dest,
 	const http::Headers&	hdr )
 {
 	CURL *curl = m_pimpl->curl ;
 	assert( curl != 0 ) ;
-	
-	char error[CURL_ERROR_SIZE] ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_ERRORBUFFER, 	error ) ;
+
+	char error[CURL_ERROR_SIZE] = {} ;
+	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error ) ;
+	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
 	SetHeader( hdr ) ;
 
@@ -137,13 +143,17 @@ long Agent::ExecCurl(
 	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
 	Trace( "HTTP response %1%", http_code ) ;
+	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	0 ) ;
 	
 	if ( curl_code != CURLE_OK || http_code >= 400 )
 	{
-		throw Error()
-			<< CurlCode( curl_code )
-			<< HttpResponse( http_code )
-			<< expt::ErrMsg( error ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< CurlCode( curl_code )
+				<< HttpResponse( http_code )
+				<< Url( url )
+				<< expt::ErrMsg( error )
+		) ;
 	}
 
 	return http_code ;
@@ -163,14 +173,11 @@ long Agent::Put(
 
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
 	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
 	
-	return ExecCurl( dest, hdr ) ;
+	return ExecCurl( url, dest, hdr ) ;
 }
 
 long Agent::Get(
@@ -182,13 +189,10 @@ long Agent::Get(
 	
 	CURL *curl = m_pimpl->curl ;
 
-	// set common options
-	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+	// set get specific options
 	::curl_easy_setopt(curl, CURLOPT_HTTPGET, 		1L);
 
-	return ExecCurl( dest, hdr ) ;
+	return ExecCurl( url, dest, hdr ) ;
 }
 
 long Agent::Post(
@@ -201,16 +205,15 @@ long Agent::Post(
 
 	CURL *curl = m_pimpl->curl ;
 
+	// make a copy because the parameter is const
 	std::string post_data = data ;
 	
+	// set post specific options
 	::curl_easy_setopt(curl, CURLOPT_POST, 			1L);
-	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
 	::curl_easy_setopt(curl, CURLOPT_POSTFIELDS,	&post_data[0] ) ;
 	::curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size() ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
-	return ExecCurl( dest, hdr ) ;
+	return ExecCurl( url, dest, hdr ) ;
 }
 
 long Agent::Custom(
@@ -224,11 +227,8 @@ long Agent::Custom(
 	CURL *curl = m_pimpl->curl ;
 
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );
-	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
-	return ExecCurl( dest, hdr ) ;
+	return ExecCurl( url, dest, hdr ) ;
 }
 
 void Agent::SetHeader( const http::Headers& hdr )
