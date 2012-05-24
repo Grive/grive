@@ -27,7 +27,6 @@
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
-#include "util/NotificationHandler.hh"
 #include "util/Destroy.hh"
 #include "util/Log.hh"
 #include "xml/Node.hh"
@@ -173,7 +172,6 @@ void Drive::Update()
 	http::Agent http ;
 	std::for_each( m_state.begin(), m_state.end(),
 		boost::bind( &Resource::Sync, _1, &http, m_http_hdr ) ) ;
-    Notify::Commit();
 }
 
 } // end of namespace

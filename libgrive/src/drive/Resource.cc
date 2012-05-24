@@ -29,7 +29,6 @@
 #include "util/Log.hh"
 #include "util/OS.hh"
 #include "util/StdioFile.hh"
-#include "util/NotificationHandler.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
@@ -37,9 +36,6 @@
 
 // for debugging
 #include <iostream>
-
-// string strema
-#include <sstream>
 
 namespace gr {
 
@@ -217,7 +213,7 @@ Resource* Resource::FindChild( const std::string& name )
 	}
 	return 0 ;
 }
-    
+
 // try to change the state to "sync"
 void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
@@ -233,36 +229,24 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		Log( "sync %1% %2% doesn't exist in server. upload \"%3%\"?",
 			m_entry.Title(), m_entry.Filename(), m_parent->m_entry.CreateLink(), log::verbose ) ;
 		if ( Create( http, auth ) )
-        {
 			m_state = sync ;
-            Notify::Push(m_entry.Filename(), "create");
-        }
 		break ;
 	
 	case local_deleted :
-		Log( "sync %1% deleted in local. delete?", m_entry.Filename(), log::verbose );
-        //Notify::Push(m_entry.Filename(), "delete");
+		Log( "sync %1% deleted in local. delete?", m_entry.Filename(), log::verbose ) ;
 		break ;
 	
 	case local_changed :
 		Log( "sync %1% changed in local", m_entry.Filename(), log::verbose ) ;
-		if ( EditContent( http, auth ) ) 
-        {
+		if ( EditContent( http, auth ) )
 			m_state = sync ;
-            Notify::Push(m_entry.Filename(), "changed");
-        }
 		break ;
 	
 	case remote_new :
 	case remote_changed :
-        {
-		    Log( "sync %1% changed in remote. download?", m_entry.Filename(), log::verbose ) ;
-		    Download( http, Path(), auth ) ;
-		    m_state = sync ;
-
-            // OS NOTIFY
-            Notify::Push(m_entry.Filename(), "download");
-        }
+		Log( "sync %1% changed in remote. download?", m_entry.Filename(), log::verbose ) ;
+		Download( http, Path(), auth ) ;
+		m_state = sync ;
 		break ;
 	
 	case sync :
