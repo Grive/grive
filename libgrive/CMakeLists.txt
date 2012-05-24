@@ -71,6 +71,7 @@ target_link_libraries( grive
 	${Boost_LIBRARIES}
 	${OPT_LIBS}
 	expat
+	stdc++
 )
 
 set_target_properties(grive PROPERTIES

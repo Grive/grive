@@ -38,7 +38,7 @@ public :
 	~StdioFile( ) ;
 
 	void Open( const std::string& filename, const char *mode ) ;
-	void Open( const boost::filesystem3::path& path, const char* mode ) ;
+	void Open( const fs::path& path, const char* mode ) ;
 	void Close() ;
 	bool IsOpened() const ;
 	

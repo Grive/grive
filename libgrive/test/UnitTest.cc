@@ -26,7 +26,6 @@
 #include "drive/StateTest.hh"
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
-#include "util/GdbmTest.hh"
 #include "util/SignalHandlerTest.hh"
 #include "xml/NodeTest.hh"
 
@@ -45,7 +44,6 @@ int main( int argc, char **argv )
 	runner.addTest( DateTimeTest::suite( ) ) ;
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;
-	runner.addTest( GdbmTest::suite( ) ) ;
 	runner.addTest( NodeTest::suite( ) ) ;
 	runner.run();
   
