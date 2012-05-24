@@ -38,6 +38,14 @@ Json::Json( ) :
 		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json object" ) ) ;
 }
 
+Json::Json( const char *str ) :
+	m_json( ::json_object_new_string( str ) )
+{
+	if ( m_json == 0 )
+		BOOST_THROW_EXCEPTION( 
+			Error() << expt::ErrMsg( "cannot create json string \"" + std::string(str) + "\"" ) ) ;
+}
+
 template <>
 Json::Json( const std::string& str ) :
 	m_json( ::json_object_new_string( str.c_str() ) )

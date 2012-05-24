@@ -312,6 +312,7 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 
 	StdioFile file( Path(), "rb" ) ;
 	
+	// TODO: upload in chunks
 	std::string data ;
 	char buf[4096] ;
 	std::size_t count = 0 ;

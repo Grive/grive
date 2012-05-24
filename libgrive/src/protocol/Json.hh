@@ -46,6 +46,7 @@ public :
 	
 	Json() ;
 	Json( const Json& rhs ) ;
+	Json( const char *str ) ;
 	~Json( ) ;
 	
 	static Json Parse( const std::string& str ) ;
