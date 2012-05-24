@@ -22,6 +22,7 @@
 #include "Assert.hh"
 
 #include "drive/State.hh"
+#include "util/Log.hh"
 
 #include <iostream>
 
@@ -35,9 +36,16 @@ StateTest::StateTest( )
 
 void StateTest::TestSync( )
 {
-	State s( ".grive_state" ) ;
-	s.FromLocal( TEST_DATA ) ;
-	s.Write( "" ) ;
+	State s( TEST_DATA "/test_dir1.state" ) ;
+	Resource *r = s.Find( "./folder1/abc.txt" ) ;
+	CPPUNIT_ASSERT( r != 0 ) ;
+	GRUT_ASSERT_EQUAL( r->Name(), "abc.txt" ) ;
+	
+	Trace( "state %1% = %2%", r->Name(), r->StateStr() ) ;
+
+	// load directory
+	s.FromLocal( TEST_DATA "/test_dir1" ) ;
+
 }
 
 } // end of namespace grut

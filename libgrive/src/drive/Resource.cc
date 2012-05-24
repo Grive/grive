@@ -154,11 +154,13 @@ std::string Resource::ResourceID() const
 
 const Resource* Resource::Parent() const
 {
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 	return m_parent ;
 }
 
 Resource* Resource::Parent()
 {
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 	return m_parent ;
 }
 
@@ -182,6 +184,7 @@ void Resource::Swap( Resource& coll )
 	m_entry.Swap( coll.m_entry ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
+	std::swap( m_state, coll.m_state ) ;
 }
 
 bool Resource::IsFolder() const
@@ -393,6 +396,13 @@ std::ostream& operator<<( std::ostream& os, Resource::State s )
 	} ;
 	assert( s >= 0 && s < Count(state) ) ;
 	return os << state[s] ;
+}
+
+std::string Resource::StateStr() const
+{
+	std::ostringstream ss ;
+	ss << m_state ;
+	return ss.str() ;
 }
 
 } // end of namespace

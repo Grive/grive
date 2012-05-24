@@ -83,6 +83,8 @@ public :
 	iterator end() const ;
 	std::size_t size() const ;
 	
+	std::string StateStr() const ;
+	
 private :
 	/// State of the resource. indicating what to do with the resource
 	enum State

@@ -176,10 +176,16 @@ bool State::Update( const Entry& e )
 		return false ;
 }
 
-Resource* State::FindFolderByHref( const std::string& href )
+Resource* State::FindByHref( const std::string& href )
 {
 	return m_res.FindByHref( href ) ;
 }
+
+Resource* State::Find( const fs::path& path )
+{
+	return m_res.FindByPath( path ) ;
+}
+
 
 State::iterator State::begin()
 {

@@ -93,22 +93,22 @@ Drive::Drive( OAuth2& auth ) :
 			if ( (*i)["content"] == "" )
 				continue ;
 
-			Entry file( *i ) ;
-			if ( file.Kind() != "folder" )
+			Entry entry( *i ) ;
+			if ( entry.Kind() != "folder" )
 			{
-				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
-				if ( file.Filename().empty() )
-					Log( "file \"%1%\" is a google document, ignored", file.Title(), log::info ) ;
+				Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
+				if ( entry.Filename().empty() )
+					Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::info ) ;
 				
-				else if ( file.ParentHref().empty() || p == 0 || !p->IsInRootTree() )
-					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title(), log::info ) ;
+				else if ( parent == 0 || !parent->IsInRootTree() )
+					Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::info ) ;
 				
-				else if ( p != 0 && !p->IsFolder() )
+				else if ( parent != 0 && !parent->IsFolder() )
 					Log( "entry %1% has parent %2% which is not a folder, ignored",
-						file.Title(), p->Name(), log::info ) ;
+						entry.Title(), parent->Name(), log::info ) ;
 				
 				else
-					m_state.FromRemote( file ) ;
+					m_state.FromRemote( entry ) ;
 			}
 		}
 		
