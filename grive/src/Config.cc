@@ -56,10 +56,6 @@ Json Config::Read( const std::string& filename )
 	}
 	catch ( Exception& e )
 	{
-// 		throw Error()
-// 			<< File( filename )
-// 			<< expt::ErrMsg("Cannot open config file ")
-// 			<< expt::Nested(e) ;
 		return Json() ;
 	}
 }

@@ -30,6 +30,8 @@
 #include <boost/exception/errinfo_file_open_mode.hpp>
 #include <boost/exception/info.hpp>
 
+#include <sys/stat.h>
+
 namespace gr {
 
 StdioFile::StdioFile( const std::string& filename, const char *mode ) : m_file( 0 )
@@ -108,6 +110,30 @@ long StdioFile::Tell() const
 {
 	assert( m_file != 0 ) ;
 	return std::ftell( m_file ) ;
+}
+
+void StdioFile::Chmod( int mode )
+{
+	assert( m_file != 0 ) ;
+	
+	int fd = ::fileno(m_file) ;
+	if ( fd == -1 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("fileno")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	
+	if ( ::fchmod( fd, mode ) != 0 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("fchmod")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
 }
 
 } // end of namespace

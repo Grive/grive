@@ -48,6 +48,8 @@ public :
 	int Seek( long offset, int whence ) ;
 	long Tell() const ;
 	
+	void Chmod( int mode ) ;
+	
 private :
 	std::FILE	*m_file ;
 } ;

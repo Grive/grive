@@ -73,7 +73,12 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 {
 	struct timeval tvp[2] = { t.Tv(), t.Tv() } ;
 	if ( ::utimes( filename.c_str(), tvp ) != 0 )
-		throw expt::ErrMsg( "cannot set file time" ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("utimes")
+				<< boost::errinfo_errno(errno)
+				<< boost::errinfo_file_name(filename)
+		) ;
 }
 
 } } // end of namespaces
