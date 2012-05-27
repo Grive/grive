@@ -40,8 +40,7 @@ Config::Config() :
 
 void Config::Save( )
 {
-	StdioFile file( Filename(), "w" ) ;
-	file.Chmod( 0600 ) ;
+	StdioFile file( Filename(), 0600 ) ;
 	m_cfg.Write( file ) ;
 }
 

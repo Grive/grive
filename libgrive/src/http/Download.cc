@@ -42,7 +42,7 @@
 namespace gr { namespace http {
 
 Download::Download( const std::string& filename ) :
-	m_file( filename, "wb" ),
+	m_file( filename, 0600 ),
 	m_mdctx( ::EVP_MD_CTX_create() )
 {
 	if ( m_mdctx == 0 )
@@ -53,7 +53,7 @@ Download::Download( const std::string& filename ) :
 }
 
 Download::Download( const std::string& filename, NoChecksum ) :
-	m_file( filename, "wb" ),
+	m_file( filename, 0600 ),
 	m_mdctx( 0 )
 {
 }

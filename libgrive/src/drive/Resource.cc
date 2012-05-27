@@ -310,7 +310,7 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 		"<title>" + m_entry.Filename() + "</title>"
 	"</entry>" ;
 
-	StdioFile file( Path(), "rb" ) ;
+	StdioFile file( Path() ) ;
 	
 	// TODO: upload in chunks
 	std::string data ;

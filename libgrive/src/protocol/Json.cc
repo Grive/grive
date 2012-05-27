@@ -104,7 +104,7 @@ Json Json::Parse( const std::string& str )
 
 Json Json::ParseFile( const std::string& filename )
 {
-	StdioFile file( filename, "r" ) ;
+	StdioFile file( filename ) ;
 	struct json_tokener *tok = ::json_tokener_new() ;
 	
 	struct json_object *json = 0 ;

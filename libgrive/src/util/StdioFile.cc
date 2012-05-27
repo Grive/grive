@@ -31,17 +31,23 @@
 #include <boost/exception/info.hpp>
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 namespace gr {
 
-StdioFile::StdioFile( const std::string& filename, const char *mode ) : m_file( 0 )
+StdioFile::StdioFile( ) : m_fd( -1 )
 {
-	Open( filename, mode ) ;
 }
 
-StdioFile::StdioFile( const fs::path& path, const char *mode ) : m_file( 0 )
+StdioFile::StdioFile( const fs::path& path ) : m_fd( -1 )
 {
-	Open( path, mode ) ;
+	OpenForRead( path ) ;
+}
+
+StdioFile::StdioFile( const fs::path& path, int mode ) : m_fd( -1 )
+{
+	OpenForWrite( path, mode ) ;
 }
 
 StdioFile::~StdioFile( )
@@ -49,84 +55,95 @@ StdioFile::~StdioFile( )
 	Close() ;
 }
 
-void StdioFile::Open( const std::string& filename, const char *mode )
+void StdioFile::Open( const fs::path& path, int flags, int mode )
 {
 	if ( IsOpened() )
 		Close() ;
 	
-	assert( m_file == 0 ) ;
-	m_file = std::fopen( filename.c_str(), mode ) ;
-	
-	if ( m_file == 0 )
+	assert( m_fd == -1 ) ;
+	m_fd = ::open( path.string().c_str(), flags, mode ) ;
+	if ( m_fd == -1 )
 	{
 		BOOST_THROW_EXCEPTION(
 			Error()
-				<< boost::errinfo_api_function("fopen")
+				<< boost::errinfo_api_function("open")
 				<< boost::errinfo_errno(errno)
-				<< boost::errinfo_file_name(filename)
-				<< boost::errinfo_file_open_mode(mode)
+				<< boost::errinfo_file_name(path.string())
 		) ;
 	}
 }
 
-void StdioFile::Open( const fs::path& path, const char *mode )
+void StdioFile::OpenForRead( const fs::path& path )
 {
-	Open( path.string(), mode ) ;
+	Open( path, O_RDONLY, 0 ) ;
+}
+
+void StdioFile::OpenForWrite( const fs::path& path, int mode )
+{
+	Open( path, O_CREAT|O_RDWR|O_TRUNC, mode ) ;
 }
 
 void StdioFile::Close()
 {
 	if ( IsOpened() )
 	{
-		std::fclose( m_file ) ;
-		m_file = 0 ;
+		close( m_fd ) ;
+		m_fd = -1 ;
 	}
 }
 
 bool StdioFile::IsOpened() const
 {
-	return m_file != 0 ;
+	return m_fd != -1 ;
 }
 
 std::size_t StdioFile::Read( void *ptr, std::size_t size )
 {
-	assert( m_file != 0 ) ;
-	return std::fread( ptr, 1, size, m_file ) ;
+	assert( IsOpened() ) ;
+	ssize_t count = ::read( m_fd, ptr, size ) ;
+	if ( count == -1 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("read")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	return count ;
 }
 
 std::size_t StdioFile::Write( const void *ptr, std::size_t size )
 {
-	assert( m_file != 0 ) ;
-	return std::fwrite( ptr, 1, size, m_file ) ;
+	assert( IsOpened() ) ;
+	ssize_t count = ::write( m_fd, ptr, size ) ;
+	if ( count == -1 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("read")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	return count ;
 }
 
-int StdioFile::Seek( long offset, int whence )
+long StdioFile::Seek( long offset, int whence )
 {
-	assert( m_file != 0 ) ;
-	return std::fseek( m_file, offset, whence ) ;
+	assert( IsOpened() ) ;
+	return ::lseek( m_fd, offset, whence ) ;
 }
 
 long StdioFile::Tell() const
 {
-	assert( m_file != 0 ) ;
-	return std::ftell( m_file ) ;
+	assert( IsOpened() ) ;
+	return ::lseek( m_fd, 0, SEEK_CUR ) ;
 }
 
 void StdioFile::Chmod( int mode )
 {
-	assert( m_file != 0 ) ;
+	assert( IsOpened() ) ;
 	
-	int fd = ::fileno(m_file) ;
-	if ( fd == -1 )
-	{
-		BOOST_THROW_EXCEPTION(
-			Error()
-				<< boost::errinfo_api_function("fileno")
-				<< boost::errinfo_errno(errno)
-		) ;
-	}
-	
-	if ( ::fchmod( fd, mode ) != 0 )
+	if ( ::fchmod( m_fd, mode ) != 0 )
 	{
 		BOOST_THROW_EXCEPTION(
 			Error()

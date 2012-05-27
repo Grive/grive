@@ -33,7 +33,7 @@ std::string MD5( const fs::path& file )
 {
 	try
 	{
-		StdioFile sfile( file, "rb" ) ;
+		StdioFile sfile( file ) ;
 		return MD5( sfile ) ;
 	}
 	catch ( StdioFile::Error& )
