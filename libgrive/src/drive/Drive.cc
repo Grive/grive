@@ -97,8 +97,13 @@ Drive::Drive( OAuth2& auth ) :
 			if ( entry.Kind() != "folder" )
 			{
 				Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
-				if ( entry.Filename().empty() )
+				std::string fn = entry.Filename() ;				
+				
+				if ( fn.empty() )
 					Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
+				
+				else if ( fn.find('/') != fn.npos )
+					Log( "file \"%1%\" contains a slash in its name, ignored", entry.Title(), log::verbose ) ;
 				
 				else if ( parent == 0 || !parent->IsInRootTree() )
 					Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
@@ -145,11 +150,14 @@ void Drive::ConstructDirTree( http::Agent *http )
 			Entry e( *i ) ;
 			if ( e.Kind() == "folder" )
 			{
-				if ( e.ParentHrefs().size() == 1 )
-					m_state.FromRemote( e ) ;
-
-				else
+				if ( e.ParentHrefs().size() != 1 )
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
+				
+				else if ( e.Title().find('/') != std::string::npos )
+					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
+				
+				else
+					m_state.FromRemote( e ) ;
 			}
 		}
 		
