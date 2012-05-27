@@ -94,16 +94,6 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 	}
 }
 
-void State::ShowFolders()
-{
-	for ( ResourceTree::iterator i = m_res.begin() ; i != m_res.end() ; ++i )
-	{
-		Resource *r = *i ;
-		if ( r->IsFolder() )
-			Trace( "%1%: %2%", r->Name(), r->StateStr() ) ;
-	}
-}
-
 void State::FromRemote( const Entry& e )
 {
 	if ( !Update( e ) )

@@ -162,9 +162,6 @@ void Drive::ConstructDirTree( http::Agent *http )
 	}
 
 	m_state.ResolveEntry() ;
-	
-	// print the state of the all folders
-	m_state.ShowFolders() ;
 }
 
 void Drive::Update()

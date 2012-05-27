@@ -39,6 +39,16 @@
 
 namespace gr {
 
+// hard coded XML file
+const std::string xml_meta =
+	"<?xml version='1.0' encoding='UTF-8'?>\n"
+	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
+		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
+		"term=\"http://schemas.google.com/docs/2007#%1%\"/>"
+		"<title>%2%</title>"
+	"</entry>" ;
+
+
 /// default constructor creates the root folder
 Resource::Resource() :
 	m_parent( 0 ),
@@ -124,7 +134,12 @@ void Resource::FromRemote( const Entry& remote )
 void Resource::FromLocal()
 {
 	fs::path path = Path() ;
-	if ( !fs::exists( path ) )
+
+	// root folder is always rsync
+	if ( m_parent == 0 )
+		m_state = sync ;
+	
+	else if ( !fs::exists( path ) )
 	{
 		m_state = local_deleted ;
 		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
@@ -233,17 +248,18 @@ Resource* Resource::FindChild( const std::string& name )
 // try to change the state to "sync"
 void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
-	// no need to update for folders
-// 	if ( IsFolder() )
-// 		return ;
-
-	assert( m_parent != 0 ) ;
+	// root folder is already synced
+	if ( IsRoot() )
+	{
+		m_state = sync ;
+		return ;
+	}
 	
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% %2% doesn't exist in server. upload \"%3%\"?",
-			m_entry.Title(), m_entry.Filename(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		Log( "sync %1% doesn't exist in server. upload \"%2%\"?",
+			Name(), m_parent->m_entry.CreateLink(), log::verbose ) ;
 		
 		if ( Create( http, auth ) )
 			m_state = sync ;
@@ -296,6 +312,12 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 
 bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 {
+	assert( m_parent != 0 ) ;
+
+	// sync parent first. make sure the parent folder exists in remote
+	if ( m_parent->m_state != sync )
+		m_parent->Sync( http, auth ) ;
+
 	// upload link missing means that file is read only
 	if ( m_entry.EditLink().empty() )
 	{
@@ -309,23 +331,43 @@ bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 bool Resource::Create( http::Agent* http, const http::Headers& auth )
 {
 	assert( m_parent != 0 ) ;
-	assert( !m_parent->m_entry.CreateLink().empty() ) ;
 	
-	return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
+	// sync parent first. make sure the parent folder exists in remote
+	if ( m_parent->m_state != sync )
+		m_parent->Sync( http, auth ) ;
+	
+	if ( IsFolder() )
+	{
+		std::string uri = feed_base ;
+		if ( !m_parent->IsRoot() )
+			uri += ("/folder%3A" + m_parent->ResourceID() ) ;
+		
+		std::string meta = (boost::format(xml_meta) % "folder" % Name() ).str() ;
+		
+		http::Headers hdr( auth ) ;
+		hdr.push_back( "Content-Type: application/atom+xml" ) ;
+		
+		http::XmlResponse xml ;
+		http->Post( uri, meta, &xml, hdr ) ;
+		m_entry.Update( xml.Response() ) ;
+
+		return true ;
+	}
+	else if ( !m_parent->m_entry.CreateLink().empty() )
+	{
+		return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
+	}
+	else
+	{
+		Log( "parent of %1% does not exist: cannot upload", Name() ) ;
+		return false ;
+	}
 }
 
 bool Resource::Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post )
 {
 	Log( "Uploading %1%", m_entry.Title() ) ;
 	
-	std::string meta =
-	"<?xml version='1.0' encoding='UTF-8'?>\n"
-	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
-		"term=\"http://schemas.google.com/docs/2007#file\"/>"
-		"<title>" + m_entry.Filename() + "</title>"
-	"</entry>" ;
-
 	StdioFile file( Path() ) ;
 	
 	// TODO: upload in chunks
@@ -344,6 +386,8 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	hdr.push_back( xcontent_len.str() ) ;
   	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
 	hdr.push_back( "Expect:" ) ;
+	
+	std::string meta = (boost::format( xml_meta ) % m_entry.Kind() % Name()).str() ;
 	
 	http::StringResponse str ;
 	if ( post )
@@ -420,6 +464,11 @@ std::string Resource::StateStr() const
 	std::ostringstream ss ;
 	ss << m_state ;
 	return ss.str() ;
+}
+
+bool Resource::IsRoot() const
+{
+	return m_parent == 0 ;
 }
 
 } // end of namespace

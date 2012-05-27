@@ -55,9 +55,6 @@ public :
 	iterator begin() ;
 	iterator end() ;
 	
-	// for debug
-	void ShowFolders() ;
-
 private :
 	void FromLocal( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;

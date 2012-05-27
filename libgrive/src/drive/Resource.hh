@@ -69,6 +69,7 @@ public :
 	
 	fs::path Path() const ;
 	bool IsInRootTree() const ;
+	bool IsRoot() const ;
 
 	void FromRemote( const Entry& e ) ;
 	void FromLocal() ;
