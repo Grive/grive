@@ -98,14 +98,14 @@ Drive::Drive( OAuth2& auth ) :
 			{
 				Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
 				if ( entry.Filename().empty() )
-					Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::info ) ;
+					Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
 				
 				else if ( parent == 0 || !parent->IsInRootTree() )
-					Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::info ) ;
+					Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
 				
 				else if ( parent != 0 && !parent->IsFolder() )
-					Log( "entry %1% has parent %2% which is not a folder, ignored",
-						entry.Title(), parent->Name(), log::info ) ;
+					Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
+						entry.Title(), parent->Name(), log::warning ) ;
 				
 				else
 					m_state.FromRemote( entry ) ;
@@ -131,7 +131,7 @@ void Drive::SaveState()
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &xml, m_http_hdr ) ;
+	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 
@@ -162,6 +162,9 @@ void Drive::ConstructDirTree( http::Agent *http )
 	}
 
 	m_state.ResolveEntry() ;
+	
+	// print the state of the all folders
+	m_state.ShowFolders() ;
 }
 
 void Drive::Update()

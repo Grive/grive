@@ -109,12 +109,12 @@ Json Json::ParseFile( const std::string& filename )
 	
 	struct json_object *json = 0 ;
 	
-	char buf[80] ;
+	char buf[1024] ;
 	std::size_t count = 0 ;
 
 	while ( (count = file.Read( buf, sizeof(buf) ) ) > 0 )
 		json = ::json_tokener_parse_ex( tok, buf, count ) ;
-
+	
 	if ( json == 0 )
 		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ) ;
 	

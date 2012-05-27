@@ -29,6 +29,8 @@
 
 namespace gr { namespace crypt {
 
+const std::size_t read_size = 8 * 1024 ;
+
 std::string MD5( const fs::path& file )
 {
 	try
@@ -44,16 +46,14 @@ std::string MD5( const fs::path& file )
 
 std::string MD5( StdioFile& file )
 {
-	char buf[64 * 1024] ;
+	char buf[read_size] ;
 	EVP_MD_CTX	md ;
 	EVP_MD_CTX_init( &md );
 	EVP_DigestInit_ex( &md, EVP_md5(), 0 ) ;
 	
 	std::size_t count = 0 ;
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-	{
 		EVP_DigestUpdate( &md, buf, count ) ;
-	}
 	
 	unsigned int md5_size = EVP_MAX_MD_SIZE ;
 	unsigned char md5[EVP_MAX_MD_SIZE] ;

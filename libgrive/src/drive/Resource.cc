@@ -93,12 +93,20 @@ Resource::Resource( const fs::path& path ) :
 /// one is newer.
 void Resource::FromRemote( const Entry& remote )
 {
+	// sync folder is easy
+	if ( remote.Kind() == "folder" && IsFolder() )
+	{
+		Log( "folder %1% is in sync", Name(), log::verbose ) ;
+		m_state = sync ;
+	}
+	
 	// if checksum is equal, no need to compare the mtime
-	if ( remote.MD5() == m_entry.MD5() )
+	else if ( remote.MD5() == m_entry.MD5() )
 	{
 		Log( "MD5 matches: %1% is already in sync", Name(), log::verbose ) ;
 		m_state = sync ;
 	}
+	
 	// use mtime to check which one is more recent
 	else
 	{
@@ -121,19 +129,24 @@ void Resource::FromLocal()
 		m_state = local_deleted ;
 		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
 	}
+
 	else
 	{
 		m_state = local_new ;
-	
-		// to save time, compare mtime before checksum
-		DateTime mtime = os::FileMTime( path ) ;
-		if ( mtime > m_entry.MTime() )
+		
+		// no need to compare MD5 or mtime for directories
+		if ( !IsFolder() )
 		{
-			Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
-			m_entry.Update( crypt::MD5( path ), mtime ) ;
+			// to save time, compare mtime before checksum
+			DateTime mtime = os::FileMTime( path ) ;
+			if ( mtime > m_entry.MTime() )
+			{
+				Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
+				m_entry.Update( crypt::MD5( path ), mtime ) ;
+			}
+			else
+				Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
 		}
-		else
-			Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
 	}
 }
 
@@ -221,8 +234,8 @@ Resource* Resource::FindChild( const std::string& name )
 void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
 	// no need to update for folders
-	if ( IsFolder() )
-		return ;
+// 	if ( IsFolder() )
+// 		return ;
 
 	assert( m_parent != 0 ) ;
 	
@@ -231,6 +244,7 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	case local_new :
 		Log( "sync %1% %2% doesn't exist in server. upload \"%3%\"?",
 			m_entry.Title(), m_entry.Filename(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		
 		if ( Create( http, auth ) )
 			m_state = sync ;
 		break ;
@@ -295,6 +309,8 @@ bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 bool Resource::Create( http::Agent* http, const http::Headers& auth )
 {
 	assert( m_parent != 0 ) ;
+	assert( !m_parent->m_entry.CreateLink().empty() ) ;
+	
 	return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
 }
 

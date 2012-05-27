@@ -64,6 +64,9 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
+	
+	// sync the folder itself
+	folder->FromLocal() ;
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
@@ -88,6 +91,16 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 			if ( fs::is_directory( i->path() ) )
 				FromLocal( *i, c ) ;
 		}
+	}
+}
+
+void State::ShowFolders()
+{
+	for ( ResourceTree::iterator i = m_res.begin() ; i != m_res.end() ; ++i )
+	{
+		Resource *r = *i ;
+		if ( r->IsFolder() )
+			Trace( "%1%: %2%", r->Name(), r->StateStr() ) ;
 	}
 }
 

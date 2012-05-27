@@ -181,6 +181,8 @@ ResourceTree::iterator ResourceTree::end()
 void ResourceTree::Read( const Json& json )
 {
 	Clear() ;
+	
+	assert( m_root == 0 ) ;
 	m_root = new Resource ;
 	AddTree( m_root, json ) ;
 }
