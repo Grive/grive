@@ -39,6 +39,16 @@
 
 namespace gr {
 
+// hard coded XML file
+const std::string xml_meta =
+	"<?xml version='1.0' encoding='UTF-8'?>\n"
+	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
+		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
+		"term=\"http://schemas.google.com/docs/2007#%1%\"/>"
+		"<title>%2%</title>"
+	"</entry>" ;
+
+
 /// default constructor creates the root folder
 Resource::Resource() :
 	m_parent( 0 ),
@@ -93,12 +103,20 @@ Resource::Resource( const fs::path& path ) :
 /// one is newer.
 void Resource::FromRemote( const Entry& remote )
 {
+	// sync folder is easy
+	if ( remote.Kind() == "folder" && IsFolder() )
+	{
+		Log( "folder %1% is in sync", Name(), log::verbose ) ;
+		m_state = sync ;
+	}
+	
 	// if checksum is equal, no need to compare the mtime
-	if ( remote.MD5() == m_entry.MD5() )
+	else if ( remote.MD5() == m_entry.MD5() )
 	{
 		Log( "MD5 matches: %1% is already in sync", Name(), log::verbose ) ;
 		m_state = sync ;
 	}
+	
 	// use mtime to check which one is more recent
 	else
 	{
@@ -116,24 +134,34 @@ void Resource::FromRemote( const Entry& remote )
 void Resource::FromLocal()
 {
 	fs::path path = Path() ;
-	if ( !fs::exists( path ) )
+
+	// root folder is always rsync
+	if ( m_parent == 0 )
+		m_state = sync ;
+	
+	else if ( !fs::exists( path ) )
 	{
 		m_state = local_deleted ;
 		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
 	}
+
 	else
 	{
 		m_state = local_new ;
-	
-		// to save time, compare mtime before checksum
-		DateTime mtime = os::FileMTime( path ) ;
-		if ( mtime > m_entry.MTime() )
+		
+		// no need to compare MD5 or mtime for directories
+		if ( !IsFolder() )
 		{
-			Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
-			m_entry.Update( crypt::MD5( path ), mtime ) ;
+			// to save time, compare mtime before checksum
+			DateTime mtime = os::FileMTime( path ) ;
+			if ( mtime > m_entry.MTime() )
+			{
+				Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
+				m_entry.Update( crypt::MD5( path ), mtime ) ;
+			}
+			else
+				Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
 		}
-		else
-			Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
 	}
 }
 
@@ -154,11 +182,13 @@ std::string Resource::ResourceID() const
 
 const Resource* Resource::Parent() const
 {
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 	return m_parent ;
 }
 
 Resource* Resource::Parent()
 {
+	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 	return m_parent ;
 }
 
@@ -182,6 +212,7 @@ void Resource::Swap( Resource& coll )
 	m_entry.Swap( coll.m_entry ) ;
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
+	std::swap( m_state, coll.m_state ) ;
 }
 
 bool Resource::IsFolder() const
@@ -217,17 +248,19 @@ Resource* Resource::FindChild( const std::string& name )
 // try to change the state to "sync"
 void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
-	// no need to update for folders
-	if ( IsFolder() )
+	// root folder is already synced
+	if ( IsRoot() )
+	{
+		m_state = sync ;
 		return ;
-
-	assert( m_parent != 0 ) ;
+	}
 	
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% %2% doesn't exist in server. upload \"%3%\"?",
-			m_entry.Title(), m_entry.Filename(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		Log( "sync %1% doesn't exist in server. upload \"%2%\"?",
+			Name(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		
 		if ( Create( http, auth ) )
 			m_state = sync ;
 		break ;
@@ -279,6 +312,12 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 
 bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 {
+	assert( m_parent != 0 ) ;
+
+	// sync parent first. make sure the parent folder exists in remote
+	if ( m_parent->m_state != sync )
+		m_parent->Sync( http, auth ) ;
+
 	// upload link missing means that file is read only
 	if ( m_entry.EditLink().empty() )
 	{
@@ -292,23 +331,46 @@ bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 bool Resource::Create( http::Agent* http, const http::Headers& auth )
 {
 	assert( m_parent != 0 ) ;
-	return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
+	
+	// sync parent first. make sure the parent folder exists in remote
+	if ( m_parent->m_state != sync )
+		m_parent->Sync( http, auth ) ;
+	
+	if ( IsFolder() )
+	{
+		std::string uri = feed_base ;
+		if ( !m_parent->IsRoot() )
+			uri += ("/folder%3A" + m_parent->ResourceID() ) ;
+		
+		std::string meta = (boost::format(xml_meta) % "folder" % Name() ).str() ;
+		
+		http::Headers hdr( auth ) ;
+		hdr.push_back( "Content-Type: application/atom+xml" ) ;
+		
+		http::XmlResponse xml ;
+		http->Post( uri, meta, &xml, hdr ) ;
+		m_entry.Update( xml.Response() ) ;
+
+		return true ;
+	}
+	else if ( !m_parent->m_entry.CreateLink().empty() )
+	{
+		return Upload( http, m_parent->m_entry.CreateLink() + "?convert=false", auth, true ) ;
+	}
+	else
+	{
+		Log( "parent of %1% does not exist: cannot upload", Name() ) ;
+		return false ;
+	}
 }
 
 bool Resource::Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post )
 {
 	Log( "Uploading %1%", m_entry.Title() ) ;
 	
-	std::string meta =
-	"<?xml version='1.0' encoding='UTF-8'?>\n"
-	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
-		"term=\"http://schemas.google.com/docs/2007#file\"/>"
-		"<title>" + m_entry.Filename() + "</title>"
-	"</entry>" ;
-
-	StdioFile file( Path(), "rb" ) ;
+	StdioFile file( Path() ) ;
 	
+	// TODO: upload in chunks
 	std::string data ;
 	char buf[4096] ;
 	std::size_t count = 0 ;
@@ -324,6 +386,8 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	hdr.push_back( xcontent_len.str() ) ;
   	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
 	hdr.push_back( "Expect:" ) ;
+	
+	std::string meta = (boost::format( xml_meta ) % m_entry.Kind() % Name()).str() ;
 	
 	http::StringResponse str ;
 	if ( post )
@@ -393,6 +457,18 @@ std::ostream& operator<<( std::ostream& os, Resource::State s )
 	} ;
 	assert( s >= 0 && s < Count(state) ) ;
 	return os << state[s] ;
+}
+
+std::string Resource::StateStr() const
+{
+	std::ostringstream ss ;
+	ss << m_state ;
+	return ss.str() ;
+}
+
+bool Resource::IsRoot() const
+{
+	return m_parent == 0 ;
 }
 
 } // end of namespace

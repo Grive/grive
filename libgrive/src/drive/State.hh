@@ -48,12 +48,13 @@ public :
 	std::string ChangeStamp() const ;
 	void ChangeStamp( const std::string& cs ) ;
 	
-	Resource* FindFolderByHref( const std::string& href ) ;
-	Resource* FindFolderByID( const std::string& id ) ;
+	Resource* FindByHref( const std::string& href ) ;
+	Resource* FindByID( const std::string& id ) ;
+	Resource* Find( const fs::path& path ) ;
 
 	iterator begin() ;
 	iterator end() ;
-
+	
 private :
 	void FromLocal( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;

@@ -94,6 +94,8 @@ ResourceTree& ResourceTree::operator=( const ResourceTree& fs )
 
 Resource* ResourceTree::FindByHref( const std::string& href )
 {
+	// for the resource that not yet have href (e.g. not yet fetched from server)
+	// their href will be empty.
 	if ( href.empty() )
 		return 0 ;
 
@@ -113,9 +115,23 @@ const Resource* ResourceTree::FindByHref( const std::string& href ) const
 /// container. It traverses the tree instead.
 Resource* ResourceTree::FindByPath( const fs::path& path )
 {
-	// not yet implemented
-	assert( false ) ;
-	return false ;
+	Resource *current = m_root ;
+	for ( fs::path::iterator i = path.begin() ; i != path.end() && current != 0 ; ++i )
+	{
+		Trace( "path it = %1%", *i ) ;
+		
+		// current directory
+		if ( *i == "." )
+			continue ;
+		
+		else if ( *i == ".." )
+			current = current->Parent() ;
+	
+		else
+			current = current->FindChild( i->filename().string() ) ;
+	}
+			
+	return current ;
 }
 
 ///	Reinsert should be called when the ID/HREF were updated
@@ -165,6 +181,8 @@ ResourceTree::iterator ResourceTree::end()
 void ResourceTree::Read( const Json& json )
 {
 	Clear() ;
+	
+	assert( m_root == 0 ) ;
 	m_root = new Resource ;
 	AddTree( m_root, json ) ;
 }

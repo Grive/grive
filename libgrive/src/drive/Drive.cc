@@ -93,22 +93,27 @@ Drive::Drive( OAuth2& auth ) :
 			if ( (*i)["content"] == "" )
 				continue ;
 
-			Entry file( *i ) ;
-			if ( file.Kind() != "folder" )
+			Entry entry( *i ) ;
+			if ( entry.Kind() != "folder" )
 			{
-				Resource *p = m_state.FindFolderByHref( file.ParentHref() ) ;
-				if ( file.Filename().empty() )
-					Log( "file \"%1%\" is a google document, ignored", file.Title(), log::info ) ;
+				Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
+				std::string fn = entry.Filename() ;				
 				
-				else if ( file.ParentHref().empty() || p == 0 || !p->IsInRootTree() )
-					Log( "file \"%1%\" parent doesn't exist, ignored", file.Title(), log::info ) ;
+				if ( fn.empty() )
+					Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
 				
-				else if ( p != 0 && !p->IsFolder() )
-					Log( "entry %1% has parent %2% which is not a folder, ignored",
-						file.Title(), p->Name(), log::info ) ;
+				else if ( fn.find('/') != fn.npos )
+					Log( "file \"%1%\" contains a slash in its name, ignored", entry.Title(), log::verbose ) ;
+				
+				else if ( parent == 0 || !parent->IsInRootTree() )
+					Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
+				
+				else if ( parent != 0 && !parent->IsFolder() )
+					Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
+						entry.Title(), parent->Name(), log::warning ) ;
 				
 				else
-					m_state.FromRemote( file ) ;
+					m_state.FromRemote( entry ) ;
 			}
 		}
 		
@@ -131,7 +136,7 @@ void Drive::SaveState()
 void Drive::ConstructDirTree( http::Agent *http )
 {
 	http::XmlResponse xml ;
-	http->Get( feed_base + "/-/folder?max-results=10&showroot=true", &xml, m_http_hdr ) ;
+	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 
@@ -145,11 +150,14 @@ void Drive::ConstructDirTree( http::Agent *http )
 			Entry e( *i ) ;
 			if ( e.Kind() == "folder" )
 			{
-				if ( e.ParentHrefs().size() == 1 )
-					m_state.FromRemote( e ) ;
-
-				else
+				if ( e.ParentHrefs().size() != 1 )
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
+				
+				else if ( e.Title().find('/') != std::string::npos )
+					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
+				
+				else
+					m_state.FromRemote( e ) ;
 			}
 		}
 		

@@ -17,12 +17,12 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "StateTest.hh"
+#include "ResourceTest.hh"
 
 #include "Assert.hh"
 
-#include "drive/State.hh"
-#include "util/Log.hh"
+#include "drive/Resource.hh"
+#include "protocol/Json.hh"
 
 #include <iostream>
 
@@ -30,22 +30,16 @@ namespace grut {
 
 using namespace gr ;
 
-StateTest::StateTest( )
+ResourceTest::ResourceTest( )
 {
 }
 
-void StateTest::TestSync( )
+void ResourceTest::TestNormal( )
 {
-	State s( TEST_DATA "/test_dir1.state" ) ;
-	Resource *r = s.Find( "./folder1/abc.txt" ) ;
-	CPPUNIT_ASSERT( r != 0 ) ;
-	GRUT_ASSERT_EQUAL( r->Name(), "abc.txt" ) ;
+	Json json ;
+	json.Add( "name", Json( "abc.txt" ) ) ;
 	
-	Trace( "state %1% = %2%", r->Name(), r->StateStr() ) ;
-
-	// load directory
-	s.FromLocal( TEST_DATA "/test_dir1" ) ;
-
+	Resource subject( json, 0 ) ;
 }
 
 } // end of namespace grut

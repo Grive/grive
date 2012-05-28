@@ -22,7 +22,6 @@
 #include "Exception.hh"
 #include "FileSystem.hh"
 
-#include <cstdio>
 #include <string>
 
 namespace gr {
@@ -33,25 +32,29 @@ public :
 	struct Error : virtual Exception {} ;
 
 public :
-	StdioFile( const std::string& filename, const char *mode ) ;
-	StdioFile( const fs::path& path, const char *mode ) ;
+	StdioFile() ;
+	StdioFile( const fs::path& path ) ;
+	StdioFile( const fs::path& path, int mode ) ;
 	~StdioFile( ) ;
 
-	void Open( const std::string& filename, const char *mode ) ;
-	void Open( const fs::path& path, const char* mode ) ;
+	void OpenForRead( const fs::path& path ) ;
+	void OpenForWrite( const fs::path& path, int mode = 0600 ) ;
 	void Close() ;
 	bool IsOpened() const ;
 	
 	std::size_t Read( void *ptr, std::size_t size ) ;
 	std::size_t Write( const void *ptr, std::size_t size ) ;
 
-	int Seek( long offset, int whence ) ;
+	long Seek( long offset, int whence ) ;
 	long Tell() const ;
 	
 	void Chmod( int mode ) ;
+
+private :
+	void Open( const fs::path& path, int flags, int mode ) ;
 	
 private :
-	std::FILE	*m_file ;
+	int	m_fd ;
 } ;
 	
 } // end of namespace

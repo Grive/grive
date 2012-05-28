@@ -48,6 +48,7 @@ public :
 	
 private :
 	void ConstructDirTree( http::Agent *http ) ;
+    void file();
 	
 private :
 	OAuth2&						m_auth ;

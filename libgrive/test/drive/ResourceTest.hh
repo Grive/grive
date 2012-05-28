@@ -17,35 +17,25 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "StateTest.hh"
+#pragma once
 
-#include "Assert.hh"
-
-#include "drive/State.hh"
-#include "util/Log.hh"
-
-#include <iostream>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
 namespace grut {
 
-using namespace gr ;
-
-StateTest::StateTest( )
+class ResourceTest : public CppUnit::TestFixture
 {
-}
+public :
+	ResourceTest( ) ;
 
-void StateTest::TestSync( )
-{
-	State s( TEST_DATA "/test_dir1.state" ) ;
-	Resource *r = s.Find( "./folder1/abc.txt" ) ;
-	CPPUNIT_ASSERT( r != 0 ) ;
-	GRUT_ASSERT_EQUAL( r->Name(), "abc.txt" ) ;
-	
-	Trace( "state %1% = %2%", r->Name(), r->StateStr() ) ;
+	// declare suit function
+	CPPUNIT_TEST_SUITE( ResourceTest ) ;
+		CPPUNIT_TEST( TestNormal ) ;
+	CPPUNIT_TEST_SUITE_END();
 
-	// load directory
-	s.FromLocal( TEST_DATA "/test_dir1" ) ;
+private :
+	void TestNormal( ) ;
+} ;
 
-}
-
-} // end of namespace grut
+} // end of namespace

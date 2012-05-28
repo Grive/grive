@@ -38,6 +38,14 @@ Json::Json( ) :
 		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json object" ) ) ;
 }
 
+Json::Json( const char *str ) :
+	m_json( ::json_object_new_string( str ) )
+{
+	if ( m_json == 0 )
+		BOOST_THROW_EXCEPTION( 
+			Error() << expt::ErrMsg( "cannot create json string \"" + std::string(str) + "\"" ) ) ;
+}
+
 template <>
 Json::Json( const std::string& str ) :
 	m_json( ::json_object_new_string( str.c_str() ) )
@@ -96,17 +104,17 @@ Json Json::Parse( const std::string& str )
 
 Json Json::ParseFile( const std::string& filename )
 {
-	StdioFile file( filename, "r" ) ;
+	StdioFile file( filename ) ;
 	struct json_tokener *tok = ::json_tokener_new() ;
 	
 	struct json_object *json = 0 ;
 	
-	char buf[80] ;
+	char buf[1024] ;
 	std::size_t count = 0 ;
 
 	while ( (count = file.Read( buf, sizeof(buf) ) ) > 0 )
 		json = ::json_tokener_parse_ex( tok, buf, count ) ;
-
+	
 	if ( json == 0 )
 		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ) ;
 	
