@@ -80,7 +80,9 @@ private :
 		const std::string&		url,
 		Receivable				*dest,
 		const http::Headers&	hdr) ;
-		
+
+	void Init() ;
+	
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_pimpl ;

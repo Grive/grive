@@ -21,6 +21,7 @@
 #include "CommonUri.hh"
 
 #include "http/Download.hh"
+#include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
@@ -331,6 +332,7 @@ bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 bool Resource::Create( http::Agent* http, const http::Headers& auth )
 {
 	assert( m_parent != 0 ) ;
+	assert( m_parent->IsFolder() ) ;
 	
 	// sync parent first. make sure the parent folder exists in remote
 	if ( m_parent->m_state != sync )
@@ -340,7 +342,7 @@ bool Resource::Create( http::Agent* http, const http::Headers& auth )
 	{
 		std::string uri = feed_base ;
 		if ( !m_parent->IsRoot() )
-			uri += ("/folder%3A" + m_parent->ResourceID() ) ;
+			uri += ("/" + http->Escape(m_parent->ResourceID()) + "/contents") ;
 		
 		std::string meta = (boost::format(xml_meta) % "folder" % Name() ).str() ;
 		
@@ -348,6 +350,7 @@ bool Resource::Create( http::Agent* http, const http::Headers& auth )
 		hdr.push_back( "Content-Type: application/atom+xml" ) ;
 		
 		http::XmlResponse xml ;
+// 		http::ResponseLog log( "create", ".xml", &xml ) ;
 		http->Post( uri, meta, &xml, hdr ) ;
 		m_entry.Update( xml.Response() ) ;
 

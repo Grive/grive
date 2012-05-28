@@ -81,6 +81,11 @@ Agent::Agent() :
 	m_pimpl( new Impl )
 {
 	m_pimpl->curl = ::curl_easy_init();
+}
+
+void Agent::Init()
+{
+	::curl_easy_reset( m_pimpl->curl ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ; 
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&Agent::HeaderCallback ) ;
@@ -166,7 +171,8 @@ long Agent::Put(
 	const http::Headers&	hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
-
+	
+	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
 	std::string put_data = data ;
@@ -187,6 +193,7 @@ long Agent::Get(
 {
 	Trace("HTTP GET \"%1%\"", url ) ;
 	
+	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
 	// set get specific options
@@ -203,6 +210,7 @@ long Agent::Post(
 {
 	Trace("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
 
+	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
 	// make a copy because the parameter is const
