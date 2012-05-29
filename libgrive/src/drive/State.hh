@@ -20,6 +20,9 @@
 #pragma once
 
 #include "ResourceTree.hh"
+
+#include "http/Agent.hh"
+#include "util/DateTime.hh"
 #include "util/FileSystem.hh"
 
 #include <memory>
@@ -45,13 +48,12 @@ public :
 	void Read( const fs::path& filename ) ;
 	void Write( const fs::path& filename ) const ;
 
-	std::string ChangeStamp() const ;
-	void ChangeStamp( const std::string& cs ) ;
-	
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
 	Resource* Find( const fs::path& path ) ;
 
+	void Sync( http::Agent *http, const http::Headers& auth ) ;
+	
 	iterator begin() ;
 	iterator end() ;
 	
@@ -61,8 +63,8 @@ private :
 	std::size_t TryResolveEntry() ;
 
 private :
-	ResourceTree		m_res ; ;
-	std::string			m_change_stamp ;
+	ResourceTree		m_res ;
+	DateTime			m_last_sync ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;

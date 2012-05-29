@@ -34,6 +34,8 @@ public :
 	explicit DateTime( const std::string& iso ) ;
 	explicit DateTime( std::time_t sec, unsigned long nsec = 0 ) ;
 
+	void Assign( std::time_t sec, unsigned long nsec = 0 ) ;
+	
 	static DateTime Now() ;
 	
 	std::time_t Sec( ) const ;

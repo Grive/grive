@@ -43,16 +43,6 @@ State::State( const fs::path& filename )
 	Read( filename ) ;
 }
 
-std::string State::ChangeStamp() const
-{
-	return m_change_stamp ;
-}
-
-void State::ChangeStamp( const std::string& cs )
-{
-	m_change_stamp = cs ;
-}
-
 /// Synchronize local directory. Build up the resource tree from files and folders
 /// of local directory.
 void State::FromLocal( const fs::path& p )
@@ -66,7 +56,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 	assert( folder->IsFolder() ) ;
 	
 	// sync the folder itself
-	folder->FromLocal() ;
+	folder->FromLocal( m_last_sync ) ;
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
@@ -82,11 +72,12 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 			Resource *c = folder->FindChild( fname ) ;
 			if ( c == 0 )
 			{
-				Log( "detected new file %1% in local", fname, log::verbose ) ;
 				c = new Resource( i->path() ) ;
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;
 			}
+			
+			c->FromLocal( m_last_sync ) ;			
 			
 			if ( fs::is_directory( i->path() ) )
 				FromLocal( *i, c ) ;
@@ -157,15 +148,23 @@ bool State::Update( const Entry& e )
 		// the directory
 		else if ( e.Kind() == "folder" || !e.Filename().empty() )
 		{
-			child = new Resource( e ) ;
-			parent->AddChild( child ) ;
-			m_res.Insert( child ) ;
-			
-			fs::path child_path = child->Path() ;
-			if ( child->IsFolder() && !fs::is_directory( child_path ) )
+			// TODO: compare the last sync time to determine which one is newer
+			if ( e.MTime() > m_last_sync )
 			{
-				Log( "creating %1% directory", child_path, log::info ) ;
-				fs::create_directories( child_path ) ;
+				child = new Resource( e ) ;
+				parent->AddChild( child ) ;
+				m_res.Insert( child ) ;
+				
+				fs::path child_path = child->Path() ;
+				if ( child->IsFolder() && !fs::is_directory( child_path ) )
+				{
+					Log( "creating %1% directory", child_path, log::info ) ;
+					fs::create_directories( child_path ) ;
+				}
+			}
+			else
+			{
+				Trace( "should I delete the local %1%/%2%", parent->Path(), e.Filename() ) ;
 			}
 		}
 		else
@@ -202,23 +201,40 @@ State::iterator State::end()
 
 void State::Read( const fs::path& filename )
 {
-	if ( fs::exists( filename ) )
+	try
 	{
 		Json json = Json::ParseFile( filename.string() ) ;
 		
-		m_change_stamp = json["change_stamp"].Str() ;
-		m_res.Read( json["rtree"] ) ;
+		Json last_sync = json["last_sync"] ;
+		m_last_sync.Assign(
+			last_sync["sec"].Int(),
+			last_sync["nsec"].Int() ) ;
+	}
+	catch ( Exception& )
+	{
+		m_last_sync.Assign(0) ;
 	}
 }
 
 void State::Write( const fs::path& filename ) const
 {
+	Json last_sync ;
+	last_sync.Add( "sec",	Json(m_last_sync.Sec() ) );
+	last_sync.Add( "nsec",	Json(m_last_sync.NanoSec() ) );
+	
 	Json result ;
-	result.Add( "change_stamp", Json( m_change_stamp ) ) ;
-	result.Add( "rtree",		m_res.Serialize() ) ;	
+	result.Add( "last_sync", last_sync ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;
+}
+
+void State::Sync( http::Agent *http, const http::Headers& auth )
+{
+	std::for_each( m_res.begin(), m_res.end(),
+		boost::bind( &Resource::Sync, _1, http, auth ) ) ;
+	
+	m_last_sync = DateTime::Now() ;
 }
 
 } // end of namespace

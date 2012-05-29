@@ -89,12 +89,12 @@ public :
 	iterator begin() ;
 	iterator end() ;
 
-	void Read( const Json& json ) ;
-	Json Serialize() const ;
+// 	void Read( const Json& json ) ;
+// 	Json Serialize() const ;
 
 private :
 	void Clear() ;
-	void AddTree( Resource *node, const Json& json ) ;
+// 	void AddTree( Resource *node, const Json& json ) ;
 
 private :
 	details::Folders	m_set ;

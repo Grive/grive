@@ -125,7 +125,7 @@ int main( int argc, char **argv )
 		drive.Update() ;
 		drive.SaveState() ;
 		
-// 		config.Save() ;
+		config.Save() ;
 	}
 	catch ( gr::Exception& e )
 	{

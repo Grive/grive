@@ -47,7 +47,7 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void ConstructDirTree( http::Agent *http ) ;
+	void SyncFolders( http::Agent *http ) ;
     void file();
 	
 private :

@@ -50,7 +50,7 @@ public :
 	explicit Resource( const xml::Node& entry ) ;
 	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
 	explicit Resource( const fs::path& path ) ;
-	explicit Resource( const Json& json, Resource *parent = 0 ) ;
+// 	explicit Resource( const Json& json, Resource *parent = 0 ) ;
 	void Swap( Resource& coll ) ;
 	
 	// default copy ctor & op= are fine
@@ -72,7 +72,7 @@ public :
 	bool IsRoot() const ;
 
 	void FromRemote( const Entry& e ) ;
-	void FromLocal() ;
+	void FromLocal( const DateTime& last_sync ) ;
 	
 	void Sync( http::Agent *http, const http::Headers& auth ) ;
 	void Delete( http::Agent* http, const http::Headers& auth ) ;
@@ -109,7 +109,10 @@ private :
 		remote_new,
 		
 		/// Resource exists in both local & remote, but remote is newer.		
-		remote_changed
+		remote_changed,
+		
+		/// Resource delete in remote, need to delete in local
+		remote_deleted
 	} ;
 
 	friend std::ostream& operator<<( std::ostream& os, State s ) ;

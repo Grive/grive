@@ -19,6 +19,15 @@
 
 #include "DateTime.hh"
 
+#include "Exception.hh"
+
+// boost headers
+#include <boost/throw_exception.hpp>
+#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_at_line.hpp>
+#include <boost/exception/errinfo_errno.hpp>
+#include <boost/exception/info.hpp>
+
 #include <sstream>
 
 #include <cassert>
@@ -55,15 +64,30 @@ DateTime::DateTime( const std::string& iso ) :
 	}
 }
 
-DateTime::DateTime( std::time_t sec, unsigned long nsec ) :
-	m_sec	( sec + nsec / 1000000000 ),
-	m_nsec	( nsec % 1000000000 )
+DateTime::DateTime( std::time_t sec, unsigned long nsec )
 {
+	Assign( sec, nsec ) ;
+}
+
+void DateTime::Assign( std::time_t sec, unsigned long nsec )
+{
+	m_sec	= sec + nsec / 1000000000 ;
+	m_nsec	= nsec % 1000000000 ;
 }
 
 DateTime DateTime::Now()
 {
-	return DateTime( std::time(0) ) ;
+	struct timeval tv = {} ;
+	if ( ::gettimeofday( &tv, 0 ) != 0 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Exception()
+				<< boost::errinfo_api_function("gettimeofday")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	
+	return DateTime( tv.tv_sec, tv.tv_usec * 1000 ) ;
 }
 
 std::string DateTime::Format( const std::string& format ) const

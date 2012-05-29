@@ -59,26 +59,13 @@ Drive::Drive( OAuth2& auth ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 
-	http::Agent http ;
-	http::XmlResponse xrsp ;
-	http.Get( feed_metadata, &xrsp, m_http_hdr ) ;
-	
-	std::string change_stamp = xrsp.Response()["docs:largestChangestamp"]["@value"] ;
-	Trace( "change stamp is %1%", change_stamp ) ;
-
-	m_state.ChangeStamp( change_stamp ) ;
 	m_state.FromLocal( "." ) ;
 	
-	ConstructDirTree( &http ) ;
+	http::Agent http ;
+	SyncFolders( &http ) ;
 	
-	std::string uri = feed_base + "?showfolders=true&showroot=true" ;
-/*	if ( !change_stamp.empty() )
-	{
-		int ichangestamp = std::atoi( change_stamp.c_str() ) + 1 ;
-		uri = (boost::format( "%1%&start-index=%2%" ) % uri % ichangestamp ).str() ;
-	}
-*/
-	http.Get( uri, &xrsp, m_http_hdr ) ;
+	http::XmlResponse xrsp ;
+	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
 	m_resume_link = resp["link"].
@@ -133,7 +120,7 @@ void Drive::SaveState()
 	m_state.Write( state_file ) ;
 }
 
-void Drive::ConstructDirTree( http::Agent *http )
+void Drive::SyncFolders( http::Agent *http )
 {
 	http::XmlResponse xml ;
 	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
@@ -175,8 +162,7 @@ void Drive::ConstructDirTree( http::Agent *http )
 void Drive::Update()
 {
 	http::Agent http ;
-	std::for_each( m_state.begin(), m_state.end(),
-		boost::bind( &Resource::Sync, _1, &http, m_http_hdr ) ) ;
+	m_state.Sync( &http, m_http_hdr ) ;
 }
 
 } // end of namespace

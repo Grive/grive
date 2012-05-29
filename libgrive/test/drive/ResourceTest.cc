@@ -39,7 +39,7 @@ void ResourceTest::TestNormal( )
 	Json json ;
 	json.Add( "name", Json( "abc.txt" ) ) ;
 	
-	Resource subject( json, 0 ) ;
+// 	Resource subject( json, 0 ) ;
 }
 
 } // end of namespace grut

@@ -177,7 +177,7 @@ ResourceTree::iterator ResourceTree::end()
 {
 	return m_set.get<ByIdentity>().end() ;
 }
-
+/*
 void ResourceTree::Read( const Json& json )
 {
 	Clear() ;
@@ -205,5 +205,5 @@ Json ResourceTree::Serialize() const
 {
 	return m_root->Serialize() ;
 }
-
+*/
 } // end of namespace

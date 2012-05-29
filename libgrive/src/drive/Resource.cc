@@ -21,7 +21,7 @@
 #include "CommonUri.hh"
 
 #include "http/Download.hh"
-#include "http/ResponseLog.hh"
+// #include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
@@ -56,7 +56,7 @@ Resource::Resource() :
 	m_state	( sync )
 {
 }
-
+/*
 /// Construct from previously serialized JSON object. The state of the
 /// resource is treated as local_deleted by default. It is because the
 /// state will be updated by scanning the local directory. If the state
@@ -77,7 +77,7 @@ Resource::Resource( const Json& json, Resource *parent ) :
 	// state as local_changed
 	FromLocal() ;
 }
-
+*/
 Resource::Resource( const xml::Node& entry ) :
 	m_entry	( entry ),
 	m_parent( 0 ),
@@ -114,7 +114,7 @@ void Resource::FromRemote( const Entry& remote )
 	// if checksum is equal, no need to compare the mtime
 	else if ( remote.MD5() == m_entry.MD5() )
 	{
-		Log( "MD5 matches: %1% is already in sync", Name(), log::verbose ) ;
+		Log( "MD5 matches: %1% is already in sync", Path(), log::verbose ) ;
 		m_state = sync ;
 	}
 	
@@ -122,9 +122,14 @@ void Resource::FromRemote( const Entry& remote )
 	else
 	{
 		assert( m_state == local_new || m_state == local_changed || m_state == local_deleted ) ;
-				
-		m_state = ( remote.MTime() > m_entry.MTime() ? remote_changed : m_state ) ;
-		m_state = ( m_state == local_new ? local_changed : m_state ) ;
+
+		// if remote is modified
+		if ( remote.MTime() > m_entry.MTime() )
+			m_state = remote_changed ;
+		
+		// remote also has the file, so it's not new in local
+		else if ( m_state == local_new || m_state == local_deleted )
+			m_state = local_changed ;
 		
 		Log( "%1% state is %2%", Name(), m_state, log::verbose ) ;
 	}
@@ -132,37 +137,24 @@ void Resource::FromRemote( const Entry& remote )
 	m_entry.AssignID( remote ) ;
 }
 
-void Resource::FromLocal()
+/// Update the resource with the attributes of local file or directory. This
+/// function will propulate the fields in m_entry.
+void Resource::FromLocal( const DateTime& last_sync )
 {
 	fs::path path = Path() ;
+	assert( fs::exists( path ) ) ;
 
 	// root folder is always rsync
 	if ( m_parent == 0 )
 		m_state = sync ;
 	
-	else if ( !fs::exists( path ) )
-	{
-		m_state = local_deleted ;
-		Log( "%1% in state but not exist on disk: %2%", Name(), m_state ) ;
-	}
-
 	else
 	{
-		m_state = local_new ;
+		// assume file is local_deleted?? very strange. change it tomorrow
+		DateTime mtime = os::FileMTime( path ) ;
+		m_state = ( mtime > last_sync ? local_new : local_deleted ) ;
 		
-		// no need to compare MD5 or mtime for directories
-		if ( !IsFolder() )
-		{
-			// to save time, compare mtime before checksum
-			DateTime mtime = os::FileMTime( path ) ;
-			if ( mtime > m_entry.MTime() )
-			{
-				Log( "%1% mtime newer on disk: %2%", Name(), m_state ) ;
-				m_entry.Update( crypt::MD5( path ), mtime ) ;
-			}
-			else
-				Log( "%1% unchanged on disk: %2%", Name(), m_state ) ;
-		}
+		Log( "%1% found on disk: %2%", Name(), m_state ) ;
 	}
 }
 
@@ -260,31 +252,31 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	{
 	case local_new :
 		Log( "sync %1% doesn't exist in server. upload \"%2%\"?",
-			Name(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+			Path(), m_parent->m_entry.CreateLink(), log::verbose ) ;
 		
 		if ( Create( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case local_deleted :
-		Log( "sync %1% deleted in local. delete?", m_entry.Filename(), log::verbose ) ;
+		Log( "sync %1% deleted in local. delete?", Path(), log::verbose ) ;
 		break ;
 	
 	case local_changed :
-		Log( "sync %1% changed in local", m_entry.Filename(), log::verbose ) ;
+		Log( "sync %1% changed in local", Path(), log::verbose ) ;
 		if ( EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 	case remote_changed :
-		Log( "sync %1% changed in remote. download?", m_entry.Filename(), log::verbose ) ;
+		Log( "sync %1% changed in remote. download?", Path(), log::verbose ) ;
 		Download( http, Path(), auth ) ;
 		m_state = sync ;
 		break ;
 	
 	case sync :
-		Log( "sync %1% already in sync", m_entry.Filename(), log::verbose ) ;
+		Log( "sync %1% already in sync", Path(), log::verbose ) ;
 		break ;
 		
 	default :
