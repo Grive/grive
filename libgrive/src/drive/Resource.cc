@@ -102,13 +102,32 @@ Resource::Resource( const fs::path& path ) :
 /// Update the state according to information (i.e. Entry) from remote. This function
 /// compares the modification time and checksum of both copies and determine which
 /// one is newer.
-void Resource::FromRemote( const Entry& remote )
+void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 {
-	// sync folder is easy
+	fs::path path = Path() ;
+	
+	// sync folder
 	if ( remote.Kind() == "folder" && IsFolder() )
 	{
-		Log( "folder %1% is in sync", Name(), log::verbose ) ;
-		m_state = sync ;
+		// already sync
+		if ( fs::is_directory( path ) )
+		{
+			Log( "folder %1% is in sync", path, log::verbose ) ;
+			m_state = sync ;
+		}
+		
+		// remote file created after last sync, so remote is newer
+		else if ( remote.MTime() > last_sync )
+		{
+			Log( "creating %1% directory", path, log::info ) ;
+			fs::create_directories( path ) ;
+			m_state = sync ;
+		}
+		else
+		{
+			Trace( "should I delete the local directory %1%?", path ) ;
+			m_state = local_deleted ;
+		}
 	}
 	
 	// if checksum is equal, no need to compare the mtime
@@ -118,17 +137,32 @@ void Resource::FromRemote( const Entry& remote )
 		m_state = sync ;
 	}
 	
+	// local not exists
+	else if ( !fs::exists( path ) )
+	{
+		if ( remote.MTime() > last_sync )
+		{
+			Trace( "new file found in remote", path ) ;
+			m_state = remote_new ;
+		}
+		else
+		{
+			Trace( "should I delete the local file %1%?", path ) ;
+			m_state = local_deleted ;
+		}
+	}
+	
 	// use mtime to check which one is more recent
 	else
 	{
-		assert( m_state == local_new || m_state == local_changed || m_state == local_deleted ) ;
+		assert( m_state == local_new || m_state == local_changed || m_state == remote_deleted ) ;
 
 		// if remote is modified
 		if ( remote.MTime() > m_entry.MTime() )
 			m_state = remote_changed ;
 		
 		// remote also has the file, so it's not new in local
-		else if ( m_state == local_new || m_state == local_deleted )
+		else if ( m_state == local_new || m_state == remote_deleted )
 			m_state = local_changed ;
 		
 		Log( "%1% state is %2%", Name(), m_state, log::verbose ) ;
@@ -150,9 +184,11 @@ void Resource::FromLocal( const DateTime& last_sync )
 	
 	else
 	{
-		// assume file is local_deleted?? very strange. change it tomorrow
+		// if the file is not created after last sync, assume file is
+		// remote_deleted first, it will be updated to sync/remote_changed
+		// in FromRemote()
 		DateTime mtime = os::FileMTime( path ) ;
-		m_state = ( mtime > last_sync ? local_new : local_deleted ) ;
+		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		Log( "%1% found on disk: %2%", Name(), m_state ) ;
 	}
@@ -273,6 +309,10 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		Log( "sync %1% changed in remote. download?", Path(), log::verbose ) ;
 		Download( http, Path(), auth ) ;
 		m_state = sync ;
+		break ;
+	
+	case remote_deleted :
+		Log( "sync %1% deleted in remote. delete?", Path(), log::verbose ) ;
 		break ;
 	
 	case sync :
@@ -448,7 +488,8 @@ std::ostream& operator<<( std::ostream& os, Resource::State s )
 {
 	static const char *state[] =
 	{
-		"sync",	"local_new", "local_changed", "local_deleted", "remote_new", "remote_changed"
+		"sync",	"local_new", "local_changed", "local_deleted", "remote_new",
+		"remote_changed", "remote_deleted"
 	} ;
 	assert( s >= 0 && s < Count(state) ) ;
 	return os << state[s] ;

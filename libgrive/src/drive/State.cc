@@ -128,7 +128,7 @@ bool State::Update( const Entry& e )
 	
 	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
 	{
-		m_res.Update( res, e ) ;
+		m_res.Update( res, e, m_last_sync ) ;
 		return true ;
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
@@ -141,31 +141,17 @@ bool State::Update( const Entry& e )
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			m_res.Update( child, e ) ;
+			m_res.Update( child, e, m_last_sync ) ;
 		}
 		
 		// folder entry exist in google drive, but not local. we should create
 		// the directory
 		else if ( e.Kind() == "folder" || !e.Filename().empty() )
 		{
-			// TODO: compare the last sync time to determine which one is newer
-			if ( e.MTime() > m_last_sync )
-			{
-				child = new Resource( e ) ;
-				parent->AddChild( child ) ;
-				m_res.Insert( child ) ;
-				
-				fs::path child_path = child->Path() ;
-				if ( child->IsFolder() && !fs::is_directory( child_path ) )
-				{
-					Log( "creating %1% directory", child_path, log::info ) ;
-					fs::create_directories( child_path ) ;
-				}
-			}
-			else
-			{
-				Trace( "should I delete the local %1%/%2%", parent->Path(), e.Filename() ) ;
-			}
+			child = new Resource( e ) ;
+			parent->AddChild( child ) ;
+			m_res.Insert( child ) ;
+			m_res.Update( child, e, m_last_sync ) ;
 		}
 		else
 		{

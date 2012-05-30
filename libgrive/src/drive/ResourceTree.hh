@@ -81,7 +81,7 @@ public :
 	
 	void Insert( Resource *coll ) ;
 	void Erase( Resource *coll ) ;
-	void Update( Resource *coll, const Entry& e ) ;
+	void Update( Resource *coll, const Entry& e, const DateTime& last_sync ) ;
 	
 	Resource* Root() ;
 	const Resource* Root() const ;
@@ -89,12 +89,8 @@ public :
 	iterator begin() ;
 	iterator end() ;
 
-// 	void Read( const Json& json ) ;
-// 	Json Serialize() const ;
-
 private :
 	void Clear() ;
-// 	void AddTree( Resource *node, const Json& json ) ;
 
 private :
 	details::Folders	m_set ;

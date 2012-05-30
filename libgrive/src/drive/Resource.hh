@@ -71,7 +71,7 @@ public :
 	bool IsInRootTree() const ;
 	bool IsRoot() const ;
 
-	void FromRemote( const Entry& e ) ;
+	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
 	void Sync( http::Agent *http, const http::Headers& auth ) ;

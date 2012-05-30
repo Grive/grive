@@ -160,11 +160,11 @@ void ResourceTree::Erase( Resource *coll )
 	s.erase( s.find( coll ) ) ;
 }
 
-void ResourceTree::Update( Resource *coll, const Entry& e )
+void ResourceTree::Update( Resource *coll, const Entry& e, const DateTime& last_sync )
 {
 	assert( coll != 0 ) ;
 
-	coll->FromRemote( e ) ;
+	coll->FromRemote( e, last_sync ) ;
 	ReInsert( coll ) ;
 }
 
@@ -177,33 +177,5 @@ ResourceTree::iterator ResourceTree::end()
 {
 	return m_set.get<ByIdentity>().end() ;
 }
-/*
-void ResourceTree::Read( const Json& json )
-{
-	Clear() ;
-	
-	assert( m_root == 0 ) ;
-	m_root = new Resource ;
-	AddTree( m_root, json ) ;
-}
 
-void ResourceTree::AddTree( Resource *node, const Json& json )
-{
-	assert( node != 0 ) ;
-	m_set.insert( node ) ;
-	
-	std::vector<Json> array = json["child"].AsArray() ;
-	for ( std::vector<Json>::iterator i = array.begin() ; i != array.end() ; ++i )
-	{
-		Resource *c = new Resource( *i, node ) ;
-		node->AddChild( c ) ;
-		AddTree( c, *i ) ;
-	}
-}
-
-Json ResourceTree::Serialize() const
-{
-	return m_root->Serialize() ;
-}
-*/
 } // end of namespace
