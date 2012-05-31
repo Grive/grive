@@ -2,18 +2,28 @@ Grive 0.1.0
 
 Grive is still considered experimental. It just downloads all the files in your google drive
 into the current directory. After you make some changes to the local files, run grive and
-it will upload your changes back to your google drive.
+it will upload your changes back to your google drive. New files created in local or google
+drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
+Currently Grive will NOT destroy any of your files: it will only rename local files to
+start with a dot, or put it in the google drive trash. You can always recover them.
 
 There are a few things that grive does not do at the moment:
 - wait for changes in file system to occur and upload. Grive only sync when you run it.
-- create new files in google drive. Grive only uploads changed files that already
-  exist in server.
   
 Of course these will be done in future, possibly the next release.
 
 This is compiled in Fedora 16 x64. You need the following libraries to run:
-json-c, libcurl, libstdc++ and openssl. CppUnit is also optional and required
-only if you want to build the test cases.
+
+- json-c
+- libcurl
+- libstdc++
+- openssl
+- Boost (Boost filesystem is required)
+
+There are also some optional dependencies:
+- CppUnit (for unit tests)
+- libbfd (for backtrace)
+- binutils
 
 When grive is ran for the first time, you should use the "-a" argument to grant
 permission to grive to access to your Google Drive. An URL should be printed.
@@ -21,7 +31,8 @@ Go to the link. You will need to login to your google account if you haven't
 done so. After granting the permission to grive, the browser will show you
 an authenication code. Copy-and-paste that to the standard input of grive.
 
-If everything works fine, grive will create a .grive file in your home directory.
-It will also start downloading files from your Google Drive to your current directory.
+If everything works fine, grive will create a .grive and a .grive_state file in your
+current directory. It will also start downloading files from your Google Drive to
+your current directory.
 
 Enjoy!
