@@ -56,28 +56,7 @@ Resource::Resource() :
 	m_state	( sync )
 {
 }
-/*
-/// Construct from previously serialized JSON object. The state of the
-/// resource is treated as local_deleted by default. It is because the
-/// state will be updated by scanning the local directory. If the state
-/// is not updated during scanning, that means the resource is deleted.
-Resource::Resource( const Json& json, Resource *parent ) :
-	m_entry	(
-		json["name"].Str(),
-		json["id"].Str(),
-		json["href"].Str(),
-		json["md5"].Str(),
-		json["kind"].Str(),
-		DateTime( json["mtime"]["sec"].Int(), json["mtime"]["nsec"].Int() ),
-		parent != 0 ? parent->SelfHref() : "" ),
-	m_parent( parent ),
-	m_state( local_deleted )
-{
-	// if the file exists in local directory, FromLocal() will mark the
-	// state as local_changed
-	FromLocal() ;
-}
-*/
+
 Resource::Resource( const xml::Node& entry ) :
 	m_entry	( entry ),
 	m_parent( 0 ),
@@ -92,8 +71,8 @@ Resource::Resource( const Entry& entry, Resource *parent ) :
 {
 }
 
-Resource::Resource( const fs::path& path ) :
-	m_entry	( path ),
+Resource::Resource( const fs::path& path, const std::string& kind ) :
+	m_entry	( path, kind ),
 	m_parent( 0 ),
 	m_state	( local_new )
 {
@@ -119,22 +98,33 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 		// remote file created after last sync, so remote is newer
 		else if ( remote.MTime() > last_sync )
 		{
-			Log( "creating %1% directory", path, log::info ) ;
-			fs::create_directories( path ) ;
-			m_state = sync ;
+			if ( fs::exists( path ) )
+			{
+				// TODO: handle type change
+				Log( "%1% changed from folder to file", path, log::verbose ) ;
+				m_state = sync ;
+			}
+			else
+			{
+				Log( "folder %1% is created in local", path, log::verbose ) ;
+				fs::create_directories( path ) ;
+				m_state = sync ;
+			}
 		}
 		else
 		{
-			Trace( "should I delete the local directory %1%?", path ) ;
-			m_state = local_deleted ;
+			if ( fs::exists( path ) )
+			{
+				// TODO: handle type chage
+				Log( "%1% changed from file to folder", path, log::verbose ) ;
+				m_state = sync ;
+			}
+			else
+			{
+				Log( "folder %1% is deleted in local", path, log::verbose ) ;
+				m_state = local_deleted ;
+			}
 		}
-	}
-	
-	// if checksum is equal, no need to compare the mtime
-	else if ( remote.MD5() == m_entry.MD5() )
-	{
-		Log( "MD5 matches: %1% is already in sync", Path(), log::verbose ) ;
-		m_state = sync ;
 	}
 	
 	// local not exists
@@ -142,16 +132,23 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 	{
 		if ( remote.MTime() > last_sync )
 		{
-			Trace( "new file found in remote", path ) ;
+			Log( "file %1% is created in remote", path, log::verbose ) ;
 			m_state = remote_new ;
 		}
 		else
 		{
-			Trace( "should I delete the local file %1%?", path ) ;
+			Log( "file %1% should be erased in remote", path, log::verbose ) ;
 			m_state = local_deleted ;
 		}
 	}
 	
+	// if checksum is equal, no need to compare the mtime
+	else if ( remote.MD5() == m_entry.MD5() )
+	{
+		Log( "file %1% is already in sync", Path(), log::verbose ) ;
+		m_state = sync ;
+	}
+
 	// use mtime to check which one is more recent
 	else
 	{
@@ -159,13 +156,19 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 
 		// if remote is modified
 		if ( remote.MTime() > m_entry.MTime() )
+		{
+			Log( "file %1% is changed in remote", path, log::verbose ) ;
 			m_state = remote_changed ;
+		}
 		
 		// remote also has the file, so it's not new in local
 		else if ( m_state == local_new || m_state == remote_deleted )
+		{
+			Log( "file %1% is changed in local", path, log::verbose ) ;
 			m_state = local_changed ;
+		}
 		
-		Log( "%1% state is %2%", Name(), m_state, log::verbose ) ;
+		Trace( "%1% state is %2%", Name(), m_state ) ;
 	}
 	
 	m_entry.AssignID( remote ) ;
@@ -190,7 +193,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		DateTime mtime = os::FileMTime( path ) ;
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
-		Log( "%1% found on disk: %2%", Name(), m_state ) ;
+		Trace( "%1% found on disk: %2%", Name(), m_state ) ;
 	}
 }
 
@@ -287,8 +290,7 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% doesn't exist in server. upload \"%2%\"?",
-			Path(), m_parent->m_entry.CreateLink(), log::verbose ) ;
+		Log( "sync %1% doesn't exist in server, uploading", Path(), log::verbose ) ;
 		
 		if ( Create( http, auth ) )
 			m_state = sync ;
@@ -299,14 +301,14 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		break ;
 	
 	case local_changed :
-		Log( "sync %1% changed in local", Path(), log::verbose ) ;
+		Log( "sync %1% changed in local. uploading", Path(), log::verbose ) ;
 		if ( EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 	case remote_changed :
-		Log( "sync %1% changed in remote. download?", Path(), log::verbose ) ;
+		Log( "sync %1% changed in remote. downloading", Path(), log::verbose ) ;
 		Download( http, Path(), auth ) ;
 		m_state = sync ;
 		break ;
@@ -336,7 +338,6 @@ void Resource::Delete( http::Agent *http, const http::Headers& auth )
 
 void Resource::Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const
 {
-	Log( "Downloading %1%", file ) ;
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
 	if ( r <= 400 )
@@ -401,8 +402,6 @@ bool Resource::Create( http::Agent* http, const http::Headers& auth )
 
 bool Resource::Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post )
 {
-	Log( "Uploading %1%", m_entry.Title() ) ;
-	
 	StdioFile file( Path() ) ;
 	
 	// TODO: upload in chunks

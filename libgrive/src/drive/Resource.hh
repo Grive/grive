@@ -49,7 +49,7 @@ public :
 	Resource() ;
 	explicit Resource( const xml::Node& entry ) ;
 	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
-	explicit Resource( const fs::path& path ) ;
+	explicit Resource( const fs::path& path, const std::string& kind = "" ) ;
 // 	explicit Resource( const Json& json, Resource *parent = 0 ) ;
 	void Swap( Resource& coll ) ;
 	

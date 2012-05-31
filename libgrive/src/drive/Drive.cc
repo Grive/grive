@@ -97,7 +97,7 @@ Drive::Drive( OAuth2& auth ) :
 				
 				else if ( parent != 0 && !parent->IsFolder() )
 					Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
-						entry.Title(), parent->Name(), log::warning ) ;
+						entry.Title(), parent->Name(), log::verbose ) ;
 				
 				else
 					m_state.FromRemote( entry ) ;
@@ -122,6 +122,8 @@ void Drive::SaveState()
 
 void Drive::SyncFolders( http::Agent *http )
 {
+	Log( "Synchronizing folders", log::info ) ;
+
 	http::XmlResponse xml ;
 	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
 
@@ -138,7 +140,7 @@ void Drive::SyncFolders( http::Agent *http )
 			if ( e.Kind() == "folder" )
 			{
 				if ( e.ParentHrefs().size() != 1 )
-					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::warning ) ;
+					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
 				
 				else if ( e.Title().find('/') != std::string::npos )
 					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
@@ -161,6 +163,8 @@ void Drive::SyncFolders( http::Agent *http )
 
 void Drive::Update()
 {
+	Log( "Synchronizing files", log::info ) ;
+	
 	http::Agent http ;
 	m_state.Sync( &http, m_http_hdr ) ;
 }

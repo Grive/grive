@@ -25,7 +25,29 @@ namespace gr {
 
 namespace log
 {
-	enum Serverity { debug, verbose, info, warning, error, critical } ;
+	/// defines the types of the log message
+	enum Serverity
+	{
+		/// user unfriendly messages. only meant for developers.
+		debug,
+		
+		/// enabled only if -V is specified. grive tries to tell you every
+		/// single thing it tries to do.
+		verbose,
+		
+		/// notification messages indicates nothing is going wrong
+		info,
+		
+		/// potential error messages
+		warning,
+		
+		/// an error has occurs but grive doesn't need to quit
+		error,
+		
+		/// grive cannot proceed
+		critical
+	} ;
+	
 	typedef boost::format Fmt ;
 }
 

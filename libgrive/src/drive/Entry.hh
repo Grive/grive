@@ -43,7 +43,7 @@ class Entry
 {
 public :
 	Entry( ) ;
-	explicit Entry( const fs::path& path ) ;
+	explicit Entry( const fs::path& path, const std::string& kind = "" ) ;
 	explicit Entry( const xml::Node& n ) ;
 	explicit Entry(
 		const std::string&	name,

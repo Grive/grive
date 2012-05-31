@@ -63,7 +63,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 		std::string fname = i->path().filename().string() ;
 	
 		if ( fname[0] == '.' )
-			Log( "file %1% is ignored by grive", fname, log::info ) ;
+			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
 		
 		else
 		{
@@ -148,9 +148,12 @@ bool State::Update( const Entry& e )
 		// the directory
 		else if ( e.Kind() == "folder" || !e.Filename().empty() )
 		{
-			child = new Resource( e ) ;
+			// first create a dummy resource and update it later
+			child = new Resource( parent->Path() / e.Filename(), e.Kind() ) ;
 			parent->AddChild( child ) ;
 			m_res.Insert( child ) ;
+			
+			// update the state of the resource
 			m_res.Update( child, e, m_last_sync ) ;
 		}
 		else

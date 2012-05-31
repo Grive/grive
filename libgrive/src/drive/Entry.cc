@@ -48,12 +48,17 @@ Entry::Entry( const xml::Node& n )
 }
 
 /// construct an entry from a file or folder in local directory
-Entry::Entry( const fs::path& path ) :
+Entry::Entry( const fs::path& path, const std::string& kind ) :
 	m_title		( path.filename().string() ),
 	m_filename	( path.filename().string() ),
-	m_kind		( fs::is_directory(path) ? "folder" : "file" ),
+	m_kind
+	(
+		fs::exists(path)
+			? (fs::is_directory(path) ? "folder" : "file" )
+			: kind
+	),
 	m_md5		( fs::is_directory(path) ? "" : crypt::MD5( path ) ),
-	m_mtime		( os::FileMTime( path ) )
+	m_mtime		( fs::exists(path) ? os::FileMTime( path ) : DateTime() )
 {
 }
 
@@ -109,6 +114,7 @@ const std::vector<std::string>& Entry::ParentHrefs() const
 void Entry::AssignID( const Entry& entry )
 {
 	m_self_href		= entry.m_self_href ;
+	m_content_src	= entry.m_content_src ;
 	m_resource_id	= entry.m_resource_id ;
 	m_parent_hrefs	= entry.m_parent_hrefs ;
 	m_edit_link		= entry.m_edit_link ;
