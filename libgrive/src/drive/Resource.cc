@@ -128,7 +128,7 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 		}
 		else
 		{
-			Log( "file %1% should be erased in remote", path, log::verbose ) ;
+			Log( "file %1% is deleted in local", path, log::verbose ) ;
 			m_state = local_deleted ;
 		}
 	}
@@ -290,7 +290,8 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		break ;
 	
 	case local_deleted :
-		Log( "sync %1% deleted in local. delete?", Path(), log::verbose ) ;
+		Log( "sync %1% deleted in local. deleting remote", Path(), log::verbose ) ;
+		DeleteRemote( http, auth ) ;
 		break ;
 	
 	case local_changed :
@@ -307,7 +308,8 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		break ;
 	
 	case remote_deleted :
-		Log( "sync %1% deleted in remote. delete?", Path(), log::verbose ) ;
+		Log( "sync %1% deleted in remote. deleting local", Path(), log::verbose ) ;
+		DeleteLocal() ;
 		break ;
 	
 	case sync :
@@ -319,13 +321,43 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 	}
 }
 
-void Resource::Delete( http::Agent *http, const http::Headers& auth )
+/// this function doesn't really remove the local file. it renames it.
+void Resource::DeleteLocal()
+{
+	assert( m_parent != 0 ) ;
+	fs::path parent = m_parent->Path() ;
+	fs::path dest	= parent / ( "." + Name() ) ;
+	
+	std::size_t idx = 1 ;
+	while ( fs::exists( dest ) && idx != 0 )
+	{
+		std::ostringstream oss ;
+		oss << '.' << Name() << "-" << idx++ ;
+		dest = parent / oss.str() ;
+	}
+	
+	// wrap around! just remove the file
+	if ( idx == 0 )
+		fs::remove_all( Path() ) ;
+	else
+		fs::rename( Path(), dest ) ;
+}
+
+void Resource::DeleteRemote( http::Agent *http, const http::Headers& auth )
 {
 	http::Headers hdr( auth ) ;
 	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
 	
 	http::StringResponse str ;
-	http->Custom( "DELETE", feed_base + "/" + m_entry.ResourceID() + "?delete=true", &str, hdr ) ;
+	try
+	{
+		http->Custom( "DELETE", m_entry.SelfHref(), &str, hdr ) ;
+	}
+	catch ( Exception& )
+	{
+		Trace( "response = %1%", str.Response() ) ;
+		throw ;
+	}
 }
 
 
