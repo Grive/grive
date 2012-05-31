@@ -43,18 +43,11 @@ class Entry
 {
 public :
 	Entry( ) ;
-	explicit Entry( const fs::path& path, const std::string& kind = "" ) ;
+	Entry( const std::string& name, const std::string& kind ) ;
 	explicit Entry( const xml::Node& n ) ;
-	explicit Entry(
-		const std::string&	name,
-		const std::string&	resource_id,
-		const std::string&	href,
-		const std::string&	md5,
-		const std::string&	kind,
-		const DateTime&		mtime,
-		const std::string&	parent_href ) ;
-
+	
 	void AssignID( const Entry& entry ) ;
+	void FromLocal( const fs::path& path ) ;
 	
 	std::string Title() const ;
 	std::string Filename() const ;

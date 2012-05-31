@@ -38,9 +38,14 @@
 
 namespace gr {
 
-State::State( const fs::path& filename )
+State::State( const fs::path& filename, const Json& options )
 {
 	Read( filename ) ;
+	
+	// the "-f" option will make grive always thinks remote is newer
+	Json force ;
+	if ( options.Get("force", force) && force.Bool() )
+		m_last_sync = DateTime() ;
 }
 
 /// Synchronize local directory. Build up the resource tree from files and folders
@@ -72,7 +77,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 			Resource *c = folder->FindChild( fname ) ;
 			if ( c == 0 )
 			{
-				c = new Resource( i->path() ) ;
+				c = new Resource( fname, fs::is_directory(i->path()) ? "folder" : "file" ) ;
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;
 			}
@@ -149,7 +154,7 @@ bool State::Update( const Entry& e )
 		else if ( e.Kind() == "folder" || !e.Filename().empty() )
 		{
 			// first create a dummy resource and update it later
-			child = new Resource( parent->Path() / e.Filename(), e.Kind() ) ;
+			child = new Resource( name, e.Kind() ) ;
 			parent->AddChild( child ) ;
 			m_res.Insert( child ) ;
 			

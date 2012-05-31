@@ -69,6 +69,7 @@ public :
 	bool Is() const ;
 	
 	bool Has( const std::string& key ) const ;
+	bool Get( const std::string& key, Json& json ) const ;
 	void Add( const std::string& key, const Json& json ) ;
 	void Add( const Json& json ) ;
 	Json FindInArray( const std::string& key, const std::string& value ) const ;

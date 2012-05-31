@@ -48,8 +48,10 @@ int main( int argc, char **argv )
 	DefaultLog nofile_log ;
 	LogBase::Inst( &nofile_log ) ;
 	
+	Json options ;
+	
 	int c ;
-	while ((c = getopt(argc, argv, "al:vV")) != -1)
+	while ((c = getopt(argc, argv, "al:vVf")) != -1)
 	{
 		switch ( c )
 		{
@@ -72,7 +74,6 @@ int main( int argc, char **argv )
 				
 				// save to config
 				config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
-				assert( config.Get()["refresh_token"].Str() == token.RefreshToken() ) ;
 				config.Save() ;
 				
 				break ;
@@ -95,6 +96,12 @@ int main( int argc, char **argv )
 			case 'V' :
 			{
 				LogBase::Inst()->Enable( log::verbose ) ;
+				break ;
+			}
+			
+			case 'f' :
+			{
+				options.Add( "force", Json(true) ) ;
 				break ;
 			}
 		}
@@ -120,7 +127,7 @@ int main( int argc, char **argv )
 	try
 	{
 		OAuth2 token( refresh_token, client_id, client_secret ) ;
-		Drive drive( token ) ;
+		Drive drive( token, options ) ;
 
 		drive.Update() ;
 		drive.SaveState() ;

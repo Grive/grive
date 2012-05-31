@@ -57,24 +57,10 @@ Resource::Resource() :
 {
 }
 
-Resource::Resource( const xml::Node& entry ) :
-	m_entry	( entry ),
+Resource::Resource( const std::string& name, const std::string& kind ) :
+	m_entry	( name, kind ),
 	m_parent( 0 ),
-	m_state	( remote_new )
-{
-}
-
-Resource::Resource( const Entry& entry, Resource *parent ) :
-	m_entry	( entry ),
-	m_parent( parent ),
-	m_state	( remote_new )
-{
-}
-
-Resource::Resource( const fs::path& path, const std::string& kind ) :
-	m_entry	( path, kind ),
-	m_parent( 0 ),
-	m_state	( local_new )
+	m_state	( unknown )
 {
 }
 
@@ -172,6 +158,7 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 	}
 	
 	m_entry.AssignID( remote ) ;
+	assert( m_state != unknown ) ;
 }
 
 /// Update the resource with the attributes of local file or directory. This
@@ -181,11 +168,8 @@ void Resource::FromLocal( const DateTime& last_sync )
 	fs::path path = Path() ;
 	assert( fs::exists( path ) ) ;
 
-	// root folder is always rsync
-	if ( m_parent == 0 )
-		m_state = sync ;
-	
-	else
+	// root folder is always in sync
+	if ( !IsRoot() )
 	{
 		// if the file is not created after last sync, assume file is
 		// remote_deleted first, it will be updated to sync/remote_changed
@@ -193,8 +177,12 @@ void Resource::FromLocal( const DateTime& last_sync )
 		DateTime mtime = os::FileMTime( path ) ;
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
+		m_entry.FromLocal( path ) ;
+		
 		Trace( "%1% found on disk: %2%", Name(), m_state ) ;
 	}
+	
+	assert( m_state != unknown ) ;
 }
 
 std::string Resource::SelfHref() const
@@ -280,10 +268,12 @@ Resource* Resource::FindChild( const std::string& name )
 // try to change the state to "sync"
 void Resource::Sync( http::Agent *http, const http::Headers& auth )
 {
+	assert( m_state != unknown ) ;
+
 	// root folder is already synced
 	if ( IsRoot() )
 	{
-		m_state = sync ;
+		assert( m_state == sync ) ;
 		return ;
 	}
 	

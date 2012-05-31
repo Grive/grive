@@ -47,13 +47,10 @@ public :
 	
 public :
 	Resource() ;
-	explicit Resource( const xml::Node& entry ) ;
-	explicit Resource( const Entry& entry, Resource *parent = 0 ) ;
-	explicit Resource( const fs::path& path, const std::string& kind = "" ) ;
-// 	explicit Resource( const Json& json, Resource *parent = 0 ) ;
-	void Swap( Resource& coll ) ;
+	Resource( const std::string& name, const std::string& kind ) ;
 	
 	// default copy ctor & op= are fine
+	void Swap( Resource& coll ) ;
 
 	bool IsFolder() const ;
 
@@ -112,7 +109,11 @@ private :
 		remote_changed,
 		
 		/// Resource delete in remote, need to delete in local
-		remote_deleted
+		remote_deleted,
+		
+		
+		/// invalid value
+		unknown
 	} ;
 
 	friend std::ostream& operator<<( std::ostream& os, State s ) ;

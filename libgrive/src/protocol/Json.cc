@@ -93,34 +93,12 @@ Json::Json( const std::vector<Json>& arr ) :
 		Add( *i ) ;
 }
 
-Json Json::Parse( const std::string& str )
+template <>
+Json::Json( const bool& b ) :
+	m_json( ::json_object_new_boolean( b ) )
 {
-	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
-	if ( json == 0 )
-		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "json parse error" ) ) ;
-	
-	return Json( json, NotOwned() ) ;
-}
-
-Json Json::ParseFile( const std::string& filename )
-{
-	StdioFile file( filename ) ;
-	struct json_tokener *tok = ::json_tokener_new() ;
-	
-	struct json_object *json = 0 ;
-	
-	char buf[1024] ;
-	std::size_t count = 0 ;
-
-	while ( (count = file.Read( buf, sizeof(buf) ) ) > 0 )
-		json = ::json_tokener_parse_ex( tok, buf, count ) ;
-	
-	if ( json == 0 )
-		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ) ;
-	
-	::json_tokener_free( tok ) ;
-	
-	return Json( json, NotOwned() ) ;
+	if ( m_json == 0 )
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json bool" ) ) ;
 }
 
 Json::Json( struct json_object *json, NotOwned ) :
@@ -200,6 +178,20 @@ bool Json::Has( const std::string& key ) const
 {
 	assert( m_json != 0 ) ;
 	return ::json_object_object_get( m_json, key.c_str() ) != 0 ;
+}
+
+bool Json::Get( const std::string& key, Json& json ) const
+{
+	assert( m_json != 0 ) ;
+	struct json_object *j = ::json_object_object_get( m_json, key.c_str() ) ;
+	if ( j != 0 )
+	{
+		Json tmp( j, NotOwned() ) ;
+		json.Swap( tmp ) ;
+		return true ;
+	}
+	else
+		return false ;
 }
 
 void Json::Add( const std::string& key, const Json& json )
@@ -339,6 +331,36 @@ bool Json::FindInArray( const std::string& key, const std::string& value, Json& 
 	{
 		return false ;
 	}
+}
+
+Json Json::Parse( const std::string& str )
+{
+	struct json_object *json = ::json_tokener_parse( str.c_str() ) ;
+	if ( json == 0 )
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "json parse error" ) ) ;
+	
+	return Json( json, NotOwned() ) ;
+}
+
+Json Json::ParseFile( const std::string& filename )
+{
+	StdioFile file( filename ) ;
+	struct json_tokener *tok = ::json_tokener_new() ;
+	
+	struct json_object *json = 0 ;
+	
+	char buf[1024] ;
+	std::size_t count = 0 ;
+
+	while ( (count = file.Read( buf, sizeof(buf) ) ) > 0 )
+		json = ::json_tokener_parse_ex( tok, buf, count ) ;
+	
+	if ( json == 0 )
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( ::json_tokener_errors[tok->err] ) ) ;
+	
+	::json_tokener_free( tok ) ;
+	
+	return Json( json, NotOwned() ) ;
 }
 
 }

@@ -52,9 +52,9 @@ namespace
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( OAuth2& auth ) :
+Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_auth( auth ),
-	m_state( state_file )
+	m_state( state_file, options )
 {
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;

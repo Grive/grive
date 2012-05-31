@@ -22,6 +22,7 @@
 #include "Assert.hh"
 
 #include "drive/State.hh"
+#include "protocol/Json.hh"
 #include "util/Log.hh"
 
 #include <iostream>
@@ -36,7 +37,7 @@ StateTest::StateTest( )
 
 void StateTest::TestSync( )
 {
-	State s( TEST_DATA "/test_dir1.state" ) ;
+	State s( TEST_DATA "/test_dir1.state", Json() ) ;
 	Resource *r = s.Find( "./folder1/abc.txt" ) ;
 	CPPUNIT_ASSERT( r != 0 ) ;
 	GRUT_ASSERT_EQUAL( r->Name(), "abc.txt" ) ;
@@ -45,7 +46,6 @@ void StateTest::TestSync( )
 
 	// load directory
 	s.FromLocal( TEST_DATA "/test_dir1" ) ;
-
 }
 
 } // end of namespace grut
