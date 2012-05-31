@@ -123,6 +123,7 @@ private :
 	bool EditContent( http::Agent* http, const http::Headers& auth ) ;
 	bool Create( http::Agent* http, const http::Headers& auth ) ;
 	bool Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post ) ;
+	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	
 private :
 	Entry					m_entry ;

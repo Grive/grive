@@ -59,11 +59,13 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
 
+	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( "." ) ;
 	
 	http::Agent http ;
 	SyncFolders( &http ) ;
 	
+	Log( "Reading remote server file list", log::info ) ;
 	http::XmlResponse xrsp ;
 	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;

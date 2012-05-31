@@ -43,5 +43,4 @@ private :
 	std::bitset<5>	m_enabled ;
 } ;
 
-
 } // end of namespace

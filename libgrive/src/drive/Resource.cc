@@ -64,6 +64,49 @@ Resource::Resource( const std::string& name, const std::string& kind ) :
 {
 }
 
+void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync )
+{
+	fs::path path = Path() ;
+	
+	// already sync
+	if ( fs::is_directory( path ) )
+	{
+		Log( "folder %1% is in sync", path, log::verbose ) ;
+		m_state = sync ;
+	}
+	
+	// remote file created after last sync, so remote is newer
+	else if ( remote.MTime() > last_sync )
+	{
+		if ( fs::exists( path ) )
+		{
+			// TODO: handle type change
+			Log( "%1% changed from folder to file", path, log::verbose ) ;
+			m_state = sync ;
+		}
+		else
+		{
+			Log( "folder %1% is created in local", path, log::verbose ) ;
+			fs::create_directories( path ) ;
+			m_state = sync ;
+		}
+	}
+	else
+	{
+		if ( fs::exists( path ) )
+		{
+			// TODO: handle type chage
+			Log( "%1% changed from file to folder", path, log::verbose ) ;
+			m_state = sync ;
+		}
+		else
+		{
+			Log( "folder %1% is deleted in local", path, log::verbose ) ;
+			m_state = local_deleted ;
+		}
+	}
+}
+
 /// Update the state according to information (i.e. Entry) from remote. This function
 /// compares the modification time and checksum of both copies and determine which
 /// one is newer.
@@ -73,45 +116,7 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 	
 	// sync folder
 	if ( remote.Kind() == "folder" && IsFolder() )
-	{
-		// already sync
-		if ( fs::is_directory( path ) )
-		{
-			Log( "folder %1% is in sync", path, log::verbose ) ;
-			m_state = sync ;
-		}
-		
-		// remote file created after last sync, so remote is newer
-		else if ( remote.MTime() > last_sync )
-		{
-			if ( fs::exists( path ) )
-			{
-				// TODO: handle type change
-				Log( "%1% changed from folder to file", path, log::verbose ) ;
-				m_state = sync ;
-			}
-			else
-			{
-				Log( "folder %1% is created in local", path, log::verbose ) ;
-				fs::create_directories( path ) ;
-				m_state = sync ;
-			}
-		}
-		else
-		{
-			if ( fs::exists( path ) )
-			{
-				// TODO: handle type chage
-				Log( "%1% changed from file to folder", path, log::verbose ) ;
-				m_state = sync ;
-			}
-			else
-			{
-				Log( "folder %1% is deleted in local", path, log::verbose ) ;
-				m_state = local_deleted ;
-			}
-		}
-	}
+		FromRemoteFolder( remote, last_sync ) ;
 	
 	// local not exists
 	else if ( !fs::exists( path ) )
@@ -153,8 +158,8 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 			Log( "file %1% is changed in local", path, log::verbose ) ;
 			m_state = local_changed ;
 		}
-		
-		Trace( "%1% state is %2%", Name(), m_state ) ;
+		else
+			Trace( "file 1% state is %2%", Name(), m_state ) ;
 	}
 	
 	m_entry.AssignID( remote ) ;
@@ -178,8 +183,6 @@ void Resource::FromLocal( const DateTime& last_sync )
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_entry.FromLocal( path ) ;
-		
-		Trace( "%1% found on disk: %2%", Name(), m_state ) ;
 	}
 	
 	assert( m_state != unknown ) ;
