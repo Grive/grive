@@ -61,7 +61,7 @@ void Entry::FromLocal( const fs::path& path )
 	m_filename	= path.filename().string() ;
 	m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 	m_md5		= fs::is_directory(path) ? ""		: crypt::MD5( path ) ;
-	m_mtime		= fs::exists(path) ? os::FileMTime( path ) : DateTime() ;
+	m_mtime		= fs::exists(path) ? os::FileCTime( path ) : DateTime() ;
 }
 
 void Entry::Update( const xml::Node& n )

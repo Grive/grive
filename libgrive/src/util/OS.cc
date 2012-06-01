@@ -39,12 +39,12 @@
 
 namespace gr { namespace os {
 
-DateTime FileMTime( const fs::path& filename )
+DateTime FileCTime( const fs::path& filename )
 {
-	return FileMTime( filename.string() ) ;
+	return FileCTime( filename.string() ) ;
 }
 
-DateTime FileMTime( const std::string& filename )
+DateTime FileCTime( const std::string& filename )
 {
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
@@ -58,9 +58,9 @@ DateTime FileMTime( const std::string& filename )
 	}
 	
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
-	return DateTime( s.st_mtimespec.tv_sec, s.st_mtimespec.tv_nsec ) ;
+	return DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
-	return DateTime( s.st_mtim.tv_sec, s.st_mtim.tv_nsec);
+	return DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
 #endif
 }
 

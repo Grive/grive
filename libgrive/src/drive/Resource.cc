@@ -179,7 +179,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// if the file is not created after last sync, assume file is
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
-		DateTime mtime = os::FileMTime( path ) ;
+		DateTime mtime = os::FileCTime( path ) ;
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_entry.FromLocal( path ) ;

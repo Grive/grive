@@ -33,8 +33,8 @@ namespace os
 {
 	struct Error : virtual Exception {} ;
 	
-	DateTime FileMTime( const std::string& filename ) ;
-	DateTime FileMTime( const fs::path& filename ) ;
+	DateTime FileCTime( const std::string& filename ) ;
+	DateTime FileCTime( const fs::path& filename ) ;
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 	void SetFileTime( const fs::path& filename, const DateTime& t ) ;
