@@ -1,11 +1,11 @@
-Name:match065-grive
-Version: 50f1d81
-Release:	5%{?dist}
+Name: grive
+Version: 0.1.0
+Release:	1%{?dist}
 Summary: An Open Source Linux Client for Google Drive
 Group: System Environment/Base
 License:  GPLv2+
 URL:http://match065.github.com/grive/
-Source0:match065-grive-50f1d81.tar.gz
+Source0:grive-0.1.0.tar.gz
 BuildRoot:%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXX)
 
 BuildRequires:cppunit
@@ -20,25 +20,15 @@ BuildRequires:expat-devel
 BuildRequires:cppunit
 BuildRequires:libcurl
 BuildRequires:libcurl-devel
-BuildRequires:gdbm-devel
-BuildRequires:gdbm
 Requires:cppunit
 Requires:libstdc++
-Requires:libstdc++-devel
 Requires:json-c
-Requires:json-c-devel
 Requires:openssl
-Requires:openssl-devel
 Requires:expat
-Requires:expat-devel
-Requires:cppunit
 Requires:libcurl
-Requires:libcurl-devel
-Requires:gdbm-devel
-Requires:gdbm
 
 %description
-Grive 0.3.0
+Grive 0.1.0
 
 Grive is still considered experimental. It just downloads all the files in your google drive
 into the current directory. After you make some changes to the local files, run grive and
@@ -81,15 +71,15 @@ rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install 
 mkdir -p  %{buildroot}/usr/lib
-mkdir -p  %{buildroot}/usr/local/match065-grive/
+mkdir -p  %{buildroot}/usr/local/grive/
 mkdir -p  %{buildroot}/usr/share/man/man1/
 
 ln -s /usr/local/lib/libgrive.so %{buildroot}/usr/lib/libgrive.so
 ln -s /usr/local/lib/libgrive.so.0 %{buildroot}/usr/lib/libgrive.so.0
-ln -s /usr/local/lib/libgrive.so.0.1.0-pre  %{buildroot}/usr/lib/libgrive.so.0.1.0-pre
+ln -s /usr/local/lib/libgrive.so.0.1.0  %{buildroot}/usr/lib/libgrive.so.0.1.0
 
-cp  /home/jbustos/rpmbuild/BUILD/match065-grive-50f1d81/README %{buildroot}/usr/local/match065-grive/
-mv  /home/jbustos/rpmbuild/BUILD/match065-grive-50f1d81/README %{buildroot}/usr/share/man/man1/grive.1
+cp  ~/rpmbuild/BUILD/grive-0.1.0/README %{buildroot}/usr/local/grive/
+mv  ~/rpmbuild/BUILD/grive-0.1.0/README %{buildroot}/usr/share/man/man1/grive.1
 chmod -x $RPM_BUILD_ROOT%{_mandir}/man1/grive.1
 
 
@@ -128,11 +118,11 @@ rm -rf $RPM_BUILD_ROOT
    /usr/local/include/grive/xml/TreeBuilder.hh
    /usr/local/lib/libgrive.so
    /usr/local/lib/libgrive.so.0
-   /usr/local/lib/libgrive.so.0.1.0-pre
+   /usr/local/lib/libgrive.so.0.1.0
    /usr/lib/libgrive.so
    /usr/lib/libgrive.so.0
-   /usr/lib/libgrive.so.0.1.0-pre
-   /usr/local/match065-grive/README
+   /usr/lib/libgrive.so.0.1.0
+   /usr/local/grive/README
    /usr/share/man/man1/grive.1.gz
 
 %post
@@ -148,6 +138,9 @@ exit 0
 %doc README
 
 %changelog
+* Sat Jun 02 2012 Nestal Wan me@nestal.net
+- Removed gdbm as dependency.
+- Updated descriptions.
 
 * Sat May 26 2012 Jesus Bustos jesus.bustos@adminilinux.org
 - Changed the name from grive to match-grive.
