@@ -39,7 +39,7 @@ DefaultLog::DefaultLog( const std::string& filename ) :
 	m_file( filename.c_str() ),
 	m_log( m_file )
 {
-	m_enabled[log::debug]		= true ;
+	m_enabled[log::debug]		= false ;
 	m_enabled[log::verbose]		= true ;
 	m_enabled[log::info]		= true ;
 	m_enabled[log::warning]		= true ;
