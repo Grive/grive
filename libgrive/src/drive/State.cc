@@ -130,7 +130,7 @@ std::size_t State::TryResolveEntry()
 bool State::Update( const Entry& e )
 {
 	assert( !e.ParentHref().empty() ) ;
-	
+
 	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
 	{
 		m_res.Update( res, e, m_last_sync ) ;
@@ -160,10 +160,6 @@ bool State::Update( const Entry& e )
 			
 			// update the state of the resource
 			m_res.Update( child, e, m_last_sync ) ;
-		}
-		else
-		{
-			Trace( "what here? %1%", e.Title() ) ;
 		}
 		
 		return true ;

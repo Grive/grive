@@ -115,12 +115,34 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 /// one is newer.
 void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 {
-	fs::path path = Path() ;
-	
 	// sync folder
 	if ( remote.Kind() == "folder" && IsFolder() )
 		FromRemoteFolder( remote, last_sync ) ;
+	else
+		FromRemoteFile( remote, last_sync ) ;
 	
+	m_entry.AssignID( remote ) ;
+	assert( m_state != unknown ) ;
+}
+
+void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
+{
+	assert( m_parent != 0 ) ;
+	
+	fs::path path = Path() ;
+
+	// recursively create/delete folder
+	if ( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ||
+		 m_parent->m_state == local_new  || m_parent->m_state == local_deleted )
+	{
+		Log( "file %1% parent %2% recursively in %3% (%4%)", path,
+			( m_parent->m_state == remote_new || m_parent->m_state == local_new )      ? "created" : "deleted",
+			( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ) ? "remode"  : "local",
+			m_parent->m_state ) ;
+		
+		m_state = m_parent->m_state ;
+	}
+
 	// local not exists
 	else if ( !fs::exists( path ) )
 	{
@@ -164,9 +186,6 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 		else
 			Trace( "file 1% state is %2%", Name(), m_state ) ;
 	}
-	
-	m_entry.AssignID( remote ) ;
-	assert( m_state != unknown ) ;
 }
 
 /// Update the resource with the attributes of local file or directory. This
@@ -358,7 +377,7 @@ void Resource::DeleteRemote( http::Agent *http, const http::Headers& auth )
 	http::StringResponse str ;
 	try
 	{
-		http->Custom( "DELETE", m_entry.SelfHref(), &str, hdr ) ;
+		http->Custom( "DELETE", http->Unescape(m_entry.SelfHref()) , &str, hdr ) ;
 	}
 	catch ( Exception& )
 	{
@@ -537,6 +556,11 @@ std::string Resource::StateStr() const
 bool Resource::IsRoot() const
 {
 	return m_parent == 0 ;
+}
+
+bool Resource::HasID() const
+{
+	return !m_entry.SelfHref().empty() && !m_entry.ResourceID().empty() ;
 }
 
 } // end of namespace

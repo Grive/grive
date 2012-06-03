@@ -86,6 +86,18 @@ void Log( const std::string& fmt, const P1& p1, const P2& p2, const P3& p3, log:
 	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2 % p3, s ) ;
 }
 
+template <typename P1, typename P2, typename P3, typename P4>
+void Log(
+	const std::string& fmt,
+	const P1& p1,
+	const P2& p2,
+	const P3& p3,
+	const P4& p4,
+	log::Serverity s = log::info )
+{
+	LogBase::Inst()->Log( log::Fmt(fmt) % p1 % p2 % p3 % p4, s ) ;
+}
+
 void Trace( const std::string& str ) ;
 
 template <typename P1>

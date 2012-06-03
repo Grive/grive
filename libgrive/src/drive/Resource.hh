@@ -67,6 +67,7 @@ public :
 	fs::path Path() const ;
 	bool IsInRootTree() const ;
 	bool IsRoot() const ;
+	bool HasID() const ;
 
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
@@ -122,7 +123,10 @@ private :
 	bool EditContent( http::Agent* http, const http::Headers& auth ) ;
 	bool Create( http::Agent* http, const http::Headers& auth ) ;
 	bool Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post ) ;
+	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
+	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
+	
 	void DeleteLocal() ;
 	void DeleteRemote( http::Agent* http, const http::Headers& auth ) ;
 	
