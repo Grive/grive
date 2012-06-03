@@ -21,13 +21,18 @@
 
 #include "ResourceTree.hh"
 
-#include "http/Agent.hh"
 #include "util/DateTime.hh"
 #include "util/FileSystem.hh"
 
 #include <memory>
 
 namespace gr {
+
+namespace http
+{
+	class Agent ;
+	class Header ;
+}
 
 class Json ;
 class Resource ;
@@ -52,7 +57,7 @@ public :
 	Resource* FindByID( const std::string& id ) ;
 	Resource* Find( const fs::path& path ) ;
 
-	void Sync( http::Agent *http, const http::Headers& auth ) ;
+	void Sync( http::Agent *http, const http::Header& auth ) ;
 	
 	iterator begin() ;
 	iterator end() ;

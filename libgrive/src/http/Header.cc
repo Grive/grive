@@ -17,28 +17,37 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
-
 #include "Header.hh"
-#include "util/Exception.hh"
+
+#include <algorithm>
+#include <iterator>
+#include <ostream>
 
 namespace gr { namespace http {
 
-struct Error : virtual Exception {} ;
+Header::Header()
+{
+}
 
-// CURL error code
-typedef boost::error_info<struct CurlCodeTag, int>			CurlCode ;
+void Header::Add( const std::string& str )
+{
+	m_vec.push_back( str ) ;
+}
 
-// HTTP response code
-typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;
+Header::iterator Header::begin() const
+{
+	return m_vec.begin() ;
+}
 
-// HTTP response body
-typedef boost::error_info<struct HttpResponseStrTag, std::string>	HttpResponseText ;
+Header::iterator Header::end() const
+{
+	return m_vec.end() ;
+}
 
-// URL
-typedef boost::error_info<struct UrlTag, std::string>		Url ;
-
-// HTTP headers
-typedef boost::error_info<struct HeaderTag, Header>		HttpHeader ;
+std::ostream& operator<<( std::ostream& os, const Header& h )
+{
+	std::copy( h.begin(), h.end(), std::ostream_iterator<std::string>( os, "\n" ) ) ;
+	return os ;
+}
 
 } } // end of namespace

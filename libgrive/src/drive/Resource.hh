@@ -20,7 +20,6 @@
 #pragma once
 
 #include "Entry.hh"
-#include "http/Agent.hh"
 #include "util/Exception.hh"
 #include "util/FileSystem.hh"
 
@@ -29,6 +28,12 @@
 #include <iosfwd>
 
 namespace gr {
+
+namespace http
+{
+	class Agent ;
+	class Header ;
+}
 
 class Json ;
 
@@ -72,7 +77,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent *http, const http::Headers& auth ) ;
+	void Sync( gr::http::Agent* http, const http::Header& auth ) ;
 
 	Json Serialize() const ;
 	
@@ -119,16 +124,16 @@ private :
 	friend std::ostream& operator<<( std::ostream& os, State s ) ;
 	
 private :
-	void Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const ;
-	bool EditContent( http::Agent* http, const http::Headers& auth ) ;
-	bool Create( http::Agent* http, const http::Headers& auth ) ;
-	bool Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post ) ;
+	void Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const ;
+	bool EditContent( http::Agent* http, const http::Header& auth ) ;
+	bool Create( http::Agent* http, const http::Header& auth ) ;
+	bool Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
 	
 	void DeleteLocal() ;
-	void DeleteRemote( http::Agent* http, const http::Headers& auth ) ;
+	void DeleteRemote( http::Agent* http, const http::Header& auth ) ;
 	
 private :
 	Entry					m_entry ;

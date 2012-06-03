@@ -20,6 +20,7 @@
 #include "Resource.hh"
 #include "CommonUri.hh"
 
+#include "http/Agent.hh"
 #include "http/Download.hh"
 // #include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
@@ -32,6 +33,8 @@
 #include "util/StdioFile.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
+
+#include <boost/exception/all.hpp>
 
 #include <cassert>
 
@@ -291,7 +294,7 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, const http::Headers& auth )
+void Resource::Sync( http::Agent *http, const http::Header& auth )
 {
 	assert( m_state != unknown ) ;
 
@@ -370,25 +373,27 @@ void Resource::DeleteLocal()
 		fs::rename( Path(), dest ) ;
 }
 
-void Resource::DeleteRemote( http::Agent *http, const http::Headers& auth )
+void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 {
-	http::Headers hdr( auth ) ;
-	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
+	http::Header hdr( auth ) ;
+	hdr.Add( "If-Match: " + m_entry.ETag() ) ;
 	http::StringResponse str ;
 	try
 	{
 		http->Custom( "DELETE", http->Unescape(m_entry.SelfHref()) , &str, hdr ) ;
 	}
-	catch ( Exception& )
+	catch ( Exception& e )
 	{
 		// don't rethrow here. there are some cases that I don't know why
 		// the delete will fail.
-		Trace( "response = %1%", str.Response() ) ;
+		Trace( "Exception %1% %2%",
+			boost::diagnostic_information(e),
+			str.Response() ) ;
 	}
 }
 
 
-void Resource::Download( http::Agent* http, const fs::path& file, const http::Headers& auth ) const
+void Resource::Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const
 {
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
@@ -396,7 +401,7 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 		os::SetFileTime( file, m_entry.MTime() ) ;
 }
 
-bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
+bool Resource::EditContent( http::Agent* http, const http::Header& auth )
 {
 	assert( m_parent != 0 ) ;
 
@@ -414,7 +419,7 @@ bool Resource::EditContent( http::Agent* http, const http::Headers& auth )
 	return Upload( http, m_entry.EditLink(), auth, false ) ;
 }
 
-bool Resource::Create( http::Agent* http, const http::Headers& auth )
+bool Resource::Create( http::Agent* http, const http::Header& auth )
 {
 	assert( m_parent != 0 ) ;
 	assert( m_parent->IsFolder() ) ;
@@ -431,8 +436,8 @@ bool Resource::Create( http::Agent* http, const http::Headers& auth )
 		
 		std::string meta = (boost::format(xml_meta) % "folder" % Name() ).str() ;
 		
-		http::Headers hdr( auth ) ;
-		hdr.push_back( "Content-Type: application/atom+xml" ) ;
+		http::Header hdr( auth ) ;
+		hdr.Add( "Content-Type: application/atom+xml" ) ;
 		
 		http::XmlResponse xml ;
 // 		http::ResponseLog log( "create", ".xml", &xml ) ;
@@ -452,7 +457,7 @@ bool Resource::Create( http::Agent* http, const http::Headers& auth )
 	}
 }
 
-bool Resource::Upload( http::Agent* http, const std::string& link, const http::Headers& auth, bool post )
+bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post )
 {
 	StdioFile file( Path() ) ;
 	
@@ -466,12 +471,12 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
 	
-	http::Headers hdr( auth ) ;
-	hdr.push_back( "Content-Type: application/atom+xml" ) ;
-	hdr.push_back( "X-Upload-Content-Type: application/octet-stream" ) ;
-	hdr.push_back( xcontent_len.str() ) ;
-  	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
-	hdr.push_back( "Expect:" ) ;
+	http::Header hdr( auth ) ;
+	hdr.Add( "Content-Type: application/atom+xml" ) ;
+	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
+	hdr.Add( xcontent_len.str() ) ;
+  	hdr.Add( "If-Match: " + m_entry.ETag() ) ;
+	hdr.Add( "Expect:" ) ;
 	
 	std::string meta = (boost::format( xml_meta ) % m_entry.Kind() % Name()).str() ;
 	
@@ -481,9 +486,9 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	else
 		http->Put( link, meta, &str, hdr ) ;
 	
-	http::Headers uphdr ;
-	uphdr.push_back( "Expect:" ) ;
-	uphdr.push_back( "Accept:" ) ;
+	http::Header uphdr ;
+	uphdr.Add( "Expect:" ) ;
+	uphdr.Add( "Accept:" ) ;
 
 	// the content upload URL is in the "Location" HTTP header
 	std::string uplink = http->RedirLocation() ;

@@ -22,6 +22,7 @@
 #include "Resource.hh"
 #include "CommonUri.hh"
 
+#include "http/Agent.hh"
 #include "util/Crypt.hh"
 #include "util/Log.hh"
 #include "protocol/Json.hh"
@@ -219,7 +220,7 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-void State::Sync( http::Agent *http, const http::Headers& auth )
+void State::Sync( http::Agent *http, const http::Header& auth )
 {
 	std::for_each( m_res.begin(), m_res.end(),
 		boost::bind( &Resource::Sync, _1, http, auth ) ) ;

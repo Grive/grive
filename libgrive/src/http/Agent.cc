@@ -126,9 +126,9 @@ std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *re
 }
 
 long Agent::ExecCurl(
-	const std::string&		url,
-	Receivable				*dest,
-	const http::Headers&	hdr )
+	const std::string&	url,
+	Receivable			*dest,
+	const http::Header&	hdr )
 {
 	CURL *curl = m_pimpl->curl ;
 	assert( curl != 0 ) ;
@@ -158,6 +158,7 @@ long Agent::ExecCurl(
 				<< HttpResponse( http_code )
 				<< Url( url )
 				<< expt::ErrMsg( error )
+				<< HttpHeader( hdr )
 		) ;
 	}
 
@@ -168,7 +169,7 @@ long Agent::Put(
 	const std::string&		url,
 	const std::string&		data,
 	Receivable				*dest,
-	const http::Headers&	hdr )
+	const Header&			hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
 	
@@ -189,7 +190,7 @@ long Agent::Put(
 long Agent::Get(
 	const std::string& 		url,
 	Receivable				*dest,
-	const http::Headers&	hdr )
+	const Header&			hdr )
 {
 	Trace("HTTP GET \"%1%\"", url ) ;
 	
@@ -206,7 +207,7 @@ long Agent::Post(
 	const std::string& 		url,
 	const std::string&		data,
 	Receivable				*dest,
-	const http::Headers&	hdr )
+	const Header&			hdr )
 {
 	Trace("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
 
@@ -228,22 +229,23 @@ long Agent::Custom(
 	const std::string&		method,
 	const std::string&		url,
 	Receivable				*dest,
-	const http::Headers&	hdr )
+	const Header&			hdr )
 {
 	Trace("HTTP %2% \"%1%\"", url, method ) ;
 
 	CURL *curl = m_pimpl->curl ;
 
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );
+	::curl_easy_setopt(curl, CURLOPT_VERBOSE,		1 );
 
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-void Agent::SetHeader( const http::Headers& hdr )
+void Agent::SetHeader( const Header& hdr )
 {
 	// set headers
 	struct curl_slist *curl_hdr = 0 ;
-    for ( Headers::const_iterator i = hdr.begin() ; i != hdr.end() ; ++i )
+    for ( Header::iterator i = hdr.begin() ; i != hdr.end() ; ++i )
 		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
 	
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;

@@ -21,6 +21,7 @@
 
 #include "State.hh"
 
+#include "http/Header.hh"
 #include "util/Exception.hh"
 
 #include <string>
@@ -52,11 +53,11 @@ private :
     void file();
 	
 private :
-	OAuth2&						m_auth ;
-	std::vector<std::string>	m_http_hdr ;
+	OAuth2&			m_auth ;
+	http::Header	m_http_hdr ;
 
-	std::string					m_resume_link ;
-	State						m_state ;
+	std::string		m_resume_link ;
+	State			m_state ;
 } ;
 
 } // end of namespace

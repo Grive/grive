@@ -19,13 +19,13 @@
 
 #pragma once
 
+#include "Header.hh"
+
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace gr { namespace http {
-
-typedef std::vector<std::string> Headers ;
 
 class Receivable ;
 
@@ -44,27 +44,27 @@ public :
 	void SetLogFile( const std::string& prefix ) ;
 	
 	long Put(
-		const std::string&		url,
-		const std::string&		data,
-		Receivable				*dest,
-		const http::Headers&	hdr = http::Headers() ) ;
+		const std::string&	url,
+		const std::string&	data,
+		Receivable			*dest,
+		const Header&		hdr = Header() ) ;
 
 	long Get(
-		const std::string& 		url,
-		Receivable				*dest,
-		const http::Headers&	hdr = http::Headers() ) ;
+		const std::string& 	url,
+		Receivable			*dest,
+		const Header&		hdr = Header() ) ;
 	
 	long Post(
-		const std::string& 		url,
-		const std::string&		data,
-		Receivable				*dest,
-		const http::Headers&	hdr = http::Headers() ) ;
+		const std::string& 	url,
+		const std::string&	data,
+		Receivable			*dest,
+		const Header&		hdr = Header() ) ;
 	
 	long Custom(
-		const std::string&		method,
-		const std::string&		url,
-		Receivable				*dest,
-		const http::Headers&	hdr = http::Headers() ) ;
+		const std::string&	method,
+		const std::string&	url,
+		Receivable			*dest,
+		const Header&		hdr = Header() ) ;
 	
 	std::string RedirLocation() const ;
 	
@@ -75,11 +75,11 @@ private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
 	
-	void SetHeader( const http::Headers& hdr ) ;
+	void SetHeader( const Header& hdr ) ;
 	long ExecCurl(
-		const std::string&		url,
-		Receivable				*dest,
-		const http::Headers&	hdr) ;
+		const std::string&	url,
+		Receivable			*dest,
+		const Header&		hdr ) ;
 
 	void Init() ;
 	

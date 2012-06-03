@@ -19,26 +19,32 @@
 
 #pragma once
 
-#include "Header.hh"
-#include "util/Exception.hh"
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 namespace gr { namespace http {
 
-struct Error : virtual Exception {} ;
+class Header
+{
+private :
+	typedef std::vector<std::string>	Vec ;
 
-// CURL error code
-typedef boost::error_info<struct CurlCodeTag, int>			CurlCode ;
+public :
+	typedef Vec::const_iterator	iterator ;
 
-// HTTP response code
-typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;
+public :
+	Header() ;
+	
+	void Add( const std::string& str ) ;
+	
+	iterator begin() const ;
+	iterator end() const ;
 
-// HTTP response body
-typedef boost::error_info<struct HttpResponseStrTag, std::string>	HttpResponseText ;
+private :
+	Vec	m_vec ;
+} ;
 
-// URL
-typedef boost::error_info<struct UrlTag, std::string>		Url ;
+std::ostream& operator<<( std::ostream& os, const Header& h ) ;
 
-// HTTP headers
-typedef boost::error_info<struct HeaderTag, Header>		HttpHeader ;
-
-} } // end of namespace
+}} // end of namespace

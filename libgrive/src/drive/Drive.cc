@@ -23,7 +23,7 @@
 #include "Entry.hh"
 
 #include "http/Agent.hh"
-// #include "http/ResponseLog.hh"
+#include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
@@ -56,8 +56,8 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_auth( auth ),
 	m_state( state_file, options )
 {
-	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
-	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
+	m_http_hdr.Add( "Authorization: Bearer " + m_auth.AccessToken() ) ;
+	m_http_hdr.Add( "GData-Version: 3.0" ) ;
 
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( "." ) ;
@@ -127,7 +127,8 @@ void Drive::SyncFolders( http::Agent *http )
 	Log( "Synchronizing folders", log::info ) ;
 
 	http::XmlResponse xml ;
-	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
+	http::ResponseLog log( "dir-", ".xml", &xml ) ;
+	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &log, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 
