@@ -26,8 +26,9 @@
 
 #include "bfd/Backtrace.hh"
 #include "util/Exception.hh"
-#include "util/Log.hh"
-#include "util/DefaultLog.hh"
+#include "util/log/Log.hh"
+#include "util/log/CompositeLog.hh"
+#include "util/log/DefaultLog.hh"
 
 #include <boost/exception/all.hpp>
 
@@ -45,13 +46,13 @@ int main( int argc, char **argv )
 
 	Config config ;
 	
-	DefaultLog nofile_log ;
-	LogBase::Inst( &nofile_log ) ;
+	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
+	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
 	
 	Json options ;
 	
 	int c ;
-	while ((c = getopt(argc, argv, "al:vVf")) != -1)
+	while ((c = getopt(argc, argv, "al:vVfd")) != -1)
 	{
 		switch ( c )
 		{
@@ -81,8 +82,14 @@ int main( int argc, char **argv )
 			
 			case 'l' :
 			{
-				static DefaultLog log( optarg ) ;
-				LogBase::Inst( &log ) ;
+				std::auto_ptr<LogBase> file_log(new log::DefaultLog(optarg)) ;
+				file_log->Enable( log::debug ) ;
+				file_log->Enable( log::verbose ) ;
+				file_log->Enable( log::info ) ;
+				file_log->Enable( log::warning ) ;
+				file_log->Enable( log::error ) ;
+				file_log->Enable( log::critical ) ;
+				comp_log->Add( file_log ) ;
 				break ;
 			}
 			
@@ -95,7 +102,14 @@ int main( int argc, char **argv )
 			
 			case 'V' :
 			{
-				LogBase::Inst()->Enable( log::verbose ) ;
+				console_log->Enable( log::verbose ) ;
+				break ;
+			}
+			
+			case 'd' :
+			{
+				console_log->Enable( log::verbose ) ;
+				console_log->Enable( log::debug ) ;
 				break ;
 			}
 			
@@ -106,7 +120,7 @@ int main( int argc, char **argv )
 			}
 		}
 	}
-		
+	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
 	
 	std::string refresh_token ;
 	try

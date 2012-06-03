@@ -30,23 +30,25 @@ public :
 	{
 	}
 	
-	bool Enable( log::Serverity s, bool enable )
+	bool Enable( log::Serverity, bool enable )
 	{
 		return enable ;
 	}
-
+	bool IsEnabled( log::Serverity ) const
+	{
+		return true ;
+	}
 } ;
 
-LogBase* LogBase::Inst( LogBase *log )
+LogBase* LogBase::Inst( std::auto_ptr<LogBase> log )
 {
-	static MockLog mlog ;
-	static LogBase *inst = &mlog ;
+	static std::auto_ptr<LogBase> inst( new MockLog ) ;
 	
-	if ( log != 0 )
+	if ( log.get() != 0 )
 		inst = log ;
 		
-	assert( inst != 0 ) ;
-	return inst ;
+	assert( inst.get() != 0 ) ;
+	return inst.get() ;
 }
 
 LogBase::LogBase()

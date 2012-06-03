@@ -28,7 +28,7 @@
 #include "protocol/Json.hh"
 #include "util/CArray.hh"
 #include "util/Crypt.hh"
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 #include "util/OS.hh"
 #include "util/StdioFile.hh"
 #include "xml/Node.hh"

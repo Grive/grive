@@ -28,7 +28,7 @@
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 

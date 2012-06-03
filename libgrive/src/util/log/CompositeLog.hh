@@ -17,36 +17,27 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "XmlResponse.hh"
+#pragma once
 
-#include "xml/Node.hh"
-#include "xml/TreeBuilder.hh"
+#include "CommonLog.hh"
 
-namespace gr { namespace http {
+#include <memory>
+#include <vector>
 
-XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
+namespace gr { namespace log {
+
+class CompositeLog : public CommonLog
 {
-}
+public :
+	CompositeLog() ;
+	~CompositeLog() ;
+	
+	LogBase* Add( std::auto_ptr<LogBase> log ) ;
 
-std::size_t XmlResponse::OnData( void *data, std::size_t count )
-{
-	m_tb->ParseData( reinterpret_cast<char*>(data), count ) ;
-	return count ;
-}
+	void Log( const log::Fmt& msg, log::Serverity s ) ;
 
-void XmlResponse::Clear()
-{
-	m_tb.reset( new xml::TreeBuilder ) ;
-}
+private :
+	std::vector<LogBase*>			m_logs ;
+} ;
 
-void XmlResponse::Finish()
-{
-	m_tb->ParseData( 0, 0, true ) ;
-}
-
-xml::Node XmlResponse::Response() const
-{
-	return m_tb->Result() ;
-}
-
-} } // end of namespace
+}} // end of namespace

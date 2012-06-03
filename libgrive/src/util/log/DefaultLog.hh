@@ -19,28 +19,24 @@
 
 #pragma once
 
-#include "Log.hh"
+#include "CommonLog.hh"
 
-#include <bitset>
 #include <fstream>
 #include <string>
 
-namespace gr {
+namespace gr { namespace log {
 
-class DefaultLog : public LogBase
+class DefaultLog : public CommonLog
 {
 public :
 	DefaultLog() ;
 	explicit DefaultLog( const std::string& filename ) ;
 
 	void Log( const log::Fmt& msg, log::Serverity s ) ;
-	bool Enable( log::Serverity s, bool enable ) ;
 	
 private :
 	std::ofstream	m_file ;
 	std::ostream&	m_log ;
-
-	std::bitset<5>	m_enabled ;
 } ;
 
-} // end of namespace
+} } // end of namespace

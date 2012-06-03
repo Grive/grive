@@ -23,7 +23,7 @@
 #include "Json.hh"
 
 #include "http/Agent.hh"
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 
 // for debugging
 #include <iostream>

@@ -19,7 +19,7 @@
 
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "util/DefaultLog.hh"
+#include "util/log/DefaultLog.hh"
 
 #include "drive/EntryTest.hh"
 #include "drive/ResourceTest.hh"
@@ -34,10 +34,8 @@ int main( int argc, char **argv )
 {
 	using namespace grut ;
 	
-	gr::DefaultLog nofile_log ;
-	nofile_log.Enable( gr::log::debug, true ) ;
-	gr::LogBase::Inst( &nofile_log ) ;
-
+	gr::LogBase::Inst( std::auto_ptr<gr::LogBase>(new gr::log::DefaultLog) ) ;
+	
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest( EntryTest::suite( ) ) ;
 	runner.addTest( StateTest::suite( ) ) ;

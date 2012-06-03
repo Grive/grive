@@ -22,7 +22,7 @@
 
 #include "protocol/Json.hh"
 #include "util/Destroy.hh"
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 
 #include <algorithm>
 #include <cassert>

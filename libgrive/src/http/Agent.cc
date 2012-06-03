@@ -23,7 +23,7 @@
 #include "Error.hh"
 #include "Receivable.hh"
 
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 
 #include <boost/throw_exception.hpp>
 

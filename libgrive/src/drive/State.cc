@@ -24,7 +24,7 @@
 
 #include "http/Agent.hh"
 #include "util/Crypt.hh"
-#include "util/Log.hh"
+#include "util/log/Log.hh"
 #include "protocol/Json.hh"
 
 #include <boost/bind.hpp>

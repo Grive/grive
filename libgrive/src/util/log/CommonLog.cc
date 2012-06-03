@@ -17,36 +17,34 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "XmlResponse.hh"
+#include "CommonLog.hh"
 
-#include "xml/Node.hh"
-#include "xml/TreeBuilder.hh"
+namespace gr { namespace log {
 
-namespace gr { namespace http {
-
-XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
+CommonLog::CommonLog()
 {
+	m_enabled[log::debug]		= false ;
+	m_enabled[log::verbose]		= false ;
+	m_enabled[log::info]		= true ;
+	m_enabled[log::warning]		= true ;
+	m_enabled[log::error]		= true ;
+	m_enabled[log::critical]	= true ;
 }
 
-std::size_t XmlResponse::OnData( void *data, std::size_t count )
+bool CommonLog::Enable( log::Serverity s, bool enable )
 {
-	m_tb->ParseData( reinterpret_cast<char*>(data), count ) ;
-	return count ;
+	assert( s >= debug && s < serverity_count ) ;
+	
+	bool prev = m_enabled[s] ;
+	m_enabled[s] = enable ;
+	
+	return prev ;
 }
 
-void XmlResponse::Clear()
+bool CommonLog::IsEnabled( log::Serverity s ) const
 {
-	m_tb.reset( new xml::TreeBuilder ) ;
+	assert( s >= debug && s < serverity_count ) ;
+	return m_enabled[s] ;
 }
 
-void XmlResponse::Finish()
-{
-	m_tb->ParseData( 0, 0, true ) ;
-}
-
-xml::Node XmlResponse::Response() const
-{
-	return m_tb->Result() ;
-}
-
-} } // end of namespace
+}} // end of namespace

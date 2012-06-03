@@ -17,36 +17,41 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "XmlResponse.hh"
+#include "CompositeLog.hh"
 
-#include "xml/Node.hh"
-#include "xml/TreeBuilder.hh"
+#include <algorithm>
+#include "util/Destroy.hh"
 
-namespace gr { namespace http {
+namespace gr { namespace log {
 
-XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
+CompositeLog::CompositeLog()
 {
+	Enable(log::debug,		true) ;
+	Enable(log::verbose,	true) ;
+	Enable(log::info,		true) ;
+	Enable(log::warning,	true) ;
+	Enable(log::error,		true) ;
+	Enable(log::critical,	true) ;
 }
 
-std::size_t XmlResponse::OnData( void *data, std::size_t count )
+CompositeLog::~CompositeLog()
 {
-	m_tb->ParseData( reinterpret_cast<char*>(data), count ) ;
-	return count ;
+	std::for_each( m_logs.begin(), m_logs.end(), Destroy() ) ;
+}
+	
+LogBase* CompositeLog::Add( std::auto_ptr<LogBase> log )
+{
+	m_logs.push_back( log.get() ) ;
+	return log.release() ;
 }
 
-void XmlResponse::Clear()
+void CompositeLog::Log( const log::Fmt& msg, log::Serverity s )
 {
-	m_tb.reset( new xml::TreeBuilder ) ;
-}
-
-void XmlResponse::Finish()
-{
-	m_tb->ParseData( 0, 0, true ) ;
-}
-
-xml::Node XmlResponse::Response() const
-{
-	return m_tb->Result() ;
+	for ( std::vector<LogBase*>::iterator i = m_logs.begin(); i != m_logs.end(); ++i )
+	{
+		if ( IsEnabled(s) && (*i)->IsEnabled(s) )
+			(*i)->Log( msg, s ) ;
+	}
 }
 
 } } // end of namespace

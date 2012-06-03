@@ -58,6 +58,7 @@ file (GLOB LIBGRIVE_SRC
 	src/http/*.cc
 	src/protocol/*.cc
 	src/util/*.cc
+	src/util/log/*.cc
 	src/xml/*.cc
 )
 

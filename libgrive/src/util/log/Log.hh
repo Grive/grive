@@ -20,6 +20,7 @@
 #pragma once
 
 #include <boost/format.hpp>
+#include <memory>
 
 namespace gr {
 
@@ -45,7 +46,11 @@ namespace log
 		error,
 		
 		/// grive cannot proceed
-		critical
+		critical,
+		
+		
+		/// must be put at the end, equal to number of serverities
+		serverity_count
 	} ;
 	
 	typedef boost::format Fmt ;
@@ -58,12 +63,13 @@ class LogBase
 public :
 	virtual void Log( const log::Fmt& msg, log::Serverity s = log::info ) = 0 ;
 	virtual bool Enable( log::Serverity s, bool enable = true ) = 0 ;
+	virtual bool IsEnabled( log::Serverity s ) const = 0 ;
 	
-	static LogBase* Inst( LogBase *log = 0 ) ;
+	static LogBase* Inst( std::auto_ptr<LogBase> log = std::auto_ptr<LogBase>() ) ;
+	~LogBase() ;
 
 protected :
 	LogBase() ;
-	~LogBase() ;
 } ;
 
 class DisableLog
