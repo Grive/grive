@@ -21,6 +21,7 @@
 
 #include "CommonUri.hh"
 #include "Entry.hh"
+#include "Feed.hh"
 
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
@@ -83,14 +84,15 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_resume_link = resp["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
 
-	bool has_next = false ;
+// 	bool has_next = false ;
+	Feed feed( resp ) ;
 	do
 	{
-		xml::NodeSet entries = resp["entry"] ;
-		for ( xml::NodeSet::iterator i = entries.begin() ; i != entries.end() ; ++i )
+// 		xml::NodeSet entries = resp["entry"] ;
+		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
 		{
-			if ( (*i)["content"] == "" )
-				continue ;
+// 			if ( (*i)["content"] == "" )
+// 				continue ;
 
 			Entry entry( *i ) ;
 			if ( entry.Kind() != "folder" )
@@ -116,15 +118,16 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 			}
 		}
 		
-		xml::NodeSet nss = resp["link"].Find( "@rel", "next" ) ;
-		has_next = !nss.empty() ;
+// 		xml::NodeSet nss = resp["link"].Find( "@rel", "next" ) ;
+// 		has_next = !nss.empty() ;
 
-		if ( has_next )
-		{
-			http.Get( nss["@href"], &xrsp, m_http_hdr ) ;
-			resp = xrsp.Response() ;
-		}
-	} while ( has_next ) ;
+// 		std::string next_uri = feed.Next() ;
+// 		if ( !next_uri.empty() )
+// 		{
+// 			http.Get( next_uri, &xrsp, m_http_hdr ) ;
+// 			resp = xrsp.Response() ;
+// 		}
+	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
 	
 	// pull the changes feed
 	boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;

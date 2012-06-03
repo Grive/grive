@@ -196,6 +196,10 @@ private :
 	ImplVec			m_children ;
 } ;
 
+Node::iterator::iterator( )
+{
+}
+
 Node::iterator::iterator( ImplVec::iterator i )
 {
 	// for some reason, gcc 4.4.4 doesn't allow me to initialize the base class

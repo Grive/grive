@@ -100,6 +100,7 @@ class Node::iterator : public boost::iterator_adaptor<
 >
 {
 public :
+	iterator( ) ;
 	explicit iterator( ImplVec::iterator i ) ;		
 
 private :
