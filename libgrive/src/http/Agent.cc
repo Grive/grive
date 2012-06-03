@@ -236,7 +236,7 @@ long Agent::Custom(
 	CURL *curl = m_pimpl->curl ;
 
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );
-	::curl_easy_setopt(curl, CURLOPT_VERBOSE,		1 );
+// 	::curl_easy_setopt(curl, CURLOPT_VERBOSE,		1 );
 
 	return ExecCurl( url, dest, hdr ) ;
 }
