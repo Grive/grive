@@ -341,8 +341,13 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 		break ;
 	
 	case remote_deleted :
-		Log( "sync %1% deleted in remote. deleting local", Path(), log::verbose ) ;
-		DeleteLocal() ;
+		if ( m_parent->m_state == remote_deleted )
+			Log( "sync %1% parent deleted in remote.", Path(), log::verbose ) ;
+		else
+		{
+			Log( "sync %1% deleted in remote. deleting local", Path(), log::verbose ) ;
+			DeleteLocal() ;
+		}
 		break ;
 	
 	case sync :
@@ -357,23 +362,24 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 /// this function doesn't really remove the local file. it renames it.
 void Resource::DeleteLocal()
 {
+	static const boost::format trash_file( "%1%-%2%" ) ;
+
 	assert( m_parent != 0 ) ;
 	fs::path parent = m_parent->Path() ;
-	fs::path dest	= parent / ( "." + Name() ) ;
+	fs::path dest	= ".trash" / parent / Name() ;
 	
 	std::size_t idx = 1 ;
 	while ( fs::exists( dest ) && idx != 0 )
-	{
-		std::ostringstream oss ;
-		oss << '.' << Name() << "-" << idx++ ;
-		dest = parent / oss.str() ;
-	}
+		dest = ".trash" / parent / (boost::format(trash_file) % Name() % idx++).str() ;
 	
 	// wrap around! just remove the file
 	if ( idx == 0 )
 		fs::remove_all( Path() ) ;
 	else
+	{
+		fs::create_directories( dest.parent_path() ) ;
 		fs::rename( Path(), dest ) ;
+	}
 }
 
 void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
