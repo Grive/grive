@@ -68,6 +68,9 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 {
 	fs::path path = Path() ;
 	
+	if ( remote.CreateLink().empty() )
+		Log( "folder %1% is read-only", path, log::verbose ) ;
+	
 	// already sync
 	if ( fs::is_directory( path ) )
 	{
@@ -86,7 +89,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 		}
 		else
 		{
-			Log( "folder %1% is created in local", path, log::verbose ) ;
+			Log( "folder %1% is created in remote", path, log::verbose ) ;
 			fs::create_directories( path ) ;
 			m_state = sync ;
 		}
@@ -290,8 +293,13 @@ void Resource::Sync( http::Agent *http, const http::Headers& auth )
 		break ;
 	
 	case local_deleted :
-		Log( "sync %1% deleted in local. deleting remote", Path(), log::verbose ) ;
-		DeleteRemote( http, auth ) ;
+		if ( m_parent->m_state == local_deleted )
+			Log( "sync %1% parent deleted in local.", Path(), log::verbose ) ;
+		else
+		{
+			Log( "sync %1% deleted in local. deleting remote", Path(), log::verbose ) ;
+			DeleteRemote( http, auth ) ;
+		}
 		break ;
 	
 	case local_changed :
@@ -347,7 +355,6 @@ void Resource::DeleteRemote( http::Agent *http, const http::Headers& auth )
 {
 	http::Headers hdr( auth ) ;
 	hdr.push_back( "If-Match: " + m_entry.ETag() ) ;
-	
 	http::StringResponse str ;
 	try
 	{
@@ -355,8 +362,9 @@ void Resource::DeleteRemote( http::Agent *http, const http::Headers& auth )
 	}
 	catch ( Exception& )
 	{
+		// don't rethrow here. there are some cases that I don't know why
+		// the delete will fail.
 		Trace( "response = %1%", str.Response() ) ;
-		throw ;
 	}
 }
 
