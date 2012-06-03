@@ -30,8 +30,9 @@ public :
 	{
 	}
 	
-	void Enable( log::Serverity s, bool enable )
+	bool Enable( log::Serverity s, bool enable )
 	{
+		return enable ;
 	}
 
 } ;
@@ -64,6 +65,17 @@ void Log( const std::string& str, log::Serverity s )
 void Trace( const std::string& str )
 {
 	LogBase::Inst()->Log( log::Fmt(str), log::debug ) ;
+}
+
+DisableLog::DisableLog( log::Serverity s ) :
+	m_sev( s ),
+	m_prev( LogBase::Inst()->Enable( s, false ) )
+{
+}
+
+DisableLog::~DisableLog()
+{
+	LogBase::Inst()->Enable( m_sev, m_prev ) ;
 }
 
 } // end of namespace

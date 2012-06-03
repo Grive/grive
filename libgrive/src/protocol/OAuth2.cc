@@ -23,6 +23,7 @@
 #include "Json.hh"
 
 #include "http/Agent.hh"
+#include "util/Log.hh"
 
 // for debugging
 #include <iostream>
@@ -62,6 +63,7 @@ void OAuth2::Auth( const std::string&	auth_code )
 	http::JsonResponse	resp ;
 	http::Agent			http ;
 
+	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp ) ;
 
 	Json jresp	= resp.Response() ;
@@ -98,6 +100,7 @@ void OAuth2::Refresh( )
 	http::JsonResponse	resp ;
 	http::Agent			http ;
 
+	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp ) ;
 
 	m_access	= resp.Response()["access_token"].Str() ;

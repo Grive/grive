@@ -66,10 +66,12 @@ void DefaultLog::Log( const log::Fmt& msg, log::Serverity s )
 	}
 }
 
-void DefaultLog::Enable( log::Serverity s, bool enable )
+bool DefaultLog::Enable( log::Serverity s, bool enable )
 {
 	assert( s >= log::debug && s <= log::critical ) ;
+	bool prev = m_enabled[s] ;
 	m_enabled[s] = enable ;
+	return prev ;
 }
 
 } // end of namespace

@@ -34,7 +34,7 @@ public :
 	explicit DefaultLog( const std::string& filename ) ;
 
 	void Log( const log::Fmt& msg, log::Serverity s ) ;
-	void Enable( log::Serverity s, bool enable ) ;
+	bool Enable( log::Serverity s, bool enable ) ;
 	
 private :
 	std::ofstream	m_file ;

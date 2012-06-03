@@ -127,8 +127,8 @@ void Drive::SyncFolders( http::Agent *http )
 	Log( "Synchronizing folders", log::info ) ;
 
 	http::XmlResponse xml ;
-	http::ResponseLog log( "dir-", ".xml", &xml ) ;
-	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &log, m_http_hdr ) ;
+// 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
+	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
 
 	xml::Node resp = xml.Response() ;
 
