@@ -126,6 +126,9 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 	
 	m_entry.AssignID( remote ) ;
 	assert( m_state != unknown ) ;
+	
+	if ( m_state == remote_new || m_state == remote_changed )
+		m_entry.Update( remote.MD5(), remote.MTime() ) ;
 }
 
 void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
@@ -380,7 +383,23 @@ void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 	http::StringResponse str ;
 	try
 	{
-		http->Custom( "DELETE", http->Unescape(m_entry.SelfHref()) , &str, hdr ) ;
+		try
+		{
+			http::XmlResponse xml ;
+			http->Get( m_entry.SelfHref(), &xml, hdr ) ;
+			
+			m_entry.Update( xml.Response() ) ;
+		}
+		catch ( Exception& e1 )
+		{
+			// don't rethrow here. there are some cases that I don't know why
+			// the delete will fail.
+			Trace( "Get Exception %1% %2%",
+				boost::diagnostic_information(e1),
+				str.Response() ) ;
+		}
+	
+		http->Custom( "DELETE", m_entry.SelfHref(), &str, hdr ) ;
 	}
 	catch ( Exception& e )
 	{
@@ -398,7 +417,10 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_entry.ContentSrc(), &dl, auth ) ;
 	if ( r <= 400 )
+	{
+		assert( m_entry.MTime() != DateTime() ) ;
 		os::SetFileTime( file, m_entry.MTime() ) ;
+	}
 }
 
 bool Resource::EditContent( http::Agent* http, const http::Header& auth )
