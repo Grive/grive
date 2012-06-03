@@ -71,6 +71,8 @@ public :
 	void Update( const xml::Node& entry ) ;
 	void Update( const std::string& md5, const DateTime& mtime ) ;
 
+	long ChangeStamp() const ;
+	
 private :
 	std::string		m_title ;
 	std::string		m_filename ;
@@ -86,6 +88,8 @@ private :
 	std::string		m_edit_link ;
 	std::string		m_create_link ;
 
+	long			m_change_stamp ;
+	
 	DateTime		m_mtime ;
 } ;
 

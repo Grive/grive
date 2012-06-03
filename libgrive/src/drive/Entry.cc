@@ -37,12 +37,14 @@ Entry::Entry( ) :
 	m_kind			( "folder" ),
 	m_resource_id	( "folder:root" ),
 	m_self_href		( root_href ),
-	m_create_link	( root_create )
+	m_create_link	( root_create ),
+	m_change_stamp	( -1 )
 {
 }
 
 /// construct an entry for remote
-Entry::Entry( const xml::Node& n )
+Entry::Entry( const xml::Node& n ) :
+	m_change_stamp( -1 )
 {
 	Update( n ) ;
 }
@@ -51,7 +53,8 @@ Entry::Entry( const xml::Node& n )
 Entry::Entry( const std::string& name, const std::string& kind ) :
 	m_title		( name ),
 	m_filename	( name ),
-	m_kind		( kind )
+	m_kind		( kind ),
+	m_change_stamp( -1 )
 {
 }
 
@@ -79,6 +82,9 @@ void Entry::Update( const xml::Node& n )
 	m_edit_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
 	m_create_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media")["@href"] ;
 
+	xml::NodeSet cs	= n["docs:changestamp"]["@value"] ;
+	m_change_stamp	= cs.empty() ? -1 : std::atoi( cs.front().Value().c_str() ) ;
+	
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
@@ -188,6 +194,13 @@ void Entry::Swap( Entry& e )
 	m_create_link.swap( e.m_create_link ) ;
 	
 	m_mtime.Swap( e.m_mtime ) ;
+	
+	std::swap( m_change_stamp, e.m_change_stamp ) ;
+}
+
+long Entry::ChangeStamp() const
+{
+	return m_change_stamp ;
 }
 
 } // end of namespace

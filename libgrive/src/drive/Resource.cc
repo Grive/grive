@@ -152,7 +152,9 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 	// local not exists
 	else if ( !fs::exists( path ) )
 	{
-		if ( remote.MTime() > last_sync )
+		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
+		
+		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
 		{
 			Log( "file %1% is created in remote", path, log::verbose ) ;
 			m_state = remote_new ;
@@ -211,6 +213,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_entry.FromLocal( path ) ;
+		Log( "file %1% read from local %2%", path, m_state, log::verbose ) ;
 	}
 	
 	assert( m_state != unknown ) ;
@@ -384,26 +387,17 @@ void Resource::DeleteLocal()
 
 void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 {
-	http::Header hdr( auth ) ;
-	hdr.Add( "If-Match: " + m_entry.ETag() ) ;
 	http::StringResponse str ;
+	
 	try
 	{
-		try
-		{
-			http::XmlResponse xml ;
-			http->Get( m_entry.SelfHref(), &xml, hdr ) ;
-			
-			m_entry.Update( xml.Response() ) ;
-		}
-		catch ( Exception& e1 )
-		{
-			// don't rethrow here. there are some cases that I don't know why
-			// the delete will fail.
-			Trace( "Get Exception %1% %2%",
-				boost::diagnostic_information(e1),
-				str.Response() ) ;
-		}
+		http::Header hdr( auth ) ;
+		hdr.Add( "If-Match: " + m_entry.ETag() ) ;
+		
+		// doesn't know why, but an update before deleting seems to work always
+		http::XmlResponse xml ;
+		http->Get( m_entry.SelfHref(), &xml, hdr ) ;
+		m_entry.Update( xml.Response() ) ;
 	
 		http->Custom( "DELETE", m_entry.SelfHref(), &str, hdr ) ;
 	}

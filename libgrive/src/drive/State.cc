@@ -47,6 +47,8 @@ State::State( const fs::path& filename, const Json& options )
 	Json force ;
 	if ( options.Get("force", force) && force.Bool() )
 		m_last_sync = DateTime() ;
+	
+	Log( "last sync time: %1%", m_last_sync, log::info ) ;
 }
 
 /// Synchronize local directory. Build up the resource tree from files and folders
@@ -200,6 +202,8 @@ void State::Read( const fs::path& filename )
 		m_last_sync.Assign(
 			last_sync["sec"].Int(),
 			last_sync["nsec"].Int() ) ;
+		
+		m_cstamp = json["change_stamp"].Int() ;
 	}
 	catch ( Exception& )
 	{
@@ -215,6 +219,7 @@ void State::Write( const fs::path& filename ) const
 	
 	Json result ;
 	result.Add( "last_sync", last_sync ) ;
+	result.Add( "change_stamp", Json(m_cstamp) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;
@@ -226,6 +231,16 @@ void State::Sync( http::Agent *http, const http::Header& auth )
 		boost::bind( &Resource::Sync, _1, http, auth ) ) ;
 	
 	m_last_sync = DateTime::Now() ;
+}
+
+long State::ChangeStamp() const
+{
+	return m_cstamp ;
+}
+
+void State::ChangeStamp( long cstamp )
+{
+	m_cstamp = cstamp ;
 }
 
 } // end of namespace

@@ -62,6 +62,9 @@ public :
 	iterator begin() ;
 	iterator end() ;
 	
+	long ChangeStamp() const ;
+	void ChangeStamp( long cstamp ) ;
+	
 private :
 	void FromLocal( const fs::path& p, Resource *folder ) ;
 	bool Update( const Entry& e ) ;
@@ -70,6 +73,7 @@ private :
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
+	long				m_cstamp ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;

@@ -63,10 +63,20 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_state.FromLocal( "." ) ;
 	
 	http::Agent http ;
+
+	long prev_stamp = m_state.ChangeStamp() ;
+	
+	// get metadata
+	http::XmlResponse xrsp ;
+	http::ResponseLog log( "meta-", ".xml", &xrsp ) ;
+	http.Get( "https://docs.google.com/feeds/metadata/default", &log, m_http_hdr ) ;
+	Trace( "return %1%", xrsp.Response()["docs:largestChangestamp"] ) ;
+	m_state.ChangeStamp( 
+		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
+	
 	SyncFolders( &http ) ;
 	
 	Log( "Reading remote server file list", log::info ) ;
-	http::XmlResponse xrsp ;
 	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
@@ -115,6 +125,41 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 			resp = xrsp.Response() ;
 		}
 	} while ( has_next ) ;
+	
+	// pull the changes feed
+	boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
+	http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
+	http.Get( (changes_uri%(prev_stamp+1)).str(), &log2, m_http_hdr ) ;
+	
+	xml::NodeSet centries = xrsp.Response()["entry"] ;
+	for ( xml::NodeSet::iterator i = centries.begin() ; i != centries.end() ; ++i )
+	{
+		if ( (*i)["content"] == "" )
+			continue ;
+
+		Entry entry( *i ) ;
+		if ( entry.Kind() != "folder" )
+		{
+			Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
+			std::string fn = entry.Filename() ;				
+			
+			if ( fn.empty() )
+				Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
+			
+			else if ( fn.find('/') != fn.npos )
+				Log( "file \"%1%\" contains a slash in its name, ignored", entry.Title(), log::verbose ) ;
+			
+			else if ( parent == 0 || !parent->IsInRootTree() )
+				Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
+			
+			else if ( parent != 0 && !parent->IsFolder() )
+				Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
+					entry.Title(), parent->Name(), log::verbose ) ;
+			
+			else
+				m_state.FromRemote( entry ) ;
+		}
+	}
 }
 
 void Drive::SaveState()
