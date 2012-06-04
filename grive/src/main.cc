@@ -160,10 +160,10 @@ int main( int argc, char **argv )
 		OAuth2 token( refresh_token, client_id, client_secret ) ;
 		Drive drive( token, options ) ;
 
-// 		drive.Update() ;
-// 		drive.SaveState() ;
-// 		
-// 		config.Save() ;
+		drive.Update() ;
+		drive.SaveState() ;
+		
+		config.Save() ;
 	}
 	catch ( gr::Exception& e )
 	{

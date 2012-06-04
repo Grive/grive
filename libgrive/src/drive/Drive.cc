@@ -91,12 +91,15 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
 
 	// pull the changes feed
-	boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-	http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
-	http.Get( (changes_uri%(prev_stamp+1)).str(), &log2, m_http_hdr ) ;
-	
-	Feed changes( xrsp.Response() ) ;
-	std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
+	if ( prev_stamp != -1 )
+	{
+		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
+		http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
+		http.Get( (changes_uri%(prev_stamp+1)).str(), &log2, m_http_hdr ) ;
+		
+		Feed changes( xrsp.Response() ) ;
+		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
+	}
 }
 
 void Drive::FromRemote( const Entry& entry )
