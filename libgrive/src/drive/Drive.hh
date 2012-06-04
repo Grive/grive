@@ -34,6 +34,7 @@ namespace http
 	class Agent ;
 }
 
+class Entry ;
 class OAuth2 ;
 class Json ;
 
@@ -51,6 +52,8 @@ public :
 private :
 	void SyncFolders( http::Agent *http ) ;
     void file();
+	void FromRemote( const Entry& entry ) ;
+	void FromChange( const Entry& entry ) ;
 	
 private :
 	OAuth2&			m_auth ;

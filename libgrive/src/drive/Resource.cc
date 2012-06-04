@@ -192,7 +192,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 			m_state = local_changed ;
 		}
 		else
-			Trace( "file 1% state is %2%", Name(), m_state ) ;
+			Trace( "file %1% state is %2%", Name(), m_state ) ;
 	}
 }
 

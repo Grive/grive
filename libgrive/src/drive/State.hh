@@ -48,6 +48,7 @@ public :
 	
 	void FromLocal( const fs::path& p ) ;
 	void FromRemote( const Entry& e ) ;
+	void FromChange( const Entry& e ) ;
 	void ResolveEntry() ;
 	
 	void Read( const fs::path& filename ) ;

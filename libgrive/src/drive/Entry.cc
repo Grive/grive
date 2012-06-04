@@ -38,13 +38,15 @@ Entry::Entry( ) :
 	m_resource_id	( "folder:root" ),
 	m_self_href		( root_href ),
 	m_create_link	( root_create ),
-	m_change_stamp	( -1 )
+	m_change_stamp	( -1 ),
+	m_is_removed	( false )
 {
 }
 
 /// construct an entry for remote
 Entry::Entry( const xml::Node& n ) :
-	m_change_stamp( -1 )
+	m_change_stamp( -1 ),
+	m_is_removed( false )
 {
 	Update( n ) ;
 }
@@ -74,6 +76,7 @@ void Entry::Update( const xml::Node& n )
 	m_filename		= n["docs:suggestedFilename"] ;
 	m_content_src	= n["content"]["@src"] ;
 	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
+	m_alt_self		= n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#alt-self" )["@href"] ;
 	m_mtime			= DateTime( n["updated"] ) ;	
 
 	m_resource_id	= n["gd:resourceId"] ;
@@ -92,6 +95,8 @@ void Entry::Update( const xml::Node& n )
 	
 	// convert to lower case for easy comparison
 	std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
+	
+	m_is_removed = !n["gd:deleted"].empty() || !n["docs:removed"].empty() ;
 }
 
 const std::vector<std::string>& Entry::ParentHrefs() const
@@ -147,6 +152,11 @@ std::string Entry::SelfHref() const
 	return m_self_href ;
 }
 
+std::string Entry::AltSelf() const
+{
+	return m_alt_self ;
+}
+
 std::string Entry::ParentHref() const
 {
 	return m_parent_hrefs.empty() ? "" : m_parent_hrefs.front() ;
@@ -189,6 +199,7 @@ void Entry::Swap( Entry& e )
 	m_parent_hrefs.swap( e.m_parent_hrefs ) ;
 	
 	m_self_href.swap( e.m_self_href ) ;
+	m_alt_self.swap( e.m_alt_self ) ;
 	m_content_src.swap( e.m_content_src ) ;	
 	m_edit_link.swap( e.m_edit_link ) ;
 	m_create_link.swap( e.m_create_link ) ;
@@ -196,11 +207,17 @@ void Entry::Swap( Entry& e )
 	m_mtime.Swap( e.m_mtime ) ;
 	
 	std::swap( m_change_stamp, e.m_change_stamp ) ;
+	std::swap( m_is_removed, e.m_is_removed ) ;
 }
 
 long Entry::ChangeStamp() const
 {
 	return m_change_stamp ;
+}
+
+bool Entry::IsRemoved() const
+{
+	return m_is_removed ;
 }
 
 } // end of namespace

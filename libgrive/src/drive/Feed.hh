@@ -43,13 +43,14 @@ public :
 
 public :
 	explicit Feed( const xml::Node& root ) ;
-
+	void Assign( const xml::Node& root ) ;
+	
 	iterator begin() const ;
 	iterator end() const ;
 	
 	std::string Next() const ;
 	bool GetNext( http::Agent *http, const http::Header& auth ) ;
-	
+		
 private :
 	xml::Node		m_root ;
 	xml::NodeSet	m_entries ;

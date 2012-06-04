@@ -33,6 +33,12 @@ Feed::Feed( const xml::Node& root ) :
 {
 }
 
+void Feed::Assign( const xml::Node& root )
+{
+	m_root		= root ;
+	m_entries	= m_root["entry"] ;
+}
+
 Feed::iterator Feed::begin() const
 {
 	return iterator( m_entries.begin() ) ;
