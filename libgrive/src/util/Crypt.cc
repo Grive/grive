@@ -51,7 +51,7 @@ std::string MD5( StdioFile& file )
 	char buf[read_size] ;
 	
 	gcry_md_hd_t hd ;
-	gcry_error_t err = gcry_md_open( &hd, GCRY_MD_MD5, GCRY_MD_FLAG_HMAC ) ;
+	gcry_error_t err = gcry_md_open( &hd, GCRY_MD_MD5, 0 ) ;
 	if ( err != GPG_ERR_NO_ERROR )
 	{
 		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( gcry_strerror(err) ) ) ;
@@ -60,13 +60,13 @@ std::string MD5( StdioFile& file )
 	std::size_t count = 0 ;
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
 		gcry_md_write( hd, buf, count ) ;
-	gcry_md_final(hd) ;
 
 	unsigned char *md5 = gcry_md_read( hd, GCRY_MD_MD5 ) ;
+	unsigned int  len  = gcry_md_get_algo_dlen(GCRY_MD_MD5) ;
 	
 	// format the MD5 string
 	std::ostringstream ss ;
-	for ( unsigned int i = 0 ; i < gcry_md_get_algo_dlen(GCRY_MD_MD5) ; i++ )
+	for ( unsigned int i = 0 ; i < len ; i++ )
 		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
 	
 	gcry_md_close( hd ) ;
