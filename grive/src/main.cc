@@ -32,6 +32,8 @@
 
 #include <boost/exception/all.hpp>
 
+#include <gcrypt.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -40,10 +42,25 @@
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
+// libgcrypt insist this to be done in application, not library
+void InitGCrypt()
+{
+	if ( !gcry_check_version(GCRYPT_VERSION) )
+		throw gr::Exception() << gr::expt::ErrMsg( "libgcrypt version mismatch" ) ;
+
+	// disable secure memory
+	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
+
+	// tell Libgcrypt that initialization has completed
+	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+}
+
 int main( int argc, char **argv )
 {
 	using namespace gr ;
 
+	InitGCrypt() ;
+	
 	Config config ;
 	
 	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;

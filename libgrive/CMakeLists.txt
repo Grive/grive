@@ -2,7 +2,7 @@ project(libgrive)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-find_package(OpenSSL REQUIRED)
+find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
@@ -73,7 +73,7 @@ add_library( grive SHARED ${LIBGRIVE_SRC} ${OPT_SRC} )
 target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
-	${OPENSSL_LIBRARIES}
+	${LIBGCRYPT_LIBRARIES}
 	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
 	${IBERTY_LIBRARY}

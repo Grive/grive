@@ -20,12 +20,14 @@
 #include "Crypt.hh"
 
 #include "StdioFile.hh"
+#include "Exception.hh"
 
 #include <iomanip>
 #include <sstream>
 
 // dependent libraries
-#include <openssl/evp.h>
+#include <gcrypt.h>
+#include <boost/throw_exception.hpp>
 
 namespace gr { namespace crypt {
 
@@ -47,22 +49,27 @@ std::string MD5( const fs::path& file )
 std::string MD5( StdioFile& file )
 {
 	char buf[read_size] ;
-	EVP_MD_CTX	md ;
-	EVP_MD_CTX_init( &md );
-	EVP_DigestInit_ex( &md, EVP_md5(), 0 ) ;
+	
+	gcry_md_hd_t hd ;
+	gcry_error_t err = gcry_md_open( &hd, GCRY_MD_MD5, GCRY_MD_FLAG_HMAC ) ;
+	if ( err != GPG_ERR_NO_ERROR )
+	{
+		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( gcry_strerror(err) ) ) ;
+	}
 	
 	std::size_t count = 0 ;
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-		EVP_DigestUpdate( &md, buf, count ) ;
-	
-	unsigned int md5_size = EVP_MAX_MD_SIZE ;
-	unsigned char md5[EVP_MAX_MD_SIZE] ;
-	EVP_DigestFinal_ex( &md, md5, &md5_size ) ;
+		gcry_md_write( hd, buf, count ) ;
+	gcry_md_final(hd) ;
+
+	unsigned char *md5 = gcry_md_read( hd, GCRY_MD_MD5 ) ;
 	
 	// format the MD5 string
 	std::ostringstream ss ;
-	for ( unsigned int i = 0 ; i < md5_size ; i++ )
+	for ( unsigned int i = 0 ; i < gcry_md_get_algo_dlen(GCRY_MD_MD5) ; i++ )
 		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
+	
+	gcry_md_close( hd ) ;
 	
 	return ss.str() ;
 }
