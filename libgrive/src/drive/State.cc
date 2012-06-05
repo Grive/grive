@@ -133,15 +133,10 @@ std::size_t State::TryResolveEntry()
 
 void State::FromChange( const Entry& e )
 {
-	// entries in the change feed is always treated as remote newer,
+	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
 	if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
-	{
-Log( "found %1% in change %2%", res->Name(), e.ChangeStamp() ) ;
 		m_res.Update( res, e, DateTime() ) ;
-	}
-	else
-Log( "can't found %1% %2%", e.Filename(), e.SelfHref() ) ;
 }
 
 bool State::Update( const Entry& e )

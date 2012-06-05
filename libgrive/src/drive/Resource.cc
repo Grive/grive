@@ -143,7 +143,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 	{
 		Log( "file %1% parent %2% recursively in %3% (%4%)", path,
 			( m_parent->m_state == remote_new || m_parent->m_state == local_new )      ? "created" : "deleted",
-			( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ) ? "remode"  : "local",
+			( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ) ? "remote"  : "local",
 			m_parent->m_state ) ;
 		
 		m_state = m_parent->m_state ;
@@ -156,7 +156,9 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 		
 		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
 		{
-			Log( "file %1% is created in remote", path, log::verbose ) ;
+			Log( "file %1% is created in remote (change %2%)", path,
+				remote.ChangeStamp(), log::verbose ) ;
+			
 			m_state = remote_new ;
 		}
 		else
