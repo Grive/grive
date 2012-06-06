@@ -42,11 +42,13 @@
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
+using namespace gr ;
+
 // libgcrypt insist this to be done in application, not library
 void InitGCrypt()
 {
 	if ( !gcry_check_version(GCRYPT_VERSION) )
-		throw gr::Exception() << gr::expt::ErrMsg( "libgcrypt version mismatch" ) ;
+		throw Exception() << expt::ErrMsg( "libgcrypt version mismatch" ) ;
 
 	// disable secure memory
 	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
@@ -55,10 +57,8 @@ void InitGCrypt()
 	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 }
 
-int main( int argc, char **argv )
+int Main( int argc, char **argv )
 {
-	using namespace gr ;
-
 	InitGCrypt() ;
 	
 	Config config ;
@@ -155,21 +155,26 @@ int main( int argc, char **argv )
 		return -1;
 	}
 	
+	OAuth2 token( refresh_token, client_id, client_secret ) ;
+	Drive drive( token, options ) ;
+
+	drive.Update() ;
+	drive.SaveState() ;
+	
+	config.Save() ;
+	
+	return 0 ;
+}
+
+int main( int argc, char **argv )
+{
 	try
 	{
-		OAuth2 token( refresh_token, client_id, client_secret ) ;
-		Drive drive( token, options ) ;
-
-		drive.Update() ;
-		drive.SaveState() ;
-		
-		config.Save() ;
+		return Main( argc, argv ) ;
 	}
-	catch ( gr::Exception& e )
+	catch ( Exception& e )
 	{
 		Log( "exception: %1%", boost::diagnostic_information(e), log::critical ) ;
 		return -1 ;
 	}
-	
-	return 0 ;
 }

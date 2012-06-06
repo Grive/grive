@@ -138,10 +138,7 @@ void Drive::FromChange( const Entry& entry )
 		Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
 	
 	else if ( !entry.ContentSrc().empty() )
-	{
-		Log( "changed entry: %1% %2%", entry.Filename(), entry.ContentSrc() ) ;
 		m_state.FromChange( entry ) ;
-	}
 }
 
 void Drive::SaveState()
