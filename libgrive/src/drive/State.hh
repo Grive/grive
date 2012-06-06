@@ -71,6 +71,8 @@ private :
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 
+	static bool IsIgnore( const std::string& filename ) ;
+	
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;

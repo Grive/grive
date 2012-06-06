@@ -64,6 +64,8 @@ public :
 	std::string ContentSrc() const ;
 	std::string EditLink() const ;
 	std::string CreateLink() const ;
+	long ChangeStamp() const ;
+	bool IsRemoved() const ;
 	
 	const std::vector<std::string>& ParentHrefs() const ;
 	
@@ -72,9 +74,7 @@ public :
 	void Update( const xml::Node& entry ) ;
 	void Update( const std::string& md5, const DateTime& mtime ) ;
 
-	long ChangeStamp() const ;
-	
-	bool IsRemoved() const ;
+	std::string Name() const ;
 	
 private :
 	std::string		m_title ;

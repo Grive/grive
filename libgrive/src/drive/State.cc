@@ -59,6 +59,11 @@ void State::FromLocal( const fs::path& p )
 	FromLocal( p, m_res.Root() ) ;
 }
 
+bool State::IsIgnore( const std::string& filename )
+{
+	return filename[0] == '.' ;
+}
+
 void State::FromLocal( const fs::path& p, gr::Resource* folder )
 {
 	assert( folder != 0 ) ;
@@ -71,7 +76,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 	{
 		std::string fname = i->path().filename().string() ;
 	
-		if ( fname[0] == '.' )
+		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
 		
 		else
@@ -96,7 +101,10 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 void State::FromRemote( const Entry& e )
 {
-	if ( !Update( e ) )
+	if ( IsIgnore( e.Name() ) )
+		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+
+	else if ( !Update( e ) )
 	{
 		m_unresolved.push_back( e ) ;
 	}
@@ -133,9 +141,12 @@ std::size_t State::TryResolveEntry()
 
 void State::FromChange( const Entry& e )
 {
+	if ( IsIgnore( e.Name() ) )
+		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+	
 	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
-	if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
+	else if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
 		m_res.Update( res, e, DateTime() ) ;
 }
 

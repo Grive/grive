@@ -228,7 +228,7 @@ std::string Resource::SelfHref() const
 
 std::string Resource::Name() const
 {
-	return IsFolder() ? m_entry.Title() : m_entry.Filename() ;
+	return m_entry.Name() ;
 }
 
 std::string Resource::ResourceID() const

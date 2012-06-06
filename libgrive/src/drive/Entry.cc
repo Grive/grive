@@ -220,4 +220,9 @@ bool Entry::IsRemoved() const
 	return m_is_removed ;
 }
 
+std::string Entry::Name() const
+{
+	return m_kind == "folder" ? m_title : m_filename ;
+}
+
 } // end of namespace
