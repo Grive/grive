@@ -33,6 +33,7 @@
 #include "util/StdioFile.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
+#include "xml/String.hh"
 
 #include <boost/exception/all.hpp>
 
@@ -327,20 +328,20 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 			Log( "sync %1% parent deleted in local.", Path(), log::verbose ) ;
 		else
 		{
-			Log( "sync %1% deleted in local. deleting remote", Path(), log::verbose ) ;
+			Log( "sync %1% deleted in local. deleting remote", Path(), log::info ) ;
 			DeleteRemote( http, auth ) ;
 		}
 		break ;
 	
 	case local_changed :
-		Log( "sync %1% changed in local. uploading", Path(), log::verbose ) ;
+		Log( "sync %1% changed in local. uploading", Path(), log::info ) ;
 		if ( EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 	case remote_changed :
-		Log( "sync %1% changed in remote. downloading", Path(), log::verbose ) ;
+		Log( "sync %1% changed in remote. downloading", Path(), log::info ) ;
 		Download( http, Path(), auth ) ;
 		m_state = sync ;
 		break ;
@@ -350,7 +351,7 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 			Log( "sync %1% parent deleted in remote.", Path(), log::verbose ) ;
 		else
 		{
-			Log( "sync %1% deleted in remote. deleting local", Path(), log::verbose ) ;
+			Log( "sync %1% deleted in remote. deleting local", Path(), log::info ) ;
 			DeleteLocal() ;
 		}
 		break ;
@@ -502,7 +503,10 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
   	hdr.Add( "If-Match: " + m_entry.ETag() ) ;
 	hdr.Add( "Expect:" ) ;
 	
-	std::string meta = (boost::format( xml_meta ) % m_entry.Kind() % Name()).str() ;
+	std::string meta = (boost::format( xml_meta )
+		% m_entry.Kind()
+		% xml::Escape(Name())
+	).str() ;
 	
 	http::StringResponse str ;
 	if ( post )

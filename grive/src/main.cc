@@ -146,7 +146,6 @@ int Main( int argc, char **argv )
 	}
 	catch ( Exception& e )
 	{
-		Trace( "cannot read config: %1%", boost::diagnostic_information(e) ) ;
 		Log(
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
@@ -175,6 +174,10 @@ int main( int argc, char **argv )
 	catch ( Exception& e )
 	{
 		Log( "exception: %1%", boost::diagnostic_information(e), log::critical ) ;
+		return -1 ;
+	}
+	catch ( ... )
+	{
 		return -1 ;
 	}
 }
