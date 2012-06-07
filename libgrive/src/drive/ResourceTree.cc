@@ -128,7 +128,7 @@ Resource* ResourceTree::FindByPath( const fs::path& path )
 			current = current->Parent() ;
 	
 		else
-			current = current->FindChild( i->filename().string() ) ;
+			current = current->FindChild( Path2Str(i->filename()) ) ;
 	}
 			
 	return current ;

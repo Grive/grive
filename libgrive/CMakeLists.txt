@@ -6,7 +6,7 @@ find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(Boost 1.44.0 COMPONENTS filesystem system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
@@ -24,6 +24,7 @@ if ( BFD_FOUND )
 	)
 	add_definitions( -DHAVE_BFD )
 
+	
 endif ( BFD_FOUND )
 
 if ( IBERTY_FOUND )

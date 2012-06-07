@@ -19,9 +19,23 @@
 
 #pragma once
 
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
 namespace gr
 {
 	namespace fs = boost::filesystem ;
+	
+	// these two functions are for ancient distro which does not have boost v1.44 or later
+	// will be removed once people upgrade
+	
+	inline std::string Path2Str( const fs::path& p )
+	{
+		return p.string() ;
+	}
+	
+	inline std::string Path2Str( const std::string& s )
+	{
+		return s ;
+	}
 }
