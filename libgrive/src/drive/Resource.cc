@@ -249,11 +249,6 @@ Resource* Resource::Parent()
 	return m_parent ;
 }
 
-std::string Resource::ParentHref() const
-{
-	return m_entry.ParentHref() ;
-}
-
 void Resource::AddChild( Resource *child )
 {
 	assert( child != 0 ) ;

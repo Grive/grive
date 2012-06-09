@@ -62,7 +62,6 @@ public :
 	std::string Name() const ;
 	std::string SelfHref() const ;
 	std::string ResourceID() const ;
-	std::string ParentHref() const ;
 	
 	const Resource* Parent() const ;
 	Resource* Parent() ;
