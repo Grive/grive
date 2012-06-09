@@ -1,29 +1,40 @@
-Grive 0.1.0
+Grive 0.1.1
+9 June 2012
+
+https://github.com/Grive/grive/wiki
 
 Grive is still considered experimental. It just downloads all the files in your google drive
 into the current directory. After you make some changes to the local files, run grive and
 it will upload your changes back to your google drive. New files created in local or google
 drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
-Currently Grive will NOT destroy any of your files: it will only rename local files to
-start with a dot, or put it in the google drive trash. You can always recover them.
+Currently Grive will NOT destroy any of your files: it will only move the files to a
+directory named .trash, or put it in the google drive trash. You can always recover them.
 
 There are a few things that grive does not do at the moment:
 - wait for changes in file system to occur and upload. Grive only sync when you run it.
+- symbolic links support
+- support for Google documents
   
 Of course these will be done in future, possibly the next release.
 
-This is compiled in Fedora 16 x64. You need the following libraries to run:
+You need the following libraries:
 
 - json-c
 - libcurl
 - libstdc++
-- openssl
+- libgcrypt
 - Boost (Boost filesystem is required)
 
 There are also some optional dependencies:
 - CppUnit (for unit tests)
 - libbfd (for backtrace)
-- binutils
+- binutils (for libiberty, required for compilation in OpenSUSE)
+
+Grive uses cmake to build, see the instructions in:
+
+https://github.com/Grive/grive/wiki/Installation
+
+for detailed procedures to compile Grive.
 
 When grive is ran for the first time, you should use the "-a" argument to grant
 permission to grive to access to your Google Drive. An URL should be printed.
