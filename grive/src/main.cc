@@ -106,6 +106,10 @@ int Main( int argc, char **argv )
 				file_log->Enable( log::warning ) ;
 				file_log->Enable( log::error ) ;
 				file_log->Enable( log::critical ) ;
+				
+				// log grive version to log file
+				file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
+				
 				comp_log->Add( file_log ) ;
 				break ;
 			}

@@ -49,7 +49,7 @@ State::State( const fs::path& filename, const Json& options ) :
 	if ( options.Get("force", force) && force.Bool() )
 		m_last_sync = DateTime() ;
 	
-	Log( "last sync time: %1%", m_last_sync, log::info ) ;
+	Log( "last sync time: %1%", m_last_sync, log::verbose ) ;
 }
 
 /// Synchronize local directory. Build up the resource tree from files and folders
