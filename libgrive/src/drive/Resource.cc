@@ -317,7 +317,7 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% doesn't exist in server, uploading", Path(), log::verbose ) ;
+		Log( "sync %1% doesn't exist in server, uploading", Path(), log::info ) ;
 		
 		if ( Create( http, auth ) )
 			m_state = sync ;
