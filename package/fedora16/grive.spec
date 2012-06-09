@@ -3,7 +3,7 @@
 
 %if !%{git}
 #Should be corrected to match the Version
-    %global gitcommit 15c5821
+    %global gitcommit da89bf2
 %else
     %global gitcommit b6fb4a6
     %global gitfull b6fb4a604e51009ece1d8cfe7b45ed603097b47c
@@ -11,7 +11,7 @@
 %endif
 
 Name:           grive
-Version:        0.1.0
+Version:        0.1.1
 %if %{git}
 Release:        1.%{date}git%{gitcommit}%{?dist}
 %else
@@ -21,11 +21,11 @@ Release:        1%{?dist}
 Summary:        An open source Linux client for Google Drive
 
 License:        GPLv2
-URL:            http://match065.github.com/grive/
+URL:            http://grive.github.com/grive/
 %if %{git}
-Source0:        https://github.com/match065/%{name}/tarball/%{gitfull}
+Source0:        https://github.com/grive/%{name}/tarball/%{gitfull}
 %else
-Source0:        https://github.com/match065/%{name}/tarball/v%{version}
+Source0:        https://github.com/grive/%{name}/tarball/v%{version}
 %endif
 
 BuildRequires:  cmake
@@ -36,7 +36,6 @@ BuildRequires:  expat-devel
 BuildRequires:  openssl-devel
 BuildRequires:  boost-devel
 BuildRequires:  binutils-devel
-#BuildRequires:  gdbm-devel
 
 %description
 The purpose of this project is to provide an independent implementation
@@ -52,7 +51,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 Development files for grive
 
 %prep
-%setup -q -n match065-%{name}-%{gitcommit}
+%setup -q -n Grive-%{name}-%{gitcommit}
 
 
 %build
@@ -81,6 +80,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Jun 09 2012 Nestal Wan <me@nestal.net> 0.1.1-1
+- Updated for new repository location
+
 * Thu Jun 07 2012 Vasiliy N. Glazov <vascom2@gmail.com> 0.1.0-1
 - Jump to release versioning
 
