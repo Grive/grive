@@ -28,7 +28,7 @@ You need the following libraries:
 There are also some optional dependencies:
 - CppUnit (for unit tests)
 - libbfd (for backtrace)
-- binutils (for libiberty, required for compilation in OpenSUSE)
+- binutils (for libiberty, required for compilation in OpenSUSE & ubuntu)
 
 Grive uses cmake to build, see the instructions in:
 
