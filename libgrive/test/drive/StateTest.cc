@@ -37,15 +37,6 @@ StateTest::StateTest( )
 
 void StateTest::TestSync( )
 {
-	State s( TEST_DATA "/test_dir1.state", Json() ) ;
-	Resource *r = s.Find( "./folder1/abc.txt" ) ;
-	CPPUNIT_ASSERT( r != 0 ) ;
-	GRUT_ASSERT_EQUAL( r->Name(), "abc.txt" ) ;
-	
-	Trace( "state %1% = %2%", r->Name(), r->StateStr() ) ;
-
-	// load directory
-	s.FromLocal( TEST_DATA "/test_dir1" ) ;
 }
 
 } // end of namespace grut

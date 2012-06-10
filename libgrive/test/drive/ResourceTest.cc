@@ -36,10 +36,11 @@ ResourceTest::ResourceTest( )
 
 void ResourceTest::TestNormal( )
 {
-	Json json ;
-	json.Add( "name", Json( "abc.txt" ) ) ;
+	Resource root ;
+	Resource subject( "abc.txt", "file" ) ;
+	root.AddChild( &subject ) ;
 	
-// 	Resource subject( json, 0 ) ;
+	GRUT_ASSERT_EQUAL( subject.Path(), fs::path( "./abc.txt" ) ) ;
 }
 
 } // end of namespace grut

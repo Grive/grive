@@ -69,8 +69,8 @@ add_definitions(
 	-DSRC_DIR="${libgrive_SOURCE_DIR}/src"
 )
 
-add_library( grive SHARED ${LIBGRIVE_SRC} ${OPT_SRC} )
-add_library( grive-static STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
+#add_library( grive SHARED ${LIBGRIVE_SRC} ${OPT_SRC} )
+add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
 	${CURL_LIBRARIES}
@@ -83,19 +83,19 @@ target_link_libraries( grive
 	${OPT_LIBS}
 )
 
-set_target_properties(grive PROPERTIES
-    SOVERSION 0 VERSION ${GRIVE_VERSION}
-)
+#set_target_properties(grive PROPERTIES
+#    SOVERSION 0 VERSION ${GRIVE_VERSION}
+#)
 
-set_target_properties(grive grive-static PROPERTIES OUTPUT_NAME grive)
+#set_target_properties(grive grive-static PROPERTIES OUTPUT_NAME grive)
 
 if ( LIB_INSTALL_DIR )
 else()
 	set ( LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib )
 endif()
 
-install(TARGETS grive LIBRARY DESTINATION ${LIB_INSTALL_DIR} )
-install(TARGETS grive-static ARCHIVE DESTINATION ${LIB_INSTALL_DIR} )
+#install(TARGETS grive LIBRARY DESTINATION ${LIB_INSTALL_DIR} )
+install(TARGETS grive ARCHIVE DESTINATION ${LIB_INSTALL_DIR} )
 install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
 install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
 install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
