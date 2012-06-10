@@ -19,6 +19,7 @@
 
 #include "State.hh"
 
+#include "Entry.hh"
 #include "Resource.hh"
 #include "CommonUri.hh"
 
@@ -50,6 +51,10 @@ State::State( const fs::path& filename, const Json& options ) :
 		m_last_sync = DateTime() ;
 	
 	Log( "last sync time: %1%", m_last_sync, log::verbose ) ;
+}
+
+State::~State()
+{
 }
 
 /// Synchronize local directory. Build up the resource tree from files and folders

@@ -43,17 +43,15 @@ class Entry
 {
 public :
 	Entry( ) ;
-	Entry( const std::string& name, const std::string& kind ) ;
 	explicit Entry( const xml::Node& n ) ;
-	
-	void AssignID( const Entry& entry ) ;
-	void FromLocal( const fs::path& path ) ;
 	
 	std::string Title() const ;
 	std::string Filename() const ;
 	std::string Kind() const ;
 	std::string MD5() const ;
 	DateTime MTime() const ;
+	
+	std::string Name() const ;
 	
 	std::string ResourceID() const ;
 	std::string ETag() const ;
@@ -72,9 +70,6 @@ public :
 	void Swap( Entry& e ) ;
 	
 	void Update( const xml::Node& entry ) ;
-	void Update( const std::string& md5, const DateTime& mtime ) ;
-
-	std::string Name() const ;
 	
 private :
 	std::string		m_title ;

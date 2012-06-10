@@ -51,24 +51,6 @@ Entry::Entry( const xml::Node& n ) :
 	Update( n ) ;
 }
 
-/// construct an entry from a file or folder in local directory
-Entry::Entry( const std::string& name, const std::string& kind ) :
-	m_title		( name ),
-	m_filename	( name ),
-	m_kind		( kind ),
-	m_change_stamp( -1 )
-{
-}
-
-void Entry::FromLocal( const fs::path& path )
-{
-	m_title		= path.filename().string() ;
-	m_filename	= path.filename().string() ;
-	m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
-	m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
-	m_mtime		= fs::exists(path) ? os::FileCTime( path ) : DateTime() ;
-}
-
 void Entry::Update( const xml::Node& n )
 {
 	m_title			= n["title"] ;
@@ -102,24 +84,6 @@ void Entry::Update( const xml::Node& n )
 const std::vector<std::string>& Entry::ParentHrefs() const
 {
 	return m_parent_hrefs ;
-}
-
-/// only assign the key members
-void Entry::AssignID( const Entry& entry )
-{
-	m_self_href		= entry.m_self_href ;
-	m_content_src	= entry.m_content_src ;
-	m_resource_id	= entry.m_resource_id ;
-	m_parent_hrefs	= entry.m_parent_hrefs ;
-	m_edit_link		= entry.m_edit_link ;
-	m_create_link	= entry.m_create_link ;
-	m_etag			= entry.m_etag ;
-}
-
-void Entry::Update( const std::string& md5, const DateTime& mtime )
-{
-	m_mtime = mtime ;
-	m_md5	= md5 ;
 }
 
 std::string Entry::Title() const

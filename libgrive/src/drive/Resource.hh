@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Entry.hh"
+#include "util/DateTime.hh"
 #include "util/Exception.hh"
 #include "util/FileSystem.hh"
 
@@ -35,7 +35,7 @@ namespace http
 	class Header ;
 }
 
-class Json ;
+class Entry ;
 
 /*!	\brief	A resource can be a file or a folder in the google drive
 
@@ -78,8 +78,6 @@ public :
 	
 	void Sync( gr::http::Agent* http, const http::Header& auth ) ;
 
-	Json Serialize() const ;
-	
 	// children access
 	iterator begin() const ;
 	iterator end() const ;
@@ -134,9 +132,21 @@ private :
 	void DeleteLocal() ;
 	void DeleteRemote( http::Agent* http, const http::Header& auth ) ;
 	
-private :
-	Entry					m_entry ;
+	void AssignIDs( const Entry& remote ) ;
 	
+private :
+	std::string				m_name ;
+	std::string				m_kind ;
+	std::string				m_md5 ;
+	DateTime				m_mtime ;
+	
+	std::string				m_id ;
+	std::string				m_href ;
+	std::string				m_edit ;
+	std::string				m_create ;
+	std::string				m_content ;
+	std::string				m_etag ;
+
 	// not owned
 	Resource				*m_parent ;
 	std::vector<Resource*>	m_child ;

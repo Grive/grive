@@ -45,6 +45,7 @@ public :
 
 public :
 	explicit State( const fs::path& filename, const Json& options ) ;
+	~State() ;
 	
 	void FromLocal( const fs::path& p ) ;
 	void FromRemote( const Entry& e ) ;
