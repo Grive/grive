@@ -63,6 +63,8 @@ public :
 	std::string EditLink() const ;
 	std::string CreateLink() const ;
 	long ChangeStamp() const ;
+	
+	bool IsChange() const ;
 	bool IsRemoved() const ;
 	
 	const std::vector<std::string>& ParentHrefs() const ;

@@ -113,6 +113,9 @@ void State::FromRemote( const Entry& e )
 	if ( IsIgnore( e.Name() ) )
 		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
 
+	else if ( e.IsChange() )
+		FromChange( e ) ;
+	
 	else if ( !Update( e ) )
 	{
 		m_unresolved.push_back( e ) ;
@@ -150,17 +153,18 @@ std::size_t State::TryResolveEntry()
 
 void State::FromChange( const Entry& e )
 {
-	if ( IsIgnore( e.Name() ) )
-		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+	assert( e.IsChange() ) ;
+	assert( !IsIgnore( e.Name() ) ) ;
 	
 	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
-	else if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
+	if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
 		m_res.Update( res, e, DateTime() ) ;
 }
 
 bool State::Update( const Entry& e )
 {
+	assert( !e.IsChange() ) ;
 	assert( !e.ParentHref().empty() ) ;
 
 	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
@@ -173,7 +177,7 @@ bool State::Update( const Entry& e )
 		assert( parent->IsFolder() ) ;
 
 		// see if the entry already exist in local
-		std::string name = ( e.Kind() == "folder" ? e.Title() : e.Filename() ) ;
+		std::string name = e.Name() ;
 		Resource *child = parent->FindChild( name ) ;
 		if ( child != 0 )
 		{

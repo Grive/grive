@@ -179,6 +179,11 @@ long Entry::ChangeStamp() const
 	return m_change_stamp ;
 }
 
+bool Entry::IsChange() const
+{
+	return m_change_stamp != -1 ;
+}
+
 bool Entry::IsRemoved() const
 {
 	return m_is_removed ;

@@ -49,7 +49,6 @@ public :
 	
 	void FromLocal( const fs::path& p ) ;
 	void FromRemote( const Entry& e ) ;
-	void FromChange( const Entry& e ) ;
 	void ResolveEntry() ;
 	
 	void Read( const fs::path& filename ) ;
@@ -69,6 +68,7 @@ public :
 	
 private :
 	void FromLocal( const fs::path& p, Resource *folder ) ;
+	void FromChange( const Entry& e ) ;
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 

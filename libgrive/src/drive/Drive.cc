@@ -104,12 +104,12 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 
 void Drive::FromRemote( const Entry& entry )
 {
-	if ( entry.Kind() != "folder" && !entry.ContentSrc().empty() )
-	{
+// 	if ( entry.Kind() != "folder" && !entry.ContentSrc().empty() )
+// 	{
 		Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
 		std::string fn = entry.Filename() ;				
 		
-		if ( fn.empty() )
+		if ( fn.empty() || entry.ContentSrc().empty() )
 			Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
 		
 		else if ( fn.find('/') != fn.npos )
@@ -124,7 +124,7 @@ void Drive::FromRemote( const Entry& entry )
 		
 		else
 			m_state.FromRemote( entry ) ;
-	}
+// 	}
 }
 
 void Drive::FromChange( const Entry& entry )
@@ -134,11 +134,13 @@ void Drive::FromChange( const Entry& entry )
 	if ( entry.IsRemoved() )
 		Log( "file \"%1%\" represents a deletion, ignored", entry.Title(), log::verbose ) ;
 	
-	else if ( fn.empty() )
-		Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
-	
-	else if ( !entry.ContentSrc().empty() )
-		m_state.FromChange( entry ) ;
+// 	else if ( fn.empty() )
+// 		Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
+// 	
+// 	else if ( !entry.ContentSrc().empty() )
+// 		m_state.FromRemote( entry ) ;
+	else
+		FromRemote( entry ) ;
 }
 
 void Drive::SaveState()

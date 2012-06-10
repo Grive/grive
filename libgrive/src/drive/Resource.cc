@@ -145,12 +145,16 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 
 void Resource::AssignIDs( const Entry& remote )
 {
-	m_id		= remote.ResourceID() ;
-	m_href		= remote.SelfHref() ;
-	m_edit		= remote.EditLink() ;
-	m_create	= remote.CreateLink() ;
-	m_content	= remote.ContentSrc() ;
-	m_etag		= remote.ETag() ;
+	// the IDs from change feed entries are different
+	if ( !remote.IsChange() )
+	{
+		m_id		= remote.ResourceID() ;
+		m_href		= remote.SelfHref() ;
+		m_edit		= remote.EditLink() ;
+		m_create	= remote.CreateLink() ;
+		m_content	= remote.ContentSrc() ;
+		m_etag		= remote.ETag() ;
+	}
 }
 
 void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
@@ -200,7 +204,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 	// use mtime to check which one is more recent
 	else
 	{
-		assert( m_state == local_new || m_state == local_changed || m_state == remote_deleted ) ;
+		assert( m_state != unknown ) ;
 
 		// if remote is modified
 		if ( remote.MTime() > m_mtime )
@@ -236,7 +240,6 @@ void Resource::FromLocal( const DateTime& last_sync )
 		m_mtime = os::FileCTime( path ) ;
 		m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
-// 		m_entry.FromLocal( path ) ;
 		m_name		= path.filename().string() ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
