@@ -103,8 +103,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 		else
 		{
 			Log( "folder %1% is created in remote", path, log::verbose ) ;
-			fs::create_directories( path ) ;
-			m_state = sync ;
+			m_state = remote_new ;
 		}
 	}
 	else
@@ -345,58 +344,68 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 	
 	SyncSelf( http, auth ) ;
 	
-	std::for_each( m_child.begin(), m_child.end(),
-		boost::bind( &Resource::Sync, _1, http, auth ) ) ;
+	// if myself is deleted, no need to do the childrens
+	if ( m_state != local_deleted && m_state != remote_deleted )
+		std::for_each( m_child.begin(), m_child.end(),
+			boost::bind( &Resource::Sync, _1, http, auth ) ) ;
 }
 
 void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
 {
+	assert( !IsRoot() || m_state == sync ) ;	// root is already sync
+	assert( IsRoot() || fs::is_directory( m_parent->Path() ) ) ;
+	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
+	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
+
+	const fs::path path = Path() ;
+
 	switch ( m_state )
 	{
 	case local_new :
-		Log( "sync %1% doesn't exist in server, uploading", Path(), log::info ) ;
+		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
 		if ( Create( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case local_deleted :
-		if ( m_parent->m_state == local_deleted )
-			Log( "sync %1% parent deleted in local.", Path(), log::verbose ) ;
-		else
-		{
-			Log( "sync %1% deleted in local. deleting remote", Path(), log::info ) ;
-			DeleteRemote( http, auth ) ;
-		}
+		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
+		DeleteRemote( http, auth ) ;
 		break ;
 	
 	case local_changed :
-		Log( "sync %1% changed in local. uploading", Path(), log::info ) ;
+		Log( "sync %1% changed in local. uploading", path, log::info ) ;
 		if ( EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
+		Log( "sync %1% created in remote. creating local", path, log::info ) ;
+		if ( IsFolder() )
+			fs::create_directories( path ) ;
+		else
+			Download( http, path, auth ) ;
+		
+		m_state = sync ;
+		break ;
+	
 	case remote_changed :
-		Log( "sync %1% changed in remote. downloading", Path(), log::info ) ;
-		Download( http, Path(), auth ) ;
+		assert( !IsFolder() ) ;
+		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
+		Download( http, path, auth ) ;
 		m_state = sync ;
 		break ;
 	
 	case remote_deleted :
-		if ( m_parent->m_state == remote_deleted )
-			Log( "sync %1% parent deleted in remote.", Path(), log::verbose ) ;
-		else
-		{
-			Log( "sync %1% deleted in remote. deleting local", Path(), log::info ) ;
-			DeleteLocal() ;
-		}
+		Log( "sync %1% deleted in remote. deleting local", path, log::info ) ;
+		DeleteLocal() ;
 		break ;
 	
 	case sync :
-		Log( "sync %1% already in sync", Path(), log::verbose ) ;
+		Log( "sync %1% already in sync", path, log::verbose ) ;
 		break ;
 
+	// shouldn't go here
 	case unknown :
 		assert( false ) ;
 		break ;
@@ -473,10 +482,7 @@ bool Resource::EditContent( http::Agent* http, const http::Header& auth )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
-
-	// sync parent first. make sure the parent folder exists in remote
-	if ( m_parent->m_state != sync )
-		m_parent->Sync( http, auth ) ;
+	assert( m_parent->m_state == sync ) ;
 
 	// upload link missing means that file is read only
 	if ( m_edit.empty() )
@@ -493,10 +499,7 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
 	assert( m_parent->IsFolder() ) ;
-	
-	// sync parent first. make sure the parent folder exists in remote
-	if ( m_parent->m_state != sync )
-		m_parent->Sync( http, auth ) ;
+	assert( m_parent->m_state == sync ) ;
 	
 	if ( IsFolder() )
 	{
