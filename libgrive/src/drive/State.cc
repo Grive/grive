@@ -29,14 +29,6 @@
 #include "util/log/Log.hh"
 #include "protocol/Json.hh"
 
-#include <boost/bind.hpp>
-
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/identity.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-
 #include <fstream>
 
 namespace gr {
@@ -260,9 +252,7 @@ void State::Write( const fs::path& filename ) const
 
 void State::Sync( http::Agent *http, const http::Header& auth )
 {
-	std::for_each( m_res.begin(), m_res.end(),
-		boost::bind( &Resource::Sync, _1, http, auth ) ) ;
-	
+	m_res.Root()->Sync( http, auth ) ;
 	m_last_sync = DateTime::Now() ;
 }
 

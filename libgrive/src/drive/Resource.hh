@@ -134,6 +134,7 @@ private :
 	void DeleteRemote( http::Agent* http, const http::Header& auth ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
+	void SyncSelf( http::Agent* http, const http::Header& auth ) ;
 	
 private :
 	std::string				m_name ;

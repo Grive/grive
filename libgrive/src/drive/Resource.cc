@@ -37,6 +37,7 @@
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
 
+#include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
 
 #include <cassert>
@@ -340,14 +341,16 @@ Resource* Resource::FindChild( const std::string& name )
 void Resource::Sync( http::Agent *http, const http::Header& auth )
 {
 	assert( m_state != unknown ) ;
-
-	// root folder is already synced
-	if ( IsRoot() )
-	{
-		assert( m_state == sync ) ;
-		return ;
-	}
+	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
+	SyncSelf( http, auth ) ;
+	
+	std::for_each( m_child.begin(), m_child.end(),
+		boost::bind( &Resource::Sync, _1, http, auth ) ) ;
+}
+
+void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
+{
 	switch ( m_state )
 	{
 	case local_new :
@@ -392,6 +395,10 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 	
 	case sync :
 		Log( "sync %1% already in sync", Path(), log::verbose ) ;
+		break ;
+
+	case unknown :
+		assert( false ) ;
 		break ;
 		
 	default :
