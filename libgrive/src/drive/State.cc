@@ -79,6 +79,10 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
 		
+		// check for broken symblic links
+		else if ( !fs::exists( i->path() ) )
+			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
+		
 		else
 		{
 			// if the Resource object of the child already exists, it should
