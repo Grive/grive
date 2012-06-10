@@ -27,10 +27,30 @@ namespace gr {
 
 const std::string& Config::Filename()
 {
-	static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
-	static const std::string filename = (env_cfg != 0) ? env_cfg : ".grive" ;
+    static std::string cfg_path;
+    char *cfg_base;
+    bool fallback;
+    
+    fallback = false;
+    cfg_base = getenv("XDG_CONFIG_HOME");
+    if (!cfg_base)
+    {
+        fallback = true;
+        cfg_base = getenv("HOME");
+        /* Clutter the current directory if forced to */
+        if (!cfg_base) 
+            cfg_base = (char *)".";
+    }
 
-	return filename ;
+    cfg_path  = cfg_base;
+    cfg_path += "/";
+    if (fallback) /* Hidden folder */
+        cfg_path += ".";
+    cfg_path += "grive";
+    cfg_path += "/";
+    cfg_path += "config.json";
+
+	return cfg_path ;
 }
 
 Config::Config() :
