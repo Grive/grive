@@ -52,6 +52,7 @@ public :
 private :
 	void SyncFolders( http::Agent *http ) ;
     void file();
+    void FromEntry( const Entry& entry ) ;
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
 	
