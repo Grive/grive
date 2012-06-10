@@ -33,12 +33,49 @@ namespace gr { namespace crypt {
 
 const std::size_t read_size = 8 * 1024 ;
 
-std::string MD5( const fs::path& file )
+struct MD5::Impl
+{
+	gcry_md_hd_t hd ;
+} ;
+
+MD5::MD5() : m_impl( new Impl )
+{
+	::gcry_error_t err = ::gcry_md_open( &m_impl->hd, GCRY_MD_MD5, 0 ) ;
+	if ( err != GPG_ERR_NO_ERROR )
+	{
+		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( ::gcry_strerror(err) ) ) ;
+	}
+}
+
+MD5::~MD5()
+{
+	::gcry_md_close( m_impl->hd ) ;
+}
+
+void MD5::Write( const void *data, std::size_t size )
+{
+	::gcry_md_write( m_impl->hd, data, size ) ;
+}
+
+std::string MD5::Get() const
+{
+	unsigned char *md5 = ::gcry_md_read( m_impl->hd, GCRY_MD_MD5 ) ;
+	unsigned int  len  = ::gcry_md_get_algo_dlen(GCRY_MD_MD5) ;
+	
+	// format the MD5 string
+	std::ostringstream ss ;
+	for ( unsigned int i = 0 ; i < len ; i++ )
+		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
+
+	return ss.str() ;
+}
+
+std::string MD5::Get( const fs::path& file )
 {
 	try
 	{
 		StdioFile sfile( file ) ;
-		return MD5( sfile ) ;
+		return Get( sfile ) ;
 	}
 	catch ( StdioFile::Error& )
 	{
@@ -46,32 +83,17 @@ std::string MD5( const fs::path& file )
 	}
 }
 
-std::string MD5( StdioFile& file )
+std::string MD5::Get( StdioFile& file )
 {
 	char buf[read_size] ;
-	
-	gcry_md_hd_t hd ;
-	gcry_error_t err = gcry_md_open( &hd, GCRY_MD_MD5, 0 ) ;
-	if ( err != GPG_ERR_NO_ERROR )
-	{
-		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( gcry_strerror(err) ) ) ;
-	}
+
+	MD5 crypt ;
 	
 	std::size_t count = 0 ;
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-		gcry_md_write( hd, buf, count ) ;
+		crypt.Write( buf, count ) ;
 
-	unsigned char *md5 = gcry_md_read( hd, GCRY_MD_MD5 ) ;
-	unsigned int  len  = gcry_md_get_algo_dlen(GCRY_MD_MD5) ;
-	
-	// format the MD5 string
-	std::ostringstream ss ;
-	for ( unsigned int i = 0 ; i < len ; i++ )
-		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
-	
-	gcry_md_close( hd ) ;
-	
-	return ss.str() ;
+	return crypt.Get() ;
 }
 
 } } // end of namespaces

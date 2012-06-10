@@ -20,6 +20,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <boost/filesystem.hpp>
 
@@ -27,10 +28,23 @@ namespace gr {
 
 class StdioFile ;
 
-namespace crypt
-{
-	std::string MD5( StdioFile& file ) ;
-	std::string MD5( const boost::filesystem::path& file ) ;
-}
+namespace crypt {
 
-} // end of namespace gr
+class MD5
+{
+public :
+	MD5() ;
+	~MD5() ;
+
+	static std::string Get( StdioFile& file ) ;
+	static std::string Get( const boost::filesystem::path& file ) ;
+	
+	void Write( const void *data, std::size_t size ) ;
+	std::string Get() const ;
+
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
+} ;
+
+} } // end of namespace gr

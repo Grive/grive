@@ -65,7 +65,7 @@ void Entry::FromLocal( const fs::path& path )
 	m_title		= path.filename().string() ;
 	m_filename	= path.filename().string() ;
 	m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
-	m_md5		= fs::is_directory(path) ? ""		: crypt::MD5( path ) ;
+	m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
 	m_mtime		= fs::exists(path) ? os::FileCTime( path ) : DateTime() ;
 }
 

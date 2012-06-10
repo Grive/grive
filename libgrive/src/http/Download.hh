@@ -24,9 +24,14 @@
 
 #include <string>
 
-#include <openssl/evp.h>
+namespace gr {
 
-namespace gr { namespace http {
+namespace crypt
+{
+	class MD5 ;
+}
+
+namespace http {
 
 class Download : public http::Receivable
 {
@@ -34,7 +39,7 @@ public :
 	struct NoChecksum {} ;
 	Download( const std::string& filename ) ;
 	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
+	~Download() ;
 	
 	std::string Finish() const ;
 	
@@ -42,8 +47,8 @@ public :
 	std::size_t OnData( void *data, std::size_t count ) ;
 	
 private :
-	StdioFile	m_file ;
-	EVP_MD_CTX	*m_mdctx ;
+	StdioFile					m_file ;
+	std::auto_ptr<crypt::MD5>	m_crypt ;
 } ;
 
 } } // end of namespace

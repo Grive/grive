@@ -216,7 +216,6 @@ void Resource::FromLocal( const DateTime& last_sync )
 		m_state = ( mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_entry.FromLocal( path ) ;
-		Trace( "file %1% read from local %2%", path, m_state ) ;
 	}
 	
 	assert( m_state != unknown ) ;

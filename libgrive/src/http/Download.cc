@@ -21,6 +21,7 @@
 // #include "util/SignalHandler.hh"
 
 #include "Error.hh"
+#include "util/Crypt.hh"
 
 // boost headers
 #include <boost/throw_exception.hpp>
@@ -32,8 +33,6 @@
 #include <boost/exception/errinfo_file_open_mode.hpp>
 #include <boost/exception/info.hpp>
 
-#include <openssl/evp.h>
-
 #include <cassert>
 #include <new>
 
@@ -43,25 +42,17 @@ namespace gr { namespace http {
 
 Download::Download( const std::string& filename ) :
 	m_file( filename, 0600 ),
-	m_mdctx( ::EVP_MD_CTX_create() )
+	m_crypt( new crypt::MD5 )
 {
-	if ( m_mdctx == 0 )
-		throw std::bad_alloc() ;
-	
-	if ( ::EVP_DigestInit_ex( m_mdctx, ::EVP_md5(), 0 ) != 1 )
-		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create MD5 digest context" ) ) ;
 }
 
 Download::Download( const std::string& filename, NoChecksum ) :
-	m_file( filename, 0600 ),
-	m_mdctx( 0 )
+	m_file( filename, 0600 )
 {
 }
 
-Download::~Download( )
+Download::~Download()
 {
-	if ( m_mdctx != 0 )
-		::EVP_MD_CTX_destroy( m_mdctx ) ;
 }
 
 void Download::Clear()
@@ -71,32 +62,15 @@ void Download::Clear()
 
 std::string Download::Finish() const
 {
-	// Unregister the signal
-// 	SignalHandler::GetInstance().UnregisterSignal( SIGINT ) ;
-
-	std::string result ;
-
-	// get the checksum and return it ;
-	if ( m_mdctx != 0 )
-	{
-		unsigned int size = EVP_MAX_MD_SIZE ;
-		result.resize( size ) ;
-		
-		if ( ::EVP_DigestFinal_ex( m_mdctx, reinterpret_cast<unsigned char*>(&result[0]), &size ) != 1 )
-			throw Error() << expt::ErrMsg( "cannot calculate checksum" ) ;
-		
-		result.resize( size ) ;
-	}
-
-	return result ;
+	return m_crypt.get() != 0 ? m_crypt->Get() : "" ;
 }
 
 std::size_t Download::OnData( void *data, std::size_t count )
 {
 	assert( data != 0 ) ;
 	
-	if ( m_mdctx != 0 )
-		::EVP_DigestUpdate( m_mdctx, data, count ) ;
+	if ( m_crypt.get() != 0 )
+		m_crypt->Write( data, count ) ;
 	
 	return m_file.Write( data, count ) ;
 }
