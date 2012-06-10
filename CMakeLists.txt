@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set( GRIVE_VERSION "0.1.1" )
+set( GRIVE_VERSION "0.2.0-pre" )
 
 add_subdirectory( libgrive )
 add_subdirectory( grive )
