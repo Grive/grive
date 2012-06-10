@@ -32,10 +32,12 @@ public :
 	// declare suit function
 	CPPUNIT_TEST_SUITE( ResourceTest ) ;
 		CPPUNIT_TEST( TestNormal ) ;
+		CPPUNIT_TEST( TestRootPath ) ;
 	CPPUNIT_TEST_SUITE_END();
 
 private :
 	void TestNormal( ) ;
+	void TestRootPath() ;
 } ;
 
 } // end of namespace

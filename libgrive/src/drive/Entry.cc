@@ -67,6 +67,7 @@ void Entry::Update( const xml::Node& n )
 	m_edit_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
 	m_create_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media")["@href"] ;
 
+	// changestamp only appear in change feed entries
 	xml::NodeSet cs	= n["docs:changestamp"]["@value"] ;
 	m_change_stamp	= cs.empty() ? -1 : std::atoi( cs.front().Value().c_str() ) ;
 	

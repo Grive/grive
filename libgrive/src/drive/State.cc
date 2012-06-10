@@ -24,6 +24,7 @@
 #include "CommonUri.hh"
 
 #include "http/Agent.hh"
+#include "http/Header.hh"
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
 #include "protocol/Json.hh"

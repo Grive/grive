@@ -19,43 +19,71 @@
 
 #pragma once
 
+#include "Agent.hh"
+
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace gr { namespace http {
 
-class Header ;
 class Receivable ;
 
-class Agent
+/*!	\class	Agent
+	\brief	class to provide HTTP access
+	
+	This class provides functions to send HTTP request in many methods (e.g. get, post and put).
+	Normally the HTTP response is returned in a Receivable.
+*/
+class CurlAgent : public Agent
 {
 public :
-	virtual long Put(
+	CurlAgent() ;
+	~CurlAgent() ;
+	
+	long Put(
 		const std::string&	url,
 		const std::string&	data,
 		Receivable			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr ) ;
 
-	virtual long Get(
+	long Get(
 		const std::string& 	url,
 		Receivable			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr ) ;
 	
-	virtual long Post(
+	long Post(
 		const std::string& 	url,
 		const std::string&	data,
 		Receivable			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr ) ;
 	
-	virtual long Custom(
+	long Custom(
 		const std::string&	method,
 		const std::string&	url,
 		Receivable			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr ) ;
 	
-	virtual std::string RedirLocation() const = 0 ;
+	std::string RedirLocation() const ;
 	
-	virtual std::string Escape( const std::string& str ) = 0 ;
-	virtual std::string Unescape( const std::string& str ) = 0 ;
+	std::string Escape( const std::string& str ) ;
+	std::string Unescape( const std::string& str ) ;
+
+private :
+	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
+	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
+	
+	void SetHeader( const Header& hdr ) ;
+	long ExecCurl(
+		const std::string&	url,
+		Receivable			*dest,
+		const Header&		hdr ) ;
+
+	void Init() ;
+	
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_pimpl ;
 } ;
 
 } } // end of namespace

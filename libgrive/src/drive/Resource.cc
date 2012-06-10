@@ -23,6 +23,7 @@
 
 #include "http/Agent.hh"
 #include "http/Download.hh"
+#include "http/Header.hh"
 // #include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
@@ -315,7 +316,7 @@ fs::path Resource::Path() const
 	assert( m_parent != this ) ;
 	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 
-	return m_parent != 0 ? (m_parent->Path() / m_name) : "." ;
+	return m_parent != 0 ? (m_parent->Path() / m_name) : m_name ;
 }
 
 bool Resource::IsInRootTree() const
@@ -450,6 +451,8 @@ void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 
 void Resource::Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const
 {
+	assert( http != 0 ) ;
+	
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_content, &dl, auth ) ;
 	if ( r <= 400 )
@@ -461,6 +464,7 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 
 bool Resource::EditContent( http::Agent* http, const http::Header& auth )
 {
+	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
 
 	// sync parent first. make sure the parent folder exists in remote
@@ -479,6 +483,7 @@ bool Resource::EditContent( http::Agent* http, const http::Header& auth )
 
 bool Resource::Create( http::Agent* http, const http::Header& auth )
 {
+	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
 	assert( m_parent->IsFolder() ) ;
 	
@@ -517,6 +522,8 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 
 bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post )
 {
+	assert( http != 0 ) ;
+	
 	StdioFile file( Path() ) ;
 	
 	// TODO: upload in chunks
@@ -592,6 +599,11 @@ std::string Resource::StateStr() const
 	std::ostringstream ss ;
 	ss << m_state ;
 	return ss.str() ;
+}
+
+std::string Resource::MD5() const
+{
+	return m_md5 ;
 }
 
 bool Resource::IsRoot() const

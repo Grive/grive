@@ -17,10 +17,11 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Agent.hh"
+#include "CurlAgent.hh"
 
 #include "Download.hh"
 #include "Error.hh"
+#include "Header.hh"
 #include "Receivable.hh"
 
 #include "util/log/Log.hh"
@@ -70,40 +71,34 @@ void CallbackInt( int )
 
 namespace gr { namespace http {
 
-struct Agent::Impl
+struct CurlAgent::Impl
 {
 	CURL			*curl ;
 	std::string		location ;
-	std::string		log_prefix ;
 } ;
 
-Agent::Agent() :
+CurlAgent::CurlAgent() :
 	m_pimpl( new Impl )
 {
 	m_pimpl->curl = ::curl_easy_init();
 }
 
-void Agent::Init()
+void CurlAgent::Init()
 {
 	::curl_easy_reset( m_pimpl->curl ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ; 
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&Agent::HeaderCallback ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&CurlAgent::HeaderCallback ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER, 			0L ) ;
 }
 
-Agent::~Agent()
+CurlAgent::~CurlAgent()
 {
 	::curl_easy_cleanup( m_pimpl->curl );
 }
 
-void Agent::SetLogFile( const std::string& prefix )
-{
-	m_pimpl->log_prefix = prefix ;
-}
-
-std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *pthis )
+std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis )
 {
 	char *str = reinterpret_cast<char*>(ptr) ;
 	std::string line( str, str + size*nmemb ) ;
@@ -119,13 +114,13 @@ std::size_t Agent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Agent *
 	return size*nmemb ;
 }
 
-std::size_t Agent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
+std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
 {
 	assert( recv != 0 ) ;
 	return recv->OnData( ptr, size * nmemb ) ;
 }
 
-long Agent::ExecCurl(
+long CurlAgent::ExecCurl(
 	const std::string&	url,
 	Receivable			*dest,
 	const http::Header&	hdr )
@@ -136,7 +131,7 @@ long Agent::ExecCurl(
 	char error[CURL_ERROR_SIZE] = {} ;
 	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error ) ;
 	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
-	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&Agent::Receive ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&CurlAgent::Receive ) ;
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
 
 	SetHeader( hdr ) ;
@@ -165,7 +160,7 @@ long Agent::ExecCurl(
 	return http_code ;
 }
 
-long Agent::Put(
+long CurlAgent::Put(
 	const std::string&		url,
 	const std::string&		data,
 	Receivable				*dest,
@@ -187,7 +182,7 @@ long Agent::Put(
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-long Agent::Get(
+long CurlAgent::Get(
 	const std::string& 		url,
 	Receivable				*dest,
 	const Header&			hdr )
@@ -203,7 +198,7 @@ long Agent::Get(
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-long Agent::Post(
+long CurlAgent::Post(
 	const std::string& 		url,
 	const std::string&		data,
 	Receivable				*dest,
@@ -225,7 +220,7 @@ long Agent::Post(
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-long Agent::Custom(
+long CurlAgent::Custom(
 	const std::string&		method,
 	const std::string&		url,
 	Receivable				*dest,
@@ -241,7 +236,7 @@ long Agent::Custom(
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-void Agent::SetHeader( const Header& hdr )
+void CurlAgent::SetHeader( const Header& hdr )
 {
 	// set headers
 	struct curl_slist *curl_hdr = 0 ;
@@ -251,12 +246,12 @@ void Agent::SetHeader( const Header& hdr )
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
 }
 
-std::string Agent::RedirLocation() const
+std::string CurlAgent::RedirLocation() const
 {
 	return m_pimpl->location ;
 }
 
-std::string Agent::Escape( const std::string& str )
+std::string CurlAgent::Escape( const std::string& str )
 {
 	CURL *curl = m_pimpl->curl ;
 	
@@ -267,7 +262,7 @@ std::string Agent::Escape( const std::string& str )
 	return result ;
 }
 
-std::string Agent::Unescape( const std::string& str )
+std::string CurlAgent::Unescape( const std::string& str )
 {
 	CURL *curl = m_pimpl->curl ;
 	

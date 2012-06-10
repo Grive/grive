@@ -72,11 +72,12 @@ public :
 	bool IsInRootTree() const ;
 	bool IsRoot() const ;
 	bool HasID() const ;
+	std::string MD5() const ;
 
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( gr::http::Agent* http, const http::Header& auth ) ;
+	void Sync( http::Agent* http, const http::Header& auth ) ;
 
 	// children access
 	iterator begin() const ;

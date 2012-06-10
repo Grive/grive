@@ -22,7 +22,7 @@
 #include "JsonResponse.hh"
 #include "Json.hh"
 
-#include "http/Agent.hh"
+#include "http/CurlAgent.hh"
 #include "util/log/Log.hh"
 
 // for debugging
@@ -61,7 +61,7 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&grant_type=authorization_code" ;
 
 	http::JsonResponse	resp ;
-	http::Agent			http ;
+	http::CurlAgent			http ;
 
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp ) ;
@@ -75,7 +75,7 @@ std::string OAuth2::MakeAuthURL(
 	const std::string&	client_id,
 	const std::string&	state )
 {
-	http::Agent h ;
+	http::CurlAgent h ;
 
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
@@ -98,7 +98,7 @@ void OAuth2::Refresh( )
 		"&grant_type=refresh_token" ;
 
 	http::JsonResponse	resp ;
-	http::Agent			http ;
+	http::CurlAgent			http ;
 
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp ) ;

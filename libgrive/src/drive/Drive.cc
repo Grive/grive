@@ -23,7 +23,7 @@
 #include "Entry.hh"
 #include "Feed.hh"
 
-#include "http/Agent.hh"
+#include "http/CurlAgent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
@@ -63,7 +63,7 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( "." ) ;
 	
-	http::Agent http ;
+	http::CurlAgent http ;
 
 	long prev_stamp = m_state.ChangeStamp() ;
 	
@@ -150,6 +150,8 @@ void Drive::SaveState()
 
 void Drive::SyncFolders( http::Agent *http )
 {
+	assert( http != 0 ) ;
+
 	Log( "Synchronizing folders", log::info ) ;
 
 	http::XmlResponse xml ;
@@ -194,7 +196,7 @@ void Drive::Update()
 {
 	Log( "Synchronizing files", log::info ) ;
 	
-	http::Agent http ;
+	http::CurlAgent http ;
 	m_state.Sync( &http, m_http_hdr ) ;
 }
 

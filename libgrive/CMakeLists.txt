@@ -23,7 +23,6 @@ if ( BFD_FOUND )
 		src/bfd/*.cc
 	)
 	add_definitions( -DHAVE_BFD )
-
 	
 endif ( BFD_FOUND )
 
