@@ -59,14 +59,6 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 	return count ;
 }
 
-// Callback for SIGINT
-void CallbackInt( int )
-{
-	// TODO: instead of just disabling the signal, clean up the environment
-	//       and exit gracefully
-	std::cout << " Signal disabled while downloading file..\n";
-}
-
 } // end of local namespace
 
 namespace gr { namespace http {
@@ -188,12 +180,10 @@ long CurlAgent::Get(
 	const Header&			hdr )
 {
 	Trace("HTTP GET \"%1%\"", url ) ;
-	
 	Init() ;
-	CURL *curl = m_pimpl->curl ;
 
 	// set get specific options
-	::curl_easy_setopt(curl, CURLOPT_HTTPGET, 		1L);
+	::curl_easy_setopt(m_pimpl->curl, CURLOPT_HTTPGET, 		1L);
 
 	return ExecCurl( url, dest, hdr ) ;
 }
