@@ -62,11 +62,10 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&grant_type=authorization_code" ;
 
 	http::JsonResponse  resp ;
-	http::CurlAgent	    http ;
-    http::Header        hdr ;
+	http::CurlAgent		http ;
 
 	DisableLog dlog( log::debug ) ;
-	http.Post( token_url, post, &resp, hdr ) ;
+	http.Post( token_url, post, &resp, http::Header() ) ;
 
 	Json jresp	= resp.Response() ;
 	m_access	= jresp["access_token"].Str() ;
@@ -100,11 +99,10 @@ void OAuth2::Refresh( )
 		"&grant_type=refresh_token" ;
 
 	http::JsonResponse  resp ;
-	http::CurlAgent	    http ;
-	http::Header        hdr ;
+	http::CurlAgent		http ;
     
 	DisableLog dlog( log::debug ) ;
-	http.Post( token_url, post, &resp, hdr ) ;
+	http.Post( token_url, post, &resp, http::Header() ) ;
 
 	m_access	= resp.Response()["access_token"].Str() ;
 }
