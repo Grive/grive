@@ -241,7 +241,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		m_mtime = os::FileCTime( path ) ;
 		m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
-		m_name		= path.filename().string() ;
+		m_name		= path.filename() ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
 	}
