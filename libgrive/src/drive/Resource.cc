@@ -235,11 +235,17 @@ void Resource::FromLocal( const DateTime& last_sync )
 	// root folder is always in sync
 	if ( !IsRoot() )
 	{
+		m_mtime = os::FileCTime( path ) ;
+
+		// follow parent recursively
+		if ( m_parent->m_state == local_new || m_parent->m_state == local_deleted )
+			m_state = local_new ;
+		
 		// if the file is not created after last sync, assume file is
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
-		m_mtime = os::FileCTime( path ) ;
-		m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
+		else
+			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_name		= path.filename().string() ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
