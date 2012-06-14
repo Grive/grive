@@ -175,6 +175,7 @@ int Main( int argc, char **argv )
 	drive.SaveState() ;
 	
 	config.Save() ;
+	Log( "Finished!", log::info ) ;
 	return 0 ;
 }
 
@@ -187,10 +188,14 @@ int main( int argc, char **argv )
 	catch ( Exception& e )
 	{
 		Log( "exception: %1%", boost::diagnostic_information(e), log::critical ) ;
-		return -1 ;
+	}
+	catch ( std::exception& e )
+	{
+		Log( "exception: %1%", e.what(), log::critical ) ;
 	}
 	catch ( ... )
 	{
-		return -1 ;
+		Log( "unexpected exception", log::critical ) ;
 	}
+	return -1 ;
 }

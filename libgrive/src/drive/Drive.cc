@@ -66,6 +66,7 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	http::CurlAgent http ;
 
 	long prev_stamp = m_state.ChangeStamp() ;
+	Trace( "previous time stamp is %1%", prev_stamp ) ;
 	
 	// get metadata
 	http::XmlResponse xrsp ;
@@ -89,7 +90,7 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	{
 		std::for_each( feed.begin(), feed.end(), boost::bind( &Drive::FromRemote, this, _1 ) ) ;
 	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
-
+	
 	// pull the changes feed
 	if ( prev_stamp != -1 )
 	{
@@ -116,24 +117,6 @@ void Drive::FromRemote( const Entry& entry )
 		Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
 		
 	else
-		FromEntry( entry ) ;
-}
-
-void Drive::FromEntry( const Entry& entry )
-{
-	std::string fn = entry.Filename() ;				
-
-	// common checkings
-	if ( fn.empty() || entry.ContentSrc().empty() )
-		Log( "file \"%1%\" is a google document, ignored", entry.Title(), log::verbose ) ;
-	
-	else if ( fn.find('/') != fn.npos )
-		Log( "file \"%1%\" contains a slash in its name, ignored", entry.Title(), log::verbose ) ;
-	
-	else if ( entry.ParentHrefs().size() != 1 )
-		Log( "file \"%1%\" has multiple parents, ignored", entry.Title(), log::verbose ) ;
-	
-	else
 		m_state.FromRemote( entry ) ;
 }
 
@@ -142,8 +125,10 @@ void Drive::FromChange( const Entry& entry )
 	if ( entry.IsRemoved() )
 		Log( "file \"%1%\" represents a deletion, ignored", entry.Title(), log::verbose ) ;
 	
+	// folders go directly
+	
 	else
-		FromEntry( entry ) ;
+		m_state.FromRemote( entry ) ;
 }
 
 void Drive::SaveState()

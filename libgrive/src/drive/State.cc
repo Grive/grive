@@ -103,12 +103,24 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 void State::FromRemote( const Entry& e )
 {
+	std::string fn = e.Filename() ;				
+
 	if ( IsIgnore( e.Name() ) )
 		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
 
+	// common checkings
+	else if ( e.Kind() != "folder" && (fn.empty() || e.ContentSrc().empty()) )
+		Log( "%1% \"%2%\" is a google document, ignored", e.Kind(), e.Name(), log::verbose ) ;
+	
+	else if ( fn.find('/') != fn.npos )
+		Log( "%1% \"%2%\" contains a slash in its name, ignored", e.Kind(), e.Name(), log::verbose ) ;
+	
+	else if ( !e.IsChange() && e.ParentHrefs().size() != 1 )
+		Log( "%1% \"%2%\" has multiple parents, ignored", e.Kind(), e.Name(), log::verbose ) ;
+
 	else if ( e.IsChange() )
 		FromChange( e ) ;
-	
+
 	else if ( !Update( e ) )
 	{
 		m_unresolved.push_back( e ) ;
