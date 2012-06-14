@@ -1,5 +1,7 @@
 project( grive )
 
+find_package(Boost COMPONENTS program_options REQUIRED)
+
 include_directories(
 	${grive_SOURCE_DIR}/../libgrive/src
 	${OPT_INCS}
@@ -16,7 +18,8 @@ add_executable( grive_executable
 )
 
 target_link_libraries( grive_executable
-    grive 
+	${Boost_LIBRARIES}
+    grive
 )
 
 set_target_properties( grive_executable

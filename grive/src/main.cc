@@ -30,8 +30,11 @@
 #include "util/log/CompositeLog.hh"
 #include "util/log/DefaultLog.hh"
 
+// boost header
 #include <boost/exception/all.hpp>
+#include <boost/program_options.hpp>
 
+// initializing libgcrypt, must be done in executable
 #include <gcrypt.h>
 
 #include <cassert>
@@ -68,79 +71,86 @@ int Main( int argc, char **argv )
 	
 	Json options ;
 	
-	int c ;
-	while ((c = getopt(argc, argv, "al:vVfd")) != -1)
+	namespace po = boost::program_options;
+	
+	// construct the program options
+	po::options_description desc( "Grive options" );
+	desc.add_options()
+		( "help,h",		"Produce help message" )
+		( "version,v",	"Display Grive version" )
+		( "auth,a",		"Request authorization token" )
+		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
+		( "debug,d",	"Enable debug level messages. Implies -v.")
+		( "log,l",		po::value<std::string>(), "Set log output filename." )
+		( "force,f",	"Force grive to always download a file from Google Drive "
+						"instead of uploading it." )
+	;
+	
+	po::variables_map vm;
+	po::store(po::parse_command_line( argc, argv, desc), vm );
+	po::notify(vm);
+	
+	if ( vm.count("help") )
 	{
-		switch ( c )
-		{
-			case 'a' :
-			{
-				std::cout
-					<< "-----------------------\n"
-					<< "Please go to this URL and get an authentication code:\n\n"
-					<< OAuth2::MakeAuthURL( client_id )
-					<< std::endl ;
-				
-				std::cout
-					<< "\n-----------------------\n"
-					<< "Please input the authentication code here: " << std::endl ;
-				std::string code ;
-				std::cin >> code ;
-				
-				OAuth2 token( client_id, client_secret ) ;
-				token.Auth( code ) ;
-				
-				// save to config
-				config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
-				config.Save() ;
-				
-				break ;
-			}
-			
-			case 'l' :
-			{
-				std::auto_ptr<LogBase> file_log(new log::DefaultLog(optarg)) ;
-				file_log->Enable( log::debug ) ;
-				file_log->Enable( log::verbose ) ;
-				file_log->Enable( log::info ) ;
-				file_log->Enable( log::warning ) ;
-				file_log->Enable( log::error ) ;
-				file_log->Enable( log::critical ) ;
-				
-				// log grive version to log file
-				file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
-				
-				comp_log->Add( file_log ) ;
-				break ;
-			}
-			
-			case 'v' :
-			{
-				std::cout
-					<< "grive version " VERSION " " __DATE__ " " __TIME__ << std::endl ;
-				return 0 ;
-			}
-			
-			case 'V' :
-			{
-				console_log->Enable( log::verbose ) ;
-				break ;
-			}
-			
-			case 'd' :
-			{
-				console_log->Enable( log::verbose ) ;
-				console_log->Enable( log::debug ) ;
-				break ;
-			}
-			
-			case 'f' :
-			{
-				options.Add( "force", Json(true) ) ;
-				break ;
-			}
-		}
+		std::cout << desc << std::endl ;
+		return 0 ;
 	}
+	if ( vm.count( "auth" ) )
+	{
+		std::cout
+			<< "-----------------------\n"
+			<< "Please go to this URL and get an authentication code:\n\n"
+			<< OAuth2::MakeAuthURL( client_id )
+			<< std::endl ;
+		
+		std::cout
+			<< "\n-----------------------\n"
+			<< "Please input the authentication code here: " << std::endl ;
+		std::string code ;
+		std::cin >> code ;
+		
+		OAuth2 token( client_id, client_secret ) ;
+		token.Auth( code ) ;
+		
+		// save to config
+		config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
+		config.Save() ;
+	}
+	if ( vm.count( "log" ) )
+	{
+		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
+		file_log->Enable( log::debug ) ;
+		file_log->Enable( log::verbose ) ;
+		file_log->Enable( log::info ) ;
+		file_log->Enable( log::warning ) ;
+		file_log->Enable( log::error ) ;
+		file_log->Enable( log::critical ) ;
+		
+		// log grive version to log file
+		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
+		
+		comp_log->Add( file_log ) ;
+	}
+	if ( vm.count( "version" ) )
+	{
+		std::cout
+			<< "grive version " VERSION " " __DATE__ " " __TIME__ << std::endl ;
+		return 0 ;
+	}
+	if ( vm.count( "verbose" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+	}
+	if ( vm.count( "debug" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+		console_log->Enable( log::debug ) ;
+	}
+	if ( vm.count( "force" ) )
+	{
+		options.Add( "force", Json(true) ) ;
+	}
+	
 	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
 	
 	std::string refresh_token ;
@@ -165,7 +175,6 @@ int Main( int argc, char **argv )
 	drive.SaveState() ;
 	
 	config.Save() ;
-	
 	return 0 ;
 }
 
