@@ -513,8 +513,11 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 		if ( !m_parent->IsRoot() )
 			uri += ("/" + http->Escape(m_parent->m_id) + "/contents") ;
 		
-		std::string meta = (boost::format(xml_meta) % "folder" % Name() ).str() ;
-		
+		std::string meta = (boost::format( xml_meta )
+			% "folder"
+			% xml::Escape(m_name)
+		).str() ;
+
 		http::Header hdr( auth ) ;
 		hdr.Add( "Content-Type: application/atom+xml" ) ;
 		
