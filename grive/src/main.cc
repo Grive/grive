@@ -84,6 +84,8 @@ int Main( int argc, char **argv )
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
+		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
+						"without actually performing them." )
 	;
 	
 	po::variables_map vm;
@@ -171,8 +173,11 @@ int Main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	Drive drive( token, options ) ;
 
-	drive.Update() ;
-	drive.SaveState() ;
+	if ( vm.count( "dry-run" ) == 0 )
+	{
+		drive.Update() ;
+		drive.SaveState() ;
+	}
 	
 	config.Save() ;
 	Log( "Finished!", log::info ) ;
