@@ -73,6 +73,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
 		std::string fname = Path2Str(i->path().filename()) ;
+// Trace( "found file %1%", i->path() ) ;
 	
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;

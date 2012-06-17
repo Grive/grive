@@ -178,4 +178,10 @@ void Drive::Update()
 	m_state.Sync( &http, m_http_hdr ) ;
 }
 
+void Drive::DryRun()
+{
+	Log( "Synchronizing files (dry-run)", log::info ) ;
+	m_state.Sync( 0, m_http_hdr ) ;
+}
+
 } // end of namespace

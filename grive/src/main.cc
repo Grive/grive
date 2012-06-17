@@ -178,6 +178,8 @@ int Main( int argc, char **argv )
 		drive.Update() ;
 		drive.SaveState() ;
 	}
+	else
+		drive.DryRun() ;
 	
 	config.Save() ;
 	Log( "Finished!", log::info ) ;

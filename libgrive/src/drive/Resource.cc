@@ -370,41 +370,49 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
-		if ( Create( http, auth ) )
+		if ( http != 0 && Create( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case local_deleted :
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
-		DeleteRemote( http, auth ) ;
+		if ( http != 0 )
+			DeleteRemote( http, auth ) ;
 		break ;
 	
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
-		if ( EditContent( http, auth ) )
+		if ( http != 0 && EditContent( http, auth ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 		Log( "sync %1% created in remote. creating local", path, log::info ) ;
-		if ( IsFolder() )
-			fs::create_directories( path ) ;
-		else
-			Download( http, path, auth ) ;
-		
-		m_state = sync ;
+		if ( http != 0 )
+		{
+			if ( IsFolder() )
+				fs::create_directories( path ) ;
+			else
+				Download( http, path, auth ) ;
+			
+			m_state = sync ;
+		}
 		break ;
 	
 	case remote_changed :
 		assert( !IsFolder() ) ;
 		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
-		Download( http, path, auth ) ;
-		m_state = sync ;
+		if ( http != 0 )
+		{
+			Download( http, path, auth ) ;
+			m_state = sync ;
+		}
 		break ;
 	
 	case remote_deleted :
 		Log( "sync %1% deleted in remote. deleting local", path, log::info ) ;
-		DeleteLocal() ;
+		if ( http != 0 )
+			DeleteLocal() ;
 		break ;
 	
 	case sync :
@@ -446,6 +454,7 @@ void Resource::DeleteLocal()
 
 void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 {
+	assert( http != 0 ) ;
 	http::StringResponse str ;
 	
 	try

@@ -44,7 +44,7 @@ public :
 	Drive( OAuth2& auth, const Json& options ) ;
 
 	void Update() ;
-	void Sync() ;
+	void DryRun() ;
 	void SaveState() ;
 	
 	struct Error : virtual Exception {} ;

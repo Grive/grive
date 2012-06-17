@@ -23,14 +23,12 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace gr { namespace http {
 
 class Receivable ;
 
-/*!	\class	Agent
-	\brief	class to provide HTTP access
+/*!	\brief	agent to provide HTTP access
 	
 	This class provides functions to send HTTP request in many methods (e.g. get, post and put).
 	Normally the HTTP response is returned in a Receivable.
