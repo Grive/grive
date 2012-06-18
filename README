@@ -1,4 +1,4 @@
-Grive 0.1.1
+Grive 0.2.0
 9 June 2012
 
 https://github.com/Grive/grive/wiki
@@ -14,6 +14,7 @@ There are a few things that grive does not do at the moment:
 - wait for changes in file system to occur and upload. Grive only sync when you run it.
 - symbolic links support
 - support for Google documents
+- support for files >2GB
   
 Of course these will be done in future, possibly the next release.
 
@@ -23,7 +24,7 @@ You need the following libraries:
 - libcurl
 - libstdc++
 - libgcrypt
-- Boost (Boost filesystem is required)
+- Boost (Boost filesystem and program_option are required)
 
 There are also some optional dependencies:
 - CppUnit (for unit tests)
