@@ -358,8 +358,8 @@ void Resource::Sync( http::Agent *http, const http::Header& auth )
 
 void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
 {
-	assert( !IsRoot() || m_state == sync ) ;	// root is already sync
-	assert( IsRoot() || fs::is_directory( m_parent->Path() ) ) ;
+	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
+	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
 	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
 	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
 
