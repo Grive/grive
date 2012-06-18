@@ -122,6 +122,8 @@ private :
 	friend std::ostream& operator<<( std::ostream& os, State s ) ;
 	
 private :
+	void SetState( State new_state ) ;
+
 	void Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const ;
 	bool EditContent( http::Agent* http, const http::Header& auth ) ;
 	bool Create( http::Agent* http, const http::Header& auth ) ;

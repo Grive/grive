@@ -77,13 +77,26 @@ Resource::Resource( const std::string& name, const std::string& kind ) :
 {
 }
 
+void Resource::SetState( State new_state )
+{
+	// only the new and delete states need to be set recursively
+	assert(
+		new_state == remote_new || new_state == remote_deleted ||
+		new_state == local_new  || new_state == local_deleted
+	) ;
+	
+	m_state = new_state ;
+	std::for_each( m_child.begin(), m_child.end(),
+		boost::bind( &Resource::SetState, _1, new_state ) ) ;
+}
+
 void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync )
 {
 	fs::path path = Path() ;
 	
 	if ( remote.CreateLink().empty() )
 		Log( "folder %1% is read-only", path, log::verbose ) ;
-	
+		
 	// already sync
 	if ( fs::is_directory( path ) )
 	{
@@ -102,8 +115,9 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 		}
 		else
 		{
+			// make all children as remote_new, if any
 			Log( "folder %1% is created in remote", path, log::verbose ) ;
-			m_state = remote_new ;
+			SetState( remote_new ) ;
 		}
 	}
 	else
@@ -117,7 +131,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 		else
 		{
 			Log( "folder %1% is deleted in local", path, log::verbose ) ;
-			m_state = local_deleted ;
+			SetState( local_deleted ) ;
 		}
 	}
 }
@@ -171,7 +185,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 		Log( "file %1% parent %2% recursively in %3% (%4%)", path,
 			( m_parent->m_state == remote_new || m_parent->m_state == local_new )      ? "created" : "deleted",
 			( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ) ? "remote"  : "local",
-			m_parent->m_state ) ;
+			m_parent->m_state, log::verbose ) ;
 		
 		m_state = m_parent->m_state ;
 	}
