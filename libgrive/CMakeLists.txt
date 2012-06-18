@@ -93,12 +93,13 @@ else()
 	set ( LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib )
 endif()
 
+# don't install libgrive for now
 #install(TARGETS grive LIBRARY DESTINATION ${LIB_INSTALL_DIR} )
-install(TARGETS grive ARCHIVE DESTINATION ${LIB_INSTALL_DIR} )
-install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
-install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
-install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
-install(FILES ${XML_HEADERS} DESTINATION include/grive/xml)
+#install(TARGETS grive ARCHIVE DESTINATION ${LIB_INSTALL_DIR} )
+#install(FILES ${DRIVE_HEADERS} DESTINATION include/grive/drive)
+#install(FILES ${PROTOCOL_HEADERS} DESTINATION include/grive/protocol)
+#install(FILES ${UTIL_HEADERS} DESTINATION include/grive/util)
+#install(FILES ${XML_HEADERS} DESTINATION include/grive/xml)
 
 IF ( CPPUNIT_FOUND )
 	message("-- Building unitary tests along with the library and the binary")
