@@ -130,13 +130,14 @@ int Main( int argc, char **argv )
 		
 		// log grive version to log file
 		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
+		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
 		
 		comp_log->Add( file_log ) ;
 	}
 	if ( vm.count( "version" ) )
 	{
 		std::cout
-			<< "grive version " VERSION " " __DATE__ " " __TIME__ << std::endl ;
+			<< "grive version " << VERSION << ' ' << __DATE__ << ' ' << __TIME__ << std::endl ;
 		return 0 ;
 	}
 	if ( vm.count( "verbose" ) )

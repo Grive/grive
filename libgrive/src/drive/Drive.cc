@@ -66,13 +66,12 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	http::CurlAgent http ;
 
 	long prev_stamp = m_state.ChangeStamp() ;
-	Trace( "previous time stamp is %1%", prev_stamp ) ;
+	Trace( "previous change stamp is %1%", prev_stamp ) ;
 	
 	// get metadata
 	http::XmlResponse xrsp ;
 // 	http::ResponseLog log( "meta-", ".xml", &xrsp ) ;
 	http.Get( "https://docs.google.com/feeds/metadata/default", &xrsp, m_http_hdr ) ;
-	Trace( "return %1%", xrsp.Response()["docs:largestChangestamp"] ) ;
 	m_state.ChangeStamp( 
 		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
 	

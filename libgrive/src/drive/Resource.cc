@@ -502,8 +502,10 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 	long r = http->Get( m_content, &dl, auth ) ;
 	if ( r <= 400 )
 	{
-		assert( m_mtime != DateTime() ) ;
-		os::SetFileTime( file, m_mtime ) ;
+		if ( m_mtime != DateTime() )
+			os::SetFileTime( file, m_mtime ) ;
+		else
+			Log( "encountered zero date time after downloading %1%", file, log::warning ) ;
 	}
 }
 
