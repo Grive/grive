@@ -27,3 +27,4 @@ set_target_properties( grive_executable
 )
 
 install(TARGETS grive_executable RUNTIME DESTINATION bin)
+install(FILES doc/grive.1 DESTINATION share/man/man1 )
