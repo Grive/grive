@@ -1,0 +1,58 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH "GRIVE" 1 "June 19, 2012"
+.SH NAME
+grive \- Google Drive client for GNU/Linux
+
+.SH SYNOPSIS
+.B grive [OPTIONS]
+.SH DESCRIPTION
+.PP
+.I Grive
+is a Google Drive (online storage service) client for GNU/Linux
+systems.
+.PP
+It allows the synchronization of all your files on the cloud with a
+directory of your choice and the upload of new files to Google Drive.
+.PP
+The options are as follows:
+.TP
+\fB\-a\fR, \fB\-\-auth\fR
+Requests authorization token from Google
+.TP
+\fB\-d\fR, \fB\-\-debug\fR
+Enable debug level messages. Implies \-V
+.TP
+\fB\-\-dry-run\fR
+Only detects which files are needed for download or upload without doing it
+.TP
+\fB\-f, \-\-force\fR
+Forces
+.I grive
+to always download a file from Google Drive instead uploading it
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Produces help message
+.TP
+\fB\-l\fR filename, \fB\-\-log\fR filename
+Set log output to
+.I filename
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Displays program version
+.TP
+\fB\-V\fR, \fB\-\-verbose\fR
+Verbose mode. Enables more messages than usual.
+
+.SH AUTHOR
+.PP
+The software was developed by Nestal Wan and Matchman Green.
+.PP
+This manpage was written by José Luis Segura Lucas (josel.segura@gmx.es)
+
+.SH REPORT BUGS
+.PP
+.I https://github.com/Grive/grive
+.I https://groups.google.com/forum/?fromgroups#!forum/grive-devel
