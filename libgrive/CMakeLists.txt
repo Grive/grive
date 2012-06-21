@@ -10,6 +10,7 @@ find_package(Boost 1.42.0 COMPONENTS filesystem system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
+find_package(ZLIB)
 
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
@@ -29,6 +30,10 @@ endif ( BFD_FOUND )
 if ( IBERTY_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
 endif ( IBERTY_FOUND )
+
+if ( ZLIB_FOUND )
+	set( OPT_LIBS	${OPT_LIBS}	${ZLIB_LIBRARIES} )
+endif ( ZLIB_FOUND )
 
 include_directories(
 	${libgrive_SOURCE_DIR}/src
