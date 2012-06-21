@@ -37,10 +37,15 @@
 // initializing libgcrypt, must be done in executable
 #include <gcrypt.h>
 
+// inotify for watching local filesystem changes
+#include <inotifytools/inotify.h>
+#include <inotifytools/inotifytools.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
+#include <regex.h>
 
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
@@ -86,6 +91,7 @@ int Main( int argc, char **argv )
 						"instead of uploading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		( "watch,w",	"Watch folder for changes." )
 	;
 	
 	po::variables_map vm;
@@ -167,7 +173,7 @@ int Main( int argc, char **argv )
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
 			log::critical ) ;
-		
+
 		return -1;
 	}
 	
@@ -178,10 +184,48 @@ int Main( int argc, char **argv )
 	{
 		drive.Update() ;
 		drive.SaveState() ;
+
+		if ( vm.count( "watch" ) )
+		{
+			inotifytools_ignore_events_by_regex( ".grive*", REG_EXTENDED) ;
+
+			struct inotify_event * event ;
+			while ( true )
+			{
+				if ( !inotifytools_initialize() ||
+						!inotifytools_watch_recursively( ".", IN_MODIFY |
+							IN_MOVE | IN_DELETE | IN_CREATE ))
+				{
+					Log( "Unable to initialize inotify!", log::critical ) ;
+					break ;
+				}
+
+				// Wait up to 5 mins for a local file change.
+				// After 5 mins we will update the drive regardless
+				// in order to pull any potential changes from
+				// the remote Google Drive
+				event = inotifytools_next_event( 300 ) ;
+				if (event != 0)
+					Log( "Local file change detected: %s", event->name, log::info ) ;
+				else
+					Log( "No local file change, polling remote Google Drive", log::info ) ;
+
+				// Remove all watches as we only need coarse grain
+				// file change notifications. Any events still in the
+				// queue can be discarded
+				inotifytools_cleanup();
+
+				// Wait for changes to accumulate
+				sleep(10);
+
+				drive.Update() ;
+				drive.SaveState() ;
+			}
+		}
 	}
 	else
 		drive.DryRun() ;
-	
+
 	config.Save() ;
 	Log( "Finished!", log::info ) ;
 	return 0 ;
