@@ -80,6 +80,8 @@ target_link_libraries( grive
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
+	#Fix to Issue#63 - linker problem encountered on OpenSuSe 12.1:
+	/lib/libz.so.1
 )
 
 #set_target_properties(grive PROPERTIES
