@@ -60,46 +60,6 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 	m_http_hdr.Add( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.Add( "GData-Version: 3.0" ) ;
 
-	Log( "Reading local directories", log::info ) ;
-	m_state.FromLocal( "." ) ;
-	
-	http::CurlAgent http ;
-
-	long prev_stamp = m_state.ChangeStamp() ;
-	Trace( "previous change stamp is %1%", prev_stamp ) ;
-	
-	// get metadata
-	http::XmlResponse xrsp ;
-// 	http::ResponseLog log( "meta-", ".xml", &xrsp ) ;
-	http.Get( "https://docs.google.com/feeds/metadata/default", &xrsp, m_http_hdr ) ;
-	m_state.ChangeStamp( 
-		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
-	
-	SyncFolders( &http ) ;
-
-	Log( "Reading remote server file list", log::info ) ;
-	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
-	xml::Node resp = xrsp.Response() ;
-
-	m_resume_link = resp["link"].
-		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-
-	Feed feed( resp ) ;
-	do
-	{
-		std::for_each( feed.begin(), feed.end(), boost::bind( &Drive::FromRemote, this, _1 ) ) ;
-	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
-	
-	// pull the changes feed
-	if ( prev_stamp != -1 )
-	{
-		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-// 		http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
-		http.Get( (changes_uri%(prev_stamp+1)).str(), &xrsp, m_http_hdr ) ;
-		
-		Feed changes( xrsp.Response() ) ;
-		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
-	}
 }
 
 void Drive::FromRemote( const Entry& entry )
@@ -171,10 +131,50 @@ void Drive::SyncFolders( http::Agent *http )
 
 void Drive::Update()
 {
-	Log( "Synchronizing files", log::info ) ;
+	Log( "Reading local directories", log::info ) ;
+	m_state.FromLocal( "." ) ;
 	
 	http::CurlAgent http ;
-	m_state.Sync( &http, m_http_hdr ) ;
+
+	long prev_stamp = m_state.ChangeStamp() ;
+	Trace( "previous change stamp is %1%", prev_stamp ) ;
+	
+	// get metadata
+	http::XmlResponse xrsp ;
+// 	http::ResponseLog log( "meta-", ".xml", &xrsp ) ;
+	http.Get( "https://docs.google.com/feeds/metadata/default", &xrsp, m_http_hdr ) ;
+	m_state.ChangeStamp( 
+		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
+	
+	SyncFolders( &http ) ;
+
+	Log( "Reading remote server file list", log::info ) ;
+	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
+	xml::Node resp = xrsp.Response() ;
+
+	m_resume_link = resp["link"].
+		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
+
+	Feed feed( resp ) ;
+	do
+	{
+		std::for_each( feed.begin(), feed.end(), boost::bind( &Drive::FromRemote, this, _1 ) ) ;
+	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
+	
+	// pull the changes feed
+	if ( prev_stamp != -1 )
+	{
+		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
+// 		http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
+		http.Get( (changes_uri%(prev_stamp+1)).str(), &xrsp, m_http_hdr ) ;
+		
+		Feed changes( xrsp.Response() ) ;
+		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
+	}
+	Log( "Synchronizing files", log::info ) ;
+	
+	http::CurlAgent http2 ;
+	m_state.Sync( &http2, m_http_hdr ) ;
 }
 
 void Drive::DryRun()
