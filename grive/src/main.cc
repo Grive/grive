@@ -173,6 +173,7 @@ int Main( int argc, char **argv )
 	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	Drive drive( token, options ) ;
+	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )
 	{

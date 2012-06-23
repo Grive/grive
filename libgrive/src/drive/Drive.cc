@@ -59,7 +59,6 @@ Drive::Drive( OAuth2& auth, const Json& options ) :
 {
 	m_http_hdr.Add( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	m_http_hdr.Add( "GData-Version: 3.0" ) ;
-
 }
 
 void Drive::FromRemote( const Entry& entry )
@@ -129,7 +128,7 @@ void Drive::SyncFolders( http::Agent *http )
 	m_state.ResolveEntry() ;
 }
 
-void Drive::Update()
+void Drive::DetectChanges()
 {
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( "." ) ;
@@ -172,9 +171,12 @@ void Drive::Update()
 		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
 	}
 	Log( "Synchronizing files", log::info ) ;
-	
-	http::CurlAgent http2 ;
-	m_state.Sync( &http2, m_http_hdr ) ;
+}
+
+void Drive::Update()
+{
+	http::CurlAgent http ;
+	m_state.Sync( &http, m_http_hdr ) ;
 }
 
 void Drive::DryRun()

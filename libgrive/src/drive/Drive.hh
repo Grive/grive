@@ -43,6 +43,7 @@ class Drive
 public :
 	Drive( OAuth2& auth, const Json& options ) ;
 
+	void DetectChanges() ;
 	void Update() ;
 	void DryRun() ;
 	void SaveState() ;
