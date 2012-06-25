@@ -55,6 +55,7 @@ private :
     void file();
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
+	void UpdateChangeStamp( http::Agent *http ) ;
 	
 private :
 	OAuth2&			m_auth ;

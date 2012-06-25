@@ -138,16 +138,10 @@ void Drive::DetectChanges()
 	long prev_stamp = m_state.ChangeStamp() ;
 	Trace( "previous change stamp is %1%", prev_stamp ) ;
 	
-	// get metadata
-	http::XmlResponse xrsp ;
-// 	http::ResponseLog log( "meta-", ".xml", &xrsp ) ;
-	http.Get( "https://docs.google.com/feeds/metadata/default", &xrsp, m_http_hdr ) ;
-	m_state.ChangeStamp( 
-		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
-	
 	SyncFolders( &http ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
+	http::XmlResponse xrsp ;
 	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
 	xml::Node resp = xrsp.Response() ;
 
@@ -163,26 +157,44 @@ void Drive::DetectChanges()
 	// pull the changes feed
 	if ( prev_stamp != -1 )
 	{
+		Log( "Detecting changes from last sync", log::info ) ;
 		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-// 		http::ResponseLog log2( "changes-", ".xml", &xrsp ) ;
 		http.Get( (changes_uri%(prev_stamp+1)).str(), &xrsp, m_http_hdr ) ;
 		
 		Feed changes( xrsp.Response() ) ;
 		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
 	}
-	Log( "Synchronizing files", log::info ) ;
 }
 
 void Drive::Update()
 {
+	Log( "Synchronizing files", log::info ) ;
 	http::CurlAgent http ;
 	m_state.Sync( &http, m_http_hdr ) ;
+	
+	UpdateChangeStamp( &http ) ;
 }
 
 void Drive::DryRun()
 {
 	Log( "Synchronizing files (dry-run)", log::info ) ;
 	m_state.Sync( 0, m_http_hdr ) ;
+}
+
+void Drive::UpdateChangeStamp( http::Agent *http )
+{
+	assert( http != 0 ) ;
+
+	http::XmlResponse xrsp ;
+	
+	// get changed feed
+	boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
+	http->Get( (changes_uri%(m_state.ChangeStamp()+1)).str(), &xrsp, m_http_hdr ) ;
+	
+	// we should go through the changes to see if it was really Grive to made that change
+	// maybe by recording the updated timestamp and compare it?
+	m_state.ChangeStamp( 
+		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
 }
 
 } // end of namespace

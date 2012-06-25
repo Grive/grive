@@ -276,6 +276,7 @@ long State::ChangeStamp() const
 
 void State::ChangeStamp( long cstamp )
 {
+	Log( "change stamp is set to %1%", cstamp, log::verbose ) ;
 	m_cstamp = cstamp ;
 }
 
