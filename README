@@ -1,7 +1,7 @@
 Grive 0.2.0
 9 June 2012
 
-https://github.com/Grive/grive/wiki
+http://www.lbreda.com/grive/
 
 Grive is still considered experimental. It just downloads all the files in your google drive
 into the current directory. After you make some changes to the local files, run grive and
