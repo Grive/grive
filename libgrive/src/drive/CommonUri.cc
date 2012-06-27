@@ -17,20 +17,15 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "CommonUri.hh"
+#include <boost/format.hpp>
 
-#include <string>
+namespace gr {
 
-namespace gr
+std::string ChangesFeed( int changestamp )
 {
-	const std::string feed_base		= "https://docs.google.com/feeds/default/private/full" ;
-	const std::string feed_changes	= "https://docs.google.com/feeds/default/private/changes" ;
-	const std::string feed_metadata	= "https://docs.google.com/feeds/metadata/default" ;
-	
-	const std::string root_href =
-		"https://docs.google.com/feeds/default/private/full/folder%3Aroot" ;
-	const std::string root_create =
-		"https://docs.google.com/feeds/upload/create-session/default/private/full" ;
-	
-	std::string ChangesFeed( int changestamp ) ;
+	boost::format feed( feed_changes + "?start-index=%1%" ) ;
+	return changestamp > 0 ? (feed%changestamp).str() : feed_changes ;
+}
+
 }

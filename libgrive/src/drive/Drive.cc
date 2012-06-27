@@ -84,7 +84,6 @@ void Drive::FromChange( const Entry& entry )
 		Log( "file \"%1%\" represents a deletion, ignored", entry.Title(), log::verbose ) ;
 	
 	// folders go directly
-	
 	else
 		m_state.FromRemote( entry ) ;
 }
@@ -101,7 +100,6 @@ void Drive::SyncFolders( http::Agent *http )
 	Log( "Synchronizing folders", log::info ) ;
 
 	http::XmlResponse xml ;
-// 	http::ResponseLog log( "dir-", ".xml", &xml ) ;
 	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
 	
 	Feed feed( xml.Response() ) ;
@@ -157,9 +155,9 @@ void Drive::DetectChanges()
 	// pull the changes feed
 	if ( prev_stamp != -1 )
 	{
+		http::ResponseLog log( "/tmp/changes-", ".xml", &xrsp ) ;
 		Log( "Detecting changes from last sync", log::info ) ;
-		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-		http.Get( (changes_uri%(prev_stamp+1)).str(), &xrsp, m_http_hdr ) ;
+		http.Get( ChangesFeed(prev_stamp+1), &log, m_http_hdr ) ;
 		
 		Feed changes( xrsp.Response() ) ;
 		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
@@ -185,20 +183,9 @@ void Drive::UpdateChangeStamp( http::Agent *http )
 {
 	assert( http != 0 ) ;
 
-	http::XmlResponse xrsp ;
-	
 	// get changed feed
-	std::string url;
-	if (m_state.ChangeStamp() != -1)
-	{
-		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-		url = (changes_uri%(m_state.ChangeStamp()+1)).str();
-	}
-	else
-	{
-		url = "https://docs.google.com/feeds/default/private/changes";
-	}
-	http->Get( url, &xrsp, m_http_hdr ) ;
+	http::XmlResponse xrsp ;
+	http->Get( ChangesFeed(m_state.ChangeStamp()+1), &xrsp, m_http_hdr ) ;
 	
 	// we should go through the changes to see if it was really Grive to made that change
 	// maybe by recording the updated timestamp and compare it?
