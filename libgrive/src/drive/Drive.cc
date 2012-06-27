@@ -188,8 +188,17 @@ void Drive::UpdateChangeStamp( http::Agent *http )
 	http::XmlResponse xrsp ;
 	
 	// get changed feed
-	boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
-	http->Get( (changes_uri%(m_state.ChangeStamp()+1)).str(), &xrsp, m_http_hdr ) ;
+	std::string url;
+	if (m_state.ChangeStamp() != -1)
+	{
+		boost::format changes_uri( "https://docs.google.com/feeds/default/private/changes?start-index=%1%" ) ;
+		url = (changes_uri%(m_state.ChangeStamp()+1)).str();
+	}
+	else
+	{
+		url = "https://docs.google.com/feeds/default/private/changes";
+	}
+	http->Get( url, &xrsp, m_http_hdr ) ;
 	
 	// we should go through the changes to see if it was really Grive to made that change
 	// maybe by recording the updated timestamp and compare it?
