@@ -33,7 +33,7 @@ There are also some optional dependencies:
 
 Grive uses cmake to build, see the instructions in:
 
-https://github.com/Grive/grive/wiki/Installation
+http://www.lbreda.com/grive/installation
 
 for detailed procedures to compile Grive.
 
