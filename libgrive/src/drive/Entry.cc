@@ -59,7 +59,7 @@ void Entry::Update( const xml::Node& n )
 	m_content_src	= n["content"]["@src"] ;
 	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
 	m_alt_self		= n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#alt-self" )["@href"] ;
-	m_mtime			= DateTime( n["updated"] ) ;	
+	m_mtime			= DateTime( n["updated"] ) ;
 
 	m_resource_id	= n["gd:resourceId"] ;
 	m_md5			= n["docs:md5Checksum"] ;
@@ -70,15 +70,15 @@ void Entry::Update( const xml::Node& n )
 	// changestamp only appear in change feed entries
 	xml::NodeSet cs	= n["docs:changestamp"]["@value"] ;
 	m_change_stamp	= cs.empty() ? -1 : std::atoi( cs.front().Value().c_str() ) ;
-	
+
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
 		m_parent_hrefs.push_back( (*i)["@href"] ) ;
-	
+
 	// convert to lower case for easy comparison
 	std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
-	
+
 	m_is_removed = !n["gd:deleted"].empty() || !n["docs:removed"].empty() ;
 }
 
@@ -162,15 +162,15 @@ void Entry::Swap( Entry& e )
 	m_resource_id.swap( e.m_resource_id ) ;
 
 	m_parent_hrefs.swap( e.m_parent_hrefs ) ;
-	
+
 	m_self_href.swap( e.m_self_href ) ;
 	m_alt_self.swap( e.m_alt_self ) ;
-	m_content_src.swap( e.m_content_src ) ;	
+	m_content_src.swap( e.m_content_src ) ;
 	m_edit_link.swap( e.m_edit_link ) ;
 	m_create_link.swap( e.m_create_link ) ;
-	
+
 	m_mtime.Swap( e.m_mtime ) ;
-	
+
 	std::swap( m_change_stamp, e.m_change_stamp ) ;
 	std::swap( m_is_removed, e.m_is_removed ) ;
 }
@@ -192,7 +192,7 @@ bool Entry::IsRemoved() const
 
 std::string Entry::Name() const
 {
-	return m_kind == "folder" ? m_title : m_filename ;
+	return m_kind == "file" ? m_filename : m_title ;
 }
 
 } // end of namespace
