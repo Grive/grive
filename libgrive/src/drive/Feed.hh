@@ -43,15 +43,29 @@ public :
 
 public :
 	explicit Feed( const xml::Node& root ) ;
+	Feed( ) ;
+	void Start( http::Agent *http, const http::Header& auth, const std::string& url ) ;
+	
 	void Assign( const xml::Node& root ) ;
+	const xml::Node& Root() const ;
 	
 	iterator begin() const ;
 	iterator end() const ;
 	
 	std::string Next() const ;
 	bool GetNext( http::Agent *http, const http::Header& auth ) ;
-		
+	
+	void EnableLog( const std::string& prefix, const std::string& suffix ) ;
+	
 private :
+	struct LogInfo
+	{
+		std::string	prefix ;
+		std::string	suffix ;
+		std::size_t	sequence ;
+	} ;
+	std::auto_ptr<LogInfo>	m_log ;
+
 	xml::Node		m_root ;
 	xml::NodeSet	m_entries ;
 } ;

@@ -139,28 +139,32 @@ void Drive::DetectChanges()
 	SyncFolders( &http ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
-	http::XmlResponse xrsp ;
-	http.Get( feed_base + "?showfolders=true&showroot=true", &xrsp, m_http_hdr ) ;
-	xml::Node resp = xrsp.Response() ;
-
-	m_resume_link = resp["link"].
+	Feed feed ;
+// 	feed.EnableLog( "/tmp/file", ".xml" ) ;
+	feed.Start( &http, m_http_hdr, feed_base + "?showfolders=true&showroot=true" ) ;
+	
+	m_resume_link = feed.Root()["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-
-	Feed feed( resp ) ;
+		
 	do
 	{
-		std::for_each( feed.begin(), feed.end(), boost::bind( &Drive::FromRemote, this, _1 ) ) ;
+		std::for_each(
+			feed.begin(), feed.end(),
+			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
+			
 	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
 	
 	// pull the changes feed
 	if ( prev_stamp != -1 )
 	{
-		http::ResponseLog log( "/tmp/changes-", ".xml", &xrsp ) ;
 		Log( "Detecting changes from last sync", log::info ) ;
-		http.Get( ChangesFeed(prev_stamp+1), &log, m_http_hdr ) ;
+		Feed changes ;
+// 		feed.EnableLog( "/tmp/changes", ".xml" ) ;
+		feed.Start( &http, m_http_hdr, ChangesFeed(prev_stamp+1) ) ;
 		
-		Feed changes( xrsp.Response() ) ;
-		std::for_each( changes.begin(), changes.end(), boost::bind( &Drive::FromChange, this, _1 ) ) ;
+		std::for_each(
+			changes.begin(), changes.end(),
+			boost::bind( &Drive::FromChange, this, _1 ) ) ;
 	}
 }
 

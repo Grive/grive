@@ -259,7 +259,10 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
 		else
+		{
+// 			Trace( "file %1% mtime %2%, last_sync %3%", path, m_mtime, last_sync ) ;
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
+		}
 		
 		m_name		= Path2Str( path.filename() ) ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;

@@ -33,14 +33,19 @@ public :
 		const std::string&	prefix,
 		const std::string&	suffix,
 		Receivable			*next ) ;
-
+	ResponseLog( Receivable	*next ) ;
+		
 	std::size_t OnData( void *data, std::size_t count ) ;
 	void Clear() ;
 
+	void Enable( bool enable = true ) ;
+	void Reset( const std::string& prefix, const std::string& suffix, Receivable *next ) ;
+	
 private :
 	static std::string Filename( const std::string& prefix, const std::string& suffix ) ;
 	
 private :
+	bool            m_enabled ;
 	std::ofstream	m_log ;
 	Receivable		*m_next ;
 } ;

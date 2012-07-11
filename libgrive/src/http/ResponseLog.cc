@@ -29,14 +29,28 @@ ResponseLog::ResponseLog(
 	const std::string&	prefix,
 	const std::string&	suffix,
 	Receivable			*next ) :
-	m_log( Filename(prefix, suffix).c_str() ),
-	m_next( next )
+	m_enabled	( true ),
+	m_log		( Filename(prefix, suffix).c_str() ),
+	m_next		( next )
 {
+	assert( m_next != 0 ) ;
+}
+
+ResponseLog::ResponseLog( Receivable *next ) :
+	m_enabled	( false ),
+	m_next		( next )
+{
+	assert( m_next != 0 ) ;
 }
 
 std::size_t ResponseLog::OnData( void *data, std::size_t count )
 {
-	m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
+	if ( m_enabled )
+	{
+		assert( m_log.rdbuf() != 0 ) ;
+		m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
+	}
+	
 	return m_next->OnData( data, count ) ;
 }
 
@@ -49,6 +63,23 @@ void ResponseLog::Clear()
 std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
 {
 	return prefix + DateTime::Now().Format( "%H%M%S" ) + suffix ;
+}
+
+void ResponseLog::Enable( bool enable )
+{
+	m_enabled = enable ;
+}
+
+void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, Receivable *next )
+{
+	assert( next != 0 ) ;
+	
+	if ( m_log.is_open() )
+		m_log.close() ;
+	
+	m_log.open( Filename(prefix, suffix).c_str() ) ;
+	m_next		= next ;
+	m_enabled	= true ;
 }
 
 }} // end of namespace
