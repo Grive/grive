@@ -3,20 +3,20 @@ Grive 0.2.0
 
 http://www.lbreda.com/grive/
 
-Grive is still considered experimental. It just downloads all the files in your google drive
-into the current directory. After you make some changes to the local files, run grive and
-it will upload your changes back to your google drive. New files created in local or google
-drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
+Grive is still considered experimental. It simply downloads all the files in your Google Drive
+into the current directory. After you make some changes to the local files, run grive again and
+it will upload your changes back to your Google Drive. New files created locally or in Google
+Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
 Currently Grive will NOT destroy any of your files: it will only move the files to a
-directory named .trash, or put it in the google drive trash. You can always recover them.
+directory named .trash or put them in the Google Drive trash. You can always recover them.
 
-There are a few things that grive does not do at the moment:
-- wait for changes in file system to occur and upload. Grive only sync when you run it.
+There are a few things that Grive does not do at the moment:
+- wait for changes in file system to occur and upload. A sync is only performed when you run Grive.
 - symbolic links support
 - support for Google documents
 - support for files >2GB
   
-Of course these will be done in future, possibly the next release.
+Of course these will be added in the future, possibly the next release.
 
 You need the following libraries:
 
@@ -35,15 +35,15 @@ Grive uses cmake to build, see the instructions in:
 
 http://www.lbreda.com/grive/installation
 
-for detailed procedures to compile Grive.
+...for detailed procedures to compile Grive.
 
-When grive is ran for the first time, you should use the "-a" argument to grant
-permission to grive to access to your Google Drive. An URL should be printed.
-Go to the link. You will need to login to your google account if you haven't
-done so. After granting the permission to grive, the browser will show you
-an authenication code. Copy-and-paste that to the standard input of grive.
+When Grive is run for the first time, you should use the "-a" argument to grant
+permission to Grive to access to your Google Drive. A URL should be printed.
+Go to the link. You will need to login to your Google account if you haven't
+done so. After granting the permission to Grive, the browser will show you
+an authenication code. Copy-and-paste that to the standard input of Grive.
 
-If everything works fine, grive will create a .grive and a .grive_state file in your
+If everything works fine, Grive will create .grive and .grive_state files in your
 current directory. It will also start downloading files from your Google Drive to
 your current directory.
 
