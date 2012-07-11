@@ -192,7 +192,7 @@ bool Entry::IsRemoved() const
 
 std::string Entry::Name() const
 {
-	return m_kind == "file" ? m_filename : m_title ;
+	return (m_kind == "file" || m_kind == "pdf") ? m_filename : m_title ;
 }
 
 } // end of namespace
