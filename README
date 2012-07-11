@@ -3,10 +3,10 @@ Grive 0.2.0
 
 http://www.lbreda.com/grive/
 
-Grive is still considered experimental. It simply downloads all the files in your Google Drive
-into the current directory. After you make some changes to the local files, run grive again and
-it will upload your changes back to your Google Drive. New files created locally or in Google
-Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
+Grive can be considered still considered beta quality. It simply downloads all the files in your
+Google Drive into the current directory. After you make some changes to the local files, run
+grive again and it will upload your changes back to your Google Drive. New files created locally
+or in Google Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
 Currently Grive will NOT destroy any of your files: it will only move the files to a
 directory named .trash or put them in the Google Drive trash. You can always recover them.
 
