@@ -23,6 +23,7 @@
 
 #include "util/DateTime.hh"
 #include "util/FileSystem.hh"
+#include "protocol/OAuth2.hh"
 
 #include <memory>
 
@@ -58,7 +59,7 @@ public :
 	Resource* FindByID( const std::string& id ) ;
 	Resource* Find( const fs::path& path ) ;
 
-	void Sync( http::Agent *http, const http::Header& auth ) ;
+	void Sync( http::Agent *http, const http::Header& auth, OAuth2::OAuth2& oauth ) ;
 	
 	iterator begin() ;
 	iterator end() ;

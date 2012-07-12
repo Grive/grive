@@ -45,8 +45,8 @@ public :
 	std::size_t Read( void *ptr, std::size_t size ) ;
 	std::size_t Write( const void *ptr, std::size_t size ) ;
 
-	long Seek( long offset, int whence ) ;
-	long Tell() const ;
+	off_t Seek(off_t offset, int whence ) ;
+	off_t Tell() const ;
 	
 	void Chmod( int mode ) ;
 

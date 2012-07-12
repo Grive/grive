@@ -61,7 +61,7 @@ void StdioFile::Open( const fs::path& path, int flags, int mode )
 		Close() ;
 	
 	assert( m_fd == -1 ) ;
-	m_fd = ::open( path.string().c_str(), flags, mode ) ;
+	m_fd = ::open64( path.string().c_str(), flags, mode ) ;
 	if ( m_fd == -1 )
 	{
 		BOOST_THROW_EXCEPTION(
@@ -127,13 +127,13 @@ std::size_t StdioFile::Write( const void *ptr, std::size_t size )
 	return count ;
 }
 
-long StdioFile::Seek( long offset, int whence )
+off_t StdioFile::Seek( off_t offset, int whence )
 {
 	assert( IsOpened() ) ;
 	return ::lseek( m_fd, offset, whence ) ;
 }
 
-long StdioFile::Tell() const
+off_t StdioFile::Tell() const
 {
 	assert( IsOpened() ) ;
 	return ::lseek( m_fd, 0, SEEK_CUR ) ;

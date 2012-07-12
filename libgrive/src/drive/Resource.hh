@@ -35,6 +35,10 @@ namespace http
 	class Header ;
 }
 
+
+
+class OAuth2;
+
 class Entry ;
 
 /*!	\brief	A resource can be a file or a folder in the google drive
@@ -77,7 +81,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent* http, const http::Header& auth ) ;
+	void Sync( http::Agent* http, const http::Header& auth, OAuth2& oauth ) ;
 
 	// children access
 	iterator begin() const ;

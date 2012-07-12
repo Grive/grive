@@ -36,12 +36,13 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "protocol/OAuth2.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
 
 #include <cassert>
-
+#include <time.h>
 // for debugging
 #include <iostream>
 
@@ -360,17 +361,29 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, const http::Header& auth )
+void Resource::Sync( http::Agent *http, const http::Header& auth, OAuth2& oauth )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
+ 	std::vector<std::string> m_auth;
+	//m_auth.assign(auth.begin(), auth.end());	
+	time_t t;
+        time(&t);
+	std::cout << auth  << std::endl;
+        if(t-oauth.Time() > oauth.ExpiresIn()-100){
+		oauth.Refresh();
+		m_auth.clear();
+		oauth.m_time = t;
+	}
+	m_auth.push_back( "Authorization: Bearer " + oauth.AccessToken() ) ;
+	m_auth.push_back( "GData-Version: 3.0" ) ;
 	
-	SyncSelf( http, auth ) ;
+	SyncSelf( http, (const http::Header&)m_auth ) ;
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, auth ) ) ;
+			boost::bind( &Resource::Sync, _1, http, auth,  oauth ) ) ;
 }
 
 void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
@@ -567,22 +580,29 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 	}
 }
 
+struct WriteThis {
+  const char *readptr;
+  off_t sizeleft;
+  FILE* file;
+  bool post;
+};
 bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post )
 {
 	assert( http != 0 ) ;
-	
-	StdioFile file( Path() ) ;
-	
+	const fs::path& path = Path();
+	struct WriteThis pooh;
+	struct WriteThis meta_a;
 	// TODO: upload in chunks
-	std::string data ;
-	char buf[4096] ;
-	std::size_t count = 0 ;
-	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-		data.append( buf, count ) ;
+	
+	pooh.file = fopen64(path.string().c_str(),"r");
+        fseeko(pooh.file, 0, SEEK_END);
+        pooh.sizeleft = ftello(pooh.file);
+        rewind (pooh.file);
+	
+	pooh.post = 1;
 
 	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
-	
+	xcontent_len << "X-Upload-Content-Length: " << pooh.sizeleft;	
 	http::Header hdr( auth ) ;
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
 	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
@@ -594,12 +614,14 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 		% m_kind
 		% xml::Escape(m_name)
 	).str() ;
-	
+	meta_a.readptr=meta.c_str();
+	meta_a.sizeleft=meta.size();
+	meta_a.post=post;
 	http::StringResponse str ;
 	if ( post )
 		http->Post( link, meta, &str, hdr ) ;
 	else
-		http->Put( link, meta, &str, hdr ) ;
+		http->Put( link, &meta_a, &str, hdr ) ;
 	
 	http::Header uphdr ;
 	uphdr.Add( "Expect:" ) ;
@@ -609,7 +631,8 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	std::string uplink = http->RedirLocation() ;
 	http::XmlResponse xml ;
 	
-	http->Put( uplink, data, &xml, uphdr ) ;
+	http->Put( uplink, &pooh, &xml, uphdr ) ;
+	fclose(pooh.file);
 	AssignIDs( Entry( xml.Response() ) ) ;
 	
 	return true ;

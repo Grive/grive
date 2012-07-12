@@ -41,7 +41,7 @@ public :
 	
 	long Put(
 		const std::string&	url,
-		const std::string&	data,
+		void*	data,
 		Receivable			*dest,
 		const Header&		hdr ) ;
 

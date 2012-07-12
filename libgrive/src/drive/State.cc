@@ -262,9 +262,9 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-void State::Sync( http::Agent *http, const http::Header& auth )
+void State::Sync( http::Agent *http, const http::Header& auth, OAuth2::OAuth2& oauth)
 {
-	m_res.Root()->Sync( http, auth ) ;
+	m_res.Root()->Sync( http, auth ,oauth) ;
 	m_last_sync = DateTime::Now() ;
 }
 
