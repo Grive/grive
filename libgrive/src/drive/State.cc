@@ -264,8 +264,20 @@ void State::Write( const fs::path& filename ) const
 
 void State::Sync( http::Agent *http, const http::Header& auth )
 {
-	m_res.Root()->Sync( http, auth ) ;
-	m_last_sync = DateTime::Now() ;
+	// set the last sync time from the time returned by the server for the last file synced
+	// if the sync time hasn't changed (i.e. now files have been uploaded)
+	// set the last sync time to the time on the client
+	// ideally because we compare server file times to the last sync time
+	// the last sync time would always be a server time rather than a client time
+	// TODO - WARNING - do we use the last sync time to compare to client file times
+	// need to check if this introduces a new problem
+ 	DateTime last_sync_time = m_last_sync;
+	m_res.Root()->Sync( http, auth, last_sync_time ) ;
+  	if (last_sync_time == m_last_sync) {
+    	m_last_sync = DateTime::Now();
+  	} else {
+    	m_last_sync = last_sync_time;
+  	}
 }
 
 long State::ChangeStamp() const
