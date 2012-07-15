@@ -360,20 +360,20 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, const http::Header& auth )
+void Resource::Sync( http::Agent *http, const http::Header& auth, DateTime& sync_time )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
-	SyncSelf( http, auth ) ;
+	SyncSelf( http, auth, sync_time ) ;
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, auth ) ) ;
+			boost::bind( &Resource::Sync, _1, http, auth, boost::ref(sync_time) ) ) ;
 }
 
-void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
+void Resource::SyncSelf( http::Agent* http, const http::Header& auth, DateTime& sync_time )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
@@ -387,7 +387,7 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
-		if ( http != 0 && Create( http, auth ) )
+		if ( http != 0 && Create( http, auth, sync_time ) )
 			m_state = sync ;
 		break ;
 	
@@ -399,7 +399,7 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth )
 	
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
-		if ( http != 0 && EditContent( http, auth ) )
+		if ( http != 0 && EditContent( http, auth, sync_time ) )
 			m_state = sync ;
 		break ;
 	
@@ -512,7 +512,7 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 	}
 }
 
-bool Resource::EditContent( http::Agent* http, const http::Header& auth )
+bool Resource::EditContent( http::Agent* http, const http::Header& auth, DateTime& sync_time )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
@@ -525,10 +525,10 @@ bool Resource::EditContent( http::Agent* http, const http::Header& auth )
 		return false ;
 	}
 	
-	return Upload( http, m_edit, auth, false ) ;
+	return Upload( http, m_edit, auth, false, sync_time ) ;
 }
 
-bool Resource::Create( http::Agent* http, const http::Header& auth )
+bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sync_time )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
@@ -558,7 +558,7 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 	}
 	else if ( !m_parent->m_create.empty() )
 	{
-		return Upload( http, m_parent->m_create + "?convert=false", auth, true ) ;
+		return Upload( http, m_parent->m_create + "?convert=false", auth, true, sync_time ) ;
 	}
 	else
 	{
@@ -567,7 +567,7 @@ bool Resource::Create( http::Agent* http, const http::Header& auth )
 	}
 }
 
-bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post )
+bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post, DateTime& sync_time )
 {
 	assert( http != 0 ) ;
 	
@@ -611,6 +611,7 @@ bool Resource::Upload( http::Agent* http, const std::string& link, const http::H
 	
 	http->Put( uplink, data, &xml, uphdr ) ;
 	AssignIDs( Entry( xml.Response() ) ) ;
+	sync_time = std::max(Entry(xml.Response()).MTime(), sync_time);
 	
 	return true ;
 }

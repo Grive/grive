@@ -77,7 +77,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent* http, const http::Header& auth ) ;
+	void Sync( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
 
 	// children access
 	iterator begin() const ;
@@ -125,9 +125,9 @@ private :
 	void SetState( State new_state ) ;
 
 	void Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const ;
-	bool EditContent( http::Agent* http, const http::Header& auth ) ;
-	bool Create( http::Agent* http, const http::Header& auth ) ;
-	bool Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post ) ;
+	bool EditContent( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
+	bool Create( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
+	bool Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post, DateTime& sync_time ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
@@ -136,7 +136,7 @@ private :
 	void DeleteRemote( http::Agent* http, const http::Header& auth ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, const http::Header& auth ) ;
+	void SyncSelf( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
 	
 private :
 	std::string				m_name ;
