@@ -25,6 +25,7 @@
 #include "Receivable.hh"
 
 #include "util/log/Log.hh"
+#include "util/StdioFile.hh"
 
 #include <boost/throw_exception.hpp>
 
@@ -34,6 +35,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <limits>
 #include <sstream>
 #include <streambuf>
 #include <iostream>
@@ -43,8 +45,9 @@
 namespace {
 
 using namespace gr::http ;
+using namespace gr ;
 
-size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
 {
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
@@ -55,6 +58,22 @@ size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string
 		std::memcpy( ptr, &(*data)[0], count ) ;
 		data->erase( 0, count ) ;
 	}
+	
+	return count ;
+}
+
+size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, StdioFile *file )
+{
+	assert( ptr != 0 ) ;
+	assert( file != 0 ) ;
+
+	u64_t count = std::min(
+		static_cast<u64_t>(size * nmemb),
+		static_cast<u64_t>(file->Size() - file->Tell()) ) ;
+	assert( count <= std::numeric_limits<std::size_t>::max() ) ;
+	
+	if ( count > 0 )
+		file->Read( ptr, static_cast<std::size_t>(count) ) ;
 	
 	return count ;
 }
@@ -167,9 +186,29 @@ long CurlAgent::Put(
 
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
 	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
+	
+	return ExecCurl( url, dest, hdr ) ;
+}
+
+long CurlAgent::Put(
+	const std::string&	url,
+	StdioFile&			file,
+	Receivable			*dest,
+	const Header&		hdr )
+{
+	Trace("HTTP PUT \"%1%\"", url ) ;
+	
+	Init() ;
+	CURL *curl = m_pimpl->curl ;
+
+	// set common options
+	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,			&file ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file.Size()) ) ;
 	
 	return ExecCurl( url, dest, hdr ) ;
 }

@@ -21,7 +21,11 @@
 
 #include <string>
 
-namespace gr { namespace http {
+namespace gr {
+
+class StdioFile ;
+
+namespace http {
 
 class Header ;
 class Receivable ;
@@ -35,6 +39,12 @@ public :
 		Receivable			*dest,
 		const Header&		hdr ) = 0 ;
 
+	virtual long Put(
+		const std::string&	url,
+		StdioFile&			file,
+		Receivable			*dest,
+		const Header&		hdr ) = 0 ;
+		
 	virtual long Get(
 		const std::string& 	url,
 		Receivable			*dest,

@@ -44,6 +44,12 @@ public :
 		const std::string&	data,
 		Receivable			*dest,
 		const Header&		hdr ) ;
+	
+	long Put(
+		const std::string&	url,
+		StdioFile&			file,
+		Receivable			*dest,
+		const Header&		hdr ) ;
 
 	long Get(
 		const std::string& 	url,
