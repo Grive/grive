@@ -140,7 +140,7 @@ void Drive::DetectChanges()
 
 	Log( "Reading remote server file list", log::info ) ;
 	Feed feed ;
-	feed.EnableLog( "/tmp/file", ".xml" ) ;
+// 	feed.EnableLog( "/tmp/file", ".xml" ) ;
 	feed.Start( &http, m_http_hdr, feed_base + "?showfolders=true&showroot=true" ) ;
 	
 	m_resume_link = feed.Root()["link"].
@@ -159,7 +159,7 @@ void Drive::DetectChanges()
 	{
 		Log( "Detecting changes from last sync", log::info ) ;
 		Feed changes ;
-		feed.EnableLog( "/tmp/changes", ".xml" ) ;
+// 		feed.EnableLog( "/tmp/changes", ".xml" ) ;
 		feed.Start( &http, m_http_hdr, ChangesFeed(prev_stamp+1) ) ;
 		
 		std::for_each(

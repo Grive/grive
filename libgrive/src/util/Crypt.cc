@@ -21,6 +21,7 @@
 
 #include "StdioFile.hh"
 #include "Exception.hh"
+#include "MemMap.hh"
 
 #include <iomanip>
 #include <sstream>
@@ -31,7 +32,8 @@
 
 namespace gr { namespace crypt {
 
-const std::size_t read_size = 8 * 1024 ;
+// map 4MB of data at a time
+const u64_t read_size = 1024 * 4096 ;
 
 struct MD5::Impl
 {
@@ -85,13 +87,14 @@ std::string MD5::Get( const fs::path& file )
 
 std::string MD5::Get( StdioFile& file )
 {
-	char buf[read_size] ;
-
 	MD5 crypt ;
 	
-	std::size_t count = 0 ;
-	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-		crypt.Write( buf, count ) ;
+	u64_t size = file.Size() ;
+	for ( u64_t i = 0 ; i < size ; i += read_size )
+	{
+		MemMap map( file, i, static_cast<std::size_t>(std::min(read_size, size-i)) ) ;
+		crypt.Write( map.Addr(), map.Length() ) ;
+	}
 
 	return crypt.Get() ;
 }
