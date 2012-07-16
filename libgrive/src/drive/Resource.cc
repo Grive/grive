@@ -209,6 +209,14 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 		}
 	}
 	
+	// remote checksum unknown, assume the file is not changed in remote
+	else if ( remote.MD5().empty() )
+	{
+		Log( "file %1% has unknown checksum in remote. assuned in sync",
+			Path(), log::verbose ) ;
+		m_state = sync ;
+	}
+	
 	// if checksum is equal, no need to compare the mtime
 	else if ( remote.MD5() == m_md5 )
 	{
@@ -259,10 +267,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
 		else
-		{
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
-// 			Trace( "file %1% mtime %2%, last_sync %3%, state (%4%)", path, m_mtime, last_sync, m_state ) ;
-		}
 		
 		m_name		= Path2Str( path.filename() ) ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
