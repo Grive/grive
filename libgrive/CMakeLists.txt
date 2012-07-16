@@ -68,7 +68,6 @@ file (GLOB LIBGRIVE_SRC
 )
 
 add_definitions(
-	-DVERSION="${GRIVE_VERSION}"
 	-DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/"
 	-DSRC_DIR="${libgrive_SOURCE_DIR}/src"
 )

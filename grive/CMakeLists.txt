@@ -7,8 +7,6 @@ include_directories(
 	${OPT_INCS}
 )
 
-add_definitions( -DVERSION="${GRIVE_VERSION}" )
-
 file (GLOB GRIVE_EXE_SRC
     ${grive_SOURCE_DIR}/src/*.cc
 )
