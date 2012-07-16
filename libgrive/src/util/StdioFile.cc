@@ -30,9 +30,46 @@
 #include <boost/exception/errinfo_file_open_mode.hpp>
 #include <boost/exception/info.hpp>
 
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+
+// local functions
+namespace {
+
+off_t LSeek( int fd, off_t offset, int whence )
+{
+	assert( fd >= 0 ) ;
+	
+	off_t r = ::lseek( fd, offset, whence ) ;
+	if ( r == static_cast<off_t>(-1) )
+	{
+		BOOST_THROW_EXCEPTION(
+			gr::StdioFile::Error()
+				<< boost::errinfo_api_function("lseek")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	
+	return r ;
+}
+
+struct stat FStat( int fd )
+{
+	struct stat s = {} ;
+	if ( ::fstat( fd, &s ) != 0 )
+	{
+		BOOST_THROW_EXCEPTION(
+			gr::StdioFile::Error()
+				<< boost::errinfo_api_function("fstat")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	return s ;
+}
+
+} // end of local functions
 
 namespace gr {
 
@@ -127,16 +164,26 @@ std::size_t StdioFile::Write( const void *ptr, std::size_t size )
 	return count ;
 }
 
-long StdioFile::Seek( long offset, int whence )
+off_t StdioFile::Seek( off_t offset, int whence )
 {
 	assert( IsOpened() ) ;
-	return ::lseek( m_fd, offset, whence ) ;
+	return LSeek( m_fd, offset, whence ) ;
 }
 
-long StdioFile::Tell() const
+off_t StdioFile::Tell() const
 {
 	assert( IsOpened() ) ;
-	return ::lseek( m_fd, 0, SEEK_CUR ) ;
+	return LSeek( m_fd, 0, SEEK_CUR ) ;
+}
+
+u64_t StdioFile::Size() const
+{
+	assert( IsOpened() ) ;
+	
+	struct stat s = FStat(m_fd) ;
+	
+	assert( s.st_size >= 0 ) ;
+	return static_cast<uint64_t>( s.st_size ) ;
 }
 
 void StdioFile::Chmod( int mode )
@@ -148,6 +195,34 @@ void StdioFile::Chmod( int mode )
 		BOOST_THROW_EXCEPTION(
 			Error()
 				<< boost::errinfo_api_function("fchmod")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+}
+
+void* StdioFile::Map( off_t offset, std::size_t length )
+{
+	assert( IsOpened() ) ;
+	
+	void *addr = ::mmap( 0, length, PROT_READ, MAP_PRIVATE, m_fd, offset ) ;
+	if ( addr == reinterpret_cast<void*>( -1 ) )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("mmap")
+				<< boost::errinfo_errno(errno)
+		) ;
+	}
+	return addr ;
+}
+
+void StdioFile::UnMap( void *addr, std::size_t length )
+{
+	if ( ::munmap( addr, length ) != 0 )
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("munmap")
 				<< boost::errinfo_errno(errno)
 		) ;
 	}

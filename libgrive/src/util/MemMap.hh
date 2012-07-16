@@ -20,46 +20,28 @@
 #pragma once
 
 #include "Exception.hh"
-#include "FileSystem.hh"
 #include "Types.hh"
-
-#include <string>
+#include <cstddef>
 
 namespace gr {
 
-class StdioFile
+class StdioFile ;
+
+class MemMap
 {
 public :
 	struct Error : virtual Exception {} ;
 
 public :
-	StdioFile() ;
-	StdioFile( const fs::path& path ) ;
-	StdioFile( const fs::path& path, int mode ) ;
-	~StdioFile( ) ;
-
-	void OpenForRead( const fs::path& path ) ;
-	void OpenForWrite( const fs::path& path, int mode = 0600 ) ;
-	void Close() ;
-	bool IsOpened() const ;
+	MemMap( StdioFile& file, off_t offset, std::size_t length ) ;
+	~MemMap() ;
 	
-	std::size_t Read( void *ptr, std::size_t size ) ;
-	std::size_t Write( const void *ptr, std::size_t size ) ;
+	void* Addr() const ;
+	std::size_t Length() const ;
 
-	off_t Seek( off_t offset, int whence ) ;
-	off_t Tell() const ;
-	u64_t Size() const ;
-	
-	void Chmod( int mode ) ;
-
-	void* Map( off_t offset, std::size_t length ) ;
-	static void UnMap( void *addr, std::size_t length ) ;
-	
 private :
-	void Open( const fs::path& path, int flags, int mode ) ;
-	
-private :
-	int	m_fd ;
+	void		*m_addr ;
+	std::size_t	m_length ;
 } ;
-	
+
 } // end of namespace

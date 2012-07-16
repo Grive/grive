@@ -589,9 +589,11 @@ bool Resource::Upload(
 	std::size_t count = 0 ;
 	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
 		data.append( buf, count ) ;
-
+	
+	assert( file.Size() == data.size() ) ;
+		
 	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << data.size() ;
+	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
 	
 	http::Header hdr( auth ) ;
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
