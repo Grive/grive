@@ -69,8 +69,9 @@ void Feed::Start( http::Agent *http, const http::Header& auth, const std::string
 	
 	if ( m_log.get() != 0 )
 		log.Reset(
-			(boost::format( "%1%-%2%." ) % m_log->prefix % m_log->sequence++).str(),
-			m_log->suffix, &xrsp ) ;
+			m_log->prefix,
+			(boost::format( "-#%1%%2%" ) % m_log->sequence++ % m_log->suffix ).str(),
+			&xrsp ) ;
 	
 	http->Get( url, &log, auth ) ;
 	

@@ -260,8 +260,8 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// in FromRemote()
 		else
 		{
-// 			Trace( "file %1% mtime %2%, last_sync %3%", path, m_mtime, last_sync ) ;
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
+// 			Trace( "file %1% mtime %2%, last_sync %3%, state (%4%)", path, m_mtime, last_sync, m_state ) ;
 		}
 		
 		m_name		= Path2Str( path.filename() ) ;
@@ -567,7 +567,12 @@ bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sy
 	}
 }
 
-bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post, DateTime& sync_time )
+bool Resource::Upload(
+	http::Agent* 		http,
+	const std::string&	link,
+	const http::Header&	auth,
+	bool 				post,
+	DateTime& 			sync_time )
 {
 	assert( http != 0 ) ;
 	

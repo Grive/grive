@@ -19,6 +19,7 @@
 
 #include "ResponseLog.hh"
 
+#include "util/log/Log.hh"
 #include "util/DateTime.hh"
 
 #include <cassert>
@@ -30,10 +31,9 @@ ResponseLog::ResponseLog(
 	const std::string&	suffix,
 	Receivable			*next ) :
 	m_enabled	( true ),
-	m_log		( Filename(prefix, suffix).c_str() ),
 	m_next		( next )
 {
-	assert( m_next != 0 ) ;
+	Reset( prefix, suffix, next ) ;
 }
 
 ResponseLog::ResponseLog( Receivable *next ) :
@@ -62,7 +62,7 @@ void ResponseLog::Clear()
 
 std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
 {
-	return prefix + DateTime::Now().Format( "%H%M%S" ) + suffix ;
+	return prefix + DateTime::Now().Format( "%F.%H%M%S" ) + suffix ;
 }
 
 void ResponseLog::Enable( bool enable )
@@ -77,9 +77,23 @@ void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, R
 	if ( m_log.is_open() )
 		m_log.close() ;
 	
-	m_log.open( Filename(prefix, suffix).c_str() ) ;
+	const std::string fname = Filename(prefix, suffix) ;
+	
+	// reset previous stream state. don't care if file can be opened
+	// successfully previously
+	m_log.clear() ;
+	
+	// re-open the file
+	m_log.open( fname.c_str() ) ;
+	if ( m_log )
+	{
+		Trace( "logging HTTP response: %1%", fname ) ;
+		m_enabled	= true ;
+	}
+	else
+		Trace( "cannot open log file %1%", fname ) ;
+	
 	m_next		= next ;
-	m_enabled	= true ;
 }
 
 }} // end of namespace
