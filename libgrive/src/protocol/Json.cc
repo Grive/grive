@@ -105,6 +105,7 @@ Json::Json( struct json_object *json, NotOwned ) :
 	m_json( json )
 {
 	assert( m_json != 0 ) ;
+	::json_object_get( m_json ) ;
 }
 
 Json::Json( struct json_object *json ) :
