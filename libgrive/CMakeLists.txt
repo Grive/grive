@@ -27,9 +27,10 @@ if ( BFD_FOUND )
 	
 endif ( BFD_FOUND )
 
-if ( IBERTY_FOUND )
-	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
-endif ( IBERTY_FOUND )
+# Not found on my system or in any standard repos.
+#if ( IBERTY_FOUND )
+#	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
+#endif ( IBERTY_FOUND )
 
 if ( ZLIB_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${ZLIB_LIBRARIES} )
@@ -81,7 +82,7 @@ target_link_libraries( grive
 	${LIBGCRYPT_LIBRARIES}
 	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
-	${IBERTY_LIBRARY}
+	#${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
 )
