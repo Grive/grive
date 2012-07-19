@@ -72,6 +72,7 @@ public :
 
 private :
 	http::Header AppendHeader( const http::Header& hdr ) const ;
+	bool CheckRetry( long response ) ;
 	
 private :
 	OAuth2								m_auth ;

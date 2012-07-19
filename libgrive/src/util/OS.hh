@@ -38,6 +38,8 @@ namespace os
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 	void SetFileTime( const fs::path& filename, const DateTime& t ) ;
+	
+	void Sleep( unsigned int sec ) ;
 }
 
 } // end of namespaces

@@ -18,7 +18,10 @@
 */
 
 #include "AuthAgent.hh"
+
 #include "http/Header.hh"
+#include "util/log/Log.hh"
+#include "util/OS.hh"
 
 #include <cassert>
 
@@ -47,7 +50,11 @@ long AuthAgent::Put(
 	Receivable			*dest,
 	const Header&		hdr )
 {
-	return m_agent->Put( url, data, dest, AppendHeader(hdr) ) ;
+	long response ;
+	while ( CheckRetry(
+		response = m_agent->Put(url, data, dest, AppendHeader(hdr)) ) ) ;
+	
+	return response ;
 }
 
 long AuthAgent::Put(
@@ -56,7 +63,11 @@ long AuthAgent::Put(
 	Receivable			*dest,
 	const Header&		hdr )
 {
-	return m_agent->Put( url, file, dest, AppendHeader(hdr) ) ;
+	long response ;
+	while ( CheckRetry(
+		response = m_agent->Put( url, file, dest, AppendHeader(hdr) ) ) ) ;
+	
+	return response ;
 }
 
 long AuthAgent::Get(
@@ -64,7 +75,11 @@ long AuthAgent::Get(
 	Receivable			*dest,
 	const Header&		hdr )
 {
-	return m_agent->Get( url, dest, AppendHeader(hdr) ) ;
+	long response ;
+	while ( CheckRetry(
+		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
+	
+	return response ;
 }
 
 long AuthAgent::Post(
@@ -73,7 +88,11 @@ long AuthAgent::Post(
 	Receivable			*dest,
 	const Header&		hdr )
 {
-	return m_agent->Post( url, data, dest, AppendHeader(hdr) ) ;
+	long response ;
+	while ( CheckRetry(
+		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
+	
+	return response ;
 }
 
 long AuthAgent::Custom(
@@ -82,7 +101,11 @@ long AuthAgent::Custom(
 	Receivable			*dest,
 	const Header&		hdr )
 {
-	return m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ;
+	long response ;
+	while ( CheckRetry(
+		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
+	
+	return response ;
 }
 
 std::string AuthAgent::RedirLocation() const
@@ -98,6 +121,20 @@ std::string AuthAgent::Escape( const std::string& str )
 std::string AuthAgent::Unescape( const std::string& str )
 {
 	return m_agent->Unescape( str ) ;
+}
+
+bool AuthAgent::CheckRetry( long response )
+{
+	if ( response == 500 || response == 503 )
+	{
+		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
+			response, log::warning ) ;
+			
+		os::Sleep( 5 ) ;
+		return true ;
+	}
+	else
+		return false ;
 }
 
 } // end of namespace
