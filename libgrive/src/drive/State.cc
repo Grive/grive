@@ -273,9 +273,14 @@ void State::Sync( http::Agent *http, const http::Header& auth )
 	// need to check if this introduces a new problem
  	DateTime last_sync_time = m_last_sync;
 	m_res.Root()->Sync( http, auth, last_sync_time ) ;
-  	if (last_sync_time == m_last_sync) {
+  	if ( last_sync_time == m_last_sync )
+  	{
+		Trace( "nothing changed? %1%", m_last_sync ) ;
     	m_last_sync = DateTime::Now();
-  	} else {
+  	}
+  	else
+  	{
+		Trace( "updating last sync? %1%", last_sync_time ) ;
     	m_last_sync = last_sync_time;
   	}
 }
