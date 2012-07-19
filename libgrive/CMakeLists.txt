@@ -29,6 +29,8 @@ endif ( BFD_FOUND )
 
 if ( IBERTY_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
+else ( IBERTY_FOUND )
+  set( IBERTY_LIBRARY "" )
 endif ( IBERTY_FOUND )
 
 if ( ZLIB_FOUND )

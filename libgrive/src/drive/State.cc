@@ -24,7 +24,6 @@
 #include "CommonUri.hh"
 
 #include "http/Agent.hh"
-#include "http/Header.hh"
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
 #include "protocol/Json.hh"
@@ -262,7 +261,7 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-void State::Sync( http::Agent *http, const http::Header& auth )
+void State::Sync( http::Agent *http )
 {
 	// set the last sync time from the time returned by the server for the last file synced
 	// if the sync time hasn't changed (i.e. now files have been uploaded)
@@ -272,10 +271,15 @@ void State::Sync( http::Agent *http, const http::Header& auth )
 	// TODO - WARNING - do we use the last sync time to compare to client file times
 	// need to check if this introduces a new problem
  	DateTime last_sync_time = m_last_sync;
-	m_res.Root()->Sync( http, auth, last_sync_time ) ;
-  	if (last_sync_time == m_last_sync) {
+	m_res.Root()->Sync( http, last_sync_time ) ;
+  	if ( last_sync_time == m_last_sync )
+  	{
+		Trace( "nothing changed? %1%", m_last_sync ) ;
     	m_last_sync = DateTime::Now();
-  	} else {
+  	}
+  	else
+  	{
+		Trace( "updating last sync? %1%", last_sync_time ) ;
     	m_last_sync = last_sync_time;
   	}
 }

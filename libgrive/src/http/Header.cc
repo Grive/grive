@@ -50,4 +50,11 @@ std::ostream& operator<<( std::ostream& os, const Header& h )
 	return os ;
 }
 
+Header operator+( const Header& header, const std::string& str )
+{
+	Header h( header ) ;
+	h.Add( str ) ;
+	return h ;
+}
+
 } } // end of namespace

@@ -31,7 +31,6 @@ namespace gr {
 namespace http
 {
 	class Agent ;
-	class Header ;
 }
 
 class Json ;
@@ -58,7 +57,7 @@ public :
 	Resource* FindByID( const std::string& id ) ;
 	Resource* Find( const fs::path& path ) ;
 
-	void Sync( http::Agent *http, const http::Header& auth ) ;
+	void Sync( http::Agent *http ) ;
 	
 	iterator begin() ;
 	iterator end() ;

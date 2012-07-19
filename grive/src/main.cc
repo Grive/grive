@@ -21,6 +21,8 @@
 
 #include "drive/Drive.hh"
 
+#include "http/CurlAgent.hh"
+#include "protocol/AuthAgent.hh"
 #include "protocol/OAuth2.hh"
 #include "protocol/Json.hh"
 
@@ -172,7 +174,8 @@ int Main( int argc, char **argv )
 	}
 	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	Drive drive( token, options ) ;
+	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
+	Drive drive( &agent, options ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )

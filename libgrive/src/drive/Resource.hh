@@ -32,7 +32,6 @@ namespace gr {
 namespace http
 {
 	class Agent ;
-	class Header ;
 }
 
 class Entry ;
@@ -77,7 +76,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
+	void Sync( http::Agent* http, DateTime& sync_time ) ;
 
 	// children access
 	iterator begin() const ;
@@ -124,19 +123,19 @@ private :
 private :
 	void SetState( State new_state ) ;
 
-	void Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const ;
-	bool EditContent( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
-	bool Create( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
-	bool Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post, DateTime& sync_time ) ;
+	void Download( http::Agent* http, const fs::path& file ) const ;
+	bool EditContent( http::Agent* http, DateTime& sync_time ) ;
+	bool Create( http::Agent* http, DateTime& sync_time ) ;
+	bool Upload( http::Agent* http, const std::string& link, bool post, DateTime& sync_time ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
 	
 	void DeleteLocal() ;
-	void DeleteRemote( http::Agent* http, const http::Header& auth ) ;
+	void DeleteRemote( http::Agent* http ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, const http::Header& auth, DateTime& sync_time ) ;
+	void SyncSelf( http::Agent* http, DateTime& sync_time ) ;
 	
 private :
 	std::string				m_name ;

@@ -81,4 +81,17 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 		) ;
 }
 
+void Sleep( unsigned int sec )
+{
+	struct timespec ts = { sec, 0 } ;
+	
+	int result = 0 ;
+	do
+	{
+		struct timespec rem ;
+		nanosleep( &ts, &rem ) ;
+		ts = rem ;
+	} while ( result == -1 && errno == EINTR ) ;
+}
+
 } } // end of namespaces

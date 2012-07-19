@@ -46,5 +46,6 @@ private :
 } ;
 
 std::ostream& operator<<( std::ostream& os, const Header& h ) ;
+Header operator+( const Header& header, const std::string& str ) ;
 
 }} // end of namespace
