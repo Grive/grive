@@ -365,20 +365,20 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, const http::Header& auth, DateTime& sync_time )
+void Resource::Sync( http::Agent *http, DateTime& sync_time )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
-	SyncSelf( http, auth, sync_time ) ;
+	SyncSelf( http, sync_time ) ;
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, auth, boost::ref(sync_time) ) ) ;
+			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time) ) ) ;
 }
 
-void Resource::SyncSelf( http::Agent* http, const http::Header& auth, DateTime& sync_time )
+void Resource::SyncSelf( http::Agent* http, DateTime& sync_time )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
@@ -392,19 +392,19 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth, DateTime& 
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
-		if ( http != 0 && Create( http, auth, sync_time ) )
+		if ( http != 0 && Create( http, sync_time ) )
 			m_state = sync ;
 		break ;
 	
 	case local_deleted :
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
 		if ( http != 0 )
-			DeleteRemote( http, auth ) ;
+			DeleteRemote( http ) ;
 		break ;
 	
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
-		if ( http != 0 && EditContent( http, auth, sync_time ) )
+		if ( http != 0 && EditContent( http, sync_time ) )
 			m_state = sync ;
 		break ;
 	
@@ -415,7 +415,7 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth, DateTime& 
 			if ( IsFolder() )
 				fs::create_directories( path ) ;
 			else
-				Download( http, path, auth ) ;
+				Download( http, path ) ;
 			
 			m_state = sync ;
 		}
@@ -426,7 +426,7 @@ void Resource::SyncSelf( http::Agent* http, const http::Header& auth, DateTime& 
 		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
 		if ( http != 0 )
 		{
-			Download( http, path, auth ) ;
+			Download( http, path ) ;
 			m_state = sync ;
 		}
 		break ;
@@ -474,14 +474,14 @@ void Resource::DeleteLocal()
 	}
 }
 
-void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
+void Resource::DeleteRemote( http::Agent *http )
 {
 	assert( http != 0 ) ;
 	http::StringResponse str ;
 	
 	try
 	{
-		http::Header hdr( auth ) ;
+		http::Header hdr ;
 		hdr.Add( "If-Match: " + m_etag ) ;
 		
 		// doesn't know why, but an update before deleting seems to work always
@@ -502,12 +502,12 @@ void Resource::DeleteRemote( http::Agent *http, const http::Header& auth )
 }
 
 
-void Resource::Download( http::Agent* http, const fs::path& file, const http::Header& auth ) const
+void Resource::Download( http::Agent* http, const fs::path& file ) const
 {
 	assert( http != 0 ) ;
 	
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
-	long r = http->Get( m_content, &dl, auth ) ;
+	long r = http->Get( m_content, &dl, http::Header() ) ;
 	if ( r <= 400 )
 	{
 		if ( m_mtime != DateTime() )
@@ -517,7 +517,7 @@ void Resource::Download( http::Agent* http, const fs::path& file, const http::He
 	}
 }
 
-bool Resource::EditContent( http::Agent* http, const http::Header& auth, DateTime& sync_time )
+bool Resource::EditContent( http::Agent* http, DateTime& sync_time )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
@@ -530,10 +530,10 @@ bool Resource::EditContent( http::Agent* http, const http::Header& auth, DateTim
 		return false ;
 	}
 	
-	return Upload( http, m_edit, auth, false, sync_time ) ;
+	return Upload( http, m_edit, false, sync_time ) ;
 }
 
-bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sync_time )
+bool Resource::Create( http::Agent* http, DateTime& sync_time )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
@@ -551,7 +551,7 @@ bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sy
 			% xml::Escape(m_name)
 		).str() ;
 
-		http::Header hdr( auth ) ;
+		http::Header hdr ;
 		hdr.Add( "Content-Type: application/atom+xml" ) ;
 		
 		http::XmlResponse xml ;
@@ -563,7 +563,7 @@ bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sy
 	}
 	else if ( !m_parent->m_create.empty() )
 	{
-		return Upload( http, m_parent->m_create + "?convert=false", auth, true, sync_time ) ;
+		return Upload( http, m_parent->m_create + "?convert=false", true, sync_time ) ;
 	}
 	else
 	{
@@ -575,7 +575,6 @@ bool Resource::Create( http::Agent* http, const http::Header& auth, DateTime& sy
 bool Resource::Upload(
 	http::Agent* 		http,
 	const std::string&	link,
-	const http::Header&	auth,
 	bool 				post,
 	DateTime& 			sync_time )
 {
@@ -585,7 +584,7 @@ bool Resource::Upload(
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
 	
-	http::Header hdr( auth ) ;
+	http::Header hdr ;
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
 	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
 	hdr.Add( xcontent_len.str() ) ;

@@ -23,11 +23,11 @@
 #include "Entry.hh"
 #include "Feed.hh"
 
-#include "http/CurlAgent.hh"
+#include "http/Agent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
-#include "protocol/OAuth2.hh"
+// #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
 #include "util/log/Log.hh"
 #include "xml/Node.hh"
@@ -53,12 +53,11 @@ namespace
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( OAuth2& auth, const Json& options ) :
-	m_auth( auth ),
+Drive::Drive( http::Agent *http, const Json& options ) :
+	m_http( http ),
 	m_state( state_file, options )
 {
-	m_http_hdr.Add( "Authorization: Bearer " + m_auth.AccessToken() ) ;
-	m_http_hdr.Add( "GData-Version: 3.0" ) ;
+	assert( m_http != 0 ) ;
 }
 
 void Drive::FromRemote( const Entry& entry )
@@ -93,14 +92,14 @@ void Drive::SaveState()
 	m_state.Write( state_file ) ;
 }
 
-void Drive::SyncFolders( http::Agent *http )
+void Drive::SyncFolders( )
 {
-	assert( http != 0 ) ;
+	assert( m_http != 0 ) ;
 
 	Log( "Synchronizing folders", log::info ) ;
 
 	http::XmlResponse xml ;
-	http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, m_http_hdr ) ;
+	m_http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
 	
 	Feed feed( xml.Response() ) ;
 	do
@@ -121,7 +120,7 @@ void Drive::SyncFolders( http::Agent *http )
 					m_state.FromRemote( e ) ;
 			}
 		}
-	} while ( feed.GetNext( http, m_http_hdr ) ) ;
+	} while ( feed.GetNext( m_http, http::Header() ) ) ;
 
 	m_state.ResolveEntry() ;
 }
@@ -131,17 +130,15 @@ void Drive::DetectChanges()
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( "." ) ;
 	
-	http::CurlAgent http ;
-
 	long prev_stamp = m_state.ChangeStamp() ;
 	Trace( "previous change stamp is %1%", prev_stamp ) ;
 	
-	SyncFolders( &http ) ;
+	SyncFolders( ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
 	Feed feed ;
 // 	feed.EnableLog( "/tmp/file", ".xml" ) ;
-	feed.Start( &http, m_http_hdr, feed_base + "?showfolders=true&showroot=true" ) ;
+	feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ;
 	
 	m_resume_link = feed.Root()["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
@@ -152,7 +149,7 @@ void Drive::DetectChanges()
 			feed.begin(), feed.end(),
 			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
 			
-	} while ( feed.GetNext( &http, m_http_hdr ) ) ;
+	} while ( feed.GetNext( m_http, http::Header() ) ) ;
 	
 	// pull the changes feed
 	if ( prev_stamp != -1 )
@@ -160,7 +157,7 @@ void Drive::DetectChanges()
 		Log( "Detecting changes from last sync", log::info ) ;
 		Feed changes ;
 // 		feed.EnableLog( "/tmp/changes", ".xml" ) ;
-		feed.Start( &http, m_http_hdr, ChangesFeed(prev_stamp+1) ) ;
+		feed.Start( m_http, http::Header(), ChangesFeed(prev_stamp+1) ) ;
 		
 		std::for_each(
 			changes.begin(), changes.end(),
@@ -171,25 +168,24 @@ void Drive::DetectChanges()
 void Drive::Update()
 {
 	Log( "Synchronizing files", log::info ) ;
-	http::CurlAgent http ;
-	m_state.Sync( &http, m_http_hdr ) ;
+	m_state.Sync( m_http ) ;
 	
-	UpdateChangeStamp( &http ) ;
+	UpdateChangeStamp( ) ;
 }
 
 void Drive::DryRun()
 {
 	Log( "Synchronizing files (dry-run)", log::info ) ;
-	m_state.Sync( 0, m_http_hdr ) ;
+	m_state.Sync( 0 ) ;
 }
 
-void Drive::UpdateChangeStamp( http::Agent *http )
+void Drive::UpdateChangeStamp( )
 {
-	assert( http != 0 ) ;
+	assert( m_http != 0 ) ;
 
 	// get changed feed
 	http::XmlResponse xrsp ;
-	http->Get( ChangesFeed(m_state.ChangeStamp()+1), &xrsp, m_http_hdr ) ;
+	m_http->Get( ChangesFeed(m_state.ChangeStamp()+1), &xrsp, http::Header() ) ;
 	
 	// we should go through the changes to see if it was really Grive to made that change
 	// maybe by recording the updated timestamp and compare it?

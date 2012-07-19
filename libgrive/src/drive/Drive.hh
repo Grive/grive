@@ -35,13 +35,12 @@ namespace http
 }
 
 class Entry ;
-class OAuth2 ;
 class Json ;
 
 class Drive
 {
 public :
-	Drive( OAuth2& auth, const Json& options ) ;
+	Drive( http::Agent *http, const Json& options ) ;
 
 	void DetectChanges() ;
 	void Update() ;
@@ -51,15 +50,16 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void SyncFolders( http::Agent *http ) ;
+	void SyncFolders( ) ;
     void file();
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( http::Agent *http ) ;
+	void UpdateChangeStamp( ) ;
 	
 private :
-	OAuth2&			m_auth ;
-	http::Header	m_http_hdr ;
+	http::Agent 	*m_http ;
+// 	OAuth2&			m_auth ;
+// 	http::Header	m_http_hdr ;
 
 	std::string		m_resume_link ;
 	State			m_state ;
