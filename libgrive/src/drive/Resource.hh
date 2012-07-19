@@ -124,9 +124,9 @@ private :
 	void SetState( State new_state ) ;
 
 	void Download( http::Agent* http, const fs::path& file ) const ;
-	bool EditContent( http::Agent* http, DateTime& sync_time ) ;
-	bool Create( http::Agent* http, DateTime& sync_time ) ;
-	bool Upload( http::Agent* http, const std::string& link, bool post, DateTime& sync_time ) ;
+	bool EditContent( http::Agent* http ) ;
+	bool Create( http::Agent* http ) ;
+	bool Upload( http::Agent* http, const std::string& link, bool post ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
@@ -135,7 +135,7 @@ private :
 	void DeleteRemote( http::Agent* http ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, DateTime& sync_time ) ;
+	void SyncSelf( http::Agent* http ) ;
 	
 private :
 	std::string				m_name ;
