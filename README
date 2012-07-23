@@ -1,4 +1,4 @@
-Grive 0.2.0
+Grive 0.3.0
 9 June 2012
 
 http://www.lbreda.com/grive/
@@ -14,7 +14,6 @@ There are a few things that Grive does not do at the moment:
 - wait for changes in file system to occur and upload. A sync is only performed when you run Grive.
 - symbolic links support
 - support for Google documents
-- support for files >2GB
   
 Of course these will be added in the future, possibly the next release.
 
@@ -48,3 +47,11 @@ current directory. It will also start downloading files from your Google Drive t
 your current directory.
 
 Enjoy!
+
+Version History:
+
+Grive v0.3: Bug fix release
+Fixed bugs:
+	#93: missing reference count increment in one of the Json constructors
+	#82: retry for HTTP error 500 & 503
+	#77: Fixed a bug where grive crashed on the first run.

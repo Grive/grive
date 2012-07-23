@@ -125,6 +125,7 @@ std::string AuthAgent::Unescape( const std::string& str )
 
 bool AuthAgent::CheckRetry( long response )
 {
+	// HTTP 500 and 503 should be temperory. just wait a bit and retry
 	if ( response == 500 || response == 503 )
 	{
 		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
@@ -133,6 +134,17 @@ bool AuthAgent::CheckRetry( long response )
 		os::Sleep( 5 ) ;
 		return true ;
 	}
+	
+	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
+	else if ( response == 401 )
+	{
+		Log( "resquest failed due to auth token expired: %1%. refreshing token",
+			response, log::warning ) ;
+			
+		m_auth.Refresh() ;
+		return true ;
+	}
+	
 	else
 		return false ;
 }
