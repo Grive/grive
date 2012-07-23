@@ -186,7 +186,7 @@ bool Json::Get( const std::string& key, Json& json ) const
 	struct json_object *j = ::json_object_object_get( m_json, key.c_str() ) ;
 	if ( j != 0 )
 	{
-		Json tmp( j, NotOwned() ) ;
+		Json tmp( j ) ;
 		json.Swap( tmp ) ;
 		return true ;
 	}
