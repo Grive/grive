@@ -29,16 +29,16 @@ struct Error : virtual Exception {} ;
 // CURL error code
 typedef boost::error_info<struct CurlCodeTag, int>			CurlCode ;
 
-// HTTP response code
-typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;
-
-// HTTP response body
-typedef boost::error_info<struct HttpResponseStrTag, std::string>	HttpResponseText ;
-
 // URL
 typedef boost::error_info<struct UrlTag, std::string>		Url ;
 
 // HTTP headers
 typedef boost::error_info<struct HeaderTag, Header>		HttpHeader ;
+
+// HTTP response code
+typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;
+
+// HTTP response body
+typedef boost::error_info<struct HttpResponseStrTag, std::string>	HttpResponseText ;
 
 } } // end of namespace

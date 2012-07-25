@@ -73,6 +73,10 @@ public :
 private :
 	http::Header AppendHeader( const http::Header& hdr ) const ;
 	bool CheckRetry( long response ) ;
+	long CheckHttpResponse(
+		long 				response,
+		const std::string&	url,
+		const http::Header&	hdr  ) ;
 	
 private :
 	OAuth2								m_auth ;

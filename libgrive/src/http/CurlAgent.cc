@@ -156,12 +156,11 @@ long CurlAgent::ExecCurl(
 	Trace( "HTTP response %1%", http_code ) ;
 	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	0 ) ;
 	
-	if ( curl_code != CURLE_OK || (http_code >= 400 && http_code < 500) )
+	if ( curl_code != CURLE_OK )
 	{
 		BOOST_THROW_EXCEPTION(
 			Error()
 				<< CurlCode( curl_code )
-				<< HttpResponse( http_code )
 				<< Url( url )
 				<< expt::ErrMsg( error )
 				<< HttpHeader( hdr )

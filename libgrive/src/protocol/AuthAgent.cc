@@ -19,6 +19,7 @@
 
 #include "AuthAgent.hh"
 
+#include "http/Error.hh"
 #include "http/Header.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
@@ -50,11 +51,13 @@ long AuthAgent::Put(
 	Receivable			*dest,
 	const Header&		hdr )
 {
+	Header auth = AppendHeader(hdr) ;
+
 	long response ;
 	while ( CheckRetry(
-		response = m_agent->Put(url, data, dest, AppendHeader(hdr)) ) ) ;
+		response = m_agent->Put(url, data, dest, auth) ) ) ;
 	
-	return response ;
+	return CheckHttpResponse(response, url, auth) ;
 }
 
 long AuthAgent::Put(
@@ -63,11 +66,13 @@ long AuthAgent::Put(
 	Receivable			*dest,
 	const Header&		hdr )
 {
+	Header auth = AppendHeader(hdr) ;
+	
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Put( url, file, dest, AppendHeader(hdr) ) ) ) ;
 	
-	return response ;
+	return CheckHttpResponse(response, url, auth) ;
 }
 
 long AuthAgent::Get(
@@ -75,11 +80,13 @@ long AuthAgent::Get(
 	Receivable			*dest,
 	const Header&		hdr )
 {
+	Header auth = AppendHeader(hdr) ;
+
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
 	
-	return response ;
+	return CheckHttpResponse(response, url, auth) ;
 }
 
 long AuthAgent::Post(
@@ -88,11 +95,13 @@ long AuthAgent::Post(
 	Receivable			*dest,
 	const Header&		hdr )
 {
+	Header auth = AppendHeader(hdr) ;
+	
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
 	
-	return response ;
+	return CheckHttpResponse(response, url, auth) ;
 }
 
 long AuthAgent::Custom(
@@ -101,11 +110,13 @@ long AuthAgent::Custom(
 	Receivable			*dest,
 	const Header&		hdr )
 {
+	Header auth = AppendHeader(hdr) ;
+
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
 	
-	return response ;
+	return CheckHttpResponse(response, url, auth) ;
 }
 
 std::string AuthAgent::RedirLocation() const
@@ -144,9 +155,26 @@ bool AuthAgent::CheckRetry( long response )
 		m_auth.Refresh() ;
 		return true ;
 	}
-	
 	else
 		return false ;
+}
+
+long AuthAgent::CheckHttpResponse(
+		long 				response,
+		const std::string&	url,
+		const http::Header&	hdr  )
+{
+	// throw for other HTTP errors
+	if ( response >= 400 && response < 500 )
+	{
+ 		BOOST_THROW_EXCEPTION(
+ 			Error()
+				<< HttpResponse( response )
+ 				<< Url( url )
+ 				<< HttpHeader( hdr ) ) ;
+	}
+	
+	return response ;
 }
 
 } // end of namespace
