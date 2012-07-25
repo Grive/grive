@@ -3,7 +3,7 @@ Grive 0.3.0
 
 http://www.lbreda.com/grive/
 
-Grive can be considered still considered beta quality. It simply downloads all the files in your
+Grive can be considered still beta quality. It simply downloads all the files in your
 Google Drive into the current directory. After you make some changes to the local files, run
 grive again and it will upload your changes back to your Google Drive. New files created locally
 or in Google Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
