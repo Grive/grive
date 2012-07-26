@@ -35,6 +35,7 @@ namespace http
 }
 
 class Entry ;
+class Json ;
 
 /*!	\brief	A resource can be a file or a folder in the google drive
 
@@ -76,7 +77,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent* http, DateTime& sync_time ) ;
+	void Sync( http::Agent* http, DateTime& sync_time, const Json& options ) ;
 
 	// children access
 	iterator begin() const ;
@@ -124,7 +125,7 @@ private :
 	void SetState( State new_state ) ;
 
 	void Download( http::Agent* http, const fs::path& file ) const ;
-	bool EditContent( http::Agent* http ) ;
+	bool EditContent( http::Agent* http, bool new_rev ) ;
 	bool Create( http::Agent* http ) ;
 	bool Upload( http::Agent* http, const std::string& link, bool post ) ;
 	
@@ -135,7 +136,7 @@ private :
 	void DeleteRemote( http::Agent* http ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http ) ;
+	void SyncSelf( http::Agent* http, const Json& options ) ;
 	
 private :
 	std::string				m_name ;

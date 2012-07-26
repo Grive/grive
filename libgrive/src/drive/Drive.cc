@@ -26,7 +26,6 @@
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
-#include "protocol/Json.hh"
 #include "util/Destroy.hh"
 #include "util/log/Log.hh"
 #include "xml/Node.hh"
@@ -55,7 +54,7 @@ namespace
 Drive::Drive( http::Agent *http, const Json& options ) :
 	m_http		( http ),
 	m_state		( state_file, options ),
-	m_log_xml	( options["log-xml"].Bool() )
+	m_options	( options )
 {
 	assert( m_http != 0 ) ;
 }
@@ -137,7 +136,7 @@ void Drive::DetectChanges()
 
 	Log( "Reading remote server file list", log::info ) ;
 	Feed feed ;
-	if ( m_log_xml )
+	if ( m_options["log-xml"].Bool() )
 		feed.EnableLog( "/tmp/file", ".xml" ) ;
 	
 	feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ;
@@ -158,7 +157,7 @@ void Drive::DetectChanges()
 	{
 		Log( "Detecting changes from last sync", log::info ) ;
 		Feed changes ;
-		if ( m_log_xml )
+		if ( m_options["log-xml"].Bool() )
 			feed.EnableLog( "/tmp/changes", ".xml" ) ;
 			
 		feed.Start( m_http, http::Header(), ChangesFeed(prev_stamp+1) ) ;
@@ -172,7 +171,7 @@ void Drive::DetectChanges()
 void Drive::Update()
 {
 	Log( "Synchronizing files", log::info ) ;
-	m_state.Sync( m_http ) ;
+	m_state.Sync( m_http, m_options ) ;
 	
 	UpdateChangeStamp( ) ;
 }
@@ -180,7 +179,7 @@ void Drive::Update()
 void Drive::DryRun()
 {
 	Log( "Synchronizing files (dry-run)", log::info ) ;
-	m_state.Sync( 0 ) ;
+	m_state.Sync( 0, m_options ) ;
 }
 
 void Drive::UpdateChangeStamp( )

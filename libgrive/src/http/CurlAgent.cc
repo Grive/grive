@@ -150,12 +150,15 @@ long CurlAgent::ExecCurl(
 	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
+	// get the HTTTP response code
 	long http_code = 0;
-	::curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
+	::curl_easy_getinfo(curl,	CURLINFO_RESPONSE_CODE, &http_code);
 	Trace( "HTTP response %1%", http_code ) ;
-	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	0 ) ;
 	
+	// reset the curl buffer to prevent it from touch our "error" buffer
+	::curl_easy_setopt(curl,	CURLOPT_ERRORBUFFER, 	0 ) ;
+	
+	// only throw for libcurl errors
 	if ( curl_code != CURLE_OK )
 	{
 		BOOST_THROW_EXCEPTION(

@@ -22,6 +22,7 @@
 #include "State.hh"
 
 #include "http/Header.hh"
+#include "protocol/Json.hh"
 #include "util/Exception.hh"
 
 #include <string>
@@ -35,7 +36,6 @@ namespace http
 }
 
 class Entry ;
-class Json ;
 
 class Drive
 {
@@ -61,7 +61,7 @@ private :
 	std::string		m_resume_link ;
 	State			m_state ;
 	
-	bool			m_log_xml ;
+	Json			m_options ;
 } ;
 
 } // end of namespace

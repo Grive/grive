@@ -365,23 +365,24 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, DateTime& sync_time )
+void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
-  SyncSelf( http ) ;
-  // we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
-  // m_mtime is updated to server modified time when the file is uploaded
-  sync_time = std::max(sync_time, m_mtime);
+	SyncSelf( http, options ) ;
+	
+	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
+	// m_mtime is updated to server modified time when the file is uploaded
+	sync_time = std::max(sync_time, m_mtime);
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time) ) ) ;
+			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time), options ) ) ;
 }
 
-void Resource::SyncSelf( http::Agent* http )
+void Resource::SyncSelf( http::Agent* http, const Json& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
@@ -407,7 +408,7 @@ void Resource::SyncSelf( http::Agent* http )
 	
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
-		if ( http != 0 && EditContent( http ) )
+		if ( http != 0 && EditContent( http, options["new-rev"].Bool() ) )
 			m_state = sync ;
 		break ;
 	
@@ -520,7 +521,7 @@ void Resource::Download( http::Agent* http, const fs::path& file ) const
 	}
 }
 
-bool Resource::EditContent( http::Agent* http )
+bool Resource::EditContent( http::Agent* http, bool new_rev )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;
@@ -533,10 +534,10 @@ bool Resource::EditContent( http::Agent* http )
 		return false ;
 	}
 	
-	return Upload( http, m_edit, false ) ;
+	return Upload( http, m_edit + (new_rev ? "?new-revision=true" : ""), false ) ;
 }
 
-bool Resource::Create( http::Agent* http)
+bool Resource::Create( http::Agent* http )
 {
 	assert( http != 0 ) ;
 	assert( m_parent != 0 ) ;

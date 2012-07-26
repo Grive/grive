@@ -83,6 +83,7 @@ int Main( int argc, char **argv )
 		( "auth,a",		"Request authorization token" )
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
 		( "log-xml",	"Log more HTTP responses as XML for debugging.")
+		( "new-rev",	"Create new revisions in server for updated files.")
 		( "debug,d",	"Enable debug level messages. Implies -v.")
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
@@ -149,6 +150,7 @@ int Main( int argc, char **argv )
 	}
 	
 	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
+	options.Add( "new-rev", Json(vm.count("new-rev") > 0) ) ;
 	
 	if ( vm.count( "debug" ) )
 	{

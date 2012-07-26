@@ -261,7 +261,7 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-void State::Sync( http::Agent *http )
+void State::Sync( http::Agent *http, const Json& options )
 {
 	// set the last sync time from the time returned by the server for the last file synced
 	// if the sync time hasn't changed (i.e. now files have been uploaded)
@@ -271,7 +271,8 @@ void State::Sync( http::Agent *http )
 	// TODO - WARNING - do we use the last sync time to compare to client file times
 	// need to check if this introduces a new problem
  	DateTime last_sync_time = m_last_sync;
-	m_res.Root()->Sync( http, last_sync_time ) ;
+	m_res.Root()->Sync( http, last_sync_time, options ) ;
+	
   	if ( last_sync_time == m_last_sync )
   	{
 		Trace( "nothing changed? %1%", m_last_sync ) ;
