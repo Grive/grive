@@ -27,7 +27,6 @@
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "protocol/Json.hh"
-// #include "protocol/OAuth2.hh"
 #include "util/Destroy.hh"
 #include "util/log/Log.hh"
 #include "xml/Node.hh"
@@ -54,8 +53,9 @@ namespace
 }
 
 Drive::Drive( http::Agent *http, const Json& options ) :
-	m_http( http ),
-	m_state( state_file, options )
+	m_http		( http ),
+	m_state		( state_file, options ),
+	m_log_xml	( options["log-xml"].Bool() )
 {
 	assert( m_http != 0 ) ;
 }
@@ -137,7 +137,9 @@ void Drive::DetectChanges()
 
 	Log( "Reading remote server file list", log::info ) ;
 	Feed feed ;
-// 	feed.EnableLog( "/tmp/file", ".xml" ) ;
+	if ( m_log_xml )
+		feed.EnableLog( "/tmp/file", ".xml" ) ;
+	
 	feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ;
 	
 	m_resume_link = feed.Root()["link"].
@@ -156,7 +158,9 @@ void Drive::DetectChanges()
 	{
 		Log( "Detecting changes from last sync", log::info ) ;
 		Feed changes ;
-// 		feed.EnableLog( "/tmp/changes", ".xml" ) ;
+		if ( m_log_xml )
+			feed.EnableLog( "/tmp/changes", ".xml" ) ;
+			
 		feed.Start( m_http, http::Header(), ChangesFeed(prev_stamp+1) ) ;
 		
 		std::for_each(

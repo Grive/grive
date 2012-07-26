@@ -58,11 +58,10 @@ private :
 	
 private :
 	http::Agent 	*m_http ;
-// 	OAuth2&			m_auth ;
-// 	http::Header	m_http_hdr ;
-
 	std::string		m_resume_link ;
 	State			m_state ;
+	
+	bool			m_log_xml ;
 } ;
 
 } // end of namespace

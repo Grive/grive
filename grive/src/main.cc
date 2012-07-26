@@ -82,6 +82,7 @@ int Main( int argc, char **argv )
 		( "version,v",	"Display Grive version" )
 		( "auth,a",		"Request authorization token" )
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
+		( "log-xml",	"Log more HTTP responses as XML for debugging.")
 		( "debug,d",	"Enable debug level messages. Implies -v.")
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
@@ -146,6 +147,9 @@ int Main( int argc, char **argv )
 	{
 		console_log->Enable( log::verbose ) ;
 	}
+	
+	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
+	
 	if ( vm.count( "debug" ) )
 	{
 		console_log->Enable( log::verbose ) ;
