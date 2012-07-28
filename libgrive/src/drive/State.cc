@@ -29,8 +29,11 @@
 #include "protocol/Json.hh"
 
 #include <fstream>
+#include <boost/regex.hpp>
 
 namespace gr {
+
+boost::regex State::m_rexp = boost::regex("(\\.|\\.\\.|\\.grive.*)");
 
 State::State( const fs::path& filename, const Json& options ) :
 	m_cstamp( -1 )
@@ -56,9 +59,10 @@ void State::FromLocal( const fs::path& p )
 	FromLocal( p, m_res.Root() ) ;
 }
 
+// changed to only ignore 
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename[0] == '.' ;
+	return boost::regex_match(filename, m_rexp);
 }
 
 void State::FromLocal( const fs::path& p, gr::Resource* folder )

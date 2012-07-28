@@ -25,6 +25,7 @@
 #include "util/FileSystem.hh"
 
 #include <memory>
+#include <boost/regex.hpp>
 
 namespace gr {
 
@@ -79,6 +80,8 @@ private :
 	long				m_cstamp ;
 	
 	std::vector<Entry>	m_unresolved ;
+	static boost::regex	m_rexp ;
 } ;
+
 
 } // end of namespace
