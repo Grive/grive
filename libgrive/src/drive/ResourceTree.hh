@@ -64,7 +64,7 @@ public :
 	typedef details::Set::iterator iterator ;
 
 public :
-	ResourceTree( ) ;
+	ResourceTree( const fs::path& rootFolder ) ;
 	ResourceTree( const ResourceTree& fs ) ;
 	~ResourceTree( ) ;
 	
@@ -74,7 +74,6 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 
-	Resource* FindByPath( const fs::path& path ) ;
 	Resource* FindByID( const std::string& id ) ;
 	
 	bool ReInsert( Resource *coll ) ;

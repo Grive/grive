@@ -31,8 +31,8 @@ namespace gr {
 
 using namespace details ;
 
-ResourceTree::ResourceTree( ) :
-	m_root( new Resource )
+ResourceTree::ResourceTree( const fs::path& rootFolder ) :
+    m_root(new Resource(rootFolder))
 {
 	m_set.insert( m_root ) ;
 }
@@ -109,29 +109,6 @@ const Resource* ResourceTree::FindByHref( const std::string& href ) const
 	const HrefMap& map = m_set.get<ByHref>() ;
 	HrefMap::const_iterator i = map.find( href ) ;
 	return i != map.end() ? *i : 0 ;
-}
-
-/// Unlike other search functions, this one does not depend on the multi-index
-/// container. It traverses the tree instead.
-Resource* ResourceTree::FindByPath( const fs::path& path )
-{
-	Resource *current = m_root ;
-	for ( fs::path::iterator i = path.begin() ; i != path.end() && current != 0 ; ++i )
-	{
-		Trace( "path it = %1%", *i ) ;
-		
-		// current directory
-		if ( *i == "." )
-			continue ;
-		
-		else if ( *i == ".." )
-			current = current->Parent() ;
-	
-		else
-			current = current->FindChild( Path2Str(*i) ) ;
-	}
-			
-	return current ;
 }
 
 ///	Reinsert should be called when the ID/HREF were updated

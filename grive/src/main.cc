@@ -17,7 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Config.hh"
+#include "util/Config.hh"
 
 #include "drive/Drive.hh"
 
@@ -46,6 +46,9 @@
 
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
+const std::string defaultRootFolder = ".";
+const std::string defaultConfigFileName = ".grive";
+const char *configFileEnvironmentVariable = "GR_CONFIG";
 
 using namespace gr ;
 
@@ -66,8 +69,8 @@ int Main( int argc, char **argv )
 {
 	InitGCrypt() ;
 	
-	Config config ;
-	
+	std::string rootFolder = defaultRootFolder;
+
 	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
 	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
 	
@@ -81,6 +84,7 @@ int Main( int argc, char **argv )
 		( "help,h",		"Produce help message" )
 		( "version,v",	"Display Grive version" )
 		( "auth,a",		"Request authorization token" )
+		( "path,p",		po::value<std::string>(), "Path to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
 		( "log-xml",	"Log more HTTP responses as XML for debugging.")
 		( "new-rev",	"Create new revisions in server for updated files.")
@@ -101,6 +105,57 @@ int Main( int argc, char **argv )
 		std::cout << desc << std::endl ;
 		return 0 ;
 	}
+
+  boost::shared_ptr<Config> config ;
+	
+	if ( vm.count( "log" ) )
+	{
+		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
+		file_log->Enable( log::debug ) ;
+		file_log->Enable( log::verbose ) ;
+		file_log->Enable( log::info ) ;
+		file_log->Enable( log::warning ) ;
+		file_log->Enable( log::error ) ;
+		file_log->Enable( log::critical ) ;
+		
+		// log grive version to log file
+		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
+		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
+		
+		comp_log->Add( file_log ) ;
+	}
+	if ( vm.count( "verbose" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+	}
+	
+	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
+	options.Add( "new-rev", Json(vm.count("new-rev") > 0) ) ;
+	
+	if ( vm.count( "debug" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+		console_log->Enable( log::debug ) ;
+	}
+
+  // config file will be (in order of preference)
+  // value specified in environment string
+  // value specified in defaultConfigFileName in path from commandline --path
+  // value specified in defaultConfigFileName in current directory
+	const char *envConfigFileName = ::getenv( configFileEnvironmentVariable ) ;
+  if (envConfigFileName) {
+    config.reset(new Config(envConfigFileName));
+
+  } else if ( vm.count( "path" ) ) {
+    rootFolder = vm["path"].as<std::string>();
+    config.reset(new Config( fs::path(rootFolder) / fs::path(defaultConfigFileName) ));
+
+  } else {
+    config.reset(new Config( defaultConfigFileName) );
+  }
+	
+  Log( "config file name %1%", config->ConfigFile().string(), log::verbose );
+
 	if ( vm.count( "auth" ) )
 	{
 		std::cout
@@ -119,43 +174,14 @@ int Main( int argc, char **argv )
 		token.Auth( code ) ;
 		
 		// save to config
-		config.Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
-		config.Save() ;
-	}
-	if ( vm.count( "log" ) )
-	{
-		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
-		file_log->Enable( log::debug ) ;
-		file_log->Enable( log::verbose ) ;
-		file_log->Enable( log::info ) ;
-		file_log->Enable( log::warning ) ;
-		file_log->Enable( log::error ) ;
-		file_log->Enable( log::critical ) ;
-		
-		// log grive version to log file
-		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
-		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
-		
-		comp_log->Add( file_log ) ;
+		config->Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
+		config->Save() ;
 	}
 	if ( vm.count( "version" ) )
 	{
 		std::cout
 			<< "grive version " << VERSION << ' ' << __DATE__ << ' ' << __TIME__ << std::endl ;
 		return 0 ;
-	}
-	if ( vm.count( "verbose" ) )
-	{
-		console_log->Enable( log::verbose ) ;
-	}
-	
-	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
-	options.Add( "new-rev", Json(vm.count("new-rev") > 0) ) ;
-	
-	if ( vm.count( "debug" ) )
-	{
-		console_log->Enable( log::verbose ) ;
-		console_log->Enable( log::debug ) ;
 	}
 	if ( vm.count( "force" ) )
 	{
@@ -167,7 +193,7 @@ int Main( int argc, char **argv )
 	std::string refresh_token ;
 	try
 	{
-		refresh_token = config.Get()["refresh_token"].Str() ;
+		refresh_token = config->Get()["refresh_token"].Str() ;
 	}
 	catch ( Exception& e )
 	{
@@ -181,7 +207,8 @@ int Main( int argc, char **argv )
 	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
-	Drive drive( &agent, options ) ;
+
+	Drive drive( &agent, options, rootFolder ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )
@@ -192,7 +219,7 @@ int Main( int argc, char **argv )
 	else
 		drive.DryRun() ;
 	
-	config.Save() ;
+	config->Save() ;
 	Log( "Finished!", log::info ) ;
 	return 0 ;
 }

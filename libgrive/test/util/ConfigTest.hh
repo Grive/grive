@@ -17,48 +17,31 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Config.hh"
+#pragma once
 
-#include "util/StdioFile.hh"
+#include "util/Config.hh"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <iterator>
+namespace grut {
 
-namespace gr {
-
-const std::string& Config::Filename()
+class ConfigTest : public CppUnit::TestFixture
 {
-	static const char *env_cfg = ::getenv( "GR_CONFIG" ) ;
-	static const std::string filename = (env_cfg != 0) ? env_cfg : ".grive" ;
+public :
+	ConfigTest( ) ;
 
-	return filename ;
-}
+	// declare suit function
+	CPPUNIT_TEST_SUITE( ConfigTest ) ;
+		CPPUNIT_TEST_EXCEPTION( TestInitialiseWithEmptyString, gr::Config::Error ) ;
+		CPPUNIT_TEST( TestInitialiseWithString ) ;
+		CPPUNIT_TEST( TestInitialiseWithFileSystemPath ) ;
+  CPPUNIT_TEST_SUITE_END();
 
-Config::Config() :
-	m_cfg( Read( Filename() ) )
-{
-}
-
-void Config::Save( )
-{
-	StdioFile file( Filename(), 0600 ) ;
-	m_cfg.Write( file ) ;
-}
-
-Json& Config::Get()
-{
-	return m_cfg ;
-}
-
-Json Config::Read( const std::string& filename )
-{
-	try
-	{
-		return Json::ParseFile( filename ) ;
-	}
-	catch ( Exception& e )
-	{
-		return Json() ;
-	}
-}
+private :
+  void TestInitialiseWithEmptyString( );
+  void TestInitialiseWithString( );
+  void TestInitialiseWithFileSystemPath( );
+} ;
 
 } // end of namespace
+

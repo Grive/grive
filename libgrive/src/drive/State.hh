@@ -43,7 +43,7 @@ public :
 	typedef ResourceTree::iterator iterator ;
 
 public :
-	explicit State( const fs::path& filename, const Json& options ) ;
+	explicit State( const fs::path& rootFolder, const fs::path& filename, const Json& options ) ;
 	~State() ;
 	
 	void FromLocal( const fs::path& p ) ;
@@ -55,7 +55,6 @@ public :
 
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
-	Resource* Find( const fs::path& path ) ;
 
 	void Sync( http::Agent *http, const Json& options ) ;
 	

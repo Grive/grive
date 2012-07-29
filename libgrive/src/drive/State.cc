@@ -32,8 +32,9 @@
 
 namespace gr {
 
-State::State( const fs::path& filename, const Json& options ) :
-	m_cstamp( -1 )
+State::State( const fs::path& rootFolder, const fs::path& filename, const Json& options  ) :
+	m_cstamp( -1 ),
+    m_res(rootFolder)
 {
 	Read( filename ) ;
 	
@@ -211,11 +212,6 @@ bool State::Update( const Entry& e )
 Resource* State::FindByHref( const std::string& href )
 {
 	return m_res.FindByHref( href ) ;
-}
-
-Resource* State::Find( const fs::path& path )
-{
-	return m_res.FindByPath( path ) ;
 }
 
 State::iterator State::begin()
