@@ -74,7 +74,6 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 
-	Resource* FindByPath( const fs::path& path ) ;
 	Resource* FindByID( const std::string& id ) ;
 	
 	bool ReInsert( Resource *coll ) ;

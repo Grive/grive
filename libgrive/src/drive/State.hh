@@ -55,7 +55,6 @@ public :
 
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
-	Resource* Find( const fs::path& path ) ;
 
 	void Sync( http::Agent *http, const Json& options ) ;
 	
