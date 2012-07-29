@@ -31,8 +31,8 @@ namespace gr {
 
 using namespace details ;
 
-ResourceTree::ResourceTree( ) :
-	m_root( new Resource )
+ResourceTree::ResourceTree( const fs::path& rootFolder ) :
+    m_root(new Resource(rootFolder))
 {
 	m_set.insert( m_root ) ;
 }

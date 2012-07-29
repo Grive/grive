@@ -58,8 +58,8 @@ const std::string xml_meta =
 
 
 /// default constructor creates the root folder
-Resource::Resource() :
-	m_name		( "." ),
+Resource::Resource(const fs::path& rootFolder) :
+	m_name		( rootFolder.string() ),
 	m_kind		( "folder" ),
 	m_id		( "folder:root" ),
 	m_href		( root_href ),

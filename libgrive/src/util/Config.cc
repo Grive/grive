@@ -17,51 +17,49 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Config.hh"
 
-#include "State.hh"
+#include "util/StdioFile.hh"
 
-#include "http/Header.hh"
-#include "protocol/Json.hh"
-#include "util/Exception.hh"
+#include <iostream>
+#include <iterator>
 
-#include <string>
-#include <vector>
+using namespace gr;
 
-namespace gr {
-
-namespace http
+Config::Config(const fs::path& configFile)
+  : m_configFile(configFile)
+	, m_cfg( Read() )
 {
-	class Agent ;
+  if (configFile.empty()) {
+    throw Error() << expt::ErrMsg("Config cannot be initalised with an empty string.");
+  }
 }
 
-class Entry ;
-
-class Drive
+const fs::path& Config::ConfigFile() const
 {
-public :
-	Drive( http::Agent *http, const Json& options, const std::string &rootFolder ) ;
+	return m_configFile ;
+}
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	State			m_state ;
-  fs::path		m_rootFolder;
-	Json			m_options ;
-} ;
+void Config::Save( )
+{
+	StdioFile file( m_configFile.string(), 0600 ) ;
+	m_cfg.Write( file ) ;
+}
 
-} // end of namespace
+Json& Config::Get()
+{
+	return m_cfg ;
+}
+
+Json Config::Read()
+{
+	try
+	{
+		return Json::ParseFile( m_configFile.string() ) ;
+	}
+	catch ( Exception& e )
+	{
+		return Json() ;
+	}
+}
+

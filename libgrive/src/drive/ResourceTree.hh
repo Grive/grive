@@ -64,7 +64,7 @@ public :
 	typedef details::Set::iterator iterator ;
 
 public :
-	ResourceTree( ) ;
+	ResourceTree( const fs::path& rootFolder ) ;
 	ResourceTree( const ResourceTree& fs ) ;
 	~ResourceTree( ) ;
 	

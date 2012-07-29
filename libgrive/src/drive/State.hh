@@ -43,7 +43,7 @@ public :
 	typedef ResourceTree::iterator iterator ;
 
 public :
-	explicit State( const fs::path& filename, const Json& options ) ;
+	explicit State( const fs::path& rootFolder, const fs::path& filename, const Json& options ) ;
 	~State() ;
 	
 	void FromLocal( const fs::path& p ) ;
