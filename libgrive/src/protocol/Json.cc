@@ -101,6 +101,17 @@ Json::Json( const bool& b ) :
 		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json bool" ) ) ;
 }
 
+template <>
+Json::Json( const Object& obj ) :
+	m_json( ::json_object_new_object() )
+{
+	if ( m_json == 0 )
+		BOOST_THROW_EXCEPTION( Error() << expt::ErrMsg( "cannot create json object" ) ) ;
+
+	for ( Object::const_iterator i = obj.begin() ; i != obj.end() ; ++i )
+		Add( i->first, i->second ) ;
+}
+
 Json::Json( struct json_object *json, NotOwned ) :
 	m_json( json )
 {
@@ -198,7 +209,7 @@ void Json::Add( const std::string& key, const Json& json )
 {
 	assert( m_json != 0 ) ;
 	assert( json.m_json != 0 ) ;
-	
+
 	::json_object_get( json.m_json ) ;
 	::json_object_object_add( m_json, key.c_str(), json.m_json ) ;
 }
