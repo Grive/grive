@@ -23,6 +23,14 @@
 #include "FileSystem.hh"
 #include "protocol/Json.hh"
 
+namespace boost
+{
+	namespace program_options
+	{
+		class variables_map ;
+	}
+}
+
 namespace gr {
 
 class Config
@@ -31,18 +39,30 @@ public :
 	struct Error : virtual Exception {} ;
 	typedef boost::error_info<struct FileTag, std::string>	File ;
 
-	Config(const fs::path& configFile) ;
+	Config( const fs::path& root_path ) ;
+	Config( const boost::program_options::variables_map& vm ) ;
+
+	const fs::path Filename() const ;
 	
-	Json& Get() ;
+	void Set( const std::string& key, const Json& value ) ;
+	Json Get( const std::string& key ) const ;
+
+	Json GetAll() const ;
 	void Save() ;
-	const fs::path &ConfigFile() const;
 
 private :
-	Json Read() ;
+	Json Read( ) ;
+	static fs::path GetPath( const fs::path& root_path ) ;
 
 private :
-	const fs::path	m_configFile;
-	Json			m_cfg ;
+	//! config file path
+	fs::path	m_path;
+	
+	//! config values loaded from config file
+	Json		m_file ;
+	
+	//! config values from command line
+	Json		m_cmd ;
 } ;
 	
 } // end of namespace

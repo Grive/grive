@@ -32,9 +32,9 @@
 
 namespace gr {
 
-State::State( const fs::path& rootFolder, const fs::path& filename, const Json& options  ) :
-    m_res(rootFolder),
-	m_cstamp( -1 )
+State::State( const fs::path& filename, const Json& options  ) :
+    m_res		( options["path"].Str() ),
+	m_cstamp	( -1 )
 {
 	Read( filename ) ;
 	

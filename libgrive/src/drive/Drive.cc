@@ -51,10 +51,10 @@ namespace
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( http::Agent *http, const Json& options, const std::string &rootFolder) :
-	m_http( http ),
-	m_state( fs::path(rootFolder), fs::path(rootFolder) / fs::path(state_file), options ),
-	m_rootFolder(rootFolder),
+Drive::Drive( http::Agent *http, const Json& options ) :
+	m_http		( http ),
+	m_root		( options["path"].Str() ),
+	m_state		( m_root / state_file, options ),
 	m_options	( options )
 {
 	assert( m_http != 0 ) ;
@@ -128,7 +128,7 @@ void Drive::SyncFolders( )
 void Drive::DetectChanges()
 {
 	Log( "Reading local directories", log::info ) ;
-	m_state.FromLocal( m_rootFolder ) ;
+	m_state.FromLocal( m_root ) ;
 	
 	long prev_stamp = m_state.ChangeStamp() ;
 	Trace( "previous change stamp is %1%", prev_stamp ) ;

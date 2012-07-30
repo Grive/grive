@@ -51,7 +51,7 @@ public :
 	typedef Children::const_iterator iterator ;
 	
 public :
-	Resource(const fs::path& rootFolder) ;
+	Resource(const fs::path& root_folder) ;
 	Resource( const std::string& name, const std::string& kind ) ;
 	
 	// default copy ctor & op= are fine

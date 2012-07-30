@@ -26,39 +26,80 @@
 #include <iostream>
 #include <iterator>
 
+namespace po = boost::program_options;
+
 namespace gr {
 
-Config::Config(const fs::path& configFile) :
-	m_configFile(configFile),
-	m_cfg( Read() )
+const std::string	default_filename	= ".grive";
+const char			*env_name			= "GR_CONFIG";
+const std::string	default_root_folder = ".";
+
+Config::Config( const fs::path& root_path ) :
+	m_path( GetPath( root_path ) )
 {
-	if (configFile.empty())
-	{
-		throw Error() << expt::ErrMsg("Config cannot be initalised with an empty string.");
-	}
+	m_file = Read() ;
 }
 
-const fs::path& Config::ConfigFile() const
+Config::Config( const po::variables_map& vm )
 {
-	return m_configFile ;
+	m_cmd.Add( "log-xml",	Json(vm.count("log-xml") > 0) ) ;
+	m_cmd.Add( "new-rev",	Json(vm.count("new-rev") > 0) ) ;
+	m_cmd.Add( "force",		Json(vm.count("force") > 0 ) ) ;
+	m_cmd.Add( "path",		Json(vm.count("path") > 0
+		? vm["path"].as<std::string>()
+		: default_root_folder ) ) ;
+	
+	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
+	m_file	= Read( ) ;
+}
+
+fs::path Config::GetPath( const fs::path& root_path )
+{
+	// config file will be (in order of preference)
+	// value specified in environment string
+	// value specified in defaultConfigFileName in path from commandline --path
+	// value specified in defaultConfigFileName in current directory
+	const char *env = ::getenv( env_name ) ;
+	return root_path / (env ? env : default_filename) ;
+}
+
+const fs::path Config::Filename() const
+{
+	return m_path ;
 }
 
 void Config::Save( )
 {
-	StdioFile file( m_configFile.string(), 0600 ) ;
-	m_cfg.Write( file ) ;
+	StdioFile file( m_path.string(), 0600 ) ;
+	m_file.Write( file ) ;
 }
 
-Json& Config::Get()
+void Config::Set( const std::string& key, const Json& value )
 {
-	return m_cfg ;
+	m_file.Add( key, value ) ;
+}
+
+Json Config::Get( const std::string& key ) const
+{
+	return m_cmd.Has(key) ? m_cmd[key] : m_file[key] ;
+}
+
+Json Config::GetAll() const
+{
+	Json::Object obj		= m_file.AsObject() ;
+	Json::Object cmd_obj	= m_cmd.AsObject() ;
+	
+	for ( Json::Object::iterator i = cmd_obj.begin() ; i != cmd_obj.end() ; ++i )
+		obj[i->first] = i->second ;
+	
+	return Json( obj ) ;
 }
 
 Json Config::Read()
 {
 	try
 	{
-		return Json::ParseFile( m_configFile.string() ) ;
+		return Json::ParseFile( m_path.string() ) ;
 	}
 	catch ( Exception& e )
 	{

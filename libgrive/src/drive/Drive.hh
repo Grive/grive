@@ -40,7 +40,7 @@ class Entry ;
 class Drive
 {
 public :
-	Drive( http::Agent *http, const Json& options, const std::string &rootFolder ) ;
+	Drive( http::Agent *http, const Json& options ) ;
 
 	void DetectChanges() ;
 	void Update() ;
@@ -59,8 +59,8 @@ private :
 private :
 	http::Agent 	*m_http ;
 	std::string		m_resume_link ;
+	fs::path		m_root ;
 	State			m_state ;
-  fs::path		m_rootFolder;
 	Json			m_options ;
 } ;
 

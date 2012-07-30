@@ -46,9 +46,6 @@
 
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
-const std::string defaultRootFolder = ".";
-const std::string defaultConfigFileName = ".grive";
-const char *configFileEnvironmentVariable = "GR_CONFIG";
 
 using namespace gr ;
 namespace po = boost::program_options;
@@ -105,8 +102,6 @@ int Main( int argc, char **argv )
 {
 	InitGCrypt() ;
 	
-	std::string rootFolder = defaultRootFolder;
-	
 	// construct the program options
 	po::options_description desc( "Grive options" );
 	desc.add_options()
@@ -129,6 +124,7 @@ int Main( int argc, char **argv )
 	po::store(po::parse_command_line( argc, argv, desc), vm );
 	po::notify(vm);
 	
+	// simple commands that doesn't require log or config
 	if ( vm.count("help") )
 	{
 		std::cout << desc << std::endl ;
@@ -144,31 +140,9 @@ int Main( int argc, char **argv )
 	// initialize logging
 	InitLog(vm) ;
 	
-	boost::shared_ptr<Config> config ;
+	Config config(vm) ;
 	
-	// config file will be (in order of preference)
-	// value specified in environment string
-	// value specified in defaultConfigFileName in path from commandline --path
-	// value specified in defaultConfigFileName in current directory
-	const char *envConfigFileName = ::getenv( configFileEnvironmentVariable ) ;
-	if (envConfigFileName) {
-		config.reset(new Config(envConfigFileName));
-
-	} else if ( vm.count( "path" ) ) {
-		rootFolder = vm["path"].as<std::string>();
-		config.reset(new Config( fs::path(rootFolder) / fs::path(defaultConfigFileName) ));
-
-	} else {
-		config.reset(new Config( defaultConfigFileName) );
-	}
-	
-	// misc options
-	Json options ;
-	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
-	options.Add( "new-rev", Json(vm.count("new-rev") > 0) ) ;
-	options.Add( "force",	Json(vm.count("force") > 0 ) ) ;
-	
-	Log( "config file name %1%", config->ConfigFile().string(), log::verbose );
+	Log( "config file name %1%", config.Filename(), log::verbose );
 
 	if ( vm.count( "auth" ) )
 	{
@@ -188,14 +162,14 @@ int Main( int argc, char **argv )
 		token.Auth( code ) ;
 		
 		// save to config
-		config->Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
-		config->Save() ;
+		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
+		config.Save() ;
 	}
 	
 	std::string refresh_token ;
 	try
 	{
-		refresh_token = config->Get()["refresh_token"].Str() ;
+		refresh_token = config.Get("refresh_token").Str() ;
 	}
 	catch ( Exception& e )
 	{
@@ -210,7 +184,7 @@ int Main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 
-	Drive drive( &agent, options, rootFolder ) ;
+	Drive drive( &agent, config.GetAll() ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )
@@ -221,7 +195,7 @@ int Main( int argc, char **argv )
 	else
 		drive.DryRun() ;
 	
-	config->Save() ;
+	config.Save() ;
 	Log( "Finished!", log::info ) ;
 	return 0 ;
 }

@@ -36,22 +36,22 @@ ConfigTest::ConfigTest( )
 
 void ConfigTest::TestInitialiseWithEmptyString( )
 {
-  Config config("");
-  GRUT_ASSERT_EQUAL( "/home/.grive", config.ConfigFile().string()) ;
+	Config config("");
+	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string()) ;
 }
 
 void ConfigTest::TestInitialiseWithString( )
 {
-  Config config("/home/.grive");
-  GRUT_ASSERT_EQUAL( "/home/.grive", config.ConfigFile().string()) ;
+	Config config("/home/.grive");
+	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string()) ;
 }
 
 void ConfigTest::TestInitialiseWithFileSystemPath( )
 {
-  fs::path path("/home");
-  fs::path file(".grive");
-  Config config(path / file);
-  GRUT_ASSERT_EQUAL( "/home/.grive", config.ConfigFile().string());
+	fs::path path("/home");
+	fs::path file(".grive");
+	Config config(path / file);
+	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string());
 }
 
 
