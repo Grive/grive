@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include "util/Exception.hh"
+#include "Exception.hh"
+#include "FileSystem.hh"
 #include "protocol/Json.hh"
 
 namespace gr {
@@ -30,17 +31,17 @@ public :
 	struct Error : virtual Exception {} ;
 	typedef boost::error_info<struct FileTag, std::string>	File ;
 
-	static const std::string& Filename() ;
-
-	Config() ;
+	Config(const fs::path& configFile) ;
 	
 	Json& Get() ;
 	void Save() ;
+  const fs::path &ConfigFile() const;
 
 private :
-	Json Read( const std::string& filename ) ;
+	Json Read() ;
 
 private :
+  const fs::path m_configFile;
 	Json m_cfg ;
 } ;
 	

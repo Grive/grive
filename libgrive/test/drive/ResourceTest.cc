@@ -38,9 +38,10 @@ ResourceTest::ResourceTest( )
 
 void ResourceTest::TestRootPath()
 {
-	Resource root ;
+  std::string rootFolder = "/home/usr/grive/grive";
+	Resource root(rootFolder) ;
 	CPPUNIT_ASSERT( root.IsRoot() ) ;
-	GRUT_ASSERT_EQUAL( root.Path(), fs::path( "." ) ) ;
+	GRUT_ASSERT_EQUAL( root.Path(), fs::path( rootFolder ) ) ;
 }
 
 void ResourceTest::TestNormal( )
@@ -60,7 +61,7 @@ void ResourceTest::TestNormal( )
 	
 	Entry remote( entry ) ;
 	subject.FromRemote( remote, DateTime() ) ;
-	GRUT_ASSERT_EQUAL( subject.StateStr(), "local_changed" ) ;
+	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;
 }
 
 
