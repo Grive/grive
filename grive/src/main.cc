@@ -51,6 +51,7 @@ const std::string defaultConfigFileName = ".grive";
 const char *configFileEnvironmentVariable = "GR_CONFIG";
 
 using namespace gr ;
+namespace po = boost::program_options;
 
 // libgcrypt insist this to be done in application, not library
 void InitGCrypt()
@@ -65,18 +66,46 @@ void InitGCrypt()
 	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 }
 
+void InitLog( const po::variables_map& vm )
+{
+	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
+	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
+
+	if ( vm.count( "log" ) )
+	{
+		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
+		file_log->Enable( log::debug ) ;
+		file_log->Enable( log::verbose ) ;
+		file_log->Enable( log::info ) ;
+		file_log->Enable( log::warning ) ;
+		file_log->Enable( log::error ) ;
+		file_log->Enable( log::critical ) ;
+		
+		// log grive version to log file
+		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
+		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
+		
+		comp_log->Add( file_log ) ;
+	}
+	
+	if ( vm.count( "verbose" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+	}
+	
+	if ( vm.count( "debug" ) )
+	{
+		console_log->Enable( log::verbose ) ;
+		console_log->Enable( log::debug ) ;
+	}
+	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
+}
+
 int Main( int argc, char **argv )
 {
 	InitGCrypt() ;
 	
 	std::string rootFolder = defaultRootFolder;
-
-	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
-	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
-	
-	Json options ;
-	
-	namespace po = boost::program_options;
 	
 	// construct the program options
 	po::options_description desc( "Grive options" );
@@ -105,56 +134,41 @@ int Main( int argc, char **argv )
 		std::cout << desc << std::endl ;
 		return 0 ;
 	}
+	else if ( vm.count( "version" ) )
+	{
+		std::cout
+			<< "grive version " << VERSION << ' ' << __DATE__ << ' ' << __TIME__ << std::endl ;
+		return 0 ;
+	}
 
-  boost::shared_ptr<Config> config ;
+	// initialize logging
+	InitLog(vm) ;
 	
-	if ( vm.count( "log" ) )
-	{
-		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
-		file_log->Enable( log::debug ) ;
-		file_log->Enable( log::verbose ) ;
-		file_log->Enable( log::info ) ;
-		file_log->Enable( log::warning ) ;
-		file_log->Enable( log::error ) ;
-		file_log->Enable( log::critical ) ;
-		
-		// log grive version to log file
-		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
-		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
-		
-		comp_log->Add( file_log ) ;
-	}
-	if ( vm.count( "verbose" ) )
-	{
-		console_log->Enable( log::verbose ) ;
+	boost::shared_ptr<Config> config ;
+	
+	// config file will be (in order of preference)
+	// value specified in environment string
+	// value specified in defaultConfigFileName in path from commandline --path
+	// value specified in defaultConfigFileName in current directory
+	const char *envConfigFileName = ::getenv( configFileEnvironmentVariable ) ;
+	if (envConfigFileName) {
+		config.reset(new Config(envConfigFileName));
+
+	} else if ( vm.count( "path" ) ) {
+		rootFolder = vm["path"].as<std::string>();
+		config.reset(new Config( fs::path(rootFolder) / fs::path(defaultConfigFileName) ));
+
+	} else {
+		config.reset(new Config( defaultConfigFileName) );
 	}
 	
+	// misc options
+	Json options ;
 	options.Add( "log-xml", Json(vm.count("log-xml") > 0) ) ;
 	options.Add( "new-rev", Json(vm.count("new-rev") > 0) ) ;
+	options.Add( "force",	Json(vm.count("force") > 0 ) ) ;
 	
-	if ( vm.count( "debug" ) )
-	{
-		console_log->Enable( log::verbose ) ;
-		console_log->Enable( log::debug ) ;
-	}
-
-  // config file will be (in order of preference)
-  // value specified in environment string
-  // value specified in defaultConfigFileName in path from commandline --path
-  // value specified in defaultConfigFileName in current directory
-	const char *envConfigFileName = ::getenv( configFileEnvironmentVariable ) ;
-  if (envConfigFileName) {
-    config.reset(new Config(envConfigFileName));
-
-  } else if ( vm.count( "path" ) ) {
-    rootFolder = vm["path"].as<std::string>();
-    config.reset(new Config( fs::path(rootFolder) / fs::path(defaultConfigFileName) ));
-
-  } else {
-    config.reset(new Config( defaultConfigFileName) );
-  }
-	
-  Log( "config file name %1%", config->ConfigFile().string(), log::verbose );
+	Log( "config file name %1%", config->ConfigFile().string(), log::verbose );
 
 	if ( vm.count( "auth" ) )
 	{
@@ -177,18 +191,6 @@ int Main( int argc, char **argv )
 		config->Get().Add( "refresh_token", Json( token.RefreshToken() ) ) ;
 		config->Save() ;
 	}
-	if ( vm.count( "version" ) )
-	{
-		std::cout
-			<< "grive version " << VERSION << ' ' << __DATE__ << ' ' << __TIME__ << std::endl ;
-		return 0 ;
-	}
-	if ( vm.count( "force" ) )
-	{
-		options.Add( "force", Json(true) ) ;
-	}
-	
-	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
 	
 	std::string refresh_token ;
 	try

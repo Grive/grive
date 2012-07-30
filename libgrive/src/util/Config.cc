@@ -21,18 +21,21 @@
 
 #include "util/StdioFile.hh"
 
+#include <boost/program_options.hpp>
+
 #include <iostream>
 #include <iterator>
 
-using namespace gr;
+namespace gr {
 
-Config::Config(const fs::path& configFile)
-  : m_configFile(configFile)
-	, m_cfg( Read() )
+Config::Config(const fs::path& configFile) :
+	m_configFile(configFile),
+	m_cfg( Read() )
 {
-  if (configFile.empty()) {
-    throw Error() << expt::ErrMsg("Config cannot be initalised with an empty string.");
-  }
+	if (configFile.empty())
+	{
+		throw Error() << expt::ErrMsg("Config cannot be initalised with an empty string.");
+	}
 }
 
 const fs::path& Config::ConfigFile() const
@@ -63,3 +66,4 @@ Json Config::Read()
 	}
 }
 
+} // end of namespace

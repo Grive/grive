@@ -6,7 +6,7 @@ find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(Boost 1.40.0 COMPONENTS filesystem system REQUIRED)
+find_package(Boost 1.40.0 COMPONENTS program_options filesystem system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
@@ -126,6 +126,7 @@ IF ( CPPUNIT_FOUND )
 	target_link_libraries( unittest
 		grive
 		${CPPUNIT_LIBRARY}
+		${Boost_LIBRARIES}
 	)
         
 ENDIF ( CPPUNIT_FOUND )

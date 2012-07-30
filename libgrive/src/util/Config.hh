@@ -35,14 +35,14 @@ public :
 	
 	Json& Get() ;
 	void Save() ;
-  const fs::path &ConfigFile() const;
+	const fs::path &ConfigFile() const;
 
 private :
 	Json Read() ;
 
 private :
-  const fs::path m_configFile;
-	Json m_cfg ;
+	const fs::path	m_configFile;
+	Json			m_cfg ;
 } ;
 	
 } // end of namespace

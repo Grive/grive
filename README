@@ -50,8 +50,13 @@ Enjoy!
 
 Version History:
 
-Grive v0.3: Bug fix release
+Grive v0.3: Bug fix & minor feature release
 Fixed bugs:
 	#93: missing reference count increment in one of the Json constructors
 	#82: retry for HTTP error 500 & 503
 	#77: Fixed a bug where grive crashed on the first run.
+
+New features:
+	#87: support for revisions
+	#86: partial sync (contributed by justin at tierramedia.com)
+	
