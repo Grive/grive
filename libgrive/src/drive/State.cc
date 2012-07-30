@@ -33,8 +33,8 @@
 namespace gr {
 
 State::State( const fs::path& rootFolder, const fs::path& filename, const Json& options  ) :
-	m_cstamp( -1 ),
-    m_res(rootFolder)
+    m_res(rootFolder),
+	m_cstamp( -1 )
 {
 	Read( filename ) ;
 	
