@@ -25,33 +25,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "protocol/Json.hh"
 #include "util/log/Log.hh"
 
+#include <boost/program_options.hpp>
 #include <iostream>
 
 using namespace grut;
 using namespace gr ;
+namespace po = boost::program_options;
 
 ConfigTest::ConfigTest( )
 {
 }
 
-void ConfigTest::TestInitialiseWithEmptyString( )
+void ConfigTest::TestInitialiseWithNoPath( )
 {
-	Config config("");
-	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string()) ;
+	po::variables_map vm;
+	po::notify(vm);
+
+	Config config(vm);
+	GRUT_ASSERT_EQUAL( "./.grive", config.Filename().string()) ;
 }
 
-void ConfigTest::TestInitialiseWithString( )
+void ConfigTest::TestInitialiseWithPath( )
 {
-	Config config("/home/.grive");
-	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string()) ;
-}
+	char const *argv[] = { "Program", "-p", "/home/grive" };
+	int argc = 3;
 
-void ConfigTest::TestInitialiseWithFileSystemPath( )
-{
-	fs::path path("/home");
-	fs::path file(".grive");
-	Config config(path / file);
-	GRUT_ASSERT_EQUAL( "/home/.grive", config.Filename().string());
-}
+	po::options_description desc( "Grive options" );
+	desc.add_options()
+		( "path,p",		po::value<std::string>(), "Path to sync")
+		;
 
+	po::variables_map vm;
+	po::store(po::parse_command_line( argc, argv, desc), vm );
+	po::notify(vm);
+
+	Config config(vm);
+	GRUT_ASSERT_EQUAL( "/home/grive/.grive", config.Filename().string()) ;
+}
 
