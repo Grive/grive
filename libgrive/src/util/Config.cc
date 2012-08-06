@@ -34,12 +34,6 @@ const std::string	default_filename	= ".grive";
 const char			*env_name			= "GR_CONFIG";
 const std::string	default_root_folder = ".";
 
-Config::Config( const fs::path& root_path ) :
-	m_path( GetPath( root_path ) )
-{
-	m_file = Read() ;
-}
-
 Config::Config( const po::variables_map& vm )
 {
 	m_cmd.Add( "log-xml",	Json(vm.count("log-xml") > 0) ) ;

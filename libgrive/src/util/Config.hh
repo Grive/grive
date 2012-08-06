@@ -39,7 +39,6 @@ public :
 	struct Error : virtual Exception {} ;
 	typedef boost::error_info<struct FileTag, std::string>	File ;
 
-	Config( const fs::path& root_path ) ;
 	Config( const boost::program_options::variables_map& vm ) ;
 
 	const fs::path Filename() const ;
