@@ -108,16 +108,34 @@ void Drive::SyncFolders( )
 		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
 		{
 			Entry e( *i ) ;
-			if ( e.Kind() == "folder" )
+			if (m_options["remotefolder"].Str() != "") 
 			{
-				if ( e.ParentHrefs().size() != 1 )
-					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
+			  if ( e.Kind() == "folder" && e.Title() == m_options["remotefolder"].Str() )
+			  {
+				  m_remotefolder_id = e.ResourceID();
+				  if ( e.ParentHrefs().size() != 1 )
+					  Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
 				
-				else if ( e.Title().find('/') != std::string::npos )
-					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
+				  else if ( e.Title().find('/') != std::string::npos )
+					  Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
 				
-				else
-					m_state.FromRemote( e ) ;
+				  else
+					  m_state.FromRemote( e ) ;
+			  }
+			}
+			else
+			{
+			  if ( e.Kind() == "folder" )
+			  {
+				  if ( e.ParentHrefs().size() != 1 )
+					  Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
+				
+				  else if ( e.Title().find('/') != std::string::npos )
+					  Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
+				
+				  else
+					  m_state.FromRemote( e ) ;
+			  }
 			}
 		}
 	} while ( feed.GetNext( m_http, http::Header() ) ) ;
@@ -140,14 +158,15 @@ void Drive::DetectChanges()
 	if ( m_options["log-xml"].Bool() )
 		feed.EnableLog( "/tmp/file", ".xml" ) ;
 	
-	feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ;
+	if ( m_options["remotefolder"].Str() != "" ) feed.Start( m_http, http::Header(), feed_base + m_remotefolder_id + "?showfolders=true&showroot=true" ) ;
+	else feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ; 
 	
 	m_resume_link = feed.Root()["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
 		
 	do
 	{
-		std::for_each(
+			std::for_each(
 			feed.begin(), feed.end(),
 			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
 			

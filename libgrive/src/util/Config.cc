@@ -33,6 +33,7 @@ namespace gr {
 const std::string	default_filename	= ".grive";
 const char			*env_name			= "GR_CONFIG";
 const std::string	default_root_folder = ".";
+const std::string	default_gdrive_root = "";
 
 Config::Config( const po::variables_map& vm )
 {
@@ -43,6 +44,10 @@ Config::Config( const po::variables_map& vm )
 		? vm["path"].as<std::string>()
 		: default_root_folder ) ) ;
 	
+	m_cmd.Add( "remotefolder",	Json(vm.count("remotefolder") > 0
+		? vm["remotefolder"].as<std::string>()
+		: default_gdrive_root ) ) ;
+		
 	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
 	m_file	= Read( ) ;
 }
