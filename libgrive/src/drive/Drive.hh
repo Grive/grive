@@ -62,6 +62,7 @@ private :
 	fs::path		m_root ;
 	State			m_state ;
 	Json			m_options ;
+	std::string	m_remotefolder_id;
 } ;
 
 } // end of namespace
