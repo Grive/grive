@@ -19,50 +19,47 @@
 
 #pragma once
 
-#include "State.hh"
+#include "Exception.hh"
+#include "FileSystem.hh"
+#include "Config.hh"
 
-#include "http/Header.hh"
 #include "protocol/Json.hh"
-#include "util/Exception.hh"
-#include "util/Ignore.hh"
 
-#include <string>
-#include <vector>
+#include "Config.hh"
+
+
+namespace boost
+{
+	namespace program_options
+	{
+		class variables_map ;
+	}
+}
 
 namespace gr {
 
-namespace http
-{
-	class Agent ;
-}
-
-class Entry ;
-
-class Drive
+class Ignore
 {
 public :
-	Drive( http::Agent *http, const Json& options, const Ignore& igno ) ;
+	//struct Error : virtual Exception {} ;
+	//typedef boost::error_info<struct FileTag, std::string>	File ;
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
+	Ignore( const Config& cfg ) ;
+
+	void Add( const std::string& filename );
+	void Remove( const std::string& filename );
 	
-	struct Error : virtual Exception {} ;
+	bool Contains( const std::string& filename );
 	
+	void Save( ) ;
+
 private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
+	//Json Read( ) ;
+	//static fs::path GetPath( const fs::path& root_path ) ;
+
 private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Json			m_options ;
+	Config m_cfg;
+	Json ignoreList;
 } ;
-
+	
 } // end of namespace

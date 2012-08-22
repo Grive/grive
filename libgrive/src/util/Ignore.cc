@@ -17,52 +17,47 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Ignore.hh"
 
-#include "State.hh"
+#include "util/Config.hh"
+#include "util/StdioFile.hh"
 
-#include "http/Header.hh"
 #include "protocol/Json.hh"
-#include "util/Exception.hh"
-#include "util/Ignore.hh"
 
-#include <string>
-#include <vector>
+namespace po = boost::program_options;
 
 namespace gr {
 
-namespace http
+Ignore::Ignore( const Config& cfg ) : 
+	m_cfg ( cfg )
 {
-	class Agent ;
+	try {
+		ignoreList = m_cfg.Get( "ignore" );
+	} catch( Exception e) { // ignore not in config
+		ignoreList = Json();
+	}
 }
 
-class Entry ;
+void Ignore::Add( const std::string& filename ) {
+	ignoreList.Add( filename, Json::Parse("1") );
+}
 
-class Drive
+void Ignore::Remove( const std::string& filename ) {
+	ignoreList.Remove( filename );
+}
+
+bool Ignore::Contains( const std::string& filename ) {
+	return ignoreList.Has(filename);
+}
+
+void Ignore::Save( )
 {
-public :
-	Drive( http::Agent *http, const Json& options, const Ignore& igno ) ;
+	m_cfg.Set( "ignore", ignoreList );
+	m_cfg.Save();
+}
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Json			m_options ;
-} ;
+
 
 } // end of namespace
+
+

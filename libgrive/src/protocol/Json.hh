@@ -74,7 +74,9 @@ public :
 	void Add( const Json& json ) ;
 	Json FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
-	
+
+	void Remove( const std::string& key ) ;	
+
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
 	void Write( StdioFile& file ) const ;
 
