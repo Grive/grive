@@ -18,6 +18,7 @@
 */
 
 #include "util/Config.hh"
+#include "util/Ignore.hh"
 
 #include "drive/Drive.hh"
 
@@ -118,6 +119,8 @@ int Main( int argc, char **argv )
 						"instead of uploading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		( "ignore,i",	po::value<std::string>(), "Adds the file to the list of ignored files." )
+		( "unignore,u",	po::value<std::string>(), "Removes the file from the list of ignored files." )		
 	;
 	
 	po::variables_map vm;
@@ -164,6 +167,27 @@ int Main( int argc, char **argv )
 		// save to config
 		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
 		config.Save() ;
+
+		// storing standard ignore files
+		Ignore igno(config);
+		igno.Add(".grive");
+		igno.Add(".grive_state");
+		igno.Add(".trash");
+		igno.Save();
+	} else if( vm.count( "ignore" ) ) {
+		std::cout << "Ignoring file \"" << vm["ignore"].as<std::string>() << "\"" << std::endl;
+		Log( "ignoring file %1%", vm["ignore"].as<std::string>(), log::verbose );
+		Ignore igno(config);
+		igno.Add(vm["ignore"].as<std::string>());
+		igno.Save();
+		return 0;
+	} else if( vm.count( "unignore" ) ) {
+		std::cout << "Unignoring file \"" << vm["unignore"].as<std::string>() << "\"" << std::endl;
+		Log( "unignoring file %1%", vm["unignore"].as<std::string>(), log::verbose );		
+		Ignore igno(config);
+		igno.Remove(vm["unignore"].as<std::string>());
+		igno.Save();
+		return 0;
 	}
 	
 	std::string refresh_token ;
@@ -184,7 +208,7 @@ int Main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 
-	Drive drive( &agent, config.GetAll() ) ;
+	Drive drive( &agent, config.GetAll(), Ignore(config) ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )

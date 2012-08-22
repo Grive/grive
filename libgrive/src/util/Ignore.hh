@@ -19,49 +19,36 @@
 
 #pragma once
 
-#include "State.hh"
+#include "Config.hh"
 
-#include "http/Header.hh"
 #include "protocol/Json.hh"
-#include "util/Exception.hh"
-#include "util/Ignore.hh"
 
-#include <string>
+
+namespace boost
+{
+	namespace program_options
+	{
+		class variables_map ;
+	}
+}
 
 namespace gr {
 
-namespace http
-{
-	class Agent ;
-}
-
-class Entry ;
-
-class Drive
+class Ignore
 {
 public :
-	Drive( http::Agent *http, const Json& options, const Ignore& igno ) ;
+	Ignore( const Config& cfg ) ;
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
+	void Add( const std::string& filename );
+	void Remove( const std::string& filename );
 	
-	struct Error : virtual Exception {} ;
+	bool Contains( const std::string& filename );
 	
+	void Save( ) ;
+
 private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Json			m_options ;
+	Config m_cfg;
+	Json ignoreList;
 } ;
-
+	
 } // end of namespace
