@@ -19,13 +19,9 @@
 
 #pragma once
 
-#include "Exception.hh"
-#include "FileSystem.hh"
 #include "Config.hh"
 
 #include "protocol/Json.hh"
-
-#include "Config.hh"
 
 
 namespace boost
@@ -41,9 +37,6 @@ namespace gr {
 class Ignore
 {
 public :
-	//struct Error : virtual Exception {} ;
-	//typedef boost::error_info<struct FileTag, std::string>	File ;
-
 	Ignore( const Config& cfg ) ;
 
 	void Add( const std::string& filename );
@@ -52,10 +45,6 @@ public :
 	bool Contains( const std::string& filename );
 	
 	void Save( ) ;
-
-private :
-	//Json Read( ) ;
-	//static fs::path GetPath( const fs::path& root_path ) ;
 
 private :
 	Config m_cfg;

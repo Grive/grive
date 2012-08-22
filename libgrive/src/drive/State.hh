@@ -26,7 +26,6 @@
 #include "util/Ignore.hh"
 
 #include <memory>
-#include <set>
 
 namespace gr {
 

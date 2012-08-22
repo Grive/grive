@@ -19,11 +19,6 @@
 
 #include "Ignore.hh"
 
-#include "util/Config.hh"
-#include "util/StdioFile.hh"
-
-#include "protocol/Json.hh"
-
 namespace po = boost::program_options;
 
 namespace gr {

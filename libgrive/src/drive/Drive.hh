@@ -27,7 +27,6 @@
 #include "util/Ignore.hh"
 
 #include <string>
-#include <vector>
 
 namespace gr {
 
