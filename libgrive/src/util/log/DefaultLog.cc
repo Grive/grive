@@ -25,7 +25,7 @@
 namespace gr { namespace log {
 
 DefaultLog::DefaultLog() :
-	m_log( std::cerr )
+	m_log( std::cout )
 {
 // 	Enable(log::debug,		true) ;
 // 	Enable(log::verbose,	true) ;
