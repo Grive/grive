@@ -31,16 +31,14 @@ public :
 	ConfigTest( ) ;
 
 	CPPUNIT_TEST_SUITE( ConfigTest ) ;
-		CPPUNIT_TEST( TestInitialiseWithEmptyString ) ;
-		CPPUNIT_TEST( TestInitialiseWithString ) ;
-		CPPUNIT_TEST( TestInitialiseWithFileSystemPath ) ;
+		CPPUNIT_TEST( TestInitialiseWithPath ) ;
+		CPPUNIT_TEST( TestInitialiseWithNoPath ) ;
 	CPPUNIT_TEST_SUITE_END();
 
 private :
-  void TestInitialiseWithEmptyString( );
-  void TestInitialiseWithString( );
-  void TestInitialiseWithFileSystemPath( );
-} ;
+  void TestInitialiseWithNoPath( );
+  void TestInitialiseWithPath( );
+};
 
 } // end of namespace
 
