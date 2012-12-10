@@ -17,6 +17,9 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#define PACKAGE "grive"
+#define PACKAGE_VERSION "git"
+
 #include "SymbolInfo.hh"
 #include "Debug.hh"
 
