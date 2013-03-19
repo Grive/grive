@@ -42,6 +42,7 @@ include_directories(
 	${libgrive_SOURCE_DIR}/test
 	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
+	${Boost_INCLUDE_DIR}
 )
 
 file(GLOB DRIVE_HEADERS
