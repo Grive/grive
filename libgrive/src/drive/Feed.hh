@@ -44,7 +44,7 @@ public :
 public :
 	explicit Feed( const xml::Node& root ) ;
 	Feed( ) ;
-	void Start( http::Agent *http, const http::Header& auth, const std::string& url ) ;
+	void Start( http::Agent *http, const std::string& url ) ;
 	
 	void Assign( const xml::Node& root ) ;
 	const xml::Node& Root() const ;
@@ -53,7 +53,7 @@ public :
 	iterator end() const ;
 	
 	std::string Next() const ;
-	bool GetNext( http::Agent *http, const http::Header& auth ) ;
+	bool GetNext( http::Agent *http ) ;
 	
 	void EnableLog( const std::string& prefix, const std::string& suffix ) ;
 	
@@ -67,7 +67,7 @@ private :
 	std::auto_ptr<LogInfo>	m_log ;
 
 	xml::Node		m_root ;
-	xml::NodeSet		m_entries ;
+	xml::NodeSet	m_entries ;
 } ;
 
 class Feed::iterator : public boost::iterator_adaptor<

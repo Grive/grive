@@ -29,7 +29,7 @@
 
 #include "http/CurlAgent.hh"
 #include "http/Header.hh"
-#include "http/XmlResponse.hh"
+//#include "http/XmlResponse.hh"
 
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
@@ -55,11 +55,9 @@ int main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 	
-/*
-	http::XmlResponse xml ;
-	agent.Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
+	Feed feed ;
+	feed.Start( &agent, feed_base + "/-/folder?max-results=50&showroot=true" ) ;
 	
-	Feed feed( xml.Response() ) ;
 	do
 	{
 		// first, get all collections from the query result
@@ -68,8 +66,8 @@ int main( int argc, char **argv )
 			Entry e( *i ) ;
 			qDebug() << e.Name().c_str() ;
 		}
-	} while ( feed.GetNext( &agent, http::Header() ) ) ;
-*/
+	} while ( feed.GetNext( &agent ) ) ;
+
 	QApplication app( argc, argv ) ;
 	MainWnd wnd ;
 	wnd.show();
