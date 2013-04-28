@@ -44,7 +44,7 @@ public :
 	
 	long Put(
 		const std::string&	url,
-		StdioFile&			file,
+		File&				file,
 		http::Receivable	*dest,
 		const http::Header&	hdr ) ;
 

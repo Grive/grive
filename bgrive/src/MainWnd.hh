@@ -1,6 +1,6 @@
 /*
 	grive: an GPL program to sync a local directory with Google Drive
-	Copyright (C) 2012  Wan Wai Ho
+	Copyright (C) 2013 Wan Wai Ho
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -14,21 +14,27 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA  02110-1301, USA.
 */
 
 #pragma once
 
-#include <cstddef>
+#include <QtGui/QMainWindow>
+#include "ui_MainWindow.h"
 
-namespace gr { namespace http {
+namespace gr {
 
-class Receivable
+class MainWnd : public QMainWindow
 {
+	Q_OBJECT
+
 public :
-	virtual ~Receivable() {}
-	virtual std::size_t OnData( void *data, std::size_t count ) = 0 ;
-	virtual void Clear() = 0 ;
+	MainWnd( ) ;
+
+private :
+	Ui::MainWindow m_ui ;
 } ;
 
-} } // end of namespace
+} // end of namespace
+

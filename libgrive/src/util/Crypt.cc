@@ -19,7 +19,7 @@
 
 #include "Crypt.hh"
 
-#include "StdioFile.hh"
+#include "File.hh"
 #include "Exception.hh"
 #include "MemMap.hh"
 
@@ -76,16 +76,16 @@ std::string MD5::Get( const fs::path& file )
 {
 	try
 	{
-		StdioFile sfile( file ) ;
+		File sfile( file ) ;
 		return Get( sfile ) ;
 	}
-	catch ( StdioFile::Error& )
+	catch ( File::Error& )
 	{
 		return "" ;
 	}
 }
 
-std::string MD5::Get( StdioFile& file )
+std::string MD5::Get( File& file )
 {
 	MD5 crypt ;
 	

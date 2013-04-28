@@ -25,7 +25,7 @@
 #include "Receivable.hh"
 
 #include "util/log/Log.hh"
-#include "util/StdioFile.hh"
+#include "util/File.hh"
 
 #include <boost/throw_exception.hpp>
 
@@ -62,7 +62,7 @@ size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::
 	return count ;
 }
 
-size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, StdioFile *file )
+size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, File *file )
 {
 	assert( ptr != 0 ) ;
 	assert( file != 0 ) ;
@@ -73,7 +73,7 @@ size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, StdioFi
 	assert( count <= std::numeric_limits<std::size_t>::max() ) ;
 	
 	if ( count > 0 )
-		file->Read( ptr, static_cast<std::size_t>(count) ) ;
+		file->Read( static_cast<char*>(ptr), static_cast<std::size_t>(count) ) ;
 	
 	return count ;
 }
@@ -197,7 +197,7 @@ long CurlAgent::Put(
 
 long CurlAgent::Put(
 	const std::string&	url,
-	StdioFile&			file,
+	File&				file,
 	Receivable			*dest,
 	const Header&		hdr )
 {

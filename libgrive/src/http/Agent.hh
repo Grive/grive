@@ -23,7 +23,7 @@
 
 namespace gr {
 
-class StdioFile ;
+class File ;
 
 namespace http {
 
@@ -33,6 +33,8 @@ class Receivable ;
 class Agent
 {
 public :
+	virtual ~Agent() {}
+
 	virtual long Put(
 		const std::string&	url,
 		const std::string&	data,
@@ -41,7 +43,7 @@ public :
 
 	virtual long Put(
 		const std::string&	url,
-		StdioFile&			file,
+		File&				file,
 		Receivable			*dest,
 		const Header&		hdr ) = 0 ;
 		

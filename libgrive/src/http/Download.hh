@@ -20,7 +20,7 @@
 #pragma once
 
 #include "Receivable.hh"
-#include "util/StdioFile.hh"
+#include "util/File.hh"
 
 #include <string>
 
@@ -47,7 +47,7 @@ public :
 	std::size_t OnData( void *data, std::size_t count ) ;
 	
 private :
-	StdioFile					m_file ;
+	File						m_file ;
 	std::auto_ptr<crypt::MD5>	m_crypt ;
 } ;
 

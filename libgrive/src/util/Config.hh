@@ -31,7 +31,7 @@ namespace boost
 	}
 }
 
-namespace gr {
+namespace PROJ_NS {
 
 class Config
 {

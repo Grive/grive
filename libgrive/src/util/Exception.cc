@@ -17,7 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "util/Exception.hh"
+#include "Exception.hh"
 
 #include "bfd/Backtrace.hh"
 #include "bfd/Debug.hh"
@@ -28,15 +28,20 @@
 #include <iterator>
 #include <sstream>
 
-namespace gr {
+namespace PROJ_NS {
 
 class Backtrace ;
 
 Exception::Exception( )
 {
 #ifdef HAVE_BFD
-	*this << expt::BacktraceInfo( Backtrace() ) ;
+	*this << expt::Backtrace_( Backtrace() ) ;
 #endif
+}
+
+const char* Exception::what() const throw()
+{
+	return boost::diagnostic_information_what( *this ) ;
 }
 
 } // end of namespace

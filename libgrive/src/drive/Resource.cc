@@ -32,7 +32,7 @@
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
-#include "util/StdioFile.hh"
+#include "util/File.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
@@ -269,7 +269,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		else
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
-		m_name		= Path2Str( path.filename() ) ;
+		m_name		= path.filename().string() ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
 	}
@@ -583,7 +583,7 @@ bool Resource::Upload(
 {
 	assert( http != 0 ) ;
 	
-	StdioFile file( Path() ) ;
+	File file( Path() ) ;
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
 	

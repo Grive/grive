@@ -19,16 +19,21 @@
 
 #pragma once
 
-#include <cstddef>
+#include "http/Agent.hh"
 
 namespace gr { namespace http {
 
-class Receivable
+class HttpRequest ;
+
+/*!	\brief	An marshaller for HTTP agent
+	
+	This agent will marshal the HTTP requests to a request objects containing the arguments
+	of the request and the response.
+*/
+class MarshalAgent : public Agent
 {
 public :
-	virtual ~Receivable() {}
-	virtual std::size_t OnData( void *data, std::size_t count ) = 0 ;
-	virtual void Clear() = 0 ;
+	MarshalAgent( std::auto_ptr<Agent> real_agent ) ;
 } ;
 
-} } // end of namespace
+}} // end of namespace

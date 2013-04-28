@@ -29,8 +29,13 @@ struct json_object ;
 
 namespace gr {
 
-class StdioFile ;
+class DataStream ;
 
+/*!	\brief	Simple wrapper around JSON-C objects.
+
+	This class represents JSON-C objects, which can be integers, booleans, strings
+	double, arrays and object.
+*/
 class Json
 {
 public :
@@ -38,19 +43,35 @@ public :
 	typedef std::vector<Json>			Array ;
 
 	struct Error : virtual Exception {} ;
-	typedef boost::error_info<struct JsonTag, Json>	JsonInfo ;
-	
+	typedef boost::error_info<struct JsonTag, 			std::string>	Json_ ;
+	typedef boost::error_info<struct OutOfRange,		std::size_t>	OutOfRange_ ;
+	typedef boost::error_info<struct KeyNotFound,		std::string>	KeyNotFound_ ;
+	typedef boost::error_info<struct JsonCApi,			std::string>	JsonCApi_ ;
+	typedef boost::error_info<struct Value,				std::string>	Value_ ;
+
+	template <typename T>
+	struct Val_
+	{
+		typedef boost::error_info<struct Value, T> Err ;
+	} ;
+
 public :
 	template <typename T>
 	explicit Json( const T& val ) ;
 	
+	template <std::size_t n>
+	explicit Json( const char (&str)[n] ) :
+		m_json( InitStr( str, n ) )
+	{
+	}
+	
 	Json() ;
 	Json( const Json& rhs ) ;
 	Json( const char *str ) ;
-	~Json( ) ;
+	~Json() ;
 	
 	static Json Parse( const std::string& str ) ;
-	static Json ParseFile( const std::string& filename ) ;
+	static Json Parse( DataStream *in ) ;
 	
 	Json operator[]( const std::string& key ) const ;
 	Json operator[]( const std::size_t& idx ) const ;
@@ -68,6 +89,9 @@ public :
 	template <typename T>
 	bool Is() const ;
 	
+	template <typename T>
+	T As() const ;
+	
 	bool Has( const std::string& key ) const ;
 	bool Get( const std::string& key, Json& json ) const ;
 	void Add( const std::string& key, const Json& json ) ;
@@ -76,7 +100,7 @@ public :
 	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
 	
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
-	void Write( StdioFile& file ) const ;
+	void Write( DataStream *out ) const ;
 
 	enum Type { null_type, bool_type, double_type, int_type, object_type, array_type, string_type } ;
 	
@@ -87,9 +111,16 @@ private :
 	
 	struct NotOwned {} ;
 	Json( struct json_object *json, NotOwned ) ;
-	
+
+	static struct json_object* InitStr( const char *str, std::size_t n ) ;
+
+	// helper for throwing exception
+	template <typename T> static typename Val_<T>::Err ValueErr( const T& t )
+	{
+		return typename Val_<T>::Err(t);
+	}
+
 private :
-public :
 	struct json_object	*m_json ;
 } ;
 

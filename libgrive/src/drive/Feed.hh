@@ -67,7 +67,7 @@ private :
 	std::auto_ptr<LogInfo>	m_log ;
 
 	xml::Node		m_root ;
-	xml::NodeSet	m_entries ;
+	xml::NodeSet		m_entries ;
 } ;
 
 class Feed::iterator : public boost::iterator_adaptor<

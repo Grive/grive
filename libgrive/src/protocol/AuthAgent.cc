@@ -62,7 +62,7 @@ long AuthAgent::Put(
 
 long AuthAgent::Put(
 	const std::string&	url,
-	StdioFile&			file,
+	File&				file,
 	Receivable			*dest,
 	const Header&		hdr )
 {

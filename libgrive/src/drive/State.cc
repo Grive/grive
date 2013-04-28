@@ -25,6 +25,7 @@
 
 #include "http/Agent.hh"
 #include "util/Crypt.hh"
+#include "util/File.hh"
 #include "util/log/Log.hh"
 #include "protocol/Json.hh"
 
@@ -72,7 +73,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
-		std::string fname = Path2Str(i->path().filename()) ;
+		std::string fname = i->path().filename().string() ;
 	
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
@@ -228,7 +229,8 @@ void State::Read( const fs::path& filename )
 {
 	try
 	{
-		Json json = Json::ParseFile( filename.string() ) ;
+		File file( filename ) ;
+		Json json = Json::Parse( &file ) ;
 		
 		Json last_sync = json["last_sync"] ;
 		m_last_sync.Assign(

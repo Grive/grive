@@ -72,7 +72,7 @@ std::size_t Download::OnData( void *data, std::size_t count )
 	if ( m_crypt.get() != 0 )
 		m_crypt->Write( data, count ) ;
 	
-	return m_file.Write( data, count ) ;
+	return m_file.Write( static_cast<char*>(data), count ) ;
 }
 
 } } // end of namespace

@@ -26,7 +26,7 @@
 
 namespace gr {
 
-class StdioFile ;
+class File ;
 
 namespace crypt {
 
@@ -36,7 +36,7 @@ public :
 	MD5() ;
 	~MD5() ;
 
-	static std::string Get( StdioFile& file ) ;
+	static std::string Get( File& file ) ;
 	static std::string Get( const boost::filesystem::path& file ) ;
 	
 	void Write( const void *data, std::size_t size ) ;
