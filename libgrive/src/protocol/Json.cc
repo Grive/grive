@@ -515,7 +515,7 @@ Json Json::Parse( DataStream *in )
 		BOOST_THROW_EXCEPTION(
 			Error()
 				<< JsonCApi_( "json_tokener_parse" )
-				<< expt::ErrMsg( ::json_tokener_error_desc(err) )
+				<< ErrMsg_( ::json_tokener_error_desc(err) )
 		) ;
 	}
 		

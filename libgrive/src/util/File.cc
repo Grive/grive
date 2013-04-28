@@ -78,7 +78,7 @@ struct stat FStat( int fd )
 
 } // end of local functions
 
-namespace PROJ_NS {
+namespace gr {
 
 File::File( ) : m_fd( -1 )
 {

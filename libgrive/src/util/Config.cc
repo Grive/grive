@@ -28,7 +28,7 @@
 
 namespace po = boost::program_options;
 
-namespace PROJ_NS {
+namespace gr {
 
 const std::string	default_filename	= ".grive";
 const char			*env_name			= "GR_CONFIG";

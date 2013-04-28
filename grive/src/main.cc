@@ -54,7 +54,7 @@ namespace po = boost::program_options;
 void InitGCrypt()
 {
 	if ( !gcry_check_version(GCRYPT_VERSION) )
-		throw Exception() << expt::ErrMsg( "libgcrypt version mismatch" ) ;
+		throw std::runtime_error( "libgcrypt version mismatch" ) ;
 
 	// disable secure memory
 	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);

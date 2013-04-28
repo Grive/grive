@@ -25,7 +25,7 @@
 #include <exception>
 #include <string>
 
-namespace PROJ_NS {
+namespace gr {
 
 class Backtrace ;
 
@@ -51,9 +51,6 @@ namespace expt
 {
 	// back-trace information. should be present for all exceptions
 	typedef boost::error_info<struct BacktraceTag, Backtrace>	Backtrace_ ;
-
-	/// generic error message
-	typedef boost::error_info<struct MsgTag, std::string>			ErrMsg ;
 }
 
 } // end of namespace

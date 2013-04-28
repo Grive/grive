@@ -48,6 +48,7 @@ public :
 	typedef boost::error_info<struct KeyNotFound,		std::string>	KeyNotFound_ ;
 	typedef boost::error_info<struct JsonCApi,			std::string>	JsonCApi_ ;
 	typedef boost::error_info<struct Value,				std::string>	Value_ ;
+	typedef boost::error_info<struct ErrMsg,			std::string>	ErrMsg_ ;
 
 	template <typename T>
 	struct Val_

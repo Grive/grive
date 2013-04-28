@@ -124,7 +124,7 @@ NodeSet NodeSet::operator[]( const std::string& name ) const
 Node NodeSet::front() const
 {
 	if ( empty() )
-		throw Error() << expt::ErrMsg( "empty node set" ) ;
+		BOOST_THROW_EXCEPTION( Error() << EmptyNodeSet_(0) ) ;
 		
 	return *m_first ;
 }

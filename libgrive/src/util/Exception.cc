@@ -28,7 +28,7 @@
 #include <iterator>
 #include <sstream>
 
-namespace PROJ_NS {
+namespace gr {
 
 class Backtrace ;
 

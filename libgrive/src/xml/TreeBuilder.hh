@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <memory>
 #include <string>
 
@@ -28,6 +30,10 @@ class Node ;
 
 class TreeBuilder
 {
+public :
+	typedef boost::error_info<struct ExpatApiError_, std::string>	ExpatApiError ;
+	typedef boost::error_info<struct LogicError_, int>				LogicError ;
+
 public :
 	TreeBuilder() ;
 	~TreeBuilder() ;

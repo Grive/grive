@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <string>
 #include <memory>
 
@@ -32,6 +34,10 @@ namespace crypt {
 
 class MD5
 {
+public :
+	typedef boost::error_info<struct GCryptErr,	std::string>	GCryptErr_ ;
+	typedef boost::error_info<struct GCryptApi,	std::string>	GCryptApi_ ;
+
 public :
 	MD5() ;
 	~MD5() ;

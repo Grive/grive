@@ -150,7 +150,7 @@ long CurlAgent::ExecCurl(
 	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
-	// get the HTTTP response code
+	// get the HTTP response code
 	long http_code = 0;
 	::curl_easy_getinfo(curl,	CURLINFO_RESPONSE_CODE, &http_code);
 	Trace( "HTTP response %1%", http_code ) ;
@@ -165,7 +165,7 @@ long CurlAgent::ExecCurl(
 			Error()
 				<< CurlCode( curl_code )
 				<< Url( url )
-				<< expt::ErrMsg( error )
+				<< CurlErrMsg( error )
 				<< HttpHeader( hdr )
 		) ;
 	}
