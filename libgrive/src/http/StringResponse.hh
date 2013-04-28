@@ -19,18 +19,19 @@
 
 #pragma once
 
-#include "Receivable.hh"
+#include "util/DataStream.hh"
 
 #include <string>
 
 namespace gr { namespace http {
 
-class StringResponse : public Receivable
+class StringResponse : public DataStream
 {
 public :
 	StringResponse() ;
 
-	std::size_t OnData( void *data, std::size_t count ) ;
+	std::size_t Write( const char *data, std::size_t count ) ;
+	std::size_t Read( char *data, std::size_t count ) ;
 	void Clear() ;
 
 	const std::string& Response() const ;

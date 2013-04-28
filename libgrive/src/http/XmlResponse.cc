@@ -28,15 +28,16 @@ XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
 {
 }
 
-std::size_t XmlResponse::OnData( void *data, std::size_t count )
+std::size_t XmlResponse::Write( const char *data, std::size_t count )
 {
-	m_tb->ParseData( reinterpret_cast<char*>(data), count ) ;
+	m_tb->ParseData( data, count ) ;
 	return count ;
 }
 
-void XmlResponse::Clear()
+std::size_t XmlResponse::Read( char *, std::size_t )
 {
-	m_tb.reset( new xml::TreeBuilder ) ;
+	// throw something better
+	throw -1 ;
 }
 
 void XmlResponse::Finish()

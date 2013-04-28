@@ -33,6 +33,10 @@ NodeSet::NodeSet() :
 {
 }
 
+/**	Initialize the node set with an external list of nodes.
+	With this constructor, the list of nodes pointed by [first,last) will NOT
+	be deep copied to the node set.
+*/
 NodeSet::NodeSet( iterator first, iterator last ) :
 	m_first( first ),
 	m_last( last )

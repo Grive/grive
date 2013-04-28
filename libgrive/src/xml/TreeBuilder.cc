@@ -44,6 +44,8 @@ TreeBuilder::TreeBuilder() : m_impl( new Impl )
 	::XML_SetElementHandler( m_impl->psr, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
 	::XML_SetCharacterDataHandler( m_impl->psr, &TreeBuilder::OnCharData ) ;
 	::XML_SetUserData( m_impl->psr , this ) ;
+	
+	is_new = true ;
 }
 
 TreeBuilder::~TreeBuilder()
@@ -68,6 +70,8 @@ Node TreeBuilder::ParseFile( const std::string& file )
 
 void TreeBuilder::ParseData( const char *data, std::size_t count, bool last )
 {
+	is_new = false ;
+
 	if ( ::XML_Parse( m_impl->psr, data, count, last ) == 0 )
 		BOOST_THROW_EXCEPTION( Error() << ExpatApiError("XML_Parse") );
 }

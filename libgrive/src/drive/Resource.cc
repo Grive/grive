@@ -613,7 +613,7 @@ bool Resource::Upload(
 	std::string uplink = http->RedirLocation() ;
 	http::XmlResponse xml ;
 	
-	http->Put( uplink, file, &xml, uphdr ) ;
+	http->Put( uplink, &file, &xml, uphdr ) ;
 	AssignIDs( Entry( xml.Response() ) ) ;
   m_mtime = Entry(xml.Response()).MTime();
 	

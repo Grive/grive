@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "Receivable.hh"
 #include "util/File.hh"
 
 #include <string>
@@ -33,7 +32,7 @@ namespace crypt
 
 namespace http {
 
-class Download : public http::Receivable
+class Download : public DataStream
 {
 public :
 	struct NoChecksum {} ;
@@ -44,7 +43,8 @@ public :
 	std::string Finish() const ;
 	
 	void Clear() ;
-	std::size_t OnData( void *data, std::size_t count ) ;
+	std::size_t Write( const char *data, std::size_t count ) ;
+	std::size_t Read( char *, std::size_t ) ; 
 	
 private :
 	File						m_file ;

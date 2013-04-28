@@ -45,6 +45,8 @@ public :
 	static Node ParseFile( const std::string& file ) ;
 	static Node Parse( const std::string& xml ) ;
 
+	bool is_new ;
+
 private :
 	
 	static void StartElement( void* pvthis, const char* name, const char** attr ) ;

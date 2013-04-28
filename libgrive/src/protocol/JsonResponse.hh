@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "http/Receivable.hh"
+#include "util/DataStream.hh"
 #include "http/StringResponse.hh"
 
 namespace gr
@@ -29,13 +29,13 @@ namespace gr
 
 namespace gr { namespace http {
 
-class JsonResponse : public Receivable
+class JsonResponse : public DataStream
 {
 public :
 	JsonResponse() ;
 
-	std::size_t OnData( void *data, std::size_t count ) ;
-	void Clear() ;
+	std::size_t Write( const char *data, std::size_t count ) ;
+	std::size_t Read( char *data, std::size_t count ) ;
 
 	Json Response() const ;
 	

@@ -48,7 +48,7 @@ Header AuthAgent::AppendHeader( const Header& hdr ) const
 long AuthAgent::Put(
 	const std::string&	url,
 	const std::string&	data,
-	Receivable			*dest,
+	DataStream			*dest,
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
@@ -62,8 +62,8 @@ long AuthAgent::Put(
 
 long AuthAgent::Put(
 	const std::string&	url,
-	File&				file,
-	Receivable			*dest,
+	File				*file,
+	DataStream			*dest,
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
@@ -77,7 +77,7 @@ long AuthAgent::Put(
 
 long AuthAgent::Get(
 	const std::string& 	url,
-	Receivable			*dest,
+	DataStream			*dest,
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
@@ -92,7 +92,7 @@ long AuthAgent::Get(
 long AuthAgent::Post(
 	const std::string& 	url,
 	const std::string&	data,
-	Receivable			*dest,
+	DataStream			*dest,
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
@@ -107,7 +107,7 @@ long AuthAgent::Post(
 long AuthAgent::Custom(
 	const std::string&	method,
 	const std::string&	url,
-	Receivable			*dest,
+	DataStream			*dest,
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
