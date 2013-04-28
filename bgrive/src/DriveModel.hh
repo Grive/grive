@@ -20,23 +20,23 @@
 
 #pragma once
 
-#include <QtGui/QMainWindow>
-#include "ui_MainWindow.h"
-
-#include "DriveModel.hh"
+#include <QtCore/QAbstractItemModel>
 
 namespace gr {
 
-class MainWnd : public QMainWindow
+class DriveModel : public QAbstractItemModel
 {
-	Q_OBJECT
-
 public :
-	MainWnd( ) ;
-
-private :
-	Ui::MainWindow	m_ui ;
-	DriveModel		m_drive ;
+	DriveModel( ) ;
+	
+	Qt::ItemFlags flags( const QModelIndex & index ) const ;
+	QVariant data( const QModelIndex& index, int role ) const ;
+	QVariant headerData( int section, Qt::Orientation orientation, int role ) const ;
+	int rowCount( const QModelIndex& parent ) const ;
+	int columnCount( const QModelIndex& parent ) const ;
+	bool hasChildren ( const QModelIndex& parent ) const ;
+	QModelIndex index( int row, int column, const QModelIndex& parent ) const ;
+	QModelIndex parent( const QModelIndex& idx ) const ;
 } ;
 
 } // end of namespace

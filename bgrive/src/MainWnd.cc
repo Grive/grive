@@ -20,11 +20,15 @@
 
 #include "MainWnd.hh"
 
+#include <cassert>
+
 namespace gr {
 
 MainWnd::MainWnd( )
 {
 	m_ui.setupUi(this) ;
+	
+	m_ui.m_dir->setModel( &m_drive ) ;
 }
 
 } // end of namespace

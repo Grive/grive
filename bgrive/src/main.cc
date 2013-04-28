@@ -55,7 +55,7 @@ int main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 	
-	
+/*
 	http::XmlResponse xml ;
 	agent.Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
 	
@@ -69,7 +69,7 @@ int main( int argc, char **argv )
 			qDebug() << e.Name().c_str() ;
 		}
 	} while ( feed.GetNext( &agent, http::Header() ) ) ;
-
+*/
 	QApplication app( argc, argv ) ;
 	MainWnd wnd ;
 	wnd.show();
