@@ -60,11 +60,15 @@ void Drive::Refresh( http::Agent *agent )
 			{
 				std::vector<std::string> pids ;
 				parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
-				
-				for ( std::vector<std::string>::iterator p = pids.begin() ; p != pids.end() ; ++p )
+
+				// onlly the first parent counts
+				if ( !pids.empty() )
+					parent_child.push_back( std::make_pair( pids.front(), r ) ) ;
+					
+//				for ( std::vector<std::string>::iterator p = pids.begin() ; p != pids.end() ; ++p )
 				{
-					std::cout << "parent = " << *p << std::endl ;
-					parent_child.push_back( std::make_pair( *p, r ) ) ;
+//					std::cout << "parent = " << *p << std::endl ;
+//					parent_child.push_back( std::make_pair( *p, r ) ) ;
 				}
 			}
 		}
@@ -74,12 +78,15 @@ void Drive::Refresh( http::Agent *agent )
 		i != parent_child.end() ; ++i )
 	{
 		Resource *parent = Find( i->first ), *child = i->second ;
-std::cout << i->first << " " << child->ID() << std::endl ;
+		assert( child != 0 ) ;
+		
 		if ( parent != 0 )
 		{
-// initialize parent IDs
- 
+			std::cout << "parent of " << child->Title() << " is " << parent->Title() << std::endl ;
+			
+			// initialize parent IDs
 			parent->AddChild( child->ID() ) ;
+			child->SetParent( parent->ID() ) ;
 		}
 	}
 }
