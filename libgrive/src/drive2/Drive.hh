@@ -22,6 +22,11 @@
 
 #include "Resource.hh"
 
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/identity.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+
 namespace gr {
 
 namespace http
@@ -29,7 +34,28 @@ namespace http
 	class Agent ;
 }
 
+class Json ;
+
 namespace v2 {
+
+namespace details
+{
+	using namespace boost::multi_index ;
+	struct ByID {} ;
+	struct ByHref {} ;
+	struct ByIdentity {} ;
+
+	typedef multi_index_container<
+		Resource*,
+		indexed_by<
+			hashed_unique<tag<ByIdentity>,	identity<Resource*> >,
+			hashed_non_unique<tag<ByID>,	const_mem_fun<Resource, std::string,	&Resource::ID> >
+		>
+	> DB ;
+	
+	typedef DB::index<ByID>::type		ID ;
+	typedef DB::index<ByIdentity>::type	Set ;
+}
 
 class Drive
 {
@@ -39,7 +65,10 @@ public :
 	void Refresh( http::Agent *agent ) ;
 
 private :
-	Resource	m_root ;
+	const Resource* Add( const Json& item ) ;
+
+private :
+	details::DB	m_db ;
 } ;
 
 } } // end of namespace gr::v2

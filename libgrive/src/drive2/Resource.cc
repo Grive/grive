@@ -22,6 +22,15 @@
 
 namespace gr { namespace v2 {
 
+/**	Default constructor construct the resource of the root folder
+*/
+Resource::Resource() :
+	m_id( "root" ),
+	m_mime( "application/vnd.google-apps.folder" ),
+	m_title( "Root folder" )
+{
+}
+
 Resource::Resource( const std::string& id, const std::string& mime, const std::string& title ) :
 	m_id( id ),
 	m_mime( mime ),
@@ -49,9 +58,9 @@ bool Resource::IsFolder() const
 	return m_mime == "application/vnd.google-apps.folder" ;
 }
 
-void Resource::Add( const Resource& child )
+void Resource::Add( const std::string& child_id )
 {
-	m_children.push_back( child ) ;
+	m_children.push_back( child_id ) ;
 }
 
 } } // end of namespace gr::v2

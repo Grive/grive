@@ -23,7 +23,7 @@
 #include <QtGui/QApplication>
 #include <QtCore/QDebug>
 
-#include "drive2/Feed.hh"
+#include "drive2/Drive.hh"
 
 #include "http/CurlAgent.hh"
 #include "http/Header.hh"
@@ -72,11 +72,14 @@ int main( int argc, char **argv )
 	agent.Get( "https://www.googleapis.com/drive/v2/files", &jsp, http::Header() ) ;
 	std::cout << jsp.Response() << std::endl ;
 */
-	Feed feed( "https://www.googleapis.com/drive/v2/files" ) ;
+/*	Feed feed( "https://www.googleapis.com/drive/v2/files" ) ;
 	while ( feed.Next(&agent) )
 	{
 		std::cout << feed.Content() << std::endl ;
 	}
+*/
+	Drive drive ;
+	drive.Refresh( &agent ) ;
 
 	QApplication app( argc, argv ) ;
 	MainWnd wnd ;

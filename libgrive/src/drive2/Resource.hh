@@ -28,6 +28,7 @@ namespace gr { namespace v2 {
 class Resource
 {
 public :
+	Resource() ;
 	Resource( const std::string& id, const std::string& mime, const std::string& title ) ;
 	
 	std::string ID() const ;
@@ -35,15 +36,15 @@ public :
 	std::string Title() const ;
 	
 	bool IsFolder() const ;
-	
-	void Add( const Resource& child ) ;
-	
+
+	void Add( const std::string& child_id ) ;
+
 private :
 	std::string		m_id ;
 	std::string		m_mime ;
 	std::string		m_title ;
 	
-	std::vector<Resource>	m_children ;
+	std::vector<std::string>	m_children ;
 } ;
 
 } } // end of namespace gr::v2
