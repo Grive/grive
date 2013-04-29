@@ -27,12 +27,17 @@
 
 namespace gr {
 
+namespace http
+{
+	class Agent ;
+}
+
 class MainWnd : public QMainWindow
 {
 	Q_OBJECT
 
 public :
-	MainWnd( ) ;
+	MainWnd( http::Agent *agent ) ;
 
 private :
 	Ui::MainWindow	m_ui ;

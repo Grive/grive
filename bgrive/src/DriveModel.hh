@@ -22,12 +22,19 @@
 
 #include <QtCore/QAbstractItemModel>
 
+#include "drive2/Drive.hh"
+
 namespace gr {
+
+namespace http
+{
+	class Agent ;
+}
 
 class DriveModel : public QAbstractItemModel
 {
 public :
-	DriveModel( ) ;
+	DriveModel( http::Agent *agent ) ;
 	
 	// QAbstractItemModel overrides
 	Qt::ItemFlags flags( const QModelIndex & index ) const ;
@@ -38,6 +45,12 @@ public :
 	bool hasChildren ( const QModelIndex& parent ) const ;
 	QModelIndex index( int row, int column, const QModelIndex& parent ) const ;
 	QModelIndex parent( const QModelIndex& idx ) const ;
+
+private :
+	const v2::Resource* Res( const QModelIndex& idx ) const ;
+
+private :
+	v2::Drive	m_drv ;
 } ;
 
 } // end of namespace

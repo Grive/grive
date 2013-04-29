@@ -31,24 +31,24 @@ public :
 	Resource() ;
 	Resource( const std::string& id, const std::string& mime, const std::string& title ) ;
 
-	template <typename InputIt>
-	void SetParent( InputIt first, InputIt last )
-	{
-		m_parent.assign( first, last ) ;
-	}
-
 	std::string ID() const ;
 	std::string	Mime() const ;
 	std::string Title() const ;
 	
 	bool IsFolder() const ;
 
+	void AddChild( const std::string& child ) ;
+
+	std::size_t ChildCount() const ;
+
+	std::string At( std::size_t idx ) const ;
+
 private :
 	std::string		m_id ;
 	std::string		m_mime ;
 	std::string		m_title ;
 	
-	std::vector<std::string>	m_parent ;
+	std::vector<std::string>	m_children ;
 } ;
 
 } } // end of namespace gr::v2

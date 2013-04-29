@@ -65,12 +65,21 @@ public :
 	void Refresh( http::Agent *agent ) ;
 
 	Resource* Find( const std::string& id ) ;
+	const Resource* Find( const std::string& id ) const ;
+
+	Resource* Root() ;
+	const Resource* Root() const ;
+	
+	const Resource* Child( const Resource *parent, std::size_t idx ) const ;
 
 private :
-	const Resource* Add( const Json& item ) ;
-
+	Resource* NewResource( const Json& item ) ;
+	Resource* FindRoot( http::Agent *agent ) ;
+	
 private :
 	details::DB	m_db ;
+	
+	Resource	m_root ;
 } ;
 
 } } // end of namespace gr::v2

@@ -27,6 +27,8 @@
 #include <iostream>
 #include <iterator>
 
+#include <cassert>
+
 namespace gr { namespace v2 {
 
 Drive::Drive( )
@@ -36,43 +38,91 @@ Drive::Drive( )
 void Drive::Refresh( http::Agent *agent )
 {
 	// get all folders first
-//	Feed folders( 
-//		"https://www.googleapis.com/drive/v2/files?q=mimeType+%3d+%27application/vnd.google-apps.folder%27" ) ;
 	Feed folders( feeds::files ) ;
-//	folders.Query( "mimeType", "application/vnd.google-apps.folder" ) ;
+	std::vector<std::pair<std::string, Resource*> > parent_child ;
 
 	while ( folders.Next( agent ) )
 	{
 		std::vector<Json> items = folders.Content()["items"].AsArray() ;
 		for ( std::vector<Json>::iterator i = items.begin() ; i != items.end() ; ++i )
 		{
-			const Resource *r = Add( *i ) ;
+			Resource *r = NewResource( *i ) ;
+			
+			Json parents ;
+			if ( i->Get( "parents", parents ) )
+			{
+				std::vector<std::string> pids ;
+				parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
+				
+				for ( std::vector<std::string>::iterator p = pids.begin() ; p != pids.end() ; ++p )
+					parent_child.push_back( std::make_pair( *p, r ) ) ;
+				
+				// add to root node if no parent
+				if ( pids.empty() )
+					m_root.AddChild( r->ID() ) ;
+			}
 		}
+	}
+	
+	for ( std::vector<std::pair<std::string, Resource*> >::iterator i = parent_child.begin() ;
+		i != parent_child.end() ; ++i )
+	{
+		Resource *parent = Find( i->first ) ;
+		if ( parent != 0 )
+			parent->AddChild( i->second->ID() ) ;
 	}
 }
 
-const Resource* Drive::Add( const Json& item )
+Resource* Drive::FindRoot( http::Agent *agent )
+{
+	// get all folders first
+	Feed folders( feeds::files + "/root?fields=id" ) ;
+	folders.Next( agent ) ;
+	
+	std::string id = folders.Content()["id"].Str() ;
+	std::cout << "root = " << id << std::endl ;
+	
+	return Find( folders.Content()["id"].Str() ) ;
+}
+
+Resource* Drive::NewResource( const Json& item )
 {
 	Resource *r = new Resource( item["id"].Str(), item["mimeType"].Str(), item["title"].Str() ) ;
 	
 	// initialize parent IDs
-	Json parents ;
-	if ( item.Get( "parents", parents ) )
-	{
-		std::vector<std::string> parent_ids ;
-		parents.Select<std::string>( "id", std::back_inserter(parent_ids) ) ;
-		
-		r->SetParent( parent_ids.begin(), parent_ids.end() ) ;
-		std::cout << r->Title() << " " << r->ID() << " " << parent_ids.size() << std::endl ;
-	}
+	std::cout << r->Title() << " " << r->ID() << std::endl ;
 	
-	return *m_db.insert(r).first ;
+	m_db.insert(r) ;
+	assert( Find(r->ID()) == r ) ;
+	
+	return r ;
 }
 
 Resource* Drive::Find( const std::string& id )
 {
 	details::ID::iterator i = m_db.get<details::ByID>().find(id) ;
 	return i != m_db.get<details::ByID>().end() ? *i : 0 ;
+}
+
+const Resource* Drive::Find( const std::string& id ) const
+{
+	details::ID::const_iterator i = m_db.get<details::ByID>().find(id) ;
+	return i != m_db.get<details::ByID>().end() ? *i : 0 ;
+}
+
+Resource* Drive::Root()
+{
+	return &m_root ;
+}
+
+const Resource* Drive::Root() const
+{
+	return &m_root ;
+}
+
+const Resource* Drive::Child( const Resource *parent, std::size_t idx ) const
+{
+	return Find( parent->At(idx) ) ;
 }
 
 } } // end of namespace gr::v2

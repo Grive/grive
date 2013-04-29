@@ -78,11 +78,11 @@ int main( int argc, char **argv )
 		std::cout << feed.Content() << std::endl ;
 	}
 */
-	Drive drive ;
-	drive.Refresh( &agent ) ;
+//	Drive drive ;
+//	drive.Refresh( &agent ) ;
 
 	QApplication app( argc, argv ) ;
-	MainWnd wnd ;
+	MainWnd wnd( &agent ) ;
 	wnd.show();
 		
 	return app.exec() ;

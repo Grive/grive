@@ -24,7 +24,8 @@
 
 namespace gr {
 
-MainWnd::MainWnd( )
+MainWnd::MainWnd( http::Agent *agent ) :
+	m_drive( agent )
 {
 	m_ui.setupUi(this) ;
 	

@@ -20,12 +20,17 @@
 
 #include "DriveModel.hh"
 
+#include "drive2/Resource.hh"
+
 #include <QtCore/QDebug>
 
 namespace gr {
 
-DriveModel::DriveModel( )
+using namespace v2;
+
+DriveModel::DriveModel( http::Agent *agent )
 {
+	m_drv.Refresh( agent ) ;
 }
 
 Qt::ItemFlags DriveModel::flags( const QModelIndex& ) const
@@ -35,7 +40,17 @@ Qt::ItemFlags DriveModel::flags( const QModelIndex& ) const
 
 QVariant DriveModel::data( const QModelIndex& index, int role ) const
 {
-	return role == Qt::DisplayRole ? QString("wow") : QVariant() ;
+	const Resource *res = Res(index) ;
+	if ( role == Qt::DisplayRole && res != 0 )
+	{
+		switch ( index.column() )
+		{
+			case 0: 	return QString::fromUtf8(res->Title().c_str()) ;
+			default:	break ;
+		}
+	}
+	
+	return QVariant() ;
 }
 
 QVariant DriveModel::headerData( int section, Qt::Orientation orientation, int role ) const
@@ -45,7 +60,7 @@ QVariant DriveModel::headerData( int section, Qt::Orientation orientation, int r
 
 int DriveModel::rowCount( const QModelIndex& parent ) const
 {
-	return 10 ;
+	return Res(parent)->ChildCount() ;
 }
 
 int DriveModel::columnCount( const QModelIndex& parent ) const
@@ -55,12 +70,19 @@ int DriveModel::columnCount( const QModelIndex& parent ) const
 
 bool DriveModel::hasChildren( const QModelIndex& parent ) const
 {
-	return parent.isValid() ? false : true ;
+	return Res(parent)->ChildCount() > 0 ;
 }
 
 QModelIndex DriveModel::index( int row, int column, const QModelIndex & parent ) const
 {
-	return parent.isValid() ? QModelIndex() : createIndex( row, column, 0 ) ;
+	return createIndex( row, column, const_cast<Resource*>(m_drv.Child(Res(parent), row)) ) ;
+}
+
+const Resource* DriveModel::Res( const QModelIndex& idx ) const
+{
+	return idx.isValid()
+		? reinterpret_cast<const Resource*>(idx.internalPointer())
+		: m_drv.Root() ;
 }
 
 QModelIndex DriveModel::parent( const QModelIndex& idx ) const
