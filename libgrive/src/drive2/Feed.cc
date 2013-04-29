@@ -31,10 +31,12 @@ Feed::Feed( const std::string& base )
 {
 	// Next() will grab this link
 	m_content.Add( "nextLink", Json(base) ) ;
-	
-	Json url ;
-	m_content.Get("nextLink", url) ;
-	std::cout << "link = " << url.Str() << std::endl ;
+}
+
+void Feed::Query( const std::string& field, const std::string& value )
+{
+	std::string url = m_content["nextLink"].Str() ;
+	m_content.Add( "nextLink", Json( url + "?q=" + field + "+%3d+%27" + value + "%27" ) ) ;
 }
 
 bool Feed::Next( http::Agent *agent )

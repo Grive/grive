@@ -19,40 +19,18 @@
 
 #pragma once
 
-#include "protocol/Json.hh"
-#include "util/Exception.hh"
-
 #include <string>
 
-namespace gr
+namespace gr { namespace v2 {
+
+namespace feeds
 {
-namespace http
-{
-	class Agent ;
-	class Header ;
+	const std::string files		= "https://www.googleapis.com/drive/v2/files" ;
 }
 
-class Json ;
-
-namespace v2 {
-
-class Feed
+namespace mime_types
 {
-public :
-	// exception info
-	typedef boost::error_info<struct DriveFeed,	Json>	DriveFeed_ ;
-
-public :
-	Feed( const std::string& base ) ;
-	void Query( const std::string& field, const std::string& value ) ;
-	
-	
-	bool Next( http::Agent *agent ) ;
-
-	Json Content() const ;
-
-private :
-	Json m_content ;
-} ;
+	const std::string folder	= "application/vnd.google-apps.folder" ;
+}
 
 } } // end of namespace gr::v2

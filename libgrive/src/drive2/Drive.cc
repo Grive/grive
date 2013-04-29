@@ -20,6 +20,7 @@
 
 #include "Drive.hh"
 
+#include "CommonUri.hh"
 #include "Feed.hh"
 #include "protocol/Json.hh"
 
@@ -34,16 +35,18 @@ Drive::Drive( )
 void Drive::Refresh( http::Agent *agent )
 {
 	// get all folders first
-	Feed folders(
-		"https://www.googleapis.com/drive/v2/files?q=mimeType+%3d+%27application/vnd.google-apps.folder%27" ) ;
-	
+//	Feed folders( 
+//		"https://www.googleapis.com/drive/v2/files?q=mimeType+%3d+%27application/vnd.google-apps.folder%27" ) ;
+	Feed folders( feeds::files ) ;
+//	folders.Query( "mimeType", "application/vnd.google-apps.folder" ) ;
+
 	while ( folders.Next( agent ) )
 	{
 		std::vector<Json> items = folders.Content()["items"].AsArray() ;
 		for ( std::vector<Json>::iterator i = items.begin() ; i != items.end() ; ++i )
 		{
 			const Resource *r = Add( *i ) ;
-			std::cout << r->Title() << " " << r->Mime() <<  std::endl ;
+			std::cout << r->Title() << " " << r->Mime() << std::endl ;
 		}
 	}
 }
@@ -52,6 +55,12 @@ const Resource* Drive::Add( const Json& item )
 {
 	Resource *r = new Resource( item["id"].Str(), item["mimeType"].Str(), item["title"].Str() ) ;
 	return *m_db.insert(r).first ;
+}
+
+Resource* Drive::Find( const std::string& id )
+{
+	details::ID::iterator i = m_db.get<details::ByID>().find(id) ;
+	return i != m_db.get<details::ByID>().end() ? *i : 0 ;
 }
 
 } } // end of namespace gr::v2

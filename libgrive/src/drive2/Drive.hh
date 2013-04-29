@@ -64,6 +64,8 @@ public :
 	
 	void Refresh( http::Agent *agent ) ;
 
+	Resource* Find( const std::string& id ) ;
+
 private :
 	const Resource* Add( const Json& item ) ;
 
