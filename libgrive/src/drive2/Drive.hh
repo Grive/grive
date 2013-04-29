@@ -71,15 +71,16 @@ public :
 	const Resource* Root() const ;
 	
 	const Resource* Child( const Resource *parent, std::size_t idx ) const ;
+	const Resource* Parent( const Resource *child ) const ;
 
 private :
 	Resource* NewResource( const Json& item ) ;
-	Resource* FindRoot( http::Agent *agent ) ;
+	Resource* NewResource( http::Agent *agent, const std::string& id ) ;
 	
 private :
 	details::DB	m_db ;
 	
-	Resource	m_root ;
+	Resource	*m_root ;
 } ;
 
 } } // end of namespace gr::v2

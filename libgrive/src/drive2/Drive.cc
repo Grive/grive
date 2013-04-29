@@ -31,23 +31,30 @@
 
 namespace gr { namespace v2 {
 
-Drive::Drive( )
+Drive::Drive( ) :
+	m_root( 0 )
 {
+
 }
 
 void Drive::Refresh( http::Agent *agent )
 {
+	// find root node ID
+	assert( m_root == 0 ) ;
+	m_root = NewResource( agent, "root" ) ;
+	
 	// get all folders first
 	Feed folders( feeds::files ) ;
+	folders.Query( "mimeType", mime_types::folder ) ;
 	std::vector<std::pair<std::string, Resource*> > parent_child ;
-
 	while ( folders.Next( agent ) )
 	{
 		std::vector<Json> items = folders.Content()["items"].AsArray() ;
 		for ( std::vector<Json>::iterator i = items.begin() ; i != items.end() ; ++i )
 		{
 			Resource *r = NewResource( *i ) ;
-			
+//std::cout << r->Title() << " " << r->ID() << std::endl ;
+
 			Json parents ;
 			if ( i->Get( "parents", parents ) )
 			{
@@ -55,11 +62,10 @@ void Drive::Refresh( http::Agent *agent )
 				parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
 				
 				for ( std::vector<std::string>::iterator p = pids.begin() ; p != pids.end() ; ++p )
+				{
+					std::cout << "parent = " << *p << std::endl ;
 					parent_child.push_back( std::make_pair( *p, r ) ) ;
-				
-				// add to root node if no parent
-				if ( pids.empty() )
-					m_root.AddChild( r->ID() ) ;
+				}
 			}
 		}
 	}
@@ -67,30 +73,29 @@ void Drive::Refresh( http::Agent *agent )
 	for ( std::vector<std::pair<std::string, Resource*> >::iterator i = parent_child.begin() ;
 		i != parent_child.end() ; ++i )
 	{
-		Resource *parent = Find( i->first ) ;
+		Resource *parent = Find( i->first ), *child = i->second ;
+std::cout << i->first << " " << child->ID() << std::endl ;
 		if ( parent != 0 )
-			parent->AddChild( i->second->ID() ) ;
+		{
+// initialize parent IDs
+ 
+			parent->AddChild( child->ID() ) ;
+		}
 	}
 }
 
-Resource* Drive::FindRoot( http::Agent *agent )
+/// Create resource base on ID
+Resource* Drive::NewResource( http::Agent *agent, const std::string& id )
 {
-	// get all folders first
-	Feed folders( feeds::files + "/root?fields=id" ) ;
-	folders.Next( agent ) ;
+	Feed feed( feeds::files + "/" + id ) ;
+	feed.Next( agent ) ;
 	
-	std::string id = folders.Content()["id"].Str() ;
-	std::cout << "root = " << id << std::endl ;
-	
-	return Find( folders.Content()["id"].Str() ) ;
+	return NewResource( feed.Content() ) ;
 }
 
 Resource* Drive::NewResource( const Json& item )
 {
 	Resource *r = new Resource( item["id"].Str(), item["mimeType"].Str(), item["title"].Str() ) ;
-	
-	// initialize parent IDs
-	std::cout << r->Title() << " " << r->ID() << std::endl ;
 	
 	m_db.insert(r) ;
 	assert( Find(r->ID()) == r ) ;
@@ -112,17 +117,22 @@ const Resource* Drive::Find( const std::string& id ) const
 
 Resource* Drive::Root()
 {
-	return &m_root ;
+	return m_root ;
 }
 
 const Resource* Drive::Root() const
 {
-	return &m_root ;
+	return m_root ;
 }
 
 const Resource* Drive::Child( const Resource *parent, std::size_t idx ) const
 {
 	return Find( parent->At(idx) ) ;
+}
+
+const Resource* Drive::Parent( const Resource *child ) const
+{
+	return Find( child->Parent() ) ;
 }
 
 } } // end of namespace gr::v2

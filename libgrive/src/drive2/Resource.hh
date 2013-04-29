@@ -38,10 +38,12 @@ public :
 	bool IsFolder() const ;
 
 	void AddChild( const std::string& child ) ;
+	void SetParent( const std::string& parent ) ;
 
 	std::size_t ChildCount() const ;
-
 	std::string At( std::size_t idx ) const ;
+	std::string Parent() const ;
+	std::size_t Index( const std::string& child ) const ;
 
 private :
 	std::string		m_id ;
@@ -49,6 +51,8 @@ private :
 	std::string		m_title ;
 	
 	std::vector<std::string>	m_children ;
+	
+	std::string		m_parent ;
 } ;
 
 } } // end of namespace gr::v2

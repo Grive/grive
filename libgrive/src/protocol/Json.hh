@@ -108,7 +108,11 @@ public :
 	{
 		Array a = AsArray() ;
 		for ( Array::iterator i = a.begin() ; i != a.end() ; ++i )
-			*out++ = i->As<T>() ;
+		{
+			Json value;
+			if ( i->Get( key, value ) )
+				*out++ = value.As<T>() ;
+		}
 		return out ;
 	}
 	

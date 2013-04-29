@@ -70,6 +70,7 @@ int DriveModel::columnCount( const QModelIndex& parent ) const
 
 bool DriveModel::hasChildren( const QModelIndex& parent ) const
 {
+qDebug() << Res(parent)->Title().c_str() << " has " << Res(parent)->ChildCount() << " children" ;
 	return Res(parent)->ChildCount() > 0 ;
 }
 
@@ -87,7 +88,19 @@ const Resource* DriveModel::Res( const QModelIndex& idx ) const
 
 QModelIndex DriveModel::parent( const QModelIndex& idx ) const
 {
-	return QModelIndex() ;
+	// if I am root, my parent is myself
+	const Resource *res = Res(idx) ;
+	if ( res == m_drv.Root() )
+		return QModelIndex() ;
+
+	// if my parent is root, return model index of root (i.e. QModelIndex())
+	const Resource *parent = m_drv.Parent(res) ;
+	if ( parent == 0 || parent == m_drv.Root() || idx.column() != 0 )
+		return QModelIndex() ;
+	
+	// check grand-parent to know the row() of my parent
+	const Resource *grand = m_drv.Parent(parent) ;
+	return createIndex( grand->Index(parent->ID()), 0, const_cast<Resource*>(grand) ) ;
 }
 
 } // end of namespace

@@ -22,6 +22,8 @@
 
 #include "CommonUri.hh"
 
+#include <algorithm>
+
 namespace gr { namespace v2 {
 
 /**	Default constructor construct the resource of the root folder
@@ -65,6 +67,11 @@ void Resource::AddChild( const std::string& child )
 	m_children.push_back( child ) ;
 }
 
+void Resource::SetParent( const std::string& parent )
+{
+	m_parent = parent ;
+}
+
 std::size_t Resource::ChildCount() const
 {
 	return m_children.size() ;
@@ -73,6 +80,16 @@ std::size_t Resource::ChildCount() const
 std::string Resource::At( std::size_t idx ) const
 {
 	return m_children.at(idx) ;
+}
+
+std::string Resource::Parent() const
+{
+	return m_parent ;
+}
+
+std::size_t Resource::Index( const std::string& child ) const
+{
+	return std::find( m_children.begin(), m_children.end(), child ) - m_children.begin() ;
 }
 
 } } // end of namespace gr::v2
