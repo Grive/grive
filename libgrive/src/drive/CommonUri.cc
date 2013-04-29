@@ -20,7 +20,7 @@
 #include "CommonUri.hh"
 #include <boost/format.hpp>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 std::string ChangesFeed( int changestamp )
 {
@@ -28,4 +28,4 @@ std::string ChangesFeed( int changestamp )
 	return changestamp > 0 ? (feed%changestamp).str() : feed_changes ;
 }
 
-}
+} }

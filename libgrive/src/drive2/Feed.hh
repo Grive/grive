@@ -19,51 +19,37 @@
 
 #pragma once
 
-#include "State.hh"
-
-#include "http/Header.hh"
 #include "protocol/Json.hh"
 #include "util/Exception.hh"
 
 #include <string>
-#include <vector>
 
-namespace gr {
-
+namespace gr
+{
 namespace http
 {
 	class Agent ;
+	class Header ;
 }
 
-namespace v1 {
+class Json ;
 
-class Entry ;
+namespace v2 {
 
-class Drive
+class Feed
 {
 public :
-	Drive( http::Agent *agent, const Json& options ) ;
+	// exception info
+	typedef boost::error_info<struct DriveFeed,	Json>	DriveFeed_ ;
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
+public :
+	Feed( const std::string& base ) ;
+	bool Next( http::Agent *agent ) ;
+
+	Json Content() const ;
+
 private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Json			m_options ;
+	Json m_content ;
 } ;
 
-} } // end of namespace
+} } // end of namespace gr::v2

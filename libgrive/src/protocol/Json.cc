@@ -63,9 +63,11 @@ Json::Json( const char *str ) :
 		) ;
 }
 
+/**	Note that json_object_new_string_len() is not used.
+*/
 struct json_object* Json::InitStr( const char *str, std::size_t n )
 {
-	struct json_object *j = ::json_object_new_string_len( str, n ) ;
+	struct json_object *j = ::json_object_new_string( str ) ;
 	if ( j == 0 )
 		BOOST_THROW_EXCEPTION(
 			Error()

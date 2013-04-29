@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 /// construct an entry for the root folder
 Entry::Entry( ) :
@@ -195,4 +195,4 @@ std::string Entry::Name() const
 	return (m_kind == "file" || m_kind == "pdf") ? m_filename : m_title ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

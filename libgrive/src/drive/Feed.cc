@@ -29,7 +29,7 @@
 
 #include <cassert>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 Feed::Feed( )
 {
@@ -123,4 +123,4 @@ const xml::Node& Feed::Root() const
 	return m_root ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

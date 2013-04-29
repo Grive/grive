@@ -34,8 +34,11 @@ namespace http
 	class Agent ;
 }
 
-class Entry ;
 class Json ;
+
+namespace v1 {
+
+class Entry ;
 
 /*!	\brief	A resource can be a file or a folder in the google drive
 
@@ -158,9 +161,9 @@ private :
 	State					m_state ;
 } ;
 
-} // end of namespace
+} } // end of namespace gr::v1
 
 namespace std
 {
-	void swap( gr::Resource& c1, gr::Resource& c2 ) ;
+	void swap( gr::v1::Resource& c1, gr::v1::Resource& c2 ) ;
 }

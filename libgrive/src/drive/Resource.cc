@@ -45,7 +45,7 @@
 // for debugging
 #include <iostream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 // hard coded XML file
 const std::string xml_meta =
@@ -668,11 +668,11 @@ bool Resource::HasID() const
 	return !m_href.empty() && !m_id.empty() ;
 }
 
-} // end of namespace
+} } // end of namespace
 
 namespace std
 {
-	void swap( gr::Resource& c1, gr::Resource& c2 )
+	void swap( gr::v1::Resource& c1, gr::v1::Resource& c2 )
 	{
 		c1.Swap( c2 ) ;
 	}

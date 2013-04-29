@@ -23,13 +23,11 @@
 #include <QtGui/QApplication>
 #include <QtCore/QDebug>
 
-#include "drive/CommonUri.hh"
-#include "drive/Entry.hh"
-#include "drive/Feed.hh"
+#include "drive2/Feed.hh"
 
 #include "http/CurlAgent.hh"
 #include "http/Header.hh"
-//#include "http/XmlResponse.hh"
+#include "protocol/JsonResponse.hh"
 
 #include "protocol/Json.hh"
 #include "protocol/OAuth2.hh"
@@ -38,11 +36,13 @@
 #include "util/File.hh"
 
 #include <string>
+#include <iostream>
 
 const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 using namespace gr ;
+using namespace gr::v2 ;
 
 int main( int argc, char **argv )
 {
@@ -55,7 +55,7 @@ int main( int argc, char **argv )
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 	
-	Feed feed ;
+/*	Feed feed ;
 	feed.Start( &agent, feed_base + "/-/folder?max-results=50&showroot=true" ) ;
 	
 	do
@@ -67,6 +67,16 @@ int main( int argc, char **argv )
 			qDebug() << e.Name().c_str() ;
 		}
 	} while ( feed.GetNext( &agent ) ) ;
+*/
+/*	http::JsonResponse jsp ;
+	agent.Get( "https://www.googleapis.com/drive/v2/files", &jsp, http::Header() ) ;
+	std::cout << jsp.Response() << std::endl ;
+*/
+	Feed feed( "https://www.googleapis.com/drive/v2/files" ) ;
+	while ( feed.Next(&agent) )
+	{
+		std::cout << feed.Content() << std::endl ;
+	}
 
 	QApplication app( argc, argv ) ;
 	MainWnd wnd ;

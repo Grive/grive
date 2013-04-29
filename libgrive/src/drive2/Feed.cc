@@ -17,53 +17,50 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Feed.hh"
 
-#include "State.hh"
-
+#include "http/Agent.hh"
 #include "http/Header.hh"
-#include "protocol/Json.hh"
-#include "util/Exception.hh"
+#include "protocol/JsonResponse.hh"
 
-#include <string>
-#include <vector>
+#include <iostream>
 
-namespace gr {
+namespace gr { namespace v2 {
 
-namespace http
+Feed::Feed( const std::string& base )
 {
-	class Agent ;
+	// Next() will grab this link
+	m_content.Add( "nextLink", Json(base) ) ;
+	
+	Json url ;
+	m_content.Get("nextLink", url) ;
+	std::cout << "link = " << url.Str() << std::endl ;
 }
 
-namespace v1 {
-
-class Entry ;
-
-class Drive
+bool Feed::Next( http::Agent *agent )
 {
-public :
-	Drive( http::Agent *agent, const Json& options ) ;
+	Json url ;
+	if ( !m_content.Get("nextLink", url) )
+		return false ;
+	
+	http::JsonResponse out ;
+	try
+	{
+		agent->Get( url.Str(), &out, http::Header() ) ;
+	}
+	catch ( Exception& e )
+	{
+		e << DriveFeed_( m_content ) ;
+		throw ;
+	}
+	m_content = out.Response() ;
+	
+	return true ;
+}
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Json			m_options ;
-} ;
+Json Feed::Content() const
+{
+	return m_content ;
+}
 
 } } // end of namespace

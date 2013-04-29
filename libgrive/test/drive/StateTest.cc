@@ -30,6 +30,7 @@
 namespace grut {
 
 using namespace gr ;
+using namespace gr::v1 ;
 
 StateTest::StateTest( )
 {

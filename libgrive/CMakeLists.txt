@@ -45,7 +45,7 @@ include_directories(
 )
 
 file(GLOB DRIVE_HEADERS
-    ${libgrive_SOURCE_DIR}/src/drive/*.hh
+	${libgrive_SOURCE_DIR}/src/drive/*.hh
 )
 
 file (GLOB PROTOCOL_HEADERS
@@ -62,6 +62,7 @@ file (GLOB XML_HEADERS
 
 file (GLOB LIBGRIVE_SRC
 	src/drive/*.cc
+	src/drive2/*.cc
 	src/http/*.cc
 	src/protocol/*.cc
 	src/util/*.cc

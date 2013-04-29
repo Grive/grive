@@ -1,6 +1,6 @@
 /*
 	grive: an GPL program to sync a local directory with Google Drive
-	Copyright (C) 2012  Wan Wai Ho
+	Copyright (C) 2013 Wan Wai Ho
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -14,30 +14,22 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA  02110-1301, USA.
 */
 
-#include "ResourceTreeTest.hh"
+#include "Drive.hh"
 
-#include "Assert.hh"
+namespace gr { namespace v2 {
 
-#include "drive/ResourceTree.hh"
-#include "drive/Resource.hh"
-
-#include <iostream>
-
-namespace grut {
-
-using namespace gr ;
-using namespace gr::v1 ;
-
-ResourceTreeTest::ResourceTreeTest( )
+Drive::Drive( ) :
+	m_root( "", "", "" )
 {
 }
 
-void ResourceTreeTest::TestSerialize( )
+void Drive::Refresh( http::Agent *agent )
 {
-	
 }
 
-} // end of namespace grut
+} } // end of namespace gr::v2
+

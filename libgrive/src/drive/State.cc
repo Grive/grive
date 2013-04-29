@@ -31,7 +31,7 @@
 
 #include <fstream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 State::State( const fs::path& filename, const Json& options  ) :
     m_res		( options["path"].Str() ),
@@ -63,7 +63,7 @@ bool State::IsIgnore( const std::string& filename )
 	return filename[0] == '.' ;
 }
 
-void State::FromLocal( const fs::path& p, gr::Resource* folder )
+void State::FromLocal( const fs::path& p, Resource* folder )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
@@ -294,4 +294,4 @@ void State::ChangeStamp( long cstamp )
 	m_cstamp = cstamp ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

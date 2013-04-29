@@ -36,6 +36,8 @@ namespace http
 	class Header ;
 }
 
+namespace v1 {
+
 class Feed
 {
 public :
@@ -88,4 +90,4 @@ private :
 	reference dereference() const ;
 } ;
 
-} // end of namespace
+} } // end of namespace

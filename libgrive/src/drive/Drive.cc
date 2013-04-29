@@ -44,15 +44,15 @@
 // for debugging only
 #include <iostream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 namespace
 {
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( http::Agent *http, const Json& options ) :
-	m_http		( http ),
+Drive::Drive( http::Agent *agent, const Json& options ) :
+	m_http		( agent ),
 	m_root		( options["path"].Str() ),
 	m_state		( m_root / state_file, options ),
 	m_options	( options )
@@ -197,4 +197,4 @@ void Drive::UpdateChangeStamp( )
 		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1
