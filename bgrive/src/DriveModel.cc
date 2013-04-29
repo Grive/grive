@@ -92,15 +92,11 @@ QModelIndex DriveModel::parent( const QModelIndex& idx ) const
 	if ( res == m_drv.Root() )
 		return QModelIndex() ;
 
-	qDebug() << "getting parent of " << res->Title().c_str() ;
-
 	// if my parent is root, return model index of root (i.e. QModelIndex())
 	const Resource *parent = m_drv.Parent(res) ;
 	
 	if ( parent == 0 || parent == m_drv.Root() || idx.column() != 0 )
 		return QModelIndex() ;
-
-	qDebug() << "parent of " << res->Title().c_str() << " should be " << parent->Title().c_str();
 
 	// check grand-parent to know the row() of my parent
 	const Resource *grand = m_drv.Parent(parent) ;

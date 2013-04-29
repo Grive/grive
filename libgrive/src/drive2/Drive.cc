@@ -46,48 +46,36 @@ void Drive::Refresh( http::Agent *agent )
 	// get all folders first
 	Feed folders( feeds::files ) ;
 	folders.Query( "mimeType", mime_types::folder ) ;
-	std::vector<std::pair<std::string, Resource*> > parent_child ;
-	while ( folders.Next( agent ) )
-	{
-		std::vector<Json> items = folders.Content()["items"].AsArray() ;
-		for ( std::vector<Json>::iterator i = items.begin() ; i != items.end() ; ++i )
-		{
-			Resource *r = NewResource( *i ) ;
-//std::cout << r->Title() << " " << r->ID() << std::endl ;
-
-			Json parents ;
-			if ( i->Get( "parents", parents ) )
-			{
-				std::vector<std::string> pids ;
-				parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
-
-				// onlly the first parent counts
-				if ( !pids.empty() )
-					parent_child.push_back( std::make_pair( pids.front(), r ) ) ;
-					
-//				for ( std::vector<std::string>::iterator p = pids.begin() ; p != pids.end() ; ++p )
-				{
-//					std::cout << "parent = " << *p << std::endl ;
-//					parent_child.push_back( std::make_pair( *p, r ) ) ;
-				}
-			}
-		}
-	}
+	NewResource( agent, folders )  ;
 	
-	for ( std::vector<std::pair<std::string, Resource*> >::iterator i = parent_child.begin() ;
-		i != parent_child.end() ; ++i )
+	// get all files
+	Feed files( feeds::files ) ;
+	NewResource( agent, files ) ;
+
+	// build parent-child linkage between folders
+	for ( details::DB::iterator i = m_db.begin() ; i != m_db.end() ; ++i )
 	{
-		Resource *parent = Find( i->first ), *child = i->second ;
+		Resource *parent = Find( (*i)->Parent() ), *child = *i ;
 		assert( child != 0 ) ;
 		
 		if ( parent != 0 )
 		{
-			std::cout << "parent of " << child->Title() << " is " << parent->Title() << std::endl ;
-			
 			// initialize parent IDs
 			parent->AddChild( child->ID() ) ;
 			child->SetParent( parent->ID() ) ;
 		}
+	}
+}
+
+void Drive::NewResource( http::Agent *agent, Feed& items )
+{
+	assert( agent != 0 ) ;
+	
+	while ( items.Next( agent ) )
+	{
+		std::vector<Json> item_json = items.Content()["items"].AsArray() ;
+		for ( std::vector<Json>::iterator i = item_json.begin() ; i != item_json.end() ; ++i )
+			NewResource( *i ) ;
 	}
 }
 
@@ -102,7 +90,25 @@ Resource* Drive::NewResource( http::Agent *agent, const std::string& id )
 
 Resource* Drive::NewResource( const Json& item )
 {
-	Resource *r = new Resource( item["id"].Str(), item["mimeType"].Str(), item["title"].Str() ) ;
+	// assume resource is directly under root
+	std::string parent_id = m_root != 0 ? m_root->ID() : "" ;
+	
+	Json parents ;
+	if ( item.Get( "parents", parents ) )
+	{
+		std::vector<std::string> pids ;
+		parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
+
+		// only the first parent counts
+		if ( !pids.empty() )
+			parent_id = pids.front() ;
+	}
+
+	Resource *r = new Resource(
+		item["id"].Str(),
+		item["mimeType"].Str(),
+		item["title"].Str(),
+		parent_id ) ;
 	
 	m_db.insert(r) ;
 	assert( Find(r->ID()) == r ) ;

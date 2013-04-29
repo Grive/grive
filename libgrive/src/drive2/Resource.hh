@@ -29,7 +29,11 @@ class Resource
 {
 public :
 	Resource() ;
-	Resource( const std::string& id, const std::string& mime, const std::string& title ) ;
+	Resource(
+		const std::string& id,
+		const std::string& mime,
+		const std::string& title,
+		const std::string& parent ) ;
 
 	std::string ID() const ;
 	std::string	Mime() const ;

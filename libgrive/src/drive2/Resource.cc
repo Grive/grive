@@ -35,10 +35,15 @@ Resource::Resource() :
 {
 }
 
-Resource::Resource( const std::string& id, const std::string& mime, const std::string& title ) :
-	m_id( id ),
-	m_mime( mime ),
-	m_title( title )
+Resource::Resource(
+	const std::string& id,
+	const std::string& mime,
+	const std::string& title,
+	const std::string& parent ) :
+	m_id	( id ),
+	m_mime	( mime ),
+	m_title	( title ),
+	m_parent( parent )
 {
 }
 

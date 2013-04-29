@@ -57,6 +57,8 @@ namespace details
 	typedef DB::index<ByIdentity>::type	Set ;
 }
 
+class Feed ;
+
 class Drive
 {
 public :
@@ -76,6 +78,7 @@ public :
 private :
 	Resource* NewResource( const Json& item ) ;
 	Resource* NewResource( http::Agent *agent, const std::string& id ) ;
+	void NewResource( http::Agent *agent, Feed& items ) ;
 	
 private :
 	details::DB	m_db ;
