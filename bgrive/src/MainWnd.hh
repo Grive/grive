@@ -25,6 +25,8 @@
 
 #include "DriveModel.hh"
 
+class QModelIndex ;
+
 namespace gr {
 
 namespace http
@@ -38,6 +40,12 @@ class MainWnd : public QMainWindow
 
 public :
 	MainWnd( http::Agent *agent ) ;
+
+private :
+	void ShowResource( const v2::Resource *res ) ;
+
+public slots :
+	void OnClick( const QModelIndex& index ) ;
 
 private :
 	Ui::MainWindow	m_ui ;

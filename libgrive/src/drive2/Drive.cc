@@ -23,6 +23,7 @@
 #include "CommonUri.hh"
 #include "Feed.hh"
 #include "protocol/Json.hh"
+#include "util/Exception.hh"
 
 #include <iostream>
 #include <iterator>
@@ -140,6 +141,11 @@ const Resource* Drive::Root() const
 
 const Resource* Drive::Child( const Resource *parent, std::size_t idx ) const
 {
+	if ( idx >= parent->ChildCount() )
+		BOOST_THROW_EXCEPTION(
+			Exception()
+		) ;
+	
 	return Find( parent->At(idx) ) ;
 }
 

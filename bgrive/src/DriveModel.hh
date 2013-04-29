@@ -46,7 +46,6 @@ public :
 	QModelIndex index( int row, int column, const QModelIndex& parent ) const ;
 	QModelIndex parent( const QModelIndex& idx ) const ;
 
-private :
 	const v2::Resource* Res( const QModelIndex& idx ) const ;
 
 private :

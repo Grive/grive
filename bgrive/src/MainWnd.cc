@@ -20,16 +20,39 @@
 
 #include "MainWnd.hh"
 
+#include "drive2/Resource.hh"
+
+#include <QtCore/QDebug>
+
 #include <cassert>
 
 namespace gr {
+
+using namespace v2 ;
 
 MainWnd::MainWnd( http::Agent *agent ) :
 	m_drive( agent )
 {
 	m_ui.setupUi(this) ;
-	
 	m_ui.m_dir->setModel( &m_drive ) ;
+	
+	connect(
+		m_ui.m_dir,	SIGNAL(activated(const QModelIndex&)),
+		this,		SLOT(OnClick(const QModelIndex&))
+	) ;
+}
+
+void MainWnd::OnClick( const QModelIndex& index )
+{
+	const Resource *res = m_drive.Res(index) ;
+	if ( res != 0 )
+		ShowResource( res ) ;
+}
+
+void MainWnd::ShowResource( const v2::Resource *res )
+{
+	m_ui.m_title->setText( QString::fromUtf8(res->Title().c_str()) ) ;
+	m_ui.m_mime_type->setText( QString::fromUtf8(res->Mime().c_str()) ) ;
 }
 
 } // end of namespace

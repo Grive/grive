@@ -94,7 +94,6 @@ QModelIndex DriveModel::parent( const QModelIndex& idx ) const
 
 	// if my parent is root, return model index of root (i.e. QModelIndex())
 	const Resource *parent = m_drv.Parent(res) ;
-	
 	if ( parent == 0 || parent == m_drv.Root() || idx.column() != 0 )
 		return QModelIndex() ;
 
