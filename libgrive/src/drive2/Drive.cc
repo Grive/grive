@@ -25,6 +25,7 @@
 #include "protocol/Json.hh"
 
 #include <iostream>
+#include <iterator>
 
 namespace gr { namespace v2 {
 
@@ -46,7 +47,6 @@ void Drive::Refresh( http::Agent *agent )
 		for ( std::vector<Json>::iterator i = items.begin() ; i != items.end() ; ++i )
 		{
 			const Resource *r = Add( *i ) ;
-			std::cout << r->Title() << " " << r->Mime() << std::endl ;
 		}
 	}
 }
@@ -54,6 +54,18 @@ void Drive::Refresh( http::Agent *agent )
 const Resource* Drive::Add( const Json& item )
 {
 	Resource *r = new Resource( item["id"].Str(), item["mimeType"].Str(), item["title"].Str() ) ;
+	
+	// initialize parent IDs
+	Json parents ;
+	if ( item.Get( "parents", parents ) )
+	{
+		std::vector<std::string> parent_ids ;
+		parents.Select<std::string>( "id", std::back_inserter(parent_ids) ) ;
+		
+		r->SetParent( parent_ids.begin(), parent_ids.end() ) ;
+		std::cout << r->Title() << " " << r->ID() << " " << parent_ids.size() << std::endl ;
+	}
+	
 	return *m_db.insert(r).first ;
 }
 

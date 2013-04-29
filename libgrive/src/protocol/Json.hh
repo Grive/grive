@@ -100,6 +100,18 @@ public :
 	Json FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
 	
+	/**	Expect *this is a JSON array of objects. Select all "key" values inside each
+		objects in the array and copies them in the output iterator \a out.
+	*/
+	template <typename T, typename Out>
+	Out Select( const std::string& key, Out out )
+	{
+		Array a = AsArray() ;
+		for ( Array::iterator i = a.begin() ; i != a.end() ; ++i )
+			*out++ = i->As<T>() ;
+		return out ;
+	}
+	
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
 	void Write( DataStream *out ) const ;
 

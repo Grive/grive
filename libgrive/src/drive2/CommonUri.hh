@@ -33,4 +33,9 @@ namespace mime_types
 	const std::string folder	= "application/vnd.google-apps.folder" ;
 }
 
+namespace kinds
+{
+	const std::string parent	= "drive#parentReference" ;
+}
+
 } } // end of namespace gr::v2

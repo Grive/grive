@@ -60,9 +60,4 @@ bool Resource::IsFolder() const
 	return m_mime == "application/vnd.google-apps.folder" ;
 }
 
-void Resource::Add( const std::string& child_id )
-{
-	m_children.push_back( child_id ) ;
-}
-
 } } // end of namespace gr::v2

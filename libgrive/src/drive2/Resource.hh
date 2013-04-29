@@ -30,21 +30,25 @@ class Resource
 public :
 	Resource() ;
 	Resource( const std::string& id, const std::string& mime, const std::string& title ) ;
-	
+
+	template <typename InputIt>
+	void SetParent( InputIt first, InputIt last )
+	{
+		m_parent.assign( first, last ) ;
+	}
+
 	std::string ID() const ;
 	std::string	Mime() const ;
 	std::string Title() const ;
 	
 	bool IsFolder() const ;
 
-	void Add( const std::string& child_id ) ;
-
 private :
 	std::string		m_id ;
 	std::string		m_mime ;
 	std::string		m_title ;
 	
-	std::vector<std::string>	m_children ;
+	std::vector<std::string>	m_parent ;
 } ;
 
 } } // end of namespace gr::v2
