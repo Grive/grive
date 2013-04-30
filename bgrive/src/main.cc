@@ -50,36 +50,9 @@ int main( int argc, char **argv )
 	Json cfg = Json::Parse( &file ) ;
 	
 	std::string refresh_token = cfg["refresh_token"].Str() ;
-	qDebug() << refresh_token.c_str() ;
-	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
+	
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
-	
-/*	Feed feed ;
-	feed.Start( &agent, feed_base + "/-/folder?max-results=50&showroot=true" ) ;
-	
-	do
-	{
-		// first, get all collections from the query result
-		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
-		{
-			Entry e( *i ) ;
-			qDebug() << e.Name().c_str() ;
-		}
-	} while ( feed.GetNext( &agent ) ) ;
-*/
-/*	http::JsonResponse jsp ;
-	agent.Get( "https://www.googleapis.com/drive/v2/files", &jsp, http::Header() ) ;
-	std::cout << jsp.Response() << std::endl ;
-*/
-/*	Feed feed( "https://www.googleapis.com/drive/v2/files" ) ;
-	while ( feed.Next(&agent) )
-	{
-		std::cout << feed.Content() << std::endl ;
-	}
-*/
-//	Drive drive ;
-//	drive.Refresh( &agent ) ;
 
 	QApplication app( argc, argv ) ;
 	MainWnd wnd( &agent ) ;

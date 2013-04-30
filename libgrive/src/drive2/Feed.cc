@@ -27,7 +27,8 @@
 
 namespace gr { namespace v2 {
 
-Feed::Feed( const std::string& base )
+Feed::Feed( const std::string& base ) :
+	m_base( base )
 {
 	// Next() will grab this link
 	m_content.Add( "nextLink", Json(base) ) ;

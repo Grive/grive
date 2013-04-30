@@ -73,9 +73,20 @@ bool DriveModel::hasChildren( const QModelIndex& parent ) const
 	return Res(parent)->ChildCount() > 0 ;
 }
 
-QModelIndex DriveModel::index( int row, int column, const QModelIndex & parent ) const
+QModelIndex DriveModel::index( int row, int column, const QModelIndex& parent_idx ) const
 {
-	return createIndex( row, column, const_cast<Resource*>(m_drv.Child(Res(parent), row)) ) ;
+	const Resource *parent = Res(parent_idx) ; 
+
+	// check out-of-bound
+	if ( parent != 0 && static_cast<unsigned>(row) >= parent->ChildCount() )
+		BOOST_THROW_EXCEPTION(
+			Exception()
+				<< InvalidRow_( row )
+				<< ResourceName_( parent->Title() )
+		) ;
+
+
+	return createIndex( row, column, const_cast<Resource*>(m_drv.Child(parent, row)) ) ;
 }
 
 const Resource* DriveModel::Res( const QModelIndex& idx ) const

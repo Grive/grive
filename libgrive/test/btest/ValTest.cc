@@ -1,5 +1,5 @@
 /*
-	grive: an GPL program to sync a local directory with Google Drive
+	webwrite: an GPL wiki-like website with in-place editing
 	Copyright (C) 2012  Wan Wai Ho
 
 	This program is free software; you can redistribute it and/or
@@ -17,43 +17,36 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "drive2/Val.hh"
+#include <boost/test/unit_test.hpp>
 
-#include "protocol/Json.hh"
-#include "util/Exception.hh"
+using namespace gr ;
 
-#include <string>
-
-namespace gr
+namespace
 {
-namespace http
-{
-	class Agent ;
-	class Header ;
+	struct Fixture
+	{
+	} ;
 }
 
-class Json ;
+BOOST_FIXTURE_TEST_SUITE( ValTest, Fixture )
 
-namespace v2 {
-
-class Feed
+BOOST_AUTO_TEST_CASE( TestSimpleTypes )
 {
-public :
-	// exception info
-	typedef boost::error_info<struct DriveFeed,	Json>	DriveFeed_ ;
-
-public :
-	Feed( const std::string& base ) ;
-	void Query( const std::string& field, const std::string& value ) ;
+	Val null ;
+	BOOST_CHECK_EQUAL( null.Type(), Val::null_type ) ;
+	BOOST_CHECK( null.Is<void>() ) ;
 	
-	
-	bool Next( http::Agent *agent ) ;
+	Val i( 100 ) ;
+	BOOST_CHECK_EQUAL( i.As<int>(), 100 ) ;
+	BOOST_CHECK_EQUAL( i.Type(), Val::int_type ) ;
+}
 
-	Json Content() const ;
+BOOST_AUTO_TEST_CASE( TestMap )
+{
+	Val obj ;
+	obj.Add( "key", Val( std::string("value") ) ) ;
+	BOOST_CHECK_EQUAL( obj["key"].As<std::string>(), "value" ) ;
+}
 
-private :
-	std::string	m_base ;
-	Json 		m_content ;
-} ;
-
-} } // end of namespace gr::v2
+BOOST_AUTO_TEST_SUITE_END()

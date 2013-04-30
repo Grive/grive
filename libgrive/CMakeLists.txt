@@ -6,7 +6,7 @@ find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(Boost 1.40.0 COMPONENTS program_options filesystem system REQUIRED)
+find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
@@ -131,3 +131,18 @@ IF ( CPPUNIT_FOUND )
 	)
         
 ENDIF ( CPPUNIT_FOUND )
+
+add_executable( btest
+	test/btest/ValTest.cc
+	test/btest/UnitTest.cc )
+
+target_link_libraries( btest
+	grive
+	${Boost_LIBRARIES}
+)
+
+if ( WIN32 )
+else ( WIN32 )
+	set_target_properties( btest
+		PROPERTIES COMPILE_FLAGS	 -DBOOST_TEST_DYN_LINK )
+endif (WIN32)

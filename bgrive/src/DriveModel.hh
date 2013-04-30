@@ -23,6 +23,7 @@
 #include <QtCore/QAbstractItemModel>
 
 #include "drive2/Drive.hh"
+#include "util/Exception.hh"
 
 namespace gr {
 
@@ -33,6 +34,10 @@ namespace http
 
 class DriveModel : public QAbstractItemModel
 {
+public :
+	typedef boost::error_info<struct InvalidRow,	int>			InvalidRow_ ;
+	typedef boost::error_info<struct ResourceName,	std::string>	ResourceName_ ;
+
 public :
 	DriveModel( http::Agent *agent ) ;
 	

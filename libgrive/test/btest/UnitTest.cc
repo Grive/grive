@@ -1,5 +1,5 @@
 /*
-	grive: an GPL program to sync a local directory with Google Drive
+	webwrite: an GPL wiki-like website with in-place editing
 	Copyright (C) 2012  Wan Wai Ho
 
 	This program is free software; you can redistribute it and/or
@@ -17,43 +17,5 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
-
-#include "protocol/Json.hh"
-#include "util/Exception.hh"
-
-#include <string>
-
-namespace gr
-{
-namespace http
-{
-	class Agent ;
-	class Header ;
-}
-
-class Json ;
-
-namespace v2 {
-
-class Feed
-{
-public :
-	// exception info
-	typedef boost::error_info<struct DriveFeed,	Json>	DriveFeed_ ;
-
-public :
-	Feed( const std::string& base ) ;
-	void Query( const std::string& field, const std::string& value ) ;
-	
-	
-	bool Next( http::Agent *agent ) ;
-
-	Json Content() const ;
-
-private :
-	std::string	m_base ;
-	Json 		m_content ;
-} ;
-
-} } // end of namespace gr::v2
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>
