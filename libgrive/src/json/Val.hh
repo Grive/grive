@@ -111,7 +111,7 @@ public :
 	Val  FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
 		
-//	friend std::ostream& operator<<( std::ostream& os, const Val& json ) ;
+	friend std::ostream& operator<<( std::ostream& os, const Val& val ) ;
 	void Visit( ValVisitor *visitor ) const ;
 
 private :

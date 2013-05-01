@@ -27,11 +27,11 @@ namespace gr {
 
 class DataStream ;
 
-class ValWriter : public ValVisitor
+class JsonWriter : public ValVisitor
 {
 public :
-	ValWriter( DataStream *out ) ;
-	~ValWriter() ;
+	JsonWriter( DataStream *out ) ;
+	~JsonWriter() ;
 
 	void Visit( long long t ) ;
 	void Visit( double t ) ;

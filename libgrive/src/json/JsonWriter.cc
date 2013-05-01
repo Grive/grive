@@ -18,7 +18,7 @@
 	MA  02110-1301, USA.
 */
 
-#include "ValWriter.hh"
+#include "JsonWriter.hh"
 #include "util/DataStream.hh"
 
 #include <yajl/yajl_gen.h>
@@ -27,81 +27,81 @@
 
 namespace gr {
 
-struct ValWriter::Impl
+struct JsonWriter::Impl
 {
 	yajl_gen	gen ;
 	DataStream 	*out ;
 } ;
 
-ValWriter::ValWriter( DataStream *out ) :
+JsonWriter::JsonWriter( DataStream *out ) :
 	m_impl( new Impl )
 {
 	assert( out != 0 ) ;
 
 	m_impl->out = out ;
 	m_impl->gen = yajl_gen_alloc(0) ;
-	yajl_gen_config( m_impl->gen, yajl_gen_print_callback, &ValWriter::WriteCallback, this ) ;
+	yajl_gen_config( m_impl->gen, yajl_gen_print_callback, &JsonWriter::WriteCallback, this ) ;
 }
 
-ValWriter::~ValWriter()
+JsonWriter::~JsonWriter()
 {
 	yajl_gen_free( m_impl->gen ) ;
 }
 
-void ValWriter::Visit( long long t )
+void JsonWriter::Visit( long long t )
 {
 	yajl_gen_integer( m_impl->gen, t ) ;
 }
 
-void ValWriter::Visit( double t )
+void JsonWriter::Visit( double t )
 {
 	yajl_gen_double( m_impl->gen, t ) ;
 }
 
-void ValWriter::Visit( const std::string& t )
+void JsonWriter::Visit( const std::string& t )
 {
 	yajl_gen_string( m_impl->gen,
 		reinterpret_cast<const unsigned char*>(t.c_str()), t.size() ) ;
 }
 
-void ValWriter::Visit( bool t )
+void JsonWriter::Visit( bool t )
 {
 	yajl_gen_bool( m_impl->gen, t ) ;
 }
 
-void ValWriter::VisitNull()
+void JsonWriter::VisitNull()
 {
 	yajl_gen_null( m_impl->gen ) ;
 }
 
-void ValWriter::StartArray()
+void JsonWriter::StartArray()
 {
 	yajl_gen_array_open( m_impl->gen ) ;
 }
 
-void ValWriter::EndArray()
+void JsonWriter::EndArray()
 {
 	yajl_gen_array_close( m_impl->gen ) ;
 }
 
-void ValWriter::StartObject()
+void JsonWriter::StartObject()
 {
 	yajl_gen_map_open( m_impl->gen ) ;
 }
 
-void ValWriter::VisitKey( const std::string& t )
+void JsonWriter::VisitKey( const std::string& t )
 {
 	Visit(t) ;
 }
 
-void ValWriter::EndObject()
+void JsonWriter::EndObject()
 {
 	yajl_gen_map_close( m_impl->gen ) ;
 }
 
-void ValWriter::WriteCallback( void *ctx, const char *str, std::size_t size )
+void JsonWriter::WriteCallback( void *ctx, const char *str, std::size_t size )
 {
-	ValWriter *pthis = reinterpret_cast<ValWriter*>(ctx) ;
+	JsonWriter *pthis = reinterpret_cast<JsonWriter*>(ctx) ;
 	assert( pthis != 0 ) ;
 	assert( pthis->m_impl->out != 0 ) ;
 	

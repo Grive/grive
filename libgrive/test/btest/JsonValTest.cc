@@ -20,7 +20,7 @@
 #include "json/JsonParser.hh"
 #include "json/Val.hh"
 #include "json/ValBuilder.hh"
-#include "json/ValWriter.hh"
+#include "json/JsonWriter.hh"
 #include "util/StringStream.hh"
 
 #include <boost/test/unit_test.hpp>
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( Test )
 	BOOST_CHECK_EQUAL( json["key"].As<long long>(), 100 ) ;
 	
 	StringStream ss ;
-	ValWriter wr( &ss ) ;
+	JsonWriter wr( &ss ) ;
 	json.Visit( &wr ) ;
 	
 	BOOST_CHECK_EQUAL( ss.Str(), "{\"key\":100}" ) ;

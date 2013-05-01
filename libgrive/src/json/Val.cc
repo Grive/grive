@@ -19,7 +19,9 @@
 */
 
 #include "Val.hh"
+#include "JsonWriter.hh"
 #include "ValVisitor.hh"
+#include "util/StdStream.hh"
 
 #include <iostream>
 
@@ -170,6 +172,15 @@ void Val::Visit( ValVisitor *visitor ) const
 			break ;
 		}
 	}
+}
+
+std::ostream& operator<<( std::ostream& os, const Val& val )
+{
+	StdStream ss( os.rdbuf() ) ;
+	JsonWriter wr( &ss ) ;
+	val.Visit( &wr ) ;
+
+	return os ;
 }
 
 } // end of namespace
