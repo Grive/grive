@@ -17,7 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "drive2/Val.hh"
+#include "json/Val.hh"
 #include <boost/test/unit_test.hpp>
 
 using namespace gr ;

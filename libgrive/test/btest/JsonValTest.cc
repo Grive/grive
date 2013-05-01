@@ -17,8 +17,9 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "drive2/JsonVal.hh"
-#include "drive2/Val.hh"
+#include "json/JsonParser.hh"
+#include "json/Val.hh"
+#include "json/ValBuilder.hh"
 
 #include <boost/test/unit_test.hpp>
 
@@ -35,7 +36,10 @@ BOOST_FIXTURE_TEST_SUITE( JsonValTest, F )
 
 BOOST_AUTO_TEST_CASE( Test )
 {
-	Val json = json::Parse( "{\"key\": 100 }" ) ;
+	ValBuilder b ;
+	JsonParser::Parse( "{\"key\": 100 }", &b ) ;
+	Val json = b.Result() ;
+	
 	BOOST_CHECK( json.Is<Val::Object>() ) ;
 	BOOST_CHECK_EQUAL( json["key"].As<long long>(), 100 ) ;
 }

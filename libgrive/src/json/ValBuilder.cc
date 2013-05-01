@@ -32,27 +32,27 @@ ValBuilder::~ValBuilder()
 {
 }
 
-void ValBuilder::Build( long long t )
+void ValBuilder::Visit( long long t )
 {
 	Build(Val(t)) ;
 }
 
-void ValBuilder::Build( double t )
+void ValBuilder::Visit( double t )
 {
 	Build(Val(t)) ;
 }
 
-void ValBuilder::Build( const std::string& t )
+void ValBuilder::Visit( const std::string& t )
 {
 	Build(Val(t)) ;
 }
 
-void ValBuilder::Build( bool t )
+void ValBuilder::Visit( bool t )
 {
 	Build(Val(t)) ;
 }
 
-void ValBuilder::BuildNull()
+void ValBuilder::VisitNull()
 {
 	Build(Val()) ;
 }
@@ -83,7 +83,7 @@ void ValBuilder::Build( const Val& t )
 		BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top()) ) ;
 }
 
-void ValBuilder::BuildKey( const std::string& t )
+void ValBuilder::VisitKey( const std::string& t )
 {
 	m_key.reset( new Val(t) ) ;
 }

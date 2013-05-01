@@ -18,24 +18,36 @@
 	MA  02110-1301, USA.
 */
 
-#pragma once
+#include "ValResponse.hh"
 
-#include "util/Exception.hh"
+#include "Val.hh"
 
-#include <string>
+namespace gr { namespace http {
 
-namespace gr
+ValResponse::ValResponse( ) :
+	m_parser( &m_val )
 {
-	class Val ;
+}
 
-	namespace json
-	{
-		struct Error : virtual Exception {} ;
-		typedef boost::error_info<struct ParseErr,	std::string> ParseErr_ ;
-		typedef boost::error_info<struct JsonText,	std::string> JsonText_ ;
-	
-		Val Parse( const std::string& json ) ; 
-	}
-	
-} // end of namespace
+std::size_t ValResponse::Write( const char *data, std::size_t count )
+{
+	m_parser.Parse( data, count ) ;
+	return count ;
+}
 
+std::size_t ValResponse::Read( char *data, std::size_t count )
+{
+	return count ;
+}
+
+Val ValResponse::Response() const
+{
+	return m_val.Result() ;
+}
+
+void ValResponse::Finish()
+{
+	m_parser.Finish() ;
+}
+
+} } // end of namespace gr::http

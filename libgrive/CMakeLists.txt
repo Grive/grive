@@ -65,6 +65,7 @@ file (GLOB LIBGRIVE_SRC
 	src/drive2/*.cc
 	src/http/*.cc
 	src/protocol/*.cc
+	src/json/*.cc
 	src/util/*.cc
 	src/util/log/*.cc
 	src/xml/*.cc

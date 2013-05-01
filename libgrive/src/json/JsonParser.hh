@@ -20,47 +20,33 @@
 
 #pragma once
 
-#include "Val.hh"
 #include "util/Exception.hh"
 
-#include <stack>
+#include <string>
 #include <memory>
 
 namespace gr {
 
-class ValBuilder
+class ValVisitor ;
+
+class JsonParser
 {
 public :
 	struct Error : virtual Exception {} ;
-	typedef boost::error_info<struct Mismatch,		Val> Mismatch_ ;
-	typedef boost::error_info<struct Unexpected,	Val> Unexpected_ ;
-	typedef boost::error_info<struct NoKey,			Val> NoKey_ ;
+	typedef boost::error_info<struct ParseErr,	std::string> ParseErr_ ;
+	typedef boost::error_info<struct JsonText,	std::string> JsonText_ ;
+
+	static void Parse( const std::string& json, ValVisitor *callback ) ;
 	
-public :
-	ValBuilder( ) ;
-	~ValBuilder() ;
-
-	void Build( long long t ) ;
-	void Build( double t ) ;
-	void Build( const std::string& t ) ;
-	void Build( bool t ) ;
-	void BuildNull() ;
-	void Build( const Val& t ) ;
-
-	void StartArray() ;
-	void EndArray() ;
-	void StartObject() ;
-	void BuildKey( const std::string& t ) ;
-	void EndObject() ;
-
-	Val Result() const ;
-
+	explicit JsonParser( ValVisitor *callback ) ;
+	~JsonParser() ;
+	
+	void Parse( const char *str, std::size_t size ) ;
+	void Finish() ;
+	
 private :
-	void End( Val::TypeEnum type ) ;
-
-private :
-	std::stack<Val> 	m_ctx ;
-	std::auto_ptr<Val>	m_key ;
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
 } ;
 
 } // end of namespace

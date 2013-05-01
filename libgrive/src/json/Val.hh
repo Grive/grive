@@ -23,13 +23,15 @@
 #include "util/Exception.hh"
 
 #include <cstddef>
-#include <memory>
-#include <vector>
-#include <map>
-#include <string>
 #include <iosfwd>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace gr {
+
+class ValVisitor ;
 
 class Val
 {
@@ -66,14 +68,9 @@ public :
 
 	template <typename T>
 	Val& Assign( const T& t ) ;
-	void Swap( Val& val ) ;
 	
-	Val& operator=( const Val& val )
-	{
-		Val tmp(val) ;
-		Swap(tmp) ;
-		return *this ;
-	}
+	void Swap( Val& val ) ;
+	Val& operator=( const Val& val ) ;
 		
 	template <typename T>
 	Val& operator=( const T& t )
@@ -95,7 +92,27 @@ public :
 	const Val& operator[]( const std::string& key ) const ;
 	const Val& operator[]( std::size_t index ) const ;
 
-	void Add( const std::string& key, const Val& value ) ;
+	// shortcuts for As<>()
+	std::string Str() const ;
+	int		Int() const ;
+	long	Long() const ;
+	double	Double() const ;
+	bool	Bool() const ;
+	const Array&	AsArray() const ;
+	const Object&	AsObject() const ;
+
+	// shortcuts for objects
+	bool Has( const std::string& key ) const ;
+	bool Get( const std::string& key, Val& val ) const ;
+	void Add( const std::string& key, const Val& val ) ;
+	
+	// shortcuts for array (and array of objects)
+	void Add( const Val& json ) ;
+	Val  FindInArray( const std::string& key, const std::string& value ) const ;
+	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
+		
+//	friend std::ostream& operator<<( std::ostream& os, const Val& json ) ;
+//	void Visit( DataStream *out ) const ;
 
 private :
 	struct Base ;

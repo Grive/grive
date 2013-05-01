@@ -38,6 +38,18 @@ Val::~Val()
 {
 }
 
+void Val::Swap( Val& val )
+{
+	std::swap( m_base, val.m_base ) ;
+}
+
+Val& Val::operator=( const Val& val )
+{
+	Val tmp(val) ;
+	Swap(tmp) ;
+	return *this ;
+}
+
 Val::TypeEnum Val::Type() const
 {
 	return m_base->Type() ;
@@ -66,14 +78,58 @@ const Val& Val::operator[]( std::size_t index ) const
 	throw ;
 }
 
+std::string Val::Str() const
+{
+	return As<std::string>() ;
+}
+
+int     Val::Int() const
+{
+	return static_cast<int>(As<long long>()) ;
+}
+
+double	Val::Double() const
+{
+	return As<double>() ;
+}
+
+bool	Val::Bool() const
+{
+	return As<bool>() ;
+}
+
+const Val::Array& Val::AsArray() const
+{
+	return As<Array>() ;
+}
+
+const Val::Object& Val::AsObject() const
+{
+	return As<Object>() ;
+}
+
+bool Val::Has( const std::string& key ) const
+{
+	const Object& obj = As<Object>() ;
+	return obj.find(key) != obj.end() ;
+}
+
+bool Val::Get( const std::string& key, Val& val ) const
+{
+	const Object& obj = As<Object>() ;
+	Object::const_iterator i = obj.find(key) ;
+	if ( i != obj.end() )
+	{
+		val = i->second ;
+		return true ;
+	}
+	else
+		return false ;
+}
+
 void Val::Add( const std::string& key, const Val& value )
 {
 	As<Object>().insert( std::make_pair(key, value) ) ;
-}
-
-void Val::Swap( Val& val )
-{
-	std::swap( m_base, val.m_base ) ;
 }
 
 } // end of namespace
