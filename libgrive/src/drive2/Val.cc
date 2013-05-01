@@ -20,6 +20,8 @@
 
 #include "Val.hh"
 
+#include <iostream>
+
 namespace gr {
 
 Val::Val( ) :
@@ -43,21 +45,25 @@ Val::TypeEnum Val::Type() const
 
 const Val& Val::operator[]( const std::string& key ) const
 {
-	static const Val null ;
-	if ( Type() == object_type )
-	{
-		const Object& obj = As<Object>() ;
-		Object::const_iterator i = obj.find(key) ;
-		return i != obj.end() ? i->second : null ;
-	}
-	else
-		return null ;
+	const Object& obj = As<Object>() ;
+	Object::const_iterator i = obj.find(key) ;
+	if ( i != obj.end() )
+		return i->second ;
+	
+	// shut off compiler warning
+	BOOST_THROW_EXCEPTION(Error() << NoKey_(key)) ;
+	throw ;
 }
 
 const Val& Val::operator[]( std::size_t index ) const
 {
-	static const Val null ;
-	return Type() == array_type ? As<Array>().at(index) : null ;
+	const Array& ar = As<Array>() ;
+	if ( index < ar.size() )
+		return ar[index] ;
+	
+	// shut off compiler warning
+	BOOST_THROW_EXCEPTION(Error() << OutOfRange_(index)) ;
+	throw ;
 }
 
 void Val::Add( const std::string& key, const Val& value )
@@ -65,4 +71,22 @@ void Val::Add( const std::string& key, const Val& value )
 	As<Object>().insert( std::make_pair(key, value) ) ;
 }
 
+void Val::Swap( Val& val )
+{
+	std::swap( m_base, val.m_base ) ;
+}
+
 } // end of namespace
+
+namespace std
+{
+	void swap( gr::Val& v1, gr::Val& v2 )
+	{
+		v1.Swap( v2 ) ;
+	}
+	
+	ostream& operator<<( ostream& os, gr::Val::TypeEnum t )
+	{
+		return os << static_cast<int>(t) ;
+	}
+}

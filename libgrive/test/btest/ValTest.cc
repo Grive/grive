@@ -38,14 +38,15 @@ BOOST_AUTO_TEST_CASE( TestSimpleTypes )
 	BOOST_CHECK( null.Is<void>() ) ;
 	
 	Val i( 100 ) ;
-	BOOST_CHECK_EQUAL( i.As<int>(), 100 ) ;
+	BOOST_CHECK_EQUAL( i.As<long long>(), 100 ) ;
 	BOOST_CHECK_EQUAL( i.Type(), Val::int_type ) ;
 }
 
 BOOST_AUTO_TEST_CASE( TestMap )
 {
-	Val obj ;
+	Val obj(( Val::Object() )) ;
 	obj.Add( "key", Val( std::string("value") ) ) ;
+	BOOST_CHECK_EQUAL( obj["key"].Type(), Val::string_type ) ;
 	BOOST_CHECK_EQUAL( obj["key"].As<std::string>(), "value" ) ;
 }
 
