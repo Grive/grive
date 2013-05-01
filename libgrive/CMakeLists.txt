@@ -79,6 +79,7 @@ add_definitions(
 add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
+	yajl
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${LIBGCRYPT_LIBRARIES}
@@ -132,9 +133,11 @@ IF ( CPPUNIT_FOUND )
         
 ENDIF ( CPPUNIT_FOUND )
 
-add_executable( btest
-	test/btest/ValTest.cc
-	test/btest/UnitTest.cc )
+file(GLOB BTEST_SRC
+	test/btest/*.cc
+)
+
+add_executable( btest ${BTEST_SRC} )
 
 target_link_libraries( btest
 	grive

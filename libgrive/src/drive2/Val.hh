@@ -106,16 +106,6 @@ private :
 	std::auto_ptr<Base>	m_base ;
 
 private :
-	// callback functions
-	static int OnNull( void *ctx ) ;
-	static int OnBool( void *ctx, int value ) ;
-	static int OnInt( void *ctx, long long value ) ;
-	static int OnDouble( void *ctx, double value ) ;
-	static int OnStr( void *ctx, const unsigned char *str, std::size_t len ) ;
-	static int StartMap( void *ctx ) ;
-	static int EndMap( void *ctx ) ;
-	static int StartArray( void *ctx ) ;
-	static int EndArray( void *ctx ) ;
 } ;
 
 template <> struct Val::Type2Enum<void>			{ static const TypeEnum type = null_type ; } ;
@@ -132,6 +122,8 @@ template <> struct Val::SupportType<long>			{ typedef long long	Type ; } ;
 template <> struct Val::SupportType<unsigned long>	{ typedef long long	Type ; } ;
 template <> struct Val::SupportType<short>			{ typedef long long	Type ; } ;
 template <> struct Val::SupportType<unsigned short>	{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<long long>			{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<unsigned long long>	{ typedef long long	Type ; } ;
 
 template <> struct Val::SupportType<bool>			{ typedef bool		Type ; } ;
 template <> struct Val::SupportType<double>			{ typedef double	Type ; } ;
