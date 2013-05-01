@@ -19,6 +19,7 @@
 */
 
 #include "Val.hh"
+#include "ValVisitor.hh"
 
 #include <iostream>
 
@@ -130,6 +131,45 @@ bool Val::Get( const std::string& key, Val& val ) const
 void Val::Add( const std::string& key, const Val& value )
 {
 	As<Object>().insert( std::make_pair(key, value) ) ;
+}
+
+void Val::Visit( ValVisitor *visitor ) const
+{
+	switch ( Type() )
+	{
+		case null_type:		visitor->VisitNull() ;					break ;
+		case int_type:		visitor->Visit( As<long long>() ) ;		break ;
+		case double_type:	visitor->Visit( As<double>() ) ;		break ;
+		case string_type:	visitor->Visit( As<std::string>() ) ;	break ;
+		case bool_type:		visitor->Visit( As<bool>() ) ;			break ;
+		
+		case object_type:
+		{
+			visitor->StartObject() ;
+			
+			const Object& obj = As<Object>() ;
+			for ( Object::const_iterator i = obj.begin() ; i != obj.end() ; ++i )
+			{
+				visitor->VisitKey( i->first ) ;
+				i->second.Visit( visitor ) ;
+			}
+			
+			visitor->EndObject() ;
+			break ;
+		}
+
+		case array_type:
+		{
+			visitor->StartArray() ;
+			
+			const Array& arr = As<Array>() ;
+			for ( Array::const_iterator i = arr.begin() ; i != arr.end() ; ++i )
+				i->Visit( visitor ) ;
+			
+			visitor->EndArray() ;
+			break ;
+		}
+	}
 }
 
 } // end of namespace

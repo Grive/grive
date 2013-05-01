@@ -112,7 +112,7 @@ public :
 	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
 		
 //	friend std::ostream& operator<<( std::ostream& os, const Val& json ) ;
-//	void Visit( DataStream *out ) const ;
+	void Visit( ValVisitor *visitor ) const ;
 
 private :
 	struct Base ;

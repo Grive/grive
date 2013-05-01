@@ -20,6 +20,8 @@
 #include "json/JsonParser.hh"
 #include "json/Val.hh"
 #include "json/ValBuilder.hh"
+#include "json/ValWriter.hh"
+#include "util/StringStream.hh"
 
 #include <boost/test/unit_test.hpp>
 
@@ -42,6 +44,14 @@ BOOST_AUTO_TEST_CASE( Test )
 	
 	BOOST_CHECK( json.Is<Val::Object>() ) ;
 	BOOST_CHECK_EQUAL( json["key"].As<long long>(), 100 ) ;
+	
+	StringStream ss ;
+	ValWriter wr( &ss ) ;
+	json.Visit( &wr ) ;
+	
+	BOOST_CHECK_EQUAL( ss.Str(), "{\"key\":100}" ) ;
+	
+//	std::cout << ss.Str() << std::endl ;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
