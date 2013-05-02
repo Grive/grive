@@ -34,7 +34,7 @@ namespace http
 	class Agent ;
 }
 
-class Json ;
+class Val ;
 
 namespace v2 {
 
@@ -76,7 +76,7 @@ public :
 	const Resource* Parent( const Resource *child ) const ;
 
 private :
-	Resource* NewResource( const Json& item ) ;
+	Resource* NewResource( const Val& item ) ;
 	Resource* NewResource( http::Agent *agent, const std::string& id ) ;
 	void NewResource( http::Agent *agent, Feed& items ) ;
 	

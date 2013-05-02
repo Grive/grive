@@ -61,8 +61,13 @@ private :
 	void End( Val::TypeEnum type ) ;
 
 private :
-	std::stack<Val> 	m_ctx ;
-	std::auto_ptr<Val>	m_key ;
+	struct Level
+	{
+		Val	key ;
+		Val	val ;
+	} ;
+
+	std::stack<Level> 	m_ctx ;
 } ;
 
 } // end of namespace

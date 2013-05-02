@@ -27,9 +27,30 @@
 
 namespace gr {
 
-Val::Val( ) :
-	m_base( new Impl<void> )
+const Val& Val::Null()
 {
+	static const Val null( null_type ) ;
+	return null ;
+}
+
+Val::Val( ) :
+	m_base( new Impl<Object> )
+{
+}
+
+Val::Val( TypeEnum type )
+{
+	switch ( type )
+	{
+		case int_type:		m_base.reset( new Impl<long long> ) ;	break ;
+		case bool_type:		m_base.reset( new Impl<bool> ) ; 		break ;
+		case double_type:	m_base.reset( new Impl<double> ) ; 		break ;
+		case string_type:	m_base.reset( new Impl<std::string> ) ;	break ;
+		case array_type:	m_base.reset( new Impl<Array> ) ; break ;
+		case object_type:	m_base.reset( new Impl<Object> ) ; break ;
+		case null_type:	
+		default:			m_base.reset( new Impl<void> ) ; break ;
+	}
 }
 
 Val::Val( const Val& v ) :
@@ -172,6 +193,35 @@ void Val::Visit( ValVisitor *visitor ) const
 			break ;
 		}
 	}
+}
+
+void Val::Select( const Object& obj, const std::string& key, std::vector<Val>& result ) const
+{
+	Object::const_iterator i = obj.find(key) ;
+	if ( i != obj.end() )
+		result.push_back(i->second) ;
+}
+
+/**	If \a this is an array of objects, this function returns all values of
+	the objects in the array with the key \a key. If \a this is an object,
+	just return the value with the key \a key. 
+*/
+std::vector<Val> Val::Select( const std::string& key ) const
+{
+	std::vector<Val> result ;
+	if ( Is<Object>() )
+		Select( As<Object>(), key, result ) ;
+	
+	else if ( Is<Array>() )
+	{
+		const Array& array = As<Array>() ;
+		for ( Array::const_iterator i = array.begin() ; i != array.end() ; ++i )
+		{
+			if ( i->Is<Object>() )
+				Select( i->As<Object>(), key, result ) ;
+		}
+	}
+	return result ;
 }
 
 std::ostream& operator<<( std::ostream& os, const Val& val )

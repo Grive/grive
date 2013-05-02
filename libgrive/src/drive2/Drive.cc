@@ -22,9 +22,12 @@
 
 #include "CommonUri.hh"
 #include "Feed.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/Exception.hh"
 
+#include <boost/bind.hpp>
+
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 
@@ -74,8 +77,8 @@ void Drive::NewResource( http::Agent *agent, Feed& items )
 	
 	while ( items.Next( agent ) )
 	{
-		std::vector<Json> item_json = items.Content()["items"].AsArray() ;
-		for ( std::vector<Json>::iterator i = item_json.begin() ; i != item_json.end() ; ++i )
+		std::vector<Val> item_json = items.Content()["items"].AsArray() ;
+		for ( std::vector<Val>::iterator i = item_json.begin() ; i != item_json.end() ; ++i )
 			NewResource( *i ) ;
 	}
 }
@@ -89,16 +92,19 @@ Resource* Drive::NewResource( http::Agent *agent, const std::string& id )
 	return NewResource( feed.Content() ) ;
 }
 
-Resource* Drive::NewResource( const Json& item )
+Resource* Drive::NewResource( const Val& item )
 {
 	// assume resource is directly under root
 	std::string parent_id = m_root != 0 ? m_root->ID() : "" ;
 	
-	Json parents ;
+	Val parents ;
 	if ( item.Get( "parents", parents ) )
 	{
+		std::vector<Val> pids_val = parents.Select( "id" ) ;
 		std::vector<std::string> pids ;
-		parents.Select<std::string>( "id", std::back_inserter(pids) ) ;
+		std::transform( pids_val.begin(), pids_val.end(),
+			std::back_inserter( pids ),
+			boost::bind( &Val::Str, _1 ) ) ;
 
 		// only the first parent counts
 		if ( !pids.empty() )

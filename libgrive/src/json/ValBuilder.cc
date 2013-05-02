@@ -60,37 +60,41 @@ void ValBuilder::VisitNull()
 void ValBuilder::Build( const Val& t )
 {
 	if ( m_ctx.empty() )
-		m_ctx.push( t ) ;
-	
-	else if ( m_ctx.top().Is<Val::Array>() )
 	{
-		Val::Array& ar = m_ctx.top().As<Val::Array>() ;
+		Level l = { Val::Null(), t } ;
+		m_ctx.push( l ) ;
+	}
+	
+	else if ( m_ctx.top().val.Is<Val::Array>() )
+	{
+		Val::Array& ar = m_ctx.top().val.As<Val::Array>() ;
 		ar.push_back( t ) ;
 	}
-	else if ( m_ctx.top().Is<Val::Object>() )
+	else if ( m_ctx.top().val.Is<Val::Object>() )
 	{
-		if ( m_key.get() == 0 )
+		if ( !m_ctx.top().key.Is<std::string>() )
 			BOOST_THROW_EXCEPTION( Error() << NoKey_(t) ) ;
 	
 		else
 		{
-			Val::Object& obj = m_ctx.top().As<Val::Object>() ;
-			obj.insert( std::make_pair( m_key->As<std::string>(), t ) ) ;
-			m_key.reset() ;
+			Val::Object& obj = m_ctx.top().val.As<Val::Object>() ;
+			obj.insert( std::make_pair( m_ctx.top().key.Str(), t ) ) ;
+			m_ctx.top().key = Val::Null() ;
 		}
 	}
 	else
-		BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top()) ) ;
+		BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top().val) ) ;
 }
 
 void ValBuilder::VisitKey( const std::string& t )
 {
-	m_key.reset( new Val(t) ) ;
+	m_ctx.top().key = t ;
 }
 
 void ValBuilder::StartArray()
 {
-	m_ctx.push( Val( Val::Array() ) ) ;
+	Level l = { Val::Null(), Val(Val::Array()) } ;
+	m_ctx.push(l) ;
 }
 
 void ValBuilder::EndArray()
@@ -100,11 +104,13 @@ void ValBuilder::EndArray()
 
 void ValBuilder::End( Val::TypeEnum type )
 {
-	if ( m_ctx.top().Type() == type )
+	if ( m_ctx.top().val.Type() == type )
 	{
+		assert( m_ctx.top().key.Is<void>() ) ;
+	
 		// get top Val from stack
 		Val current ;
-		current.Swap( m_ctx.top() ) ;
+		current.Swap( m_ctx.top().val ) ;
 		m_ctx.pop() ;
 		
 		Build(current) ;
@@ -113,7 +119,8 @@ void ValBuilder::End( Val::TypeEnum type )
 
 void ValBuilder::StartObject()
 {
-	m_ctx.push( Val( Val::Object() ) ) ;
+	Level l = { Val::Null(), Val( Val::Object() ) } ;
+	m_ctx.push(l) ;
 }
 
 void ValBuilder::EndObject()
@@ -124,7 +131,7 @@ void ValBuilder::EndObject()
 Val ValBuilder::Result() const
 {
 	assert( m_ctx.size() == 1U ) ;
-	return m_ctx.top() ;
+	return m_ctx.top().val ;
 }
 
 } // end of namespace

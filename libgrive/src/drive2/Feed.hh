@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/Exception.hh"
 
 #include <string>
@@ -32,7 +32,7 @@ namespace http
 	class Header ;
 }
 
-class Json ;
+class Val ;
 
 namespace v2 {
 
@@ -40,7 +40,7 @@ class Feed
 {
 public :
 	// exception info
-	typedef boost::error_info<struct DriveFeed,	Json>	DriveFeed_ ;
+	typedef boost::error_info<struct DriveFeed,	Val>	DriveFeed_ ;
 
 public :
 	Feed( const std::string& base ) ;
@@ -49,11 +49,11 @@ public :
 	
 	bool Next( http::Agent *agent ) ;
 
-	Json Content() const ;
+	Val Content() const ;
 
 private :
 	std::string	m_base ;
-	Json 		m_content ;
+	Val 		m_content ;
 } ;
 
 } } // end of namespace gr::v2

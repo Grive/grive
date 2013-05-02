@@ -58,7 +58,10 @@ public :
 public :
 	Val() ;
 	Val( const Val& v ) ;
+	explicit Val( TypeEnum type ) ;
 	~Val() ;
+
+	static const Val& Null() ;
 
 	template <typename T>
 	explicit Val( const T& t )
@@ -110,19 +113,22 @@ public :
 	void Add( const Val& json ) ;
 	Val  FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
-		
+	
+	std::vector<Val> Select( const std::string& key ) const ;
+	
 	friend std::ostream& operator<<( std::ostream& os, const Val& val ) ;
 	void Visit( ValVisitor *visitor ) const ;
 
 private :
 	struct Base ;
-	
+
 	template <typename T>
 	struct Impl ;
 	
 	std::auto_ptr<Base>	m_base ;
 
 private :
+	void Select( const Object& obj, const std::string& key, std::vector<Val>& result ) const ;
 } ;
 
 template <> struct Val::Type2Enum<void>			{ static const TypeEnum type = null_type ; } ;
@@ -160,6 +166,7 @@ template <typename T>
 struct Val::Impl : public Base
 {
 	T val ;
+	Impl( ) : val() {}
 	Impl( const T& t ) : val(t) {}
 	Impl<T>* Clone() const { return new Impl<T>(val); }
 	TypeEnum Type() const { return Type2Enum<T>::type ; }

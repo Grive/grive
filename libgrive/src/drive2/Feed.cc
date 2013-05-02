@@ -21,7 +21,7 @@
 
 #include "http/Agent.hh"
 #include "http/Header.hh"
-#include "protocol/JsonResponse.hh"
+#include "json/ValResponse.hh"
 
 #include <iostream>
 
@@ -31,22 +31,22 @@ Feed::Feed( const std::string& base ) :
 	m_base( base )
 {
 	// Next() will grab this link
-	m_content.Add( "nextLink", Json(base) ) ;
+	m_content.Add( "nextLink", Val(base) ) ;
 }
 
 void Feed::Query( const std::string& field, const std::string& value )
 {
 	std::string url = m_content["nextLink"].Str() ;
-	m_content.Add( "nextLink", Json( url + "?q=" + field + "+%3d+%27" + value + "%27" ) ) ;
+	m_content.Add( "nextLink", Val( url + "?q=" + field + "+%3d+%27" + value + "%27" ) ) ;
 }
 
 bool Feed::Next( http::Agent *agent )
 {
-	Json url ;
+	Val url ;
 	if ( !m_content.Get("nextLink", url) )
 		return false ;
 	
-	http::JsonResponse out ;
+	http::ValResponse out ;
 	try
 	{
 		agent->Get( url.Str(), &out, http::Header() ) ;
@@ -61,7 +61,7 @@ bool Feed::Next( http::Agent *agent )
 	return true ;
 }
 
-Json Feed::Content() const
+Val Feed::Content() const
 {
 	return m_content ;
 }
