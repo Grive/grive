@@ -57,7 +57,10 @@ DateTime FileCTime( const std::string& filename )
 		) ;
 	}
 	
-#if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
+#if (defined __APPLE__ && defined __DARWIN_64_BIT_INO_T) \
+	|| \
+	(defined(__FreeBSD__) && __FreeBSD_version < 900000)
+
 	return DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
 	return DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
