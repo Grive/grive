@@ -19,7 +19,7 @@ file (GLOB BGRIVE_UI
 )
 
 QT4_WRAP_UI(BGRIVE_UI_SRCS		${BGRIVE_UI})
-QT4_WRAP_CPP(BGRIVE_MOC_SRCS	
+QT4_WRAP_CPP(BGRIVE_MOC_SRCS
 	src/MainWnd.hh )
 
 add_executable( bgrive_executable
@@ -40,4 +40,3 @@ set_target_properties( bgrive_executable
 )
 
 install(TARGETS bgrive_executable RUNTIME DESTINATION bin)
-install(FILES doc/grive.1 DESTINATION share/man/man1 )
