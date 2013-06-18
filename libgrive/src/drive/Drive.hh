@@ -35,12 +35,14 @@ namespace http
 	class Agent ;
 }
 
+namespace v1 {
+
 class Entry ;
 
 class Drive
 {
 public :
-	Drive( http::Agent *http, const Json& options ) ;
+	Drive( http::Agent *agent, const Json& options ) ;
 
 	void DetectChanges() ;
 	void Update() ;
@@ -64,4 +66,4 @@ private :
 	Json			m_options ;
 } ;
 
-} // end of namespace
+} } // end of namespace

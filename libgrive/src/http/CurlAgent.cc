@@ -19,13 +19,12 @@
 
 #include "CurlAgent.hh"
 
-#include "Download.hh"
 #include "Error.hh"
 #include "Header.hh"
-#include "Receivable.hh"
 
 #include "util/log/Log.hh"
-#include "util/StdioFile.hh"
+#include "util/DataStream.hh"
+#include "util/File.hh"
 
 #include <boost/throw_exception.hpp>
 
@@ -47,7 +46,7 @@ namespace {
 using namespace gr::http ;
 using namespace gr ;
 
-size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
 {
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
@@ -62,18 +61,18 @@ size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::
 	return count ;
 }
 
-size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, StdioFile *file )
+std::size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, File *file )
 {
 	assert( ptr != 0 ) ;
 	assert( file != 0 ) ;
 
-	u64_t count = std::min(
-		static_cast<u64_t>(size * nmemb),
-		static_cast<u64_t>(file->Size() - file->Tell()) ) ;
+	std::size_t count = std::min(
+		static_cast<std::size_t>(size * nmemb),
+		static_cast<std::size_t>(file->Size() - file->Tell()) ) ;
 	assert( count <= std::numeric_limits<std::size_t>::max() ) ;
 	
 	if ( count > 0 )
-		file->Read( ptr, static_cast<std::size_t>(count) ) ;
+		file->Read( static_cast<char*>(ptr), static_cast<std::size_t>(count) ) ;
 	
 	return count ;
 }
@@ -125,15 +124,15 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 	return size*nmemb ;
 }
 
-std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv )
+std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv )
 {
 	assert( recv != 0 ) ;
-	return recv->OnData( ptr, size * nmemb ) ;
+	return recv->Write( static_cast<char*>(ptr), size * nmemb ) ;
 }
 
 long CurlAgent::ExecCurl(
 	const std::string&	url,
-	Receivable			*dest,
+	DataStream			*dest,
 	const http::Header&	hdr )
 {
 	CURL *curl = m_pimpl->curl ;
@@ -147,10 +146,10 @@ long CurlAgent::ExecCurl(
 
 	SetHeader( hdr ) ;
 
-	dest->Clear() ;
+//	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
-	// get the HTTTP response code
+	// get the HTTP response code
 	long http_code = 0;
 	::curl_easy_getinfo(curl,	CURLINFO_RESPONSE_CODE, &http_code);
 	Trace( "HTTP response %1%", http_code ) ;
@@ -165,7 +164,7 @@ long CurlAgent::ExecCurl(
 			Error()
 				<< CurlCode( curl_code )
 				<< Url( url )
-				<< expt::ErrMsg( error )
+				<< CurlErrMsg( error )
 				<< HttpHeader( hdr )
 		) ;
 	}
@@ -176,7 +175,7 @@ long CurlAgent::ExecCurl(
 long CurlAgent::Put(
 	const std::string&		url,
 	const std::string&		data,
-	Receivable				*dest,
+	DataStream				*dest,
 	const Header&			hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
@@ -197,10 +196,12 @@ long CurlAgent::Put(
 
 long CurlAgent::Put(
 	const std::string&	url,
-	StdioFile&			file,
-	Receivable			*dest,
+	File				*file,
+	DataStream			*dest,
 	const Header&		hdr )
 {
+	assert( file != 0 ) ;  
+
 	Trace("HTTP PUT \"%1%\"", url ) ;
 	
 	Init() ;
@@ -209,15 +210,15 @@ long CurlAgent::Put(
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,			&file ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file.Size()) ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,			file ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file->Size()) ) ;
 	
 	return ExecCurl( url, dest, hdr ) ;
 }
 
 long CurlAgent::Get(
 	const std::string& 		url,
-	Receivable				*dest,
+	DataStream				*dest,
 	const Header&			hdr )
 {
 	Trace("HTTP GET \"%1%\"", url ) ;
@@ -232,7 +233,7 @@ long CurlAgent::Get(
 long CurlAgent::Post(
 	const std::string& 		url,
 	const std::string&		data,
-	Receivable				*dest,
+	DataStream				*dest,
 	const Header&			hdr )
 {
 	Trace("HTTP POST \"%1%\" with \"%2%\"", url, data ) ;
@@ -254,7 +255,7 @@ long CurlAgent::Post(
 long CurlAgent::Custom(
 	const std::string&		method,
 	const std::string&		url,
-	Receivable				*dest,
+	DataStream				*dest,
 	const Header&			hdr )
 {
 	Trace("HTTP %2% \"%1%\"", url, method ) ;

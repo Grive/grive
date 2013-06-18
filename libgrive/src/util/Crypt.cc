@@ -19,7 +19,7 @@
 
 #include "Crypt.hh"
 
-#include "StdioFile.hh"
+#include "File.hh"
 #include "Exception.hh"
 #include "MemMap.hh"
 
@@ -45,7 +45,10 @@ MD5::MD5() : m_impl( new Impl )
 	::gcry_error_t err = ::gcry_md_open( &m_impl->hd, GCRY_MD_MD5, 0 ) ;
 	if ( err != GPG_ERR_NO_ERROR )
 	{
-		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( ::gcry_strerror(err) ) ) ;
+		BOOST_THROW_EXCEPTION( Exception()
+			<< GCryptErr_( ::gcry_strerror(err) )
+			<< GCryptApi_( "gcry_md_open" )
+		) ;
 	}
 }
 
@@ -76,16 +79,16 @@ std::string MD5::Get( const fs::path& file )
 {
 	try
 	{
-		StdioFile sfile( file ) ;
+		File sfile( file ) ;
 		return Get( sfile ) ;
 	}
-	catch ( StdioFile::Error& )
+	catch ( File::Error& )
 	{
 		return "" ;
 	}
 }
 
-std::string MD5::Get( StdioFile& file )
+std::string MD5::Get( File& file )
 {
 	MD5 crypt ;
 	

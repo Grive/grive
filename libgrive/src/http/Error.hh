@@ -27,13 +27,16 @@ namespace gr { namespace http {
 struct Error : virtual Exception {} ;
 
 // CURL error code
-typedef boost::error_info<struct CurlCodeTag, int>			CurlCode ;
+typedef boost::error_info<struct CurlCodeTag, int>				CurlCode ;
+
+// CURL error message
+typedef boost::error_info<struct CurlErrMsgTag, std::string>	CurlErrMsg ;
 
 // URL
 typedef boost::error_info<struct UrlTag, std::string>		Url ;
 
 // HTTP headers
-typedef boost::error_info<struct HeaderTag, Header>		HttpHeader ;
+typedef boost::error_info<struct HeaderTag, Header>			HttpHeader ;
 
 // HTTP response code
 typedef boost::error_info<struct HttpResponseTag, int>		HttpResponse ;

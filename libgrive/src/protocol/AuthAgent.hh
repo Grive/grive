@@ -39,30 +39,30 @@ public :
 	long Put(
 		const std::string&	url,
 		const std::string&	data,
-		http::Receivable	*dest,
+		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	
 	long Put(
 		const std::string&	url,
-		StdioFile&			file,
-		http::Receivable	*dest,
+		File*				file,
+		DataStream			*dest,
 		const http::Header&	hdr ) ;
 
 	long Get(
 		const std::string& 	url,
-		http::Receivable	*dest,
+		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	
 	long Post(
 		const std::string& 	url,
 		const std::string&	data,
-		http::Receivable	*dest,
+		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	
 	long Custom(
 		const std::string&	method,
 		const std::string&	url,
-		http::Receivable	*dest,
+		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	
 	std::string RedirLocation() const ;

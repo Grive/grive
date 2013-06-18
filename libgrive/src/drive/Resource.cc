@@ -32,7 +32,7 @@
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
-#include "util/StdioFile.hh"
+#include "util/File.hh"
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
@@ -45,7 +45,7 @@
 // for debugging
 #include <iostream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 // hard coded XML file
 const std::string xml_meta =
@@ -269,7 +269,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		else
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
-		m_name		= Path2Str( path.filename() ) ;
+		m_name		= path.filename().string() ;
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
 	}
@@ -583,7 +583,7 @@ bool Resource::Upload(
 {
 	assert( http != 0 ) ;
 	
-	StdioFile file( Path() ) ;
+	File file( Path() ) ;
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
 	
@@ -613,7 +613,7 @@ bool Resource::Upload(
 	std::string uplink = http->RedirLocation() ;
 	http::XmlResponse xml ;
 	
-	http->Put( uplink, file, &xml, uphdr ) ;
+	http->Put( uplink, &file, &xml, uphdr ) ;
 	AssignIDs( Entry( xml.Response() ) ) ;
   m_mtime = Entry(xml.Response()).MTime();
 	
@@ -668,11 +668,11 @@ bool Resource::HasID() const
 	return !m_href.empty() && !m_id.empty() ;
 }
 
-} // end of namespace
+} } // end of namespace
 
 namespace std
 {
-	void swap( gr::Resource& c1, gr::Resource& c2 )
+	void swap( gr::v1::Resource& c1, gr::v1::Resource& c2 )
 	{
 		c1.Swap( c2 ) ;
 	}

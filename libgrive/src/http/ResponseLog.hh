@@ -19,27 +19,27 @@
 
 #pragma once
 
-#include "Receivable.hh"
+#include "util/DataStream.hh"
 
 #include <fstream>
 #include <string>
 
 namespace gr { namespace http {
 
-class ResponseLog : public Receivable
+class ResponseLog : public DataStream
 {
 public :
 	ResponseLog(
 		const std::string&	prefix,
 		const std::string&	suffix,
-		Receivable			*next ) ;
-	ResponseLog( Receivable	*next ) ;
+		DataStream			*next ) ;
+	ResponseLog( DataStream	*next ) ;
 		
-	std::size_t OnData( void *data, std::size_t count ) ;
-	void Clear() ;
-
+	std::size_t Write( const char *data, std::size_t count ) ;
+	std::size_t Read( char *data, std::size_t count ) ;
+	
 	void Enable( bool enable = true ) ;
-	void Reset( const std::string& prefix, const std::string& suffix, Receivable *next ) ;
+	void Reset( const std::string& prefix, const std::string& suffix, DataStream *next ) ;
 	
 private :
 	static std::string Filename( const std::string& prefix, const std::string& suffix ) ;
@@ -47,7 +47,7 @@ private :
 private :
 	bool            m_enabled ;
 	std::ofstream	m_log ;
-	Receivable		*m_next ;
+	DataStream		*m_next ;
 } ;
 
 } } // end of namespace

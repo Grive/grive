@@ -36,6 +36,8 @@ namespace http
 	class Header ;
 }
 
+namespace v1 {
+
 class Feed
 {
 public :
@@ -44,7 +46,7 @@ public :
 public :
 	explicit Feed( const xml::Node& root ) ;
 	Feed( ) ;
-	void Start( http::Agent *http, const http::Header& auth, const std::string& url ) ;
+	void Start( http::Agent *http, const std::string& url ) ;
 	
 	void Assign( const xml::Node& root ) ;
 	const xml::Node& Root() const ;
@@ -53,7 +55,7 @@ public :
 	iterator end() const ;
 	
 	std::string Next() const ;
-	bool GetNext( http::Agent *http, const http::Header& auth ) ;
+	bool GetNext( http::Agent *http ) ;
 	
 	void EnableLog( const std::string& prefix, const std::string& suffix ) ;
 	
@@ -88,4 +90,4 @@ private :
 	reference dereference() const ;
 } ;
 
-} // end of namespace
+} } // end of namespace

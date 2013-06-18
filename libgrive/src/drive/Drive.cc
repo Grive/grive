@@ -44,15 +44,15 @@
 // for debugging only
 #include <iostream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 namespace
 {
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( http::Agent *http, const Json& options ) :
-	m_http		( http ),
+Drive::Drive( http::Agent *agent, const Json& options ) :
+	m_http		( agent ),
 	m_root		( options["path"].Str() ),
 	m_state		( m_root / state_file, options ),
 	m_options	( options )
@@ -120,7 +120,7 @@ void Drive::SyncFolders( )
 					m_state.FromRemote( e ) ;
 			}
 		}
-	} while ( feed.GetNext( m_http, http::Header() ) ) ;
+	} while ( feed.GetNext( m_http ) ) ;
 
 	m_state.ResolveEntry() ;
 }
@@ -140,7 +140,7 @@ void Drive::DetectChanges()
 	if ( m_options["log-xml"].Bool() )
 		feed.EnableLog( "/tmp/file", ".xml" ) ;
 	
-	feed.Start( m_http, http::Header(), feed_base + "?showfolders=true&showroot=true" ) ;
+	feed.Start( m_http, feed_base + "?showfolders=true&showroot=true" ) ;
 	
 	m_resume_link = feed.Root()["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
@@ -151,7 +151,7 @@ void Drive::DetectChanges()
 			feed.begin(), feed.end(),
 			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
 			
-	} while ( feed.GetNext( m_http, http::Header() ) ) ;
+	} while ( feed.GetNext( m_http ) ) ;
 	
 	// pull the changes feed
 	if ( prev_stamp != -1 )
@@ -161,7 +161,7 @@ void Drive::DetectChanges()
 		if ( m_options["log-xml"].Bool() )
 			feed.EnableLog( "/tmp/changes", ".xml" ) ;
 			
-		feed.Start( m_http, http::Header(), ChangesFeed(prev_stamp+1) ) ;
+		feed.Start( m_http, ChangesFeed(prev_stamp+1) ) ;
 		
 		std::for_each(
 			changes.begin(), changes.end(),
@@ -197,4 +197,4 @@ void Drive::UpdateChangeStamp( )
 		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

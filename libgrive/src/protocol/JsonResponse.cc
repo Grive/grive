@@ -27,14 +27,14 @@ JsonResponse::JsonResponse()
 {
 }
 
-void JsonResponse::Clear()
+std::size_t JsonResponse::Write( const char *data, std::size_t count )
 {
-	m_resp.Clear() ;
+	return m_resp.Write( data, count ) ;
 }
 
-std::size_t JsonResponse::OnData( void *data, std::size_t count )
+std::size_t JsonResponse::Read( char *data, std::size_t count )
 {
-	return m_resp.OnData( data, count ) ;
+	return count ;
 }
 
 Json JsonResponse::Response() const

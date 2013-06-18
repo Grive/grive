@@ -13,3 +13,4 @@ add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
 
 add_subdirectory( libgrive )
 add_subdirectory( grive )
+add_subdirectory( bgrive )

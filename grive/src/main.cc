@@ -48,13 +48,14 @@ const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 using namespace gr ;
+using namespace gr::v1 ;
 namespace po = boost::program_options;
 
 // libgcrypt insist this to be done in application, not library
 void InitGCrypt()
 {
 	if ( !gcry_check_version(GCRYPT_VERSION) )
-		throw Exception() << expt::ErrMsg( "libgcrypt version mismatch" ) ;
+		throw std::runtime_error( "libgcrypt version mismatch" ) ;
 
 	// disable secure memory
 	gcry_control(GCRYCTL_DISABLE_SECMEM, 0);

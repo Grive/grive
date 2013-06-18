@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include "Node.hh"
 
 #include <cstddef>
@@ -31,6 +33,8 @@ class NodeSet
 {
 public :
 	typedef Node::iterator iterator ;
+
+	typedef boost::error_info<struct EmptyNodeSet,	int>		EmptyNodeSet_ ;
 
 public :
 	NodeSet() ;

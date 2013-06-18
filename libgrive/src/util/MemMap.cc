@@ -18,11 +18,11 @@
 */
 
 #include "MemMap.hh"
-#include "StdioFile.hh"
+#include "File.hh"
 
 namespace gr {
 
-MemMap::MemMap( StdioFile& file, off_t offset, std::size_t length ) :
+MemMap::MemMap( File& file, off_t offset, std::size_t length ) :
 	m_addr	( file.Map( offset, length ) ),
 	m_length( length )
 {
@@ -30,7 +30,7 @@ MemMap::MemMap( StdioFile& file, off_t offset, std::size_t length ) :
 
 MemMap::~MemMap()
 {
-	StdioFile::UnMap( m_addr, m_length ) ;
+	File::UnMap( m_addr, m_length ) ;
 }
 	
 void* MemMap::Addr() const

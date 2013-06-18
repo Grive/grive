@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace gr
+namespace gr { namespace v1
 {
 	const std::string feed_base		= "https://docs.google.com/feeds/default/private/full" ;
 	const std::string feed_changes	= "https://docs.google.com/feeds/default/private/changes" ;
@@ -33,4 +33,4 @@ namespace gr
 		"https://docs.google.com/feeds/upload/create-session/default/private/full" ;
 	
 	std::string ChangesFeed( int changestamp ) ;
-}
+} }

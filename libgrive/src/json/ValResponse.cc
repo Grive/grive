@@ -1,6 +1,6 @@
 /*
 	grive: an GPL program to sync a local directory with Google Drive
-	Copyright (C) 2012  Wan Wai Ho
+	Copyright (C) 2013 Wan Wai Ho
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -14,20 +14,40 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA  02110-1301, USA.
 */
 
-#pragma once
+#include "ValResponse.hh"
 
-#include <cstddef>
+#include "Val.hh"
 
 namespace gr { namespace http {
 
-class Receivable
+ValResponse::ValResponse( ) :
+	m_parser( &m_val )
 {
-public :
-	virtual std::size_t OnData( void *data, std::size_t count ) = 0 ;
-	virtual void Clear() = 0 ;
-} ;
+}
 
-} } // end of namespace
+std::size_t ValResponse::Write( const char *data, std::size_t count )
+{
+	m_parser.Parse( data, count ) ;
+	return count ;
+}
+
+std::size_t ValResponse::Read( char *data, std::size_t count )
+{
+	return count ;
+}
+
+Val ValResponse::Response() const
+{
+	return m_val.Result() ;
+}
+
+void ValResponse::Finish()
+{
+	m_parser.Finish() ;
+}
+
+} } // end of namespace gr::http

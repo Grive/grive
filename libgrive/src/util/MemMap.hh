@@ -25,7 +25,7 @@
 
 namespace gr {
 
-class StdioFile ;
+class File ;
 
 class MemMap
 {
@@ -33,7 +33,7 @@ public :
 	struct Error : virtual Exception {} ;
 
 public :
-	MemMap( StdioFile& file, off_t offset, std::size_t length ) ;
+	MemMap( File& file, off_t offset, std::size_t length ) ;
 	~MemMap() ;
 	
 	void* Addr() const ;

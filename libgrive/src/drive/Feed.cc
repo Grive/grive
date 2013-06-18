@@ -20,6 +20,7 @@
 #include "Feed.hh"
 
 #include "http/Agent.hh"
+#include "http/Header.hh"
 #include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "xml/NodeSet.hh"
@@ -28,7 +29,7 @@
 
 #include <cassert>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 Feed::Feed( )
 {
@@ -62,7 +63,7 @@ std::string Feed::Next() const
 	return nss.empty() ? "" : std::string(nss["@href"]) ;
 }
 
-void Feed::Start( http::Agent *http, const http::Header& auth, const std::string& url )
+void Feed::Start( http::Agent *http, const std::string& url )
 {
 	http::XmlResponse xrsp ;
 	http::ResponseLog log( &xrsp ) ;
@@ -73,20 +74,20 @@ void Feed::Start( http::Agent *http, const http::Header& auth, const std::string
 			(boost::format( "-#%1%%2%" ) % m_log->sequence++ % m_log->suffix ).str(),
 			&xrsp ) ;
 	
-	http->Get( url, &log, auth ) ;
+	http->Get( url, &log, http::Header() ) ;
 	
 	m_root		= xrsp.Response() ;
 	m_entries	= m_root["entry"] ;
 }
 
-bool Feed::GetNext( http::Agent *http, const http::Header& auth )
+bool Feed::GetNext( http::Agent *http )
 {
 	assert( http != 0 ) ;
 
 	xml::NodeSet nss = m_root["link"].Find( "@rel", "next" ) ;
 	if ( !nss.empty() )
 	{
-		Start( http, auth, nss["@href"] ) ;
+		Start( http, nss["@href"] ) ;
 		return true ;
 	}
 	else
@@ -122,4 +123,4 @@ const xml::Node& Feed::Root() const
 	return m_root ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

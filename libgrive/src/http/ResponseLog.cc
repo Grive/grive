@@ -29,35 +29,35 @@ namespace gr { namespace http {
 ResponseLog::ResponseLog(
 	const std::string&	prefix,
 	const std::string&	suffix,
-	Receivable			*next ) :
+	DataStream			*next ) :
 	m_enabled	( true ),
 	m_next		( next )
 {
 	Reset( prefix, suffix, next ) ;
 }
 
-ResponseLog::ResponseLog( Receivable *next ) :
+ResponseLog::ResponseLog( DataStream *next ) :
 	m_enabled	( false ),
 	m_next		( next )
 {
 	assert( m_next != 0 ) ;
 }
 
-std::size_t ResponseLog::OnData( void *data, std::size_t count )
+std::size_t ResponseLog::Write( const char *data, std::size_t count )
 {
 	if ( m_enabled )
 	{
 		assert( m_log.rdbuf() != 0 ) ;
-		m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
+		m_log.rdbuf()->sputn( data, count ) ;
 	}
 	
-	return m_next->OnData( data, count ) ;
+	return m_next->Write( data, count ) ;
 }
 
-void ResponseLog::Clear()
+std::size_t ResponseLog::Read( char *data, std::size_t count )
 {
 	assert( m_next != 0 ) ;
-	m_next->Clear() ;
+	return m_next->Read( data, count ) ;
 }
 
 std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
@@ -70,7 +70,7 @@ void ResponseLog::Enable( bool enable )
 	m_enabled = enable ;
 }
 
-void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, Receivable *next )
+void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, DataStream *next )
 {
 	assert( next != 0 ) ;
 	

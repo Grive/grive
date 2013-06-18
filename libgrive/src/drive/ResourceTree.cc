@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 using namespace details ;
 
@@ -155,4 +155,4 @@ ResourceTree::iterator ResourceTree::end()
 	return m_set.get<ByIdentity>().end() ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

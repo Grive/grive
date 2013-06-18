@@ -30,9 +30,14 @@ void StringResponse::Clear()
 	m_resp.clear() ;
 }
 
-std::size_t StringResponse::OnData( void *data, std::size_t count )
+std::size_t StringResponse::Write( const char *data, std::size_t count )
 {
-	m_resp.append( reinterpret_cast<char*>(data), count ) ;
+	m_resp.append( data, count ) ;
+	return count ;
+}
+
+std::size_t StringResponse::Read( char *data, std::size_t count )
+{
 	return count ;
 }
 

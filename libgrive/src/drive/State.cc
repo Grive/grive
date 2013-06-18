@@ -25,12 +25,13 @@
 
 #include "http/Agent.hh"
 #include "util/Crypt.hh"
+#include "util/File.hh"
 #include "util/log/Log.hh"
 #include "protocol/Json.hh"
 
 #include <fstream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
 State::State( const fs::path& filename, const Json& options  ) :
     m_res		( options["path"].Str() ),
@@ -62,7 +63,7 @@ bool State::IsIgnore( const std::string& filename )
 	return filename[0] == '.' ;
 }
 
-void State::FromLocal( const fs::path& p, gr::Resource* folder )
+void State::FromLocal( const fs::path& p, Resource* folder )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
@@ -72,7 +73,7 @@ void State::FromLocal( const fs::path& p, gr::Resource* folder )
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
-		std::string fname = Path2Str(i->path().filename()) ;
+		std::string fname = i->path().filename().string() ;
 	
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
@@ -228,7 +229,8 @@ void State::Read( const fs::path& filename )
 {
 	try
 	{
-		Json json = Json::ParseFile( filename.string() ) ;
+		File file( filename ) ;
+		Json json = Json::Parse( &file ) ;
 		
 		Json last_sync = json["last_sync"] ;
 		m_last_sync.Assign(
@@ -292,4 +294,4 @@ void State::ChangeStamp( long cstamp )
 	m_cstamp = cstamp ;
 }
 
-} // end of namespace
+} } // end of namespace gr::v1

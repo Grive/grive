@@ -34,6 +34,9 @@ namespace http
 }
 
 class Json ;
+
+namespace v1 {
+
 class Resource ;
 class Entry ;
 
@@ -80,4 +83,4 @@ private :
 	std::vector<Entry>	m_unresolved ;
 } ;
 
-} // end of namespace
+} } // end of namespace gr::v1

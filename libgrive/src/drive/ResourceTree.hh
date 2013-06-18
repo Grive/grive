@@ -32,6 +32,8 @@ namespace gr {
 
 class Json ;
 
+namespace v1 {
+
 namespace details
 {
 	using namespace boost::multi_index ;
@@ -96,4 +98,4 @@ private :
 	Resource*			m_root ;
 } ;
 
-} // end of namespace
+} } // end of namespace gr::v1

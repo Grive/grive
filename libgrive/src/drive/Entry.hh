@@ -33,6 +33,8 @@ namespace xml
 	class Node ;
 }
 
+namespace v1 {
+
 /*!	\brief	corresponds to an "entry" in the resource feed
 
 	This class is decodes an entry in the resource feed. It will stored the properties like
@@ -95,4 +97,4 @@ private :
 	bool			m_is_removed ;
 } ;
 
-} // end of namespace
+} } // end of namespace gr::v1

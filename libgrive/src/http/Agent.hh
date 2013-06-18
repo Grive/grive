@@ -23,43 +23,45 @@
 
 namespace gr {
 
-class StdioFile ;
+class DataStream ;
+class File ;
 
 namespace http {
 
 class Header ;
-class Receivable ;
 
 class Agent
 {
 public :
+	virtual ~Agent() {}
+
 	virtual long Put(
 		const std::string&	url,
 		const std::string&	data,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 
 	virtual long Put(
 		const std::string&	url,
-		StdioFile&			file,
-		Receivable			*dest,
+		File				*file,
+		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 		
 	virtual long Get(
 		const std::string& 	url,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 	
 	virtual long Post(
 		const std::string& 	url,
 		const std::string&	data,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 	
 	virtual long Custom(
 		const std::string&	method,
 		const std::string&	url,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 	
 	virtual std::string RedirLocation() const = 0 ;

@@ -19,32 +19,47 @@
 
 #pragma once
 
+#include "DataStream.hh"
 #include "Exception.hh"
 #include "FileSystem.hh"
 #include "Types.hh"
 
 #include <string>
 
+struct stat ;
+
 namespace gr {
 
-class StdioFile
+/**	\brief	A wrapper class for file read/write.
+
+	It is a simple wrapper around the UNIX file descriptor. It will
+	throw exceptions (i.e. Error) when it encounters errors.
+*/
+class File : public DataStream
 {
 public :
+	/// File specific errors. It often includes
+	/// boost::errinfo_api_function and boost::errinfo_errno for the
+	/// detail information.
 	struct Error : virtual Exception {} ;
 
 public :
-	StdioFile() ;
-	StdioFile( const fs::path& path ) ;
-	StdioFile( const fs::path& path, int mode ) ;
-	~StdioFile( ) ;
+	File() ;
+	File( const fs::path& path ) ;
+	File( const fs::path& path, int mode ) ;
+	~File( ) ;
+
+	File( const File& rhs ) ;
+	File& operator=( const File& rhs ) ;
+	void Swap( File& other ) ;
 
 	void OpenForRead( const fs::path& path ) ;
 	void OpenForWrite( const fs::path& path, int mode = 0600 ) ;
 	void Close() ;
 	bool IsOpened() const ;
 	
-	std::size_t Read( void *ptr, std::size_t size ) ;
-	std::size_t Write( const void *ptr, std::size_t size ) ;
+	std::size_t Read( char *ptr, std::size_t size ) ;
+	std::size_t Write( const char *ptr, std::size_t size ) ;
 
 	off_t Seek( off_t offset, int whence ) ;
 	off_t Tell() const ;
@@ -54,7 +69,9 @@ public :
 
 	void* Map( off_t offset, std::size_t length ) ;
 	static void UnMap( void *addr, std::size_t length ) ;
-	
+
+	struct stat Stat() const ;
+
 private :
 	void Open( const fs::path& path, int flags, int mode ) ;
 	

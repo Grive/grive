@@ -6,7 +6,7 @@ find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(Boost 1.40.0 COMPONENTS program_options filesystem system REQUIRED)
+find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
@@ -45,7 +45,7 @@ include_directories(
 )
 
 file(GLOB DRIVE_HEADERS
-    ${libgrive_SOURCE_DIR}/src/drive/*.hh
+	${libgrive_SOURCE_DIR}/src/drive/*.hh
 )
 
 file (GLOB PROTOCOL_HEADERS
@@ -62,8 +62,10 @@ file (GLOB XML_HEADERS
 
 file (GLOB LIBGRIVE_SRC
 	src/drive/*.cc
+	src/drive2/*.cc
 	src/http/*.cc
 	src/protocol/*.cc
+	src/json/*.cc
 	src/util/*.cc
 	src/util/log/*.cc
 	src/xml/*.cc
@@ -78,6 +80,7 @@ add_definitions(
 add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
+	yajl
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${LIBGCRYPT_LIBRARIES}
@@ -130,3 +133,20 @@ IF ( CPPUNIT_FOUND )
 	)
         
 ENDIF ( CPPUNIT_FOUND )
+
+file(GLOB BTEST_SRC
+	test/btest/*.cc
+)
+
+add_executable( btest ${BTEST_SRC} )
+
+target_link_libraries( btest
+	grive
+	${Boost_LIBRARIES}
+)
+
+if ( WIN32 )
+else ( WIN32 )
+	set_target_properties( btest
+		PROPERTIES COMPILE_FLAGS	 -DBOOST_TEST_DYN_LINK )
+endif (WIN32)

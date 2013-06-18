@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <boost/iterator_adaptors.hpp>
 
 #include <iosfwd>
@@ -38,6 +40,8 @@ private :
 	
 public :
 	class iterator ;
+
+	typedef boost::error_info<struct DupAttr, std::string>	DupAttr_ ;
 
 public :
 	Node() ;

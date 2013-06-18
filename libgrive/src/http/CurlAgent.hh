@@ -24,9 +24,11 @@
 #include <memory>
 #include <string>
 
-namespace gr { namespace http {
+namespace gr {
 
-class Receivable ;
+class DataStream ;
+
+namespace http {
 
 /*!	\brief	agent to provide HTTP access
 	
@@ -42,30 +44,30 @@ public :
 	long Put(
 		const std::string&	url,
 		const std::string&	data,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 	
 	long Put(
 		const std::string&	url,
-		StdioFile&			file,
-		Receivable			*dest,
+		File				*file,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 
 	long Get(
 		const std::string& 	url,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 	
 	long Post(
 		const std::string& 	url,
 		const std::string&	data,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 	
 	long Custom(
 		const std::string&	method,
 		const std::string&	url,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 	
 	std::string RedirLocation() const ;
@@ -75,12 +77,12 @@ public :
 
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
-	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, Receivable *recv ) ;
+	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv ) ;
 	
 	void SetHeader( const Header& hdr ) ;
 	long ExecCurl(
 		const std::string&	url,
-		Receivable			*dest,
+		DataStream			*dest,
 		const Header&		hdr ) ;
 
 	void Init() ;
