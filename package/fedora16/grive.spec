@@ -36,6 +36,7 @@ BuildRequires:  expat-devel
 BuildRequires:  openssl-devel
 BuildRequires:  boost-devel
 BuildRequires:  binutils-devel
+BuildRequires:  yajl-devel
 
 %description
 The purpose of this project is to provide an independent implementation
@@ -63,19 +64,24 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 
-%post -p /sbin/ldconfig
+# As long as no dynamic libs are build omit ldconfig and the glob for them.
+#%post -p /sbin/ldconfig
 
-%postun -p /sbin/ldconfig
+#%postun -p /sbin/ldconfig
 
 
 %files
-%doc COPYING README
+%doc COPYING README 
 %{_bindir}/%{name}
-%{_libdir}/libgrive.so.*
+%{_bindir}/b%{name}
+%{_mandir}/man1/%{name}.1.gz
 
-%files devel
-%{_includedir}/%{name}*
-%{_libdir}/libgrive.so
+#%{_libdir}/libgrive.so.*
+
+# Files are not installed by cmake currently.
+#%files devel
+#%{_includedir}/%{name}*
+#%{_libdir}/libgrive.so
 
 
 
