@@ -607,11 +607,23 @@ bool Resource::Upload(
 			os::Sleep( 5 );
 		}
 
-		http::StringResponse str ;
-		if ( post )
-			http->Post( link, meta, &str, hdr ) ;
-		else
-			http->Put( link, meta, &str, hdr ) ;
+		try {
+			http::StringResponse str ;
+			if ( post )
+				http->Post( link, meta, &str, hdr ) ;
+			else
+				http->Put( link, meta, &str, hdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing pre-upload response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
 
 		http::Header uphdr ;
 		uphdr.Add( "Expect:" ) ;
@@ -622,7 +634,19 @@ bool Resource::Upload(
 		http::XmlResponse xml ;
 
 		long http_code = 0;
-		http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+		try {
+			http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
 
 		if ( http_code == 410 || http_code == 412 ) {
 			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
