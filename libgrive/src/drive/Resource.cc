@@ -36,6 +36,7 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
@@ -599,23 +600,44 @@ bool Resource::Upload(
 		% xml::Escape(m_name)
 	).str() ;
 	
-	http::StringResponse str ;
-	if ( post )
-		http->Post( link, meta, &str, hdr ) ;
-	else
-		http->Put( link, meta, &str, hdr ) ;
-	
-	http::Header uphdr ;
-	uphdr.Add( "Expect:" ) ;
-	uphdr.Add( "Accept:" ) ;
+	bool retrying=false;
+	while ( true ) {
+		if ( retrying ) {
+			file.Seek( 0, SEEK_SET );
+			os::Sleep( 5 );
+		}
 
-	// the content upload URL is in the "Location" HTTP header
-	std::string uplink = http->RedirLocation() ;
-	http::XmlResponse xml ;
-	
-	http->Put( uplink, &file, &xml, uphdr ) ;
-	AssignIDs( Entry( xml.Response() ) ) ;
-  m_mtime = Entry(xml.Response()).MTime();
+		http::StringResponse str ;
+		if ( post )
+			http->Post( link, meta, &str, hdr ) ;
+		else
+			http->Put( link, meta, &str, hdr ) ;
+
+		http::Header uphdr ;
+		uphdr.Add( "Expect:" ) ;
+		uphdr.Add( "Accept:" ) ;
+
+		// the content upload URL is in the "Location" HTTP header
+		std::string uplink = http->RedirLocation() ;
+		http::XmlResponse xml ;
+
+		long http_code = 0;
+		http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+
+		if ( http_code == 410 || http_code == 412 ) {
+			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
+					log::warning ) ;
+			retrying = true;
+			continue;
+		}
+
+		if ( retrying )
+			Log( "upload succeeded on retry", log::warning );
+		Entry responseEntry = Entry( xml.Response() );
+		AssignIDs( responseEntry ) ;
+		m_mtime = responseEntry.MTime();
+		break;
+	}
 	
 	return true ;
 }
