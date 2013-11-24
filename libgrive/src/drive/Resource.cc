@@ -252,7 +252,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 void Resource::FromLocal( const DateTime& last_sync )
 {
 	fs::path path = Path() ;
-	assert( fs::exists( path ) ) ;
+	//assert( fs::exists( path ) ) ;
 
 	// root folder is always in sync
 	if ( !IsRoot() )
@@ -270,8 +270,8 @@ void Resource::FromLocal( const DateTime& last_sync )
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_name		= path.filename().string() ;
-		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
-		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
+		//m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
+		m_md5		= IsFolder() ? ""		: crypt::MD5::Get( path ) ;
 	}
 	
 	assert( m_state != unknown ) ;
