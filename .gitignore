@@ -4,3 +4,13 @@ grive.kdev4
 .project
 .cproject
 build/
+/CMakeCache.txt
+CMakeFiles
+moc_*.cxx*
+bgrive/ui_MainWindow.h
+Makefile
+*.a
+bgrive/bgrive
+grive/grive
+libgrive/btest
+*.cmake
