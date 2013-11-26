@@ -152,6 +152,7 @@ bool AuthAgent::CheckRetry( long response )
 		Log( "resquest failed due to auth token expired: %1%. refreshing token",
 			response, log::warning ) ;
 			
+		os::Sleep( 5 ) ;
 		m_auth.Refresh() ;
 		return true ;
 	}
