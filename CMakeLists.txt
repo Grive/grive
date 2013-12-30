@@ -5,6 +5,8 @@ set( GRIVE_VERSION "0.3.0-pre" )
 
 # common compile options
 add_definitions( -DVERSION="${GRIVE_VERSION}" )
+add_definitions( -DPACKAGE="grive" )
+add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
 add_definitions( -D_FILE_OFFSET_BITS=64 )
 
 add_subdirectory( libgrive )
