@@ -4,6 +4,7 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 include_directories(
 	${grive_SOURCE_DIR}/../libgrive/src
+	${Boost_INCLUDE_DIR}
 	${OPT_INCS}
 )
 
