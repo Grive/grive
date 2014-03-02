@@ -19,32 +19,36 @@
 
 #pragma once
 
-#include "Receivable.hh"
+#include "util/File.hh"
 
 #include <string>
-#include <fstream>
-
-#include <openssl/evp.h>
 
 namespace gr {
 
-class Download : public http::Receivable
+namespace crypt
+{
+	class MD5 ;
+}
+
+namespace http {
+
+class Download : public DataStream
 {
 public :
 	struct NoChecksum {} ;
 	Download( const std::string& filename ) ;
 	Download( const std::string& filename, NoChecksum ) ;
-	~Download( ) ;
+	~Download() ;
 	
 	std::string Finish() const ;
 	
-	std::size_t OnData( void *data, std::size_t count ) ;
-	
-	static std::size_t Callback( char *data, std::size_t size, std::size_t nmemb, Download *pthis ) ;
+	void Clear() ;
+	std::size_t Write( const char *data, std::size_t count ) ;
+	std::size_t Read( char *, std::size_t ) ; 
 	
 private :
-	std::ofstream	m_file ;
-	EVP_MD_CTX		*m_mdctx ;
+	File						m_file ;
+	std::auto_ptr<crypt::MD5>	m_crypt ;
 } ;
 
-} // end of namespace
+} } // end of namespace

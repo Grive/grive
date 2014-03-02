@@ -19,37 +19,87 @@
 
 #include "Crypt.hh"
 
+#include "File.hh"
+#include "Exception.hh"
+#include "MemMap.hh"
+
 #include <iomanip>
 #include <sstream>
 
 // dependent libraries
-#include <openssl/evp.h>
+#include <gcrypt.h>
+#include <boost/throw_exception.hpp>
 
 namespace gr { namespace crypt {
 
-std::string MD5( std::streambuf *file )
+// map 4MB of data at a time
+const u64_t read_size = 1024 * 4096 ;
+
+struct MD5::Impl
 {
-	char buf[64 * 1024] ;
-	EVP_MD_CTX	md ;
-	EVP_MD_CTX_init( &md );
-	EVP_DigestInit_ex( &md, EVP_md5(), 0 ) ;
-	
-	std::size_t count = 0 ;
-	while ( (count = file->sgetn( buf, sizeof(buf) )) > 0 )
+	gcry_md_hd_t hd ;
+} ;
+
+MD5::MD5() : m_impl( new Impl )
+{
+	::gcry_error_t err = ::gcry_md_open( &m_impl->hd, GCRY_MD_MD5, 0 ) ;
+	if ( err != GPG_ERR_NO_ERROR )
 	{
-		EVP_DigestUpdate( &md, buf, count ) ;
+		BOOST_THROW_EXCEPTION( Exception()
+			<< GCryptErr_( ::gcry_strerror(err) )
+			<< GCryptApi_( "gcry_md_open" )
+		) ;
 	}
-	
-	unsigned int md5_size = EVP_MAX_MD_SIZE ;
-	unsigned char md5[EVP_MAX_MD_SIZE] ;
-	EVP_DigestFinal_ex( &md, md5, &md5_size ) ;
+}
+
+MD5::~MD5()
+{
+	::gcry_md_close( m_impl->hd ) ;
+}
+
+void MD5::Write( const void *data, std::size_t size )
+{
+	::gcry_md_write( m_impl->hd, data, size ) ;
+}
+
+std::string MD5::Get() const
+{
+	unsigned char *md5 = ::gcry_md_read( m_impl->hd, GCRY_MD_MD5 ) ;
+	unsigned int  len  = ::gcry_md_get_algo_dlen(GCRY_MD_MD5) ;
 	
 	// format the MD5 string
 	std::ostringstream ss ;
-	for ( unsigned int i = 0 ; i < md5_size ; i++ )
+	for ( unsigned int i = 0 ; i < len ; i++ )
 		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5[i]) ;
-	
+
 	return ss.str() ;
+}
+
+std::string MD5::Get( const fs::path& file )
+{
+	try
+	{
+		File sfile( file ) ;
+		return Get( sfile ) ;
+	}
+	catch ( File::Error& )
+	{
+		return "" ;
+	}
+}
+
+std::string MD5::Get( File& file )
+{
+	MD5 crypt ;
+	
+	u64_t size = file.Size() ;
+	for ( u64_t i = 0 ; i < size ; i += read_size )
+	{
+		MemMap map( file, i, static_cast<std::size_t>(std::min(read_size, size-i)) ) ;
+		crypt.Write( map.Addr(), map.Length() ) ;
+	}
+
+	return crypt.Get() ;
 }
 
 } } // end of namespaces

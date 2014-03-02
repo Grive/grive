@@ -22,7 +22,9 @@
 #include "JsonResponse.hh"
 #include "Json.hh"
 
-#include "http/HTTP.hh"
+#include "http/CurlAgent.hh"
+#include "http/Header.hh"
+#include "util/log/Log.hh"
 
 // for debugging
 #include <iostream>
@@ -59,21 +61,22 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
-	http::JsonResponse	resp ;
-	http::Agent			http ;
+	http::JsonResponse  resp ;
+	http::CurlAgent		http ;
 
-	http.Post( token_url, post, &resp ) ;
+	DisableLog dlog( log::debug ) ;
+	http.Post( token_url, post, &resp, http::Header() ) ;
 
 	Json jresp	= resp.Response() ;
-	m_access	= jresp["access_token"].As<std::string>() ;
-	m_refresh	= jresp["refresh_token"].As<std::string>() ;
+	m_access	= jresp["access_token"].Str() ;
+	m_refresh	= jresp["refresh_token"].Str() ;
 }
 
 std::string OAuth2::MakeAuthURL(
 	const std::string&	client_id,
 	const std::string&	state )
 {
-	http::Agent h ;
+	http::CurlAgent h ;
 
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
@@ -81,8 +84,7 @@ std::string OAuth2::MakeAuthURL(
 			h.Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
 			h.Escape( "https://docs.google.com/feeds/" )					+ "+" + 
 			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
-			h.Escape( "https://spreadsheets.google.com/feeds/" )			+ /*"+" +
-			h.Escape( "https://www.googleapis.com/auth/drive.file/" )		+*/
+			h.Escape( "https://spreadsheets.google.com/feeds/" )			+
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
 		"&client_id=" + client_id ;
@@ -96,12 +98,13 @@ void OAuth2::Refresh( )
 		"&client_secret="	+ m_client_secret +
 		"&grant_type=refresh_token" ;
 
-	http::JsonResponse	resp ;
-	http::Agent			http ;
+	http::JsonResponse  resp ;
+	http::CurlAgent		http ;
+    
+	DisableLog dlog( log::debug ) ;
+	http.Post( token_url, post, &resp, http::Header() ) ;
 
-	http.Post( token_url, post, &resp ) ;
-
-	m_access	= resp.Response()["access_token"].As<std::string>() ;
+	m_access	= resp.Response()["access_token"].Str() ;
 }
 
 std::string OAuth2::RefreshToken( ) const

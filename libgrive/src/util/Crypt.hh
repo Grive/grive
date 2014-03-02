@@ -19,14 +19,38 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <string>
-#include <iosfwd>
+#include <memory>
+
+#include <boost/filesystem.hpp>
 
 namespace gr {
 
-namespace crypt
-{
-	std::string MD5( std::streambuf *file ) ;
-}
+class File ;
 
-} // end of namespace gr
+namespace crypt {
+
+class MD5
+{
+public :
+	typedef boost::error_info<struct GCryptErr,	std::string>	GCryptErr_ ;
+	typedef boost::error_info<struct GCryptApi,	std::string>	GCryptApi_ ;
+
+public :
+	MD5() ;
+	~MD5() ;
+
+	static std::string Get( File& file ) ;
+	static std::string Get( const boost::filesystem::path& file ) ;
+	
+	void Write( const void *data, std::size_t size ) ;
+	std::string Get() const ;
+
+private :
+	struct Impl ;
+	std::auto_ptr<Impl>	m_impl ;
+} ;
+
+} } // end of namespace gr

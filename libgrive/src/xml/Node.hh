@@ -19,13 +19,30 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
+#include <boost/iterator_adaptors.hpp>
+
+#include <iosfwd>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace gr { namespace xml {
 
+class NodeSet ;
+
 class Node
 {
+private :
+	class	Impl ;
+	typedef std::vector<Impl*>	ImplVec ;
+	
+public :
+	class iterator ;
+
+	typedef boost::error_info<struct DupAttr, std::string>	DupAttr_ ;
+
 public :
 	Node() ;
 	Node( const Node& node ) ;
@@ -35,13 +52,17 @@ public :
 	static Node Text( const std::string& name ) ;
 	
 	Node& operator=( const Node& node ) ;
+	void Swap( Node& node ) ;
 	
 	Node AddElement( const std::string& name ) ;
 	Node AddText( const std::string& text ) ;
 	void AddNode( const Node& node ) ;
+	void AddNode( iterator first, iterator last ) ;
 	void AddAttribute( const std::string& name, const std::string& val ) ;
 
-	Node operator[]( const std::string& name ) const ;
+	NodeSet operator[]( const std::string& name ) const ;
+	operator std::string() const ;
+	bool operator==( const std::string& value ) const ;
 	
 	const std::string& Name() const ;
 	std::string Value() const ;
@@ -53,17 +74,43 @@ public :
 	Type GetType() const ;
 
 	static bool IsCompatible( Type parent, Type child ) ;
+	static std::ostream& PrintChar( std::ostream& os, char c ) ;
+	static std::ostream& PrintString( std::ostream& os, const std::string& s ) ;
 
-	std::vector<Node> Children() const ;
+	iterator begin() const ;
+	iterator end() const ;
+	std::size_t size() const ;
+	NodeSet Children() const ;
 	
-private :
-	class	Impl ;
-
+	NodeSet Attr() const ;
+	std::string Attr( const std::string& attr ) const ;
+	bool HasAttr( const std::string& attr ) const ;
+	
 private :
 	explicit Node( Impl *impl ) ;
 
+	typedef std::pair<ImplVec::iterator, ImplVec::iterator> Range ;
+	
 private :
 	Impl *m_ptr ;
+} ;
+
+class Node::iterator : public boost::iterator_adaptor<
+	Node::iterator,
+	Node::ImplVec::iterator,
+	Node,
+	boost::random_access_traversal_tag,
+	Node
+>
+{
+public :
+	iterator( ) ;
+	explicit iterator( ImplVec::iterator i ) ;		
+
+private :
+	friend class boost::iterator_core_access;
+	
+	reference dereference() const ;
 } ;
 
 std::ostream& operator<<( std::ostream& os, const Node& node ) ;

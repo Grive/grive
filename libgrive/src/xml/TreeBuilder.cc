@@ -18,6 +18,8 @@
 */
 
 #include "TreeBuilder.hh"
+
+#include "Error.hh"
 #include "Node.hh"
 
 #include <expat.h>
@@ -25,7 +27,6 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
 
 namespace gr { namespace xml {
 
@@ -41,7 +42,10 @@ TreeBuilder::TreeBuilder() : m_impl( new Impl )
 	m_impl->psr = ::XML_ParserCreate( 0 ) ;
 	
 	::XML_SetElementHandler( m_impl->psr, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
+	::XML_SetCharacterDataHandler( m_impl->psr, &TreeBuilder::OnCharData ) ;
 	::XML_SetUserData( m_impl->psr , this ) ;
+	
+	is_new = true ;
 }
 
 TreeBuilder::~TreeBuilder()
@@ -66,8 +70,10 @@ Node TreeBuilder::ParseFile( const std::string& file )
 
 void TreeBuilder::ParseData( const char *data, std::size_t count, bool last )
 {
+	is_new = false ;
+
 	if ( ::XML_Parse( m_impl->psr, data, count, last ) == 0 )
-		throw std::runtime_error( "XML parse error" ) ;
+		BOOST_THROW_EXCEPTION( Error() << ExpatApiError("XML_Parse") );
 }
 
 Node TreeBuilder::Parse( const std::string& xml )
@@ -79,8 +85,13 @@ Node TreeBuilder::Parse( const std::string& xml )
 
 Node TreeBuilder::Result() const
 {
+	// the node on the stack should be the dummy node with only one child
 	assert( m_impl->stack.size() == 1 ) ;
-	return m_impl->stack.front() ;
+	
+	if ( m_impl->stack.front().size() != 1 )
+		BOOST_THROW_EXCEPTION( Error() << LogicError(0) ) ;
+		
+	return *m_impl->stack.front().begin() ;
 }
 
 void TreeBuilder::StartElement( void *pvthis, const char *name, const char **attr )
@@ -108,6 +119,12 @@ void TreeBuilder::EndElement( void* pvthis, const char* name )
 	
 	assert( pthis->m_impl->stack.back().Name() == name ) ;
 	pthis->m_impl->stack.pop_back() ;
+}
+
+void TreeBuilder::OnCharData( void *pvthis, const char *s, int len )
+{
+	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
+	pthis->m_impl->stack.back().AddText( std::string( s, len ) ) ;
 }
 
 } } // end of namespace

@@ -20,55 +20,78 @@
 #include "OS.hh"
 
 #include "DateTime.hh"
-#include "Path.hh"
+#include "Exception.hh"
 
-#include <stdexcept>
+// boost headers
+#include <boost/throw_exception.hpp>
+#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_at_line.hpp>
+#include <boost/exception/errinfo_errno.hpp>
+#include <boost/exception/errinfo_file_name.hpp>
+#include <boost/exception/errinfo_file_open_mode.hpp>
+#include <boost/exception/info.hpp>
 
 // OS specific headers
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
 namespace gr { namespace os {
 
-void MakeDir( const Path& dir )
+DateTime FileCTime( const fs::path& filename )
 {
-	MakeDir( dir.Str() ) ;
+	return FileCTime( filename.string() ) ;
 }
 
-void MakeDir( const std::string& dir )
-{
-	mkdir( dir.c_str(), 0700 ) ;
-}
-
-DateTime FileMTime( const Path& filename )
-{
-	return FileMTime( filename.Str() ) ;
-}
-
-DateTime FileMTime( const std::string& filename )
+DateTime FileCTime( const std::string& filename )
 {
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
-		throw std::runtime_error( "cannot get file attribute of " + filename ) ;
+	{
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("stat")
+				<< boost::errinfo_errno(errno)
+				<< boost::errinfo_file_name(filename)
+		) ;
+	}
 	
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
-	return DateTime( s.st_mtimespec.tv_sec, s.st_mtimespec.tv_nsec ) ;
+	return DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
-	return DateTime( s.st_mtim.tv_sec, s.st_mtim.tv_nsec);
+	return DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
 #endif
 }
 
-void SetFileTime( const Path& filename, const DateTime& t )
+void SetFileTime( const fs::path& filename, const DateTime& t )
 {
-	return SetFileTime( filename.Str(), t ) ;
+	return SetFileTime( filename.string(), t ) ;
 }
 
 void SetFileTime( const std::string& filename, const DateTime& t )
 {
 	struct timeval tvp[2] = { t.Tv(), t.Tv() } ;
 	if ( ::utimes( filename.c_str(), tvp ) != 0 )
-		throw std::runtime_error( "cannot set file time" ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< boost::errinfo_api_function("utimes")
+				<< boost::errinfo_errno(errno)
+				<< boost::errinfo_file_name(filename)
+		) ;
+}
+
+void Sleep( unsigned int sec )
+{
+	struct timespec ts = { sec, 0 } ;
+	
+	int result = 0 ;
+	do
+	{
+		struct timespec rem ;
+		nanosleep( &ts, &rem ) ;
+		ts = rem ;
+	} while ( result == -1 && errno == EINTR ) ;
 }
 
 } } // end of namespaces

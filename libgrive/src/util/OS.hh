@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include "Exception.hh"
+#include "FileSystem.hh"
+
 #include <string>
 
 namespace gr {
@@ -28,14 +31,15 @@ class Path ;
 
 namespace os
 {
-	void MakeDir( const std::string& dir ) ;
-	void MakeDir( const Path& dir ) ;
+	struct Error : virtual Exception {} ;
 	
-	DateTime FileMTime( const std::string& filename ) ;
-	DateTime FileMTime( const Path& filename ) ;
+	DateTime FileCTime( const std::string& filename ) ;
+	DateTime FileCTime( const fs::path& filename ) ;
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
-	void SetFileTime( const Path& filename, const DateTime& t ) ;
+	void SetFileTime( const fs::path& filename, const DateTime& t ) ;
+	
+	void Sleep( unsigned int sec ) ;
 }
 
 } // end of namespaces

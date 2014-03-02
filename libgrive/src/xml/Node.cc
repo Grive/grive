@@ -19,11 +19,13 @@
 
 #include "Node.hh"
 
+#include "Error.hh"
+#include "NodeSet.hh"
+
 #include <algorithm>
 #include <cassert>
 #include <functional>
 #include <iterator>
-#include <stdexcept>
 
 // debugging
 #include <iostream>
@@ -37,6 +39,7 @@ private :
 
 public :
 	typedef ImplVec::iterator iterator ;
+	typedef ImplVec::const_iterator const_iterator ;
 
 public :
 	Impl() : m_ref(1), m_type( element )
@@ -84,20 +87,20 @@ public :
 		if ( map[child->m_type] != 0 )
 		{
 			ImplVec& vec = *map[child->m_type] ;
-			iterator p = std::lower_bound( vec.begin(), vec.end(), child, Comp() ) ;
+			std::pair<iterator,iterator> p =
+				std::equal_range( vec.begin(), vec.end(), child, Comp() ) ;
 
 			// cannot allow duplicate attribute nodes
-			if ( child->m_type	== attr && p 			!= vec.end() &&
-				 (*p)->m_type	== attr && (*p)->m_name == child->m_name )
-				throw std::runtime_error( "duplicate attribute " + child->m_name ) ;
+			if ( child->m_type	== attr && p.first != p.second )
+				BOOST_THROW_EXCEPTION( Error() << DupAttr_( child->m_name ) ) ;
 			
-			vec.insert( p, child ) ;
+			vec.insert( p.second, child ) ;
 		}
 		
 		m_children.push_back( child ) ;
 	}
 
-	Impl* Find( const std::string& name )
+	Range Find( const std::string& name )
 	{
 		assert( !name.empty() ) ;
 
@@ -106,12 +109,10 @@ public :
 			: Find( m_element, name ) ;
 	}
 	
-	Impl* Find( ImplVec& map, const std::string& name )
+	Impl* FindAttr( const std::string& name )
 	{
-		Impl tmp( name , element ) ;
-		iterator i = std::lower_bound( map.begin(), map.end(), &tmp, Comp() ) ;
-
-		return i != map.end() && (*i)->m_name == name ? *i : 0 ;
+		std::pair<iterator,iterator> r = Find( m_attr, name ) ;
+		return r.first != r.second ? *r.first : 0 ;
 	}
 	
 	iterator Begin()
@@ -124,14 +125,40 @@ public :
 		return m_children.end() ;
 	}
 	
+	const_iterator Begin() const
+	{
+		return m_children.begin() ;
+	}
+	
+	const_iterator End() const
+	{
+		return m_children.end() ;
+	}
+	
+	std::size_t Size() const
+	{
+		return m_children.size() ;
+	}
+	
+	Range Attr()
+	{
+		return std::make_pair( m_attr.begin(), m_attr.end() ) ;
+	}
+	
 	const std::string& Name() const
 	{
 		return m_name ;
 	}
 	
-	const std::string& Value() const
+	std::string Value() const
 	{
-		return m_value ;
+		assert( m_type != element || m_value.empty() ) ;
+	
+		std::string value = m_value ;
+		for ( const_iterator i = Begin() ; i != End() ; ++i )
+			value += (*i)->Value() ;
+
+		return value ;
 	}
 	
 	void Value( const std::string& val )
@@ -153,6 +180,13 @@ public :
 	} ;
 
 private :
+	Range Find( ImplVec& map, const std::string& name )
+	{
+		Impl tmp( name , element ) ;
+		return std::equal_range( map.begin(), map.end(), &tmp, Comp() ) ;
+	}
+
+private :
 	std::size_t		m_ref ;
 	
 	Type			m_type ;
@@ -161,6 +195,25 @@ private :
 	ImplVec			m_element, m_attr ;
 	ImplVec			m_children ;
 } ;
+
+Node::iterator::iterator( )
+{
+}
+
+Node::iterator::iterator( ImplVec::iterator i )
+{
+	// for some reason, gcc 4.4.4 doesn't allow me to initialize the base class
+	// in the initializer. I have no choice but to initialize here.
+	base_reference() = i ;
+}
+
+Node::iterator::reference Node::iterator::dereference() const
+{
+	Impl *p = *base_reference() ;
+	assert( p != 0 ) ;
+	
+	return Node( p->AddRef() ) ;
+}
 
 Node::Node() : m_ptr( new Impl )
 {
@@ -193,8 +246,13 @@ Node::~Node()
 Node& Node::operator=( const Node& node )
 {
 	Node tmp( node ) ;
-	std::swap( tmp.m_ptr, m_ptr ) ;
+	Swap( tmp ) ;
 	return *this ;
+}
+
+void Node::Swap( Node& node )
+{
+	std::swap( node.m_ptr, m_ptr ) ;
 }
 
 bool Node::IsCompatible( Type parent, Type child )
@@ -227,7 +285,7 @@ Node Node::AddText( const std::string& str )
 	assert( m_ptr != 0 ) ;
 	assert( IsCompatible( GetType(), text ) ) ;
 
-	Impl *child = new Impl( str, text ) ;
+	Impl *child = new Impl( "#text", text, str ) ;
 	m_ptr->Add( child->AddRef() ) ;
 	return Node( child ) ;
 }
@@ -248,16 +306,19 @@ void Node::AddNode( const Node& node )
 	m_ptr->Add( node.m_ptr->AddRef() ) ;
 }
 
-Node Node::operator[]( const std::string& name ) const
+void Node::AddNode( iterator first, iterator last )
+{
+	for ( iterator i = first ; i != last ; ++i )
+		AddNode( *i ) ;
+}
+
+NodeSet Node::operator[]( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
 	assert( !name.empty() ) ;
 	
-	Impl *i = m_ptr->Find( name ) ;
-	if ( i != 0 )
-		return Node( i->AddRef() ) ;
-
-	throw std::runtime_error( "node " + name + " can't be found" ) ;
+	Range is = m_ptr->Find( name ) ;
+	return NodeSet( iterator(is.first), iterator(is.second) ) ;
 }
 
 std::size_t Node::RefCount() const
@@ -281,26 +342,112 @@ const std::string& Node::Name() const
 std::string Node::Value() const
 {
 	assert( m_ptr != 0 ) ;
+	
 	return m_ptr->Value() ;
 }
 
-std::vector<Node> Node::Children() const
+Node::operator std::string() const
 {
-	std::vector<Node> result ;
-	for ( Impl::iterator i = m_ptr->Begin() ; i != m_ptr->End() ; ++i )
-		result.push_back( Node( (*i)->AddRef() ) ) ;
+	return Value() ;
+}
 
-	return result ;
+bool Node::operator==( const std::string& value ) const
+{
+	return Value() == value ;
 }
 
 std::ostream& operator<<( std::ostream& os, const Node& node )
 {
-	os << '<' << node.Name() << '>' ;
+	if ( node.GetType() == Node::element )
+	{
+		os << '<' << node.Name() ;
+		
+		// print attributes
+		NodeSet attrs = node.Attr() ;
+		if ( !attrs.empty() )
+			os << ' ' << attrs ;
+		os << '>' ;
+		
+		// recursively print children
+		for ( Node::iterator i = node.begin() ; i != node.end() ; ++i )
+		{
+			if ( (*i).GetType() != Node::attr )
+				os << *i ;
+		}
+		os << "</" << node.Name() << '>' ;
+	}
+	else if ( node.GetType() == Node::attr )
+	{
+		os << node.Name() << "=\"" ;
+		Node::PrintString( os, node.Value() ) ;
+		os << "\"" ;
+	}
+	else
+	{
+		Node::PrintString( os, node.Value() ) ;
+	}
 	
-	std::vector<Node> c = node.Children() ;
-	
-	std::copy( c.begin(), c.end(), std::ostream_iterator<Node>(os, "\n") ) ;
 	return os ;
+}
+
+std::ostream& Node::PrintString( std::ostream& os, const std::string& s )
+{
+	for ( std::string::const_iterator i = s.begin() ; i != s.end() ; ++i )
+		Node::PrintChar( os, *i ) ;
+	return os ;
+}
+
+std::ostream& Node::PrintChar( std::ostream& os, char c )
+{
+	switch ( c )
+	{
+		case '\"': 	os << "&quot;" ; break ;
+		case '\'':	os << "&apos;" ; break ;
+		case '&':	os << "&amp;" ; break ;
+		case '<':	os << "&lt;" ; break ;
+		case '>':	os << "&gt;" ; break ;
+		default :	os << c ; break ;
+	}
+	return os ;
+}
+
+Node::iterator Node::begin() const
+{
+	assert( m_ptr != 0 ) ;
+	return iterator( m_ptr->Begin() ) ;
+}
+
+Node::iterator Node::end() const
+{
+	assert( m_ptr != 0 ) ;
+	return iterator( m_ptr->End() ) ;
+}
+
+std::size_t Node::size() const
+{
+	assert( m_ptr != 0 ) ;
+	return m_ptr->Size() ;
+}
+
+NodeSet Node::Children() const
+{
+	assert( m_ptr != 0 ) ;
+	return NodeSet( begin(), end() ) ;
+}
+
+NodeSet Node::Attr() const
+{
+	assert( m_ptr != 0 ) ;
+	Range is = m_ptr->Attr() ;
+
+	return NodeSet( iterator(is.first), iterator(is.second) ) ;
+}
+
+std::string Node::Attr( const std::string& attr ) const
+{
+	assert( m_ptr != 0 ) ;
+	Impl *imp = m_ptr->FindAttr( attr ) ;
+	return imp != 0 ? imp->Value() : "" ;
 }
 
 } } // end namespace

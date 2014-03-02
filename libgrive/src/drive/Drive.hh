@@ -19,41 +19,51 @@
 
 #pragma once
 
-#include "Collection.hh"
+#include "State.hh"
+
+#include "http/Header.hh"
+#include "protocol/Json.hh"
+#include "util/Exception.hh"
 
 #include <string>
 #include <vector>
 
 namespace gr {
 
-class OAuth2 ;
-class Json ;
+namespace http
+{
+	class Agent ;
+}
+
+namespace v1 {
+
+class Entry ;
 
 class Drive
 {
 public :
-	typedef std::vector<Collection>				FolderList ;
-	typedef std::vector<Collection>::iterator	FolderListIterator ;
+	Drive( http::Agent *agent, const Json& options ) ;
 
-public :
-	Drive( OAuth2& auth ) ;
-	~Drive( ) ;
-
-private :
-	void UpdateFile( const Json& entry ) ;
+	void DetectChanges() ;
+	void Update() ;
+	void DryRun() ;
+	void SaveState() ;
 	
-	void ConstructDirTree( const std::vector<Json>& entries ) ;
-	
-	FolderListIterator FindFolder( const std::string& href ) ;
+	struct Error : virtual Exception {} ;
 	
 private :
-	OAuth2&						m_auth ;
-	std::vector<std::string>	m_http_hdr ;
-
-	std::string					m_resume_link ;
+	void SyncFolders( ) ;
+    void file();
+	void FromRemote( const Entry& entry ) ;
+	void FromChange( const Entry& entry ) ;
+	void UpdateChangeStamp( ) ;
 	
-	FolderList					m_coll ;
-	Collection					m_root ;
+private :
+	http::Agent 	*m_http ;
+	std::string		m_resume_link ;
+	fs::path		m_root ;
+	State			m_state ;
+	Json			m_options ;
 } ;
 
-} // end of namespace
+} } // end of namespace

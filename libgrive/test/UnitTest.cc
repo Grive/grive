@@ -23,20 +23,32 @@
 
 #include <sstream>
 
+#include "util/log/DefaultLog.hh"
+
+#include "drive/EntryTest.hh"
+#include "drive/ResourceTest.hh"
+#include "drive/ResourceTreeTest.hh"
+#include "drive/StateTest.hh"
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
-#include "util/PathTest.hh"
+#include "util/ConfigTest.hh"
 #include "util/SignalHandlerTest.hh"
 #include "xml/NodeTest.hh"
 
 int main( int argc, char **argv )
 {
 	using namespace grut ;
-
+	
+	gr::LogBase::Inst( std::auto_ptr<gr::LogBase>(new gr::log::DefaultLog) ) ;
+	
 	CppUnit::TextUi::TestRunner runner;
+	runner.addTest( EntryTest::suite( ) ) ;
+	runner.addTest( StateTest::suite( ) ) ;
+	runner.addTest( ResourceTest::suite( ) ) ;
+	runner.addTest( ResourceTreeTest::suite( ) ) ;
 	runner.addTest( DateTimeTest::suite( ) ) ;
 	runner.addTest( FunctionTest::suite( ) ) ;
-	runner.addTest( PathTest::suite( ) ) ;
+	runner.addTest( ConfigTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;
 	runner.addTest( NodeTest::suite( ) ) ;
 	runner.run();

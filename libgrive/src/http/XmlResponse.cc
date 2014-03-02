@@ -20,27 +20,34 @@
 #include "XmlResponse.hh"
 
 #include "xml/Node.hh"
+#include "xml/TreeBuilder.hh"
 
 namespace gr { namespace http {
 
-XmlResponse::XmlResponse()
+XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
 {
 }
 
-std::size_t XmlResponse::OnData( void *data, std::size_t count )
+std::size_t XmlResponse::Write( const char *data, std::size_t count )
 {
-	m_tb.ParseData( reinterpret_cast<char*>(data), count ) ;
+	m_tb->ParseData( data, count ) ;
 	return count ;
+}
+
+std::size_t XmlResponse::Read( char *, std::size_t )
+{
+	// throw something better
+	throw -1 ;
 }
 
 void XmlResponse::Finish()
 {
-	m_tb.ParseData( 0, 0, true ) ;
+	m_tb->ParseData( 0, 0, true ) ;
 }
 
 xml::Node XmlResponse::Response() const
 {
-	return m_tb.Result() ;
+	return m_tb->Result() ;
 }
 
 } } // end of namespace

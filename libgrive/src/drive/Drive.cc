@@ -19,20 +19,24 @@
 
 #include "Drive.hh"
 
-#include "File.hh"
+#include "CommonUri.hh"
+#include "Entry.hh"
+#include "Feed.hh"
 
-#include "http/HTTP.hh"
-#include "protocol/Json.hh"
-#include "protocol/JsonResponse.hh"
-#include "protocol/OAuth2.hh"
-#include "util/Crypt.hh"
-#include "util/DateTime.hh"
-#include "util/OS.hh"
-#include "util/Path.hh"
+#include "http/Agent.hh"
+#include "http/ResponseLog.hh"
+#include "http/XmlResponse.hh"
+#include "util/Destroy.hh"
+#include "util/log/Log.hh"
+#include "xml/Node.hh"
+#include "xml/NodeSet.hh"
+
+#include <boost/bind.hpp>
 
 // standard C++ library
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -40,158 +44,157 @@
 // for debugging only
 #include <iostream>
 
-namespace gr {
+namespace gr { namespace v1 {
 
-const std::string root_url = "https://docs.google.com/feeds/default/private/full" ;
-
-Drive::Drive( OAuth2& auth ) :
-	m_auth( auth ),
-	m_root( ".", "https://docs.google.com/feeds/default/private/full/folder%3Aroot" )
+namespace
 {
-	m_http_hdr.push_back( "Authorization: Bearer " + m_auth.AccessToken() ) ;
-	m_http_hdr.push_back( "GData-Version: 3.0" ) ;
-	
-	http::JsonResponse str ;
-	http::Agent agent ;
-	agent.Get( root_url + "?alt=json&showfolders=true", &str, m_http_hdr ) ;
-	Json resp = str.Response() ;
-	
-	Json resume_link ;
-	if ( resp["feed"]["link"].FindInArray( "rel", "http://schemas.google.com/g/2005#resumable-create-media", resume_link ) )
-		m_resume_link = resume_link["href"].As<std::string>() ;
-	
-	Json::Array entries = resp["feed"]["entry"].As<Json::Array>() ;
-	ConstructDirTree( entries ) ;
-	
-	for ( Json::Array::iterator i = entries.begin() ; i != entries.end() ; ++i )
-	{
-		if ( !Collection::IsCollection( *i ) )
-		{
-			UpdateFile( *i ) ;
-		}
-	}
+	const std::string state_file = ".grive_state" ;
 }
 
-Drive::~Drive( )
+Drive::Drive( http::Agent *agent, const Json& options ) :
+	m_http		( agent ),
+	m_root		( options["path"].Str() ),
+	m_state		( m_root / state_file, options ),
+	m_options	( options )
 {
+	assert( m_http != 0 ) ;
 }
 
-struct SortCollectionByHref
+void Drive::FromRemote( const Entry& entry )
 {
-	bool operator()( const Collection& c1, const Collection& c2 ) const
-	{
-		return c1.Href() < c2.Href() ;
-	}
-} ;
-
-Drive::FolderListIterator Drive::FindFolder( const std::string& href )
-{
-	// try to find the parent by its href
-	std::vector<Collection>::iterator it =
-		std::lower_bound(
-			m_coll.begin(),
-			m_coll.end(),
-			Collection( "", href ),
-			SortCollectionByHref() ) ;
+	// entries from change feed does not have the parent HREF,
+	// so these checkings are done in normal entries only
+	Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
 	
-	 return (it != m_coll.end() && it->Href() == href) ? it : m_coll.end() ;
-}
-
-void Drive::ConstructDirTree( const std::vector<Json>& entries )
-{
-	assert( m_coll.empty() ) ;
-	std::map<std::string, std::string> parent_href ;
-
-	// first, get all collections from the query result
-	for ( Json::Array::const_iterator i = entries.begin() ; i != entries.end() ; ++i )
-	{
-		if ( Collection::IsCollection( *i ) )
-		{
-			m_coll.push_back( Collection( *i ) ) ;
-			parent_href.insert(
-				std::make_pair(
-					m_coll.back().Href(),
-					Collection::ParentHref( *i ) ) ) ;
-		}
-	}
-	assert( m_coll.size() == parent_href.size() ) ;
+	if ( parent != 0 && !parent->IsFolder() )
+		Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
+			entry.Title(), parent->Name(), log::verbose ) ;
 	
-	// second, build up linkage between parent and child 
-	std::sort( m_coll.begin(), m_coll.end(), SortCollectionByHref() ) ;
-	for ( FolderListIterator i = m_coll.begin() ; i != m_coll.end() ; ++i )
-	{
-		assert( parent_href.find( i->Href() ) != parent_href.end() ) ;
-		std::string parent = parent_href[i->Href()] ;
+	else if ( parent == 0 || !parent->IsInRootTree() )
+		Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
 		
-		if ( parent.empty() )
-			m_root.AddChild( &*i ) ;
-		else
-		{
-			FolderListIterator pit = FindFolder( parent ) ;
-			if ( pit != m_coll.end() )
-			{
-				// it shouldn't happen, just in case
-				if ( &*i == &*pit )
-					std::cout
-						<< "the parent of folder " << i->Title()
-						<< " is itself. ignored" << std::endl ;
-				else
-					pit->AddChild( &*i ) ;
-			}
-		}
-	}
-	
-	// lastly, iterating from the root, create the directories in the local file system
-	assert( m_root.Parent() == 0 ) ;
-	m_root.CreateSubDir( Path() ) ;
+	else
+		m_state.FromRemote( entry ) ;
 }
 
-void Drive::UpdateFile( const Json& entry )
+void Drive::FromChange( const Entry& entry )
 {
-	// only handle uploaded files
-	if ( entry.Has( "docs$suggestedFilename" ) )
-	{
-		File file( entry ) ;
+	if ( entry.IsRemoved() )
+		Log( "file \"%1%\" represents a deletion, ignored", entry.Title(), log::verbose ) ;
 	
-		bool changed = true ;
-		Path path = Path() / file.Filename() ;
+	// folders go directly
+	else
+		m_state.FromRemote( entry ) ;
+}
 
-		// determine which folder the file belongs to
-		if ( !file.Parent().empty() )
-		{
-			FolderListIterator pit = FindFolder( file.Parent() ) ;
-			if ( pit != m_coll.end() )
-				path = pit->Dir() / file.Filename() ;
-		}
+void Drive::SaveState()
+{
+	m_state.Write( state_file ) ;
+}
 
-		// compare checksum first if file exists
-		std::ifstream ifile( path.Str().c_str(), std::ios::binary | std::ios::in ) ;
-		if ( ifile && file.ServerMD5() == crypt::MD5(ifile.rdbuf()) )
-			changed = false ;
-		
-		// if the checksum is different, file is changed and we need to update
-		if ( changed )
+void Drive::SyncFolders( )
+{
+	assert( m_http != 0 ) ;
+
+	Log( "Synchronizing folders", log::info ) ;
+
+	http::XmlResponse xml ;
+	m_http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
+	
+	Feed feed( xml.Response() ) ;
+	do
+	{
+		// first, get all collections from the query result
+		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
 		{
-			DateTime remote	= file.ServerModified() ;
-			DateTime local	= ifile ? os::FileMTime( path ) : DateTime() ;
-			
-			// remote file is newer, download file
-			if ( !ifile || remote > local )
+			Entry e( *i ) ;
+			if ( e.Kind() == "folder" )
 			{
-std::cout << "downloading " << path << std::endl ;
-				file.Download( path, m_http_hdr ) ;
-			}
-			else
-			{
-std::cout << "local " << path << " is newer" << std::endl ;
-				// re-reading the file
-				ifile.seekg(0) ;
+				if ( e.ParentHrefs().size() != 1 )
+					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
 				
-				if ( !file.Upload( ifile.rdbuf(), m_http_hdr ) )
-std::cout << path << " is read only" << std::endl ;
+				else if ( e.Title().find('/') != std::string::npos )
+					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
+				
+				else
+					m_state.FromRemote( e ) ;
 			}
 		}
+	} while ( feed.GetNext( m_http ) ) ;
+
+	m_state.ResolveEntry() ;
+}
+
+void Drive::DetectChanges()
+{
+	Log( "Reading local directories", log::info ) ;
+	m_state.FromLocal( m_root ) ;
+	
+	long prev_stamp = m_state.ChangeStamp() ;
+	Trace( "previous change stamp is %1%", prev_stamp ) ;
+	
+	SyncFolders( ) ;
+
+	Log( "Reading remote server file list", log::info ) ;
+	Feed feed ;
+	if ( m_options["log-xml"].Bool() )
+		feed.EnableLog( "/tmp/file", ".xml" ) ;
+	
+	feed.Start( m_http, feed_base + "?showfolders=true&showroot=true" ) ;
+	
+	m_resume_link = feed.Root()["link"].
+		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
+		
+	do
+	{
+		std::for_each(
+			feed.begin(), feed.end(),
+			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
+			
+	} while ( feed.GetNext( m_http ) ) ;
+	
+	// pull the changes feed
+	if ( prev_stamp != -1 )
+	{
+		Log( "Detecting changes from last sync", log::info ) ;
+		Feed changes ;
+		if ( m_options["log-xml"].Bool() )
+			feed.EnableLog( "/tmp/changes", ".xml" ) ;
+			
+		feed.Start( m_http, ChangesFeed(prev_stamp+1) ) ;
+		
+		std::for_each(
+			changes.begin(), changes.end(),
+			boost::bind( &Drive::FromChange, this, _1 ) ) ;
 	}
 }
 
-} // end of namespace
+void Drive::Update()
+{
+	Log( "Synchronizing files", log::info ) ;
+	m_state.Sync( m_http, m_options ) ;
+	
+	UpdateChangeStamp( ) ;
+}
+
+void Drive::DryRun()
+{
+	Log( "Synchronizing files (dry-run)", log::info ) ;
+	m_state.Sync( 0, m_options ) ;
+}
+
+void Drive::UpdateChangeStamp( )
+{
+	assert( m_http != 0 ) ;
+
+	// get changed feed
+	http::XmlResponse xrsp ;
+	m_http->Get( ChangesFeed(m_state.ChangeStamp()+1), &xrsp, http::Header() ) ;
+	
+	// we should go through the changes to see if it was really Grive to made that change
+	// maybe by recording the updated timestamp and compare it?
+	m_state.ChangeStamp( 
+		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
+}
+
+} } // end of namespace gr::v1
