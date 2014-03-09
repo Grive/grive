@@ -58,9 +58,11 @@ void State::FromLocal( const fs::path& p )
 	FromLocal( p, m_res.Root() ) ;
 }
 
+    const std::string prefix = ".grive";
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename[0] == '.' ;
+  //	return filename[0] == '.' ;
+  return filename.size() <= prefix.size() && filename.compare(0, prefix.size(), prefix) == 0;
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
