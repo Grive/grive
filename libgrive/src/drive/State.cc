@@ -62,7 +62,7 @@ void State::FromLocal( const fs::path& p )
 bool State::IsIgnore( const std::string& filename )
 {
   //	return filename[0] == '.' ;
-  return filename.size() <= prefix.size() && filename.compare(0, prefix.size(), prefix) == 0;
+  return filename.size() >= prefix.size() && filename.compare(0, prefix.size(), prefix) == 0;
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
