@@ -42,10 +42,10 @@ public :
 	ValBuilder( ) ;
 	~ValBuilder() ;
 
-	void Visit( long long t ) ;
+	void Visit( long int t ) ;
 	void Visit( double t ) ;
 	void Visit( const std::string& t ) ;
-	void Visit( bool t ) ;
+	void Visit( int t ) ;
 	void VisitNull() ;
 	void Build( const Val& t ) ;
 
