@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 set( GRIVE_VERSION "0.3.1-pre" )
 
 # common compile options
-add_definitions( -DBoost_NO_BOOST_CMAKE=ON )
+option(Boost_NO_BOOST_CMAKE "Workaround BOOST libraries issue" ON)
 add_definitions( -DVERSION="${GRIVE_VERSION}" )
 add_definitions( -D_FILE_OFFSET_BITS=64 )
 
