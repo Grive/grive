@@ -24,5 +24,10 @@ set_target_properties( grive_executable
     PROPERTIES OUTPUT_NAME grive
 )
 
+if ( WIN32 )
+else ( WIN32 )
+	set_target_properties( grive_executable PROPERTIES COMPILE_FLAGS -D_IMPORT_PREFIX=/usr )
+endif (WIN32)
+
 install(TARGETS grive_executable RUNTIME DESTINATION bin)
 install(FILES doc/grive.1 DESTINATION share/man/man1 )
