@@ -29,11 +29,11 @@ class ValVisitor
 public :
 	virtual ~ValVisitor() {}
 
-	virtual void Visit( long int t ) = 0 ;
+	virtual void VisitNull() = 0 ;
+	virtual void Visit( long t ) = 0 ;
 	virtual void Visit( double t ) = 0 ;
 	virtual void Visit( const std::string& t ) = 0 ;
-	virtual void Visit( int t ) = 0 ;
-	virtual void VisitNull() = 0 ;
+	virtual void Visit( bool t ) = 0 ;
 
 	virtual void StartArray() = 0 ;
 	virtual void EndArray() = 0 ;

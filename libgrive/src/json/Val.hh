@@ -98,9 +98,9 @@ public :
 	// shortcuts for As<>()
 	std::string Str() const ;
 	int		Int() const ;
-	long	Long() const ;
-	double	Double() const ;
-	bool	Bool() const ;
+	long		Long() const ;
+	double		Double() const ;
+	bool		Bool() const ;
 	const Array&	AsArray() const ;
 	const Object&	AsObject() const ;
 
@@ -132,21 +132,22 @@ private :
 } ;
 
 template <> struct Val::Type2Enum<void>			{ static const TypeEnum type = null_type ; } ;
-template <> struct Val::Type2Enum<long long>	{ static const TypeEnum type = int_type ;  } ;
+template <> struct Val::Type2Enum<long int>	{ static const TypeEnum type = int_type ;  } ;
+template <> struct Val::Type2Enum<long long int>	{ static const TypeEnum type = int_type ;  } ;
 template <> struct Val::Type2Enum<bool>			{ static const TypeEnum type = bool_type ; } ;
 template <> struct Val::Type2Enum<double>		{ static const TypeEnum type = double_type ;} ;
 template <> struct Val::Type2Enum<std::string>	{ static const TypeEnum type = string_type ; } ;
 template <> struct Val::Type2Enum<Val::Array>	{ static const TypeEnum type = array_type ; } ;
 template <> struct Val::Type2Enum<Val::Object>	{ static const TypeEnum type = object_type ; } ;
 
-template <> struct Val::SupportType<int>			{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<int>			{ typedef long int	Type ; } ;
 template <> struct Val::SupportType<unsigned>		{ typedef long long	Type ; } ;
-template <> struct Val::SupportType<long>			{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<long>			{ typedef long int	Type ; } ;
 template <> struct Val::SupportType<unsigned long>	{ typedef long long	Type ; } ;
-template <> struct Val::SupportType<short>			{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<short>			{ typedef long int	Type ; } ;
 template <> struct Val::SupportType<unsigned short>	{ typedef long long	Type ; } ;
-template <> struct Val::SupportType<long long>			{ typedef long long	Type ; } ;
-template <> struct Val::SupportType<unsigned long long>	{ typedef long long	Type ; } ;
+template <> struct Val::SupportType<long long>			{ typedef long int	Type ; } ;
+template <> struct Val::SupportType<unsigned long long>	{ typedef long int	Type ; } ;
 
 template <> struct Val::SupportType<bool>			{ typedef bool		Type ; } ;
 template <> struct Val::SupportType<double>			{ typedef double	Type ; } ;

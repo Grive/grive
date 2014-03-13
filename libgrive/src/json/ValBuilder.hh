@@ -42,11 +42,11 @@ public :
 	ValBuilder( ) ;
 	~ValBuilder() ;
 
-	void Visit( long int t ) ;
+	void VisitNull() ;
+	void Visit( long t ) ;
 	void Visit( double t ) ;
 	void Visit( const std::string& t ) ;
-	void Visit( int t ) ;
-	void VisitNull() ;
+	void Visit( bool t ) ;
 	void Build( const Val& t ) ;
 
 	void StartArray() ;

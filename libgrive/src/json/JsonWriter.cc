@@ -39,8 +39,12 @@ JsonWriter::JsonWriter( DataStream *out ) :
 	assert( out != 0 ) ;
 
 	m_impl->out = out ;
-	m_impl->gen = yajl_gen_alloc(0) ;
-	yajl_gen_config( m_impl->gen, yajl_gen_print_callback, &JsonWriter::WriteCallback, this ) ;
+	yajl_gen_config conf;
+	conf.beautify = 0;
+	conf.indentString = "";
+	//m_impl->gen = yajl_gen_alloc(0) ;
+	// yajl_gen_config( m_impl->gen, yajl_gen_print_callback, &JsonWriter::WriteCallback, this ) ;
+	m_impl->gen = yajl_gen_alloc( &conf,(const yajl_alloc_funcs*) &JsonWriter::WriteCallback);
 }
 
 JsonWriter::~JsonWriter()
@@ -48,7 +52,7 @@ JsonWriter::~JsonWriter()
 	yajl_gen_free( m_impl->gen ) ;
 }
 
-void JsonWriter::Visit( long long t )
+void JsonWriter::Visit( long int t )
 {
 	yajl_gen_integer( m_impl->gen, t ) ;
 }
