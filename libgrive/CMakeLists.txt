@@ -148,5 +148,4 @@ target_link_libraries( btest
 if ( WIN32 )
 else ( WIN32 )
 	set_target_properties( btest PROPERTIES COMPILE_FLAGS -DBOOST_TEST_DYN_LINK )
-	set_target_properties( btest PROPERTIES COMPILE_FLAGS -D_IMPORT_PREFIX=/usr )
 endif (WIN32)
