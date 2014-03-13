@@ -1,4 +1,4 @@
-Grive 0.3.0
+Grive 0.3.1
 25 July 2012
 
 http://www.lbreda.com/grive/
@@ -50,7 +50,7 @@ Enjoy!
 
 Version History:
 
-Grive v0.3: Bug fix & minor feature release
+Grive v0.3.1: Bug fix & minor feature release
 Fixed bugs:
 	#93: missing reference count increment in one of the Json constructors
 	#82: retry for HTTP error 500 & 503
@@ -65,3 +65,4 @@ New features:
 13.3.2014: Fixed bugs up on yajl definition
            Fixed boost issue with double lib64 definition in link
            * Ready up to compile
+	   Added definition to workaround Boost issue with double libdir in full path
