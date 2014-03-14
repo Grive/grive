@@ -60,9 +60,3 @@ New features:
 
 	#87: support for revisions
 	#86: partial sync (contributed by justin at tierramedia.com)
-	
--- Added by Juraj Puchky - Devtech <sjurajpuchky@seznam.cz>
-13.3.2014: Fixed bugs up on yajl definition
-           Fixed boost issue with double lib64 definition in link
-           * Ready up to compile
-	   Added definition to workaround Boost issue with double libdir in full path
