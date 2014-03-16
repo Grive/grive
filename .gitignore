@@ -4,3 +4,4 @@ grive.kdev4
 .project
 .cproject
 build/
+CMakeFiles/

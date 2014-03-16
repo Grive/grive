@@ -52,7 +52,7 @@ JsonWriter::~JsonWriter()
 	yajl_gen_free( m_impl->gen ) ;
 }
 
-void JsonWriter::Visit( long int t )
+void JsonWriter::Visit( long t )
 {
 	yajl_gen_integer( m_impl->gen, t ) ;
 }

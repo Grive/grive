@@ -7,11 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Grive</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../../../../mnt/safer/home/jpuchky/Projects/grive/icon/32x32/32x32.png</normaloff>../../../../../../mnt/safer/home/jpuchky/Projects/grive/icon/32x32/32x32.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -28,85 +32,139 @@
         </sizepolicy>
        </property>
       </widget>
-      <widget class="QWidget" name="">
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Title:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="m_title"/>
-        </item>
-        <item row="0" column="2" rowspan="2">
-         <widget class="QLabel" name="m_icon">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Filename:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="m_filename"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Mime type:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="m_mime_type"/>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Last Updated:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" colspan="2">
-         <widget class="QDateTimeEdit" name="m_last_update"/>
-        </item>
-        <item row="4" column="0" colspan="3">
-         <widget class="QGraphicsView" name="m_preview"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Preview</string>
+         </attribute>
+         <widget class="QGraphicsView" name="preview">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>381</width>
+            <height>481</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Details</string>
+         </attribute>
+         <widget class="QCalendarWidget" name="calendarWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>294</y>
+            <width>381</width>
+            <height>181</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="m_title">
+          <property name="geometry">
+           <rect>
+            <x>82</x>
+            <y>10</y>
+            <width>291</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLabel" name="lbl_m_title">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>12</y>
+            <width>56</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Title</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="m_mime_type">
+          <property name="geometry">
+           <rect>
+            <x>82</x>
+            <y>40</y>
+            <width>291</width>
+            <height>25</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="lbl_m_mime_type">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>45</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Mime-type</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="usageBar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="m_menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="m_menu_file">
-    <property name="title">
-     <string>&amp;File</string>
-    </property>
-    <addaction name="m_action_exit"/>
-   </widget>
-   <addaction name="m_menu_file"/>
   </widget>
   <widget class="QStatusBar" name="m_statusbar"/>
   <action name="m_action_exit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../../mnt/safer/home/jpuchky/Projects/grive/icon/16x16/16x16.png</normaloff>../../../../../../mnt/safer/home/jpuchky/Projects/grive/icon/16x16/16x16.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About grive</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionTopic">
+   <property name="text">
+    <string>Topic</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="text">
+    <string>Console</string>
+   </property>
+   <property name="toolTip">
+    <string>Open console window</string>
    </property>
   </action>
  </widget>
