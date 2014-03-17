@@ -46,8 +46,8 @@ DateTime FileCTime( const fs::path& filename )
 
 DateTime FileCTime( const std::string& filename )
 {
-	struct stat s = {} ;
-	if ( ::stat( filename.c_str(), &s ) != 0 )
+	struct stat64 s = {} ;
+	if ( ::stat64( filename.c_str(), &s ) != 0 )
 	{
 		BOOST_THROW_EXCEPTION(
 			Error()

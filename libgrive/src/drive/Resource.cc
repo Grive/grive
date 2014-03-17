@@ -36,12 +36,13 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "protocol/OAuth2.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
 
 #include <cassert>
-
+#include <time.h>
 // for debugging
 #include <iostream>
 
@@ -269,7 +270,8 @@ void Resource::FromLocal( const DateTime& last_sync )
 		else
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
-		m_name		= path.filename().string() ;
+		// m_name		= path.filename().string() ;
+		m_name		= path.filename();
 		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
 		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
 	}
@@ -365,24 +367,47 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options )
+//<<<<<<< HEAD
+// void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options )
+// =======
+void Resource::Sync( gr::http::Agent* http, DateTime& sync_time,gr::http::Header& auth, gr::OAuth2& oauth )
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
+ 	std::vector<std::string> m_auth;
+	m_auth.assign(auth.begin(), auth.end());
+	//std::cout << auth  << std::endl;
+
+	// -360s avg sync time, refresh token
+    if(oauth.Time() > (oauth.ExpiresIn()-360)){
+    	oauth.Refresh();
+	}
+	m_auth.push_back( "Authorization: Bearer " + oauth.AccessToken() ) ;
+	m_auth.push_back( "GData-Version: 3.0" ) ;
 	
-	SyncSelf( http, options ) ;
+//<<<<<<< HEAD
+//	SyncSelf( http, options ) ;
 	
 	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
 	// m_mtime is updated to server modified time when the file is uploaded
-	sync_time = std::max(sync_time, m_mtime);
+	sync_time = std::max(sync_time, oauth.m_time);
+//=======
+//	SyncSelf( http, (const http::Header&)m_auth ) ;
+	SyncSelf( http, auth ) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time), options ) ) ;
+//<<<<<<< HEAD
+//			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time), options ) ) ;
+//=======
+			boost::bind( &Resource::Sync, _1, http, auth,  oauth ) ) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 }
 
-void Resource::SyncSelf( http::Agent* http, const Json& options )
+void Resource::SyncSelf( gr::http::Agent* http,const gr::http::Header& auth, const Json& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
@@ -500,7 +525,8 @@ void Resource::DeleteRemote( http::Agent *http )
 		// don't rethrow here. there are some cases that I don't know why
 		// the delete will fail.
 		Trace( "Exception %1% %2%",
-			boost::diagnostic_information(e),
+			e.what(),
+			//boost::diagnostic_information(e),
 			str.Response() ) ;
 	}
 }
@@ -576,18 +602,40 @@ bool Resource::Create( http::Agent* http )
 	}
 }
 
-bool Resource::Upload(
-	http::Agent* 		http,
-	const std::string&	link,
-	bool 				post)
+//<<<<<<< HEAD
+//bool Resource::Upload(
+//	http::Agent* 		http,
+//	const std::string&	link,
+//	bool 				post)
+//=======
+
+bool Resource::Upload( http::Agent* http, const std::string& link, const http::Header& auth, bool post )
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 {
 	assert( http != 0 ) ;
+	const fs::path& path = Path();
+	t_UploadResourceEntry file;
+	t_UploadResourceEntry meta_a;
+	// TODO: upload in chunks
 	
-	File file( Path() ) ;
+//<<<<<<< HEAD
+//	File file( Path() ) ;
+//	std::ostringstream xcontent_len ;
+//	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
+//
+//	http::Header hdr ;
+//=======
+	file.fp = fopen64(path.string().c_str(),"r");
+        fseeko(file.fp, 0, SEEK_END);
+        file.sizeleft = ftello(file.fp);
+        rewind (file.fp);
+	
+	file.post = 1;
+
 	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
-	
-	http::Header hdr ;
+	xcontent_len << "X-Upload-Content-Length: " << file.sizeleft;
+	http::Header hdr( auth ) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
 	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
 	hdr.Add( xcontent_len.str() ) ;
@@ -598,12 +646,14 @@ bool Resource::Upload(
 		% m_kind
 		% xml::Escape(m_name)
 	).str() ;
-	
+	meta_a.readptr=meta.c_str();
+	meta_a.sizeleft=meta.size();
+	meta_a.post=post;
 	http::StringResponse str ;
 	if ( post )
 		http->Post( link, meta, &str, hdr ) ;
 	else
-		http->Put( link, meta, &str, hdr ) ;
+		http->Put( link, &meta_a, &str, hdr ) ;
 	
 	http::Header uphdr ;
 	uphdr.Add( "Expect:" ) ;
@@ -613,7 +663,12 @@ bool Resource::Upload(
 	std::string uplink = http->RedirLocation() ;
 	http::XmlResponse xml ;
 	
+//<<<<<<< HEAD
+//	http->Put( uplink, &file, &xml, uphdr ) ;
+//=======
 	http->Put( uplink, &file, &xml, uphdr ) ;
+	fclose(file.file);
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	AssignIDs( Entry( xml.Response() ) ) ;
   m_mtime = Entry(xml.Response()).MTime();
 	

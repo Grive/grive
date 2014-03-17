@@ -21,7 +21,13 @@
 #pragma once
 
 #include <QtGui/QMainWindow>
+#include <QSystemTrayIcon>
+#include <QDialog>
+
 #include "ui_MainWindow.h"
+#include "ui_Console.h"
+#include "ui_Settings.h"
+#include "ui_About.h"
 
 #include "DriveModel.hh"
 
@@ -41,15 +47,41 @@ class MainWnd : public QMainWindow
 public :
 	MainWnd( http::Agent *agent ) ;
 
+
 private :
 	void ShowResource( const v2::Resource *res ) ;
+    void createTrayIcon();
+    void setIcon(int index);
+    void setVisible(bool visible);
+
 
 public slots :
-	void OnClick( const QModelIndex& index ) ;
+	void OnClickItem( const QModelIndex& index ) ;
+	void OnClickDetailTab() ;
+	void OnClickPreviewTab() ;
+	void OnClose(QCloseEvent *event);
+	void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private :
-	Ui::MainWindow	m_ui ;
+	// Ui components
+	Ui::MainWindow	m_mainwindow;
+	Ui::Settings	m_settings;
+	Ui::Console		m_console;
+	Ui::About		m_about;
+
+	// Items
+	QModelIndex 	currentItem;
 	DriveModel		m_drive ;
+
+	// Actions
+    QAction *minimizeAction;
+    QAction *maximizeAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+
 } ;
 
 } // end of namespace

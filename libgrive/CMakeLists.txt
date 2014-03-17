@@ -1,7 +1,7 @@
 project(libgrive)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
+ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES)
 find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
@@ -147,6 +147,5 @@ target_link_libraries( btest
 
 if ( WIN32 )
 else ( WIN32 )
-	set_target_properties( btest
-		PROPERTIES COMPILE_FLAGS	 -DBOOST_TEST_DYN_LINK )
+	set_target_properties( btest PROPERTIES COMPILE_FLAGS -DBOOST_TEST_DYN_LINK )
 endif (WIN32)

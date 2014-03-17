@@ -61,7 +61,7 @@ public :
 	std::size_t Read( char *ptr, std::size_t size ) ;
 	std::size_t Write( const char *ptr, std::size_t size ) ;
 
-	off_t Seek( off_t offset, int whence ) ;
+	off_t Seek(off_t offset, int whence ) ;
 	off_t Tell() const ;
 	u64_t Size() const ;
 	

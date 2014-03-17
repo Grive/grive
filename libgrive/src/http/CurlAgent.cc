@@ -40,22 +40,31 @@
 #include <iostream>
 
 #include <signal.h>
-
+#define min(a,b) (((a) < (b)) ? (a):(b))
 namespace {
 
 using namespace gr::http ;
 using namespace gr ;
 
-std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+//<<<<<<< HEAD
+//std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+//=======
+size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, void *data )
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 {
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
-
-	std::size_t count = std::min( size * nmemb, data->size() ) ;
-	if ( count > 0 )
-	{
-		std::memcpy( ptr, &(*data)[0], count ) ;
-		data->erase( 0, count ) ;
+	struct WriteThis *pooh = (struct WriteThis *)data;
+	size_t count = min( (size * nmemb), pooh->sizeleft ) ;
+	if ( count > 0 ){
+		if(pooh->post==0){
+		 std::memcpy( ptr,(char*)(pooh->readptr),count ) ;
+		 pooh->readptr+=count;
+		}
+		else{
+		 fread(ptr,size,count,pooh->file);
+		}
+		pooh->sizeleft-=count;
 	}
 	
 	return count ;
@@ -174,33 +183,40 @@ long CurlAgent::ExecCurl(
 
 long CurlAgent::Put(
 	const std::string&		url,
-	const std::string&		data,
+	void*					data,
 	DataStream				*dest,
 	const Header&			hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
 	
 	Init() ;
+	// TODO: Check structure
+	t_UploadResourceEntry *file = (t_UploadResourceEntry *)data;
 	CURL *curl = m_pimpl->curl ;
 
-	std::string put_data = data ;
 
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
-	
+//<<<<<<< HEAD
+//	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
+//	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
+//	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
+//
+//=======
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,		file ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file->sizeleft);
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	return ExecCurl( url, dest, hdr ) ;
 }
 
 long CurlAgent::Put(
 	const std::string&	url,
-	File				*file,
+	File				*fip,
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	assert( file != 0 ) ;  
+	assert( fp != 0 ) ;
 
 	Trace("HTTP PUT \"%1%\"", url ) ;
 	
@@ -210,8 +226,8 @@ long CurlAgent::Put(
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,			file ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file->Size()) ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,			fip ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(fip->Size()) ) ;
 	
 	return ExecCurl( url, dest, hdr ) ;
 }
@@ -270,6 +286,8 @@ long CurlAgent::Custom(
 
 void CurlAgent::SetHeader( const Header& hdr )
 {
+	// Store current on the scope
+	m_curl_hdr = hdr;
 	// set headers
 	struct curl_slist *curl_hdr = 0 ;
     for ( Header::iterator i = hdr.begin() ; i != hdr.end() ; ++i )
@@ -277,6 +295,12 @@ void CurlAgent::SetHeader( const Header& hdr )
 	
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
 }
+
+Header& CurlAgent::GetHeader( )
+{
+	return m_curl_hdr;
+}
+
 
 std::string CurlAgent::RedirLocation() const
 {

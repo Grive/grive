@@ -33,7 +33,7 @@ public :
 	JsonWriter( DataStream *out ) ;
 	~JsonWriter() ;
 
-	void Visit( long long t ) ;
+	void Visit( long t ) ;
 	void Visit( double t ) ;
 	void Visit( const std::string& t ) ;
 	void Visit( bool t ) ;

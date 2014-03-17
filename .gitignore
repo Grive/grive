@@ -4,3 +4,7 @@ grive.kdev4
 .project
 .cproject
 build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile

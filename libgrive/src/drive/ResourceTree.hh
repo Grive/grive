@@ -55,16 +55,17 @@ namespace details
 	typedef Folders::index<ByIdentity>::type	Set ;
 }
 
+
 /*!	\brief	A simple container for storing folders
 
 	This class stores a set of folders and provide fast search access from ID, HREF etc.
 	It is a wrapper around multi_index_container from Boost library.
 */
+
 class ResourceTree
 {
-public :
-	typedef details::Set::iterator iterator ;
-
+public:
+	typedef details::Set::iterator iterator;
 public :
 	ResourceTree( const fs::path& rootFolder ) ;
 	ResourceTree( const ResourceTree& fs ) ;
@@ -75,7 +76,6 @@ public :
 	
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
-
 	Resource* FindByID( const std::string& id ) ;
 	
 	bool ReInsert( Resource *coll ) ;
@@ -87,8 +87,9 @@ public :
 	Resource* Root() ;
 	const Resource* Root() const ;
 	
-	iterator begin() ;
-	iterator end() ;
+	// was getByIdentity();
+	iterator begin() { return m_set.get<details::ByIdentity>().begin(); }
+	iterator end() { return m_set.get<details::ByIdentity>().end(); }
 
 private :
 	void Clear() ;

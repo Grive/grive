@@ -161,7 +161,7 @@ void Val::Visit( ValVisitor *visitor ) const
 	switch ( Type() )
 	{
 		case null_type:		visitor->VisitNull() ;					break ;
-		case int_type:		visitor->Visit( As<long long>() ) ;		break ;
+		case int_type:		visitor->Visit( As<long>() ) ;			break ;
 		case double_type:	visitor->Visit( As<double>() ) ;		break ;
 		case string_type:	visitor->Visit( As<std::string>() ) ;	break ;
 		case bool_type:		visitor->Visit( As<bool>() ) ;			break ;

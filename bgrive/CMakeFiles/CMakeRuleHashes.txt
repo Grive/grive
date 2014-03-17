@@ -1,0 +1,6 @@
+# Hashes of file build rules.
+b95a0377e43e7b9b1607da3d71c30451 src/moc_MainWnd.cxx
+47ac8503162eca266dbdcaf05fb14314 ui_About.h
+1f3e213480a73f2fa5ad9e32eab98a5e ui_Console.h
+46abb4ed651a830859e75191f93a5b3c ui_MainWindow.h
+2db398e7f973662830cdadb21862bb1f ui_Settings.h
