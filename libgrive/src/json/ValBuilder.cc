@@ -32,7 +32,7 @@ ValBuilder::~ValBuilder()
 {
 }
 
-void ValBuilder::Visit( long int t )
+void ValBuilder::Visit( long t )
 {
 	Build(Val(t)) ;
 }
