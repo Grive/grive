@@ -66,10 +66,12 @@ void OAuth2::Auth( const std::string&	auth_code )
 
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp, http::Header() ) ;
+	time(&m_time);
 
 	Json jresp	= resp.Response() ;
 	m_access	= jresp["access_token"].Str() ;
 	m_refresh	= jresp["refresh_token"].Str() ;
+	m_expire	= jresp["expires_in"].Str() ;
 }
 
 std::string OAuth2::MakeAuthURL(
@@ -103,8 +105,9 @@ void OAuth2::Refresh( )
     
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp, http::Header() ) ;
-
+	time(&m_time);
 	m_access	= resp.Response()["access_token"].Str() ;
+	m_expire        = resp.Response()["expires_in"].Str() ;
 }
 
 std::string OAuth2::RefreshToken( ) const
@@ -115,6 +118,16 @@ std::string OAuth2::RefreshToken( ) const
 std::string OAuth2::AccessToken( ) const
 {
 	return m_access ;
+}
+
+std::size_t OAuth2::ExpiresIn( ) const
+{
+	return atoi(m_expire.c_str()); 
+}
+
+std::size_t OAuth2::Time() const
+{
+	return m_time ;
 }
 
 std::string OAuth2::HttpHeader( ) const

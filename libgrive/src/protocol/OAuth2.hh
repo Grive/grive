@@ -20,7 +20,7 @@
 #pragma once
 
 #include <string>
-
+#include <time.h>
 namespace gr {
 
 class OAuth2
@@ -45,13 +45,17 @@ public :
 		
 	std::string RefreshToken( ) const ;
 	std::string AccessToken( ) const ;
+	std::size_t ExpiresIn( ) const ;
 	
+	std::size_t Time( ) const ;
+	std::time_t m_time;
 	// adding HTTP auth header
 	std::string HttpHeader( ) const ;
 	
 private :
 	std::string m_access ;
 	std::string m_refresh ;
+	std::string m_expire;
 	
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;

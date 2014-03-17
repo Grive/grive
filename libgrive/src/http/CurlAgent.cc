@@ -40,22 +40,39 @@
 #include <iostream>
 
 #include <signal.h>
-
+struct WriteThis {
+  const char *readptr;
+  off_t sizeleft;
+  FILE* file;
+  bool post;
+  size_t contfrom;
+  size_t contend;
+};
+#define min(a,b) (((a) < (b)) ? (a):(b))
 namespace {
 
 using namespace gr::http ;
 using namespace gr ;
 
+<<<<<<< HEAD
 std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
+=======
+size_t ReadCallback( void *ptr, std::size_t size, std::size_t nmemb, void *data )
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 {
 	assert( ptr != 0 ) ;
 	assert( data != 0 ) ;
-
-	std::size_t count = std::min( size * nmemb, data->size() ) ;
-	if ( count > 0 )
-	{
-		std::memcpy( ptr, &(*data)[0], count ) ;
-		data->erase( 0, count ) ;
+	struct WriteThis *pooh = (struct WriteThis *)data;
+	size_t count = min( (size * nmemb), pooh->sizeleft ) ;
+	if ( count > 0 ){
+		if(pooh->post==0){
+		 std::memcpy( ptr,(char*)(pooh->readptr),count ) ;
+		 pooh->readptr+=count;
+		}
+		else{
+		 fread(ptr,size,count,pooh->file);
+		}
+		pooh->sizeleft-=count;
 	}
 	
 	return count ;
@@ -174,23 +191,34 @@ long CurlAgent::ExecCurl(
 
 long CurlAgent::Put(
 	const std::string&		url,
+<<<<<<< HEAD
 	const std::string&		data,
 	DataStream				*dest,
+=======
+	void*		data,
+	Receivable				*dest,
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	const Header&			hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
 	
 	Init() ;
+	struct WriteThis *pooh = (struct WriteThis *)data;
 	CURL *curl = m_pimpl->curl ;
 
-	std::string put_data = data ;
 
 	// set common options
 	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
+<<<<<<< HEAD
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
 	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
 	
+=======
+	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadCallback ) ;
+	::curl_easy_setopt(curl, CURLOPT_READDATA ,		pooh ) ;
+	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)pooh->sizeleft);
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	return ExecCurl( url, dest, hdr ) ;
 }
 

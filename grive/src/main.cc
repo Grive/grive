@@ -66,6 +66,7 @@ void InitGCrypt()
 
 void InitLog( const po::variables_map& vm )
 {
+<<<<<<< HEAD
 	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
 	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
 
@@ -85,6 +86,14 @@ void InitLog( const po::variables_map& vm )
 		
 		comp_log->Add( file_log ) ;
 	}
+=======
+	InitGCrypt() ;
+	
+	Config config ;
+	
+	std::auto_ptr<gr::log::CompositeLog> comp_log(new gr::log::CompositeLog) ;
+	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new gr::log::DefaultLog ) ) ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	
 	if ( vm.count( "verbose" ) )
 	{
@@ -174,6 +183,46 @@ int Main( int argc, char **argv )
 		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
 		config.Save() ;
 	}
+<<<<<<< HEAD
+=======
+	if ( vm.count( "log" ) )
+	{
+		std::auto_ptr<LogBase> file_log(new gr::log::DefaultLog( vm["log"].as<std::string>() )) ;
+		file_log->Enable( gr::log::debug ) ;
+		file_log->Enable( gr::log::verbose ) ;
+		file_log->Enable( gr::log::info ) ;
+		file_log->Enable( gr::log::warning ) ;
+		file_log->Enable( gr::log::error ) ;
+		file_log->Enable( gr::log::critical ) ;
+		
+		// log grive version to log file
+		file_log->Log( gr::log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), gr::log::verbose ) ;
+		file_log->Log( gr::log::Fmt("current time: %1%") % DateTime::Now(), gr::log::verbose ) ;
+		
+		comp_log->Add( file_log ) ;
+	}
+	if ( vm.count( "version" ) )
+	{
+		std::cout
+			<< "grive version " << VERSION << ' ' << __DATE__ << ' ' << __TIME__ << std::endl ;
+		return 0 ;
+	}
+	if ( vm.count( "verbose" ) )
+	{
+		console_log->Enable( gr::log::verbose ) ;
+	}
+	if ( vm.count( "debug" ) )
+	{
+		console_log->Enable( gr::log::verbose ) ;
+		console_log->Enable( gr::log::debug ) ;
+	}
+	if ( vm.count( "force" ) )
+	{
+		options.Add( "force", Json(true) ) ;
+	}
+	
+	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	
 	std::string refresh_token ;
 	try
@@ -185,7 +234,7 @@ int Main( int argc, char **argv )
 		Log(
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
-			log::critical ) ;
+			gr::log::critical ) ;
 		
 		return -1;
 	}
@@ -198,14 +247,14 @@ int Main( int argc, char **argv )
 
 	if ( vm.count( "dry-run" ) == 0 )
 	{
-		drive.Update() ;
+		drive.Update( token ) ;
 		drive.SaveState() ;
 	}
 	else
-		drive.DryRun() ;
+		drive.DryRun( token ) ;
 	
 	config.Save() ;
-	Log( "Finished!", log::info ) ;
+	Log( "Finished!", gr::log::info ) ;
 	return 0 ;
 }
 
@@ -217,15 +266,15 @@ int main( int argc, char **argv )
 	}
 	catch ( Exception& e )
 	{
-		Log( "exception: %1%", boost::diagnostic_information(e), log::critical ) ;
+		Log( "exception: %1%", boost::diagnostic_information(e), gr::log::critical ) ;
 	}
 	catch ( std::exception& e )
 	{
-		Log( "exception: %1%", e.what(), log::critical ) ;
+		Log( "exception: %1%", e.what(), gr::log::critical ) ;
 	}
 	catch ( ... )
 	{
-		Log( "unexpected exception", log::critical ) ;
+		Log( "unexpected exception", gr::log::critical ) ;
 	}
 	return -1 ;
 }

@@ -34,9 +34,15 @@ namespace http
 	class Agent ;
 }
 
+<<<<<<< HEAD
 class Json ;
 
 namespace v1 {
+=======
+
+
+class OAuth2;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 
 class Entry ;
 
@@ -80,7 +86,11 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
+<<<<<<< HEAD
 	void Sync( http::Agent* http, DateTime& sync_time, const Json& options ) ;
+=======
+	void Sync( http::Agent* http, const http::Header& auth, OAuth2& oauth ) ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 
 	// children access
 	iterator begin() const ;

@@ -37,8 +37,13 @@ public :
 
 	virtual long Put(
 		const std::string&	url,
+<<<<<<< HEAD
 		const std::string&	data,
 		DataStream			*dest,
+=======
+		void*	data,
+		Receivable			*dest,
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 		const Header&		hdr ) = 0 ;
 
 	virtual long Put(

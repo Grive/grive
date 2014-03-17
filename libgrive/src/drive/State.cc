@@ -260,6 +260,7 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
+<<<<<<< HEAD
 void State::Sync( http::Agent *http, const Json& options )
 {
 	// set the last sync time from the time returned by the server for the last file synced
@@ -282,6 +283,12 @@ void State::Sync( http::Agent *http, const Json& options )
 		Trace( "updating last sync? %1%", last_sync_time ) ;
     	m_last_sync = last_sync_time;
   	}
+=======
+void State::Sync( http::Agent *http, const http::Header& auth, OAuth2::OAuth2& oauth)
+{
+	m_res.Root()->Sync( http, auth ,oauth) ;
+	m_last_sync = DateTime::Now() ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 }
 
 long State::ChangeStamp() const

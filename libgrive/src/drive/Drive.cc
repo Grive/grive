@@ -169,18 +169,27 @@ void Drive::DetectChanges()
 	}
 }
 
-void Drive::Update()
+void Drive::Update( OAuth2& auth )
 {
 	Log( "Synchronizing files", log::info ) ;
+<<<<<<< HEAD
 	m_state.Sync( m_http, m_options ) ;
+=======
+	http::CurlAgent http ;
+	m_state.Sync( &http, m_http_hdr, auth) ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	
 	UpdateChangeStamp( ) ;
 }
 
-void Drive::DryRun()
+void Drive::DryRun( OAuth2& auth )
 {
 	Log( "Synchronizing files (dry-run)", log::info ) ;
+<<<<<<< HEAD
 	m_state.Sync( 0, m_options ) ;
+=======
+	m_state.Sync( 0, m_http_hdr, auth ) ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 }
 
 void Drive::UpdateChangeStamp( )

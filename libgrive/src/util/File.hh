@@ -61,9 +61,14 @@ public :
 	std::size_t Read( char *ptr, std::size_t size ) ;
 	std::size_t Write( const char *ptr, std::size_t size ) ;
 
+<<<<<<< HEAD:libgrive/src/util/File.hh
 	off_t Seek( off_t offset, int whence ) ;
 	off_t Tell() const ;
 	u64_t Size() const ;
+=======
+	off_t Seek(off_t offset, int whence ) ;
+	off_t Tell() const ;
+>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215:libgrive/src/util/StdioFile.hh
 	
 	void Chmod( int mode ) ;
 

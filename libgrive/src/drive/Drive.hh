@@ -45,8 +45,8 @@ public :
 	Drive( http::Agent *agent, const Json& options ) ;
 
 	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
+	void Update( OAuth2& auth ) ;
+	void DryRun( OAuth2& auth ) ;
 	void SaveState() ;
 	
 	struct Error : virtual Exception {} ;
