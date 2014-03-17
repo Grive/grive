@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "protocol/OAuth2.hh"
 #include "util/DateTime.hh"
 #include "util/Exception.hh"
 #include "util/FileSystem.hh"
@@ -34,15 +35,24 @@ namespace http
 	class Agent ;
 }
 
-<<<<<<< HEAD
-class Json ;
+
+//<<<<<<< HEAD
+//class Json ;
 
 namespace v1 {
-=======
+//=======
 
+typedef struct UploadResourceEntry {
+  const char *readptr;
+  off_t sizeleft;
+  FILE* fp;
+  bool post;
+  size_t contfrom;
+  size_t contend;
+} t_UploadResourceEntry;
 
 class OAuth2;
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 
 class Entry ;
 
@@ -83,14 +93,14 @@ public :
 	bool HasID() const ;
 	std::string MD5() const ;
 
-	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
-	void FromLocal( const DateTime& last_sync ) ;
+	void FromRemote( const Entry &remote, const DateTime &last_sync ) ;
+	void FromLocal( const DateTime &last_sync ) ;
 	
-<<<<<<< HEAD
-	void Sync( http::Agent* http, DateTime& sync_time, const Json& options ) ;
-=======
-	void Sync( http::Agent* http, const http::Header& auth, OAuth2& oauth ) ;
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
+//<<<<<<< HEAD
+//	void Sync( http::Agent* http, DateTime& sync_time, const Json& options ) ;
+//=======
+	void Sync( gr::http::Agent* http, DateTime& sync_time,gr::http::Header& auth, gr::OAuth2& oauth ) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 
 	// children access
 	iterator begin() const ;
@@ -137,19 +147,20 @@ private :
 private :
 	void SetState( State new_state ) ;
 
-	void Download( http::Agent* http, const fs::path& file ) const ;
-	bool EditContent( http::Agent* http, bool new_rev ) ;
-	bool Create( http::Agent* http ) ;
-	bool Upload( http::Agent* http, const std::string& link, bool post ) ;
+	void Download( gr::http::Agent* http, const fs::path& file ) const ;
+	bool EditContent( gr::http::Agent* http, bool new_rev ) ;
+	bool Create( gr::http::Agent* http ) ;
+	bool Upload( gr::http::Agent* http, const std::string& link, const gr::http::Header& auth, bool post );
+	// bool Upload( http::Agent* http, const std::string& link, bool post ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
 	
 	void DeleteLocal() ;
-	void DeleteRemote( http::Agent* http ) ;
+	void DeleteRemote( gr::http::Agent* http ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, const Json& options ) ;
+	void SyncSelf( gr::http::Agent* http, const gr::http::Header& auth,const Json options ) ;
 	
 private :
 	std::string				m_name ;

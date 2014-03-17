@@ -36,21 +36,16 @@ public :
 	virtual ~Agent() {}
 
 	virtual long Put(
-		const std::string&	url,
-<<<<<<< HEAD
-		const std::string&	data,
-		DataStream			*dest,
-=======
-		void*	data,
-		Receivable			*dest,
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
-		const Header&		hdr ) = 0 ;
+		const std::string&		url,
+		void*					data,
+		DataStream				*dest,
+		const Header&			hdr );
 
 	virtual long Put(
 		const std::string&	url,
-		File				*file,
+		File				*fp,
 		DataStream			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr );
 		
 	virtual long Get(
 		const std::string& 	url,

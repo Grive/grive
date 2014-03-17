@@ -1058,6 +1058,30 @@ src/util/StdStream.cc.s:
 	cd /home/jpuchky/Projects/grive && $(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.s
 .PHONY : src/util/StdStream.cc.s
 
+src/util/StdioFile.o: src/util/StdioFile.cc.o
+.PHONY : src/util/StdioFile.o
+
+# target to build an object file
+src/util/StdioFile.cc.o:
+	cd /home/jpuchky/Projects/grive && $(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o
+.PHONY : src/util/StdioFile.cc.o
+
+src/util/StdioFile.i: src/util/StdioFile.cc.i
+.PHONY : src/util/StdioFile.i
+
+# target to preprocess a source file
+src/util/StdioFile.cc.i:
+	cd /home/jpuchky/Projects/grive && $(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.i
+.PHONY : src/util/StdioFile.cc.i
+
+src/util/StdioFile.s: src/util/StdioFile.cc.s
+.PHONY : src/util/StdioFile.s
+
+# target to generate assembly for a file
+src/util/StdioFile.cc.s:
+	cd /home/jpuchky/Projects/grive && $(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.s
+.PHONY : src/util/StdioFile.cc.s
+
 src/util/StringStream.o: src/util/StringStream.cc.o
 .PHONY : src/util/StringStream.o
 
@@ -1471,6 +1495,9 @@ help:
 	@echo "... src/util/StdStream.o"
 	@echo "... src/util/StdStream.i"
 	@echo "... src/util/StdStream.s"
+	@echo "... src/util/StdioFile.o"
+	@echo "... src/util/StdioFile.i"
+	@echo "... src/util/StdioFile.s"
 	@echo "... src/util/StringStream.o"
 	@echo "... src/util/StringStream.i"
 	@echo "... src/util/StringStream.s"

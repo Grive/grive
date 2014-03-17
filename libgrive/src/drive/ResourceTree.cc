@@ -58,6 +58,16 @@ ResourceTree::~ResourceTree( )
 	Clear() ;
 }
 
+Resource* ResourceTree::FindByID(const std::string& id)
+{
+	if ( id.empty() )
+		return 0 ;
+
+	IDMap& map = m_set.get<ByID>() ;
+	IDMap::iterator i = map.find( id ) ;
+	return i != map.end() ? *i : 0 ;
+}
+
 void ResourceTree::Clear()
 {
 	// delete all pointers
@@ -143,16 +153,6 @@ void ResourceTree::Update( Resource *coll, const Entry& e, const DateTime& last_
 
 	coll->FromRemote( e, last_sync ) ;
 	ReInsert( coll ) ;
-}
-
-ResourceTree::iterator ResourceTree::begin()
-{
-	return m_set.get<ByIdentity>().begin() ;
-}
-
-ResourceTree::iterator ResourceTree::end()
-{
-	return m_set.get<ByIdentity>().end() ;
 }
 
 } } // end of namespace gr::v1

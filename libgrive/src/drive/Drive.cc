@@ -51,7 +51,7 @@ namespace
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( http::Agent *agent, const Json& options ) :
+Drive::Drive( gr::http::Agent *agent, const Json& options ) :
 	m_http		( agent ),
 	m_root		( options["path"].Str() ),
 	m_state		( m_root / state_file, options ),
@@ -169,27 +169,32 @@ void Drive::DetectChanges()
 	}
 }
 
-void Drive::Update( OAuth2& auth )
+void Drive::Update( gr::OAuth2& oauth )
 {
 	Log( "Synchronizing files", log::info ) ;
-<<<<<<< HEAD
-	m_state.Sync( m_http, m_options ) ;
-=======
-	http::CurlAgent http ;
-	m_state.Sync( &http, m_http_hdr, auth) ;
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
+//<<<<<<< HEAD
+//	m_state.Sync( m_http, m_options ) ;
+//=======
+	gr::http::CurlAgent http ;
+	gr::http::Header http_hdr = http.GetHeader();
+
+	m_state.Sync( (gr::http::Agent*)&http, http_hdr, oauth) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 	
 	UpdateChangeStamp( ) ;
 }
 
-void Drive::DryRun( OAuth2& auth )
+void Drive::DryRun( gr::OAuth2& oauth )
 {
 	Log( "Synchronizing files (dry-run)", log::info ) ;
-<<<<<<< HEAD
-	m_state.Sync( 0, m_options ) ;
-=======
-	m_state.Sync( 0, m_http_hdr, auth ) ;
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
+//<<<<<<< HEAD
+//	m_state.Sync( 0, m_options ) ;
+//=======
+	gr::http::CurlAgent http ;
+	gr::http::Header http_hdr = http.GetHeader();
+// TODO: Init CurlAgent;
+	m_state.Sync( 0, http_hdr, oauth ) ;
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 }
 
 void Drive::UpdateChangeStamp( )

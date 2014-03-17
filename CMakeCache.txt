@@ -237,10 +237,10 @@ JSONC_LIBRARY:FILEPATH=/usr/lib64/libjson.so
 LIBGCRYPTCONFIG_EXECUTABLE:FILEPATH=/usr/bin/libgcrypt-config
 
 //Value Computed by CMake
-Project_BINARY_DIR:STATIC=/mnt/safer/home/jpuchky/Projects/grive
+Project_BINARY_DIR:STATIC=/home/jpuchky/Projects/grive
 
 //Value Computed by CMake
-Project_SOURCE_DIR:STATIC=/mnt/safer/home/jpuchky/Projects/grive
+Project_SOURCE_DIR:STATIC=/home/jpuchky/Projects/grive
 
 //Path to a library.
 QT_ARTHURPLUGIN_PLUGIN_DEBUG:FILEPATH=QT_ARTHURPLUGIN_PLUGIN_DEBUG-NOTFOUND

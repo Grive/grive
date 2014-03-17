@@ -42,21 +42,16 @@ public :
 	~CurlAgent() ;
 	
 	long Put(
-		const std::string&	url,
-<<<<<<< HEAD
-		const std::string&	data,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
+		const std::string&		url,
+		void*					data,
+		DataStream				*dest,
+		const Header&			hdr );
+
 	long Put(
 		const std::string&	url,
-		File				*file,
+		File				*fp,
 		DataStream			*dest,
-=======
-		void*	data,
-		Receivable			*dest,
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
-		const Header&		hdr ) ;
+		const Header&		hdr );
 
 	long Get(
 		const std::string& 	url,
@@ -80,11 +75,14 @@ public :
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 
+	Header& GetHeader();
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv ) ;
 	
 	void SetHeader( const Header& hdr ) ;
+
+
 	long ExecCurl(
 		const std::string&	url,
 		DataStream			*dest,
@@ -95,6 +93,7 @@ private :
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_pimpl ;
+	Header&   m_curl_hdr;
 } ;
 
 } } // end of namespace

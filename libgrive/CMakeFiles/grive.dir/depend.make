@@ -27,10 +27,12 @@ libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/drive/Resource.
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/drive/ResourceTree.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/drive/State.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/http/Agent.hh
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/http/CurlAgent.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/http/Header.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/http/ResponseLog.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/http/XmlResponse.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/protocol/Json.hh
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/protocol/OAuth2.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/util/DataStream.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/util/DateTime.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/util/Destroy.hh
@@ -76,6 +78,7 @@ libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/http/Header.
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/http/StringResponse.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/http/XmlResponse.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/protocol/Json.hh
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/protocol/OAuth2.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/util/CArray.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/util/Crypt.hh
 libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/util/DataStream.hh
@@ -94,7 +97,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/drive/Co
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/drive/Resource.hh
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/drive/ResourceTree.cc
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/drive/ResourceTree.hh
+libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/http/Header.hh
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/protocol/Json.hh
+libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/protocol/OAuth2.hh
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/util/DateTime.hh
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/util/Destroy.hh
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/util/Exception.hh
@@ -108,7 +113,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/drive/ResourceT
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/drive/State.cc
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/drive/State.hh
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/http/Agent.hh
+libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/http/Header.hh
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/protocol/Json.hh
+libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/protocol/OAuth2.hh
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/util/Crypt.hh
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/util/DataStream.hh
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/util/DateTime.hh
@@ -222,6 +229,7 @@ libgrive/CMakeFiles/grive.dir/src/json/ValResponse.cc.o: libgrive/src/util/Excep
 
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/protocol/AuthAgent.cc
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/protocol/AuthAgent.hh
+libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/protocol/Json.hh
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/protocol/OAuth2.hh
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/http/Agent.hh
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/http/Error.hh
@@ -312,6 +320,8 @@ libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o: libgrive/src/util/Sig
 libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o: libgrive/src/util/DataStream.hh
 libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o: libgrive/src/util/StdStream.cc
 libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o: libgrive/src/util/StdStream.hh
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o: libgrive/src/util/StdioFile.cc
 
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o: libgrive/src/util/DataStream.hh
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o: libgrive/src/util/StringStream.cc

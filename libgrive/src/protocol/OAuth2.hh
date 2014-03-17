@@ -20,12 +20,18 @@
 #pragma once
 
 #include <string>
-#include <time.h>
+#include <ctime>
+#include "Json.hh"
+#include "http/Header.hh"
+
 namespace gr {
+
 
 class OAuth2
 {
 public :
+	static const int default_tries = 3;
+
 	OAuth2(
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
@@ -40,10 +46,10 @@ public :
 		const std::string&	client_id,
 		const std::string&	state = std::string() ) ;
 
-	void Auth( const std::string& auth_code ) ;
-	void Refresh( ) ;
+	void Auth( const std::string& auth_code,int tries=default_tries ) ;
+	void Refresh(int tries=default_tries) ;
 		
-	std::string RefreshToken( ) const ;
+	std::string RefreshToken() const ;
 	std::string AccessToken( ) const ;
 	std::size_t ExpiresIn( ) const ;
 	
@@ -60,5 +66,6 @@ private :
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;
 } ;
+
 	
 } // end of namespace

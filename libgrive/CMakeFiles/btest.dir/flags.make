@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_FLAGS = -I/home/jpuchky/Projects/grive/libgrive/src -I/home/jpuchky/Projects/grive/libgrive/test   
 
-CXX_DEFINES = -DHAVE_BFD -DSRC_DIR=\"/home/jpuchky/Projects/grive/libgrive/src\" -DTEST_DATA=\"/home/jpuchky/Projects/grive/libgrive/test/data/\" -DVERSION=\"0.3.1-pre\" -D_FILE_OFFSET_BITS=64
+CXX_DEFINES = -DHAVE_BFD -DSRC_DIR=\"/home/jpuchky/Projects/grive/libgrive/src\" -DTEST_DATA=\"/home/jpuchky/Projects/grive/libgrive/test/data/\" -DVERSION=\"0.3.1-pre\" -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
 # TARGET_FLAGS = -DBOOST_TEST_DYN_LINK
 

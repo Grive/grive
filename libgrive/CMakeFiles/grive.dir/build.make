@@ -75,32 +75,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/CommonUri.cc.o.provides: libgrive/CMakeF
 
 libgrive/CMakeFiles/grive.dir/src/drive/CommonUri.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/CommonUri.cc.o
 
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/drive/Drive.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_2)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Drive.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc
-
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/drive/Drive.cc.i"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc > CMakeFiles/grive.dir/src/drive/Drive.cc.i
-
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/drive/Drive.cc.s"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc -o CMakeFiles/grive.dir/src/drive/Drive.cc.s
-
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires:
-.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
-
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
-	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides.build
-.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides
-
-libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o
-
 libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o: libgrive/src/drive/Entry.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Entry.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Entry.cc
 
@@ -123,7 +100,7 @@ libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o.provides.build: libgrive/CMak
 
 libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o: libgrive/src/drive/Feed.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_4)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Feed.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Feed.cc
 
@@ -144,32 +121,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o.provides: libgrive/CMakeFiles/
 
 libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o
 
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/drive/Resource.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_5)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Resource.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc
-
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/drive/Resource.cc.i"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc > CMakeFiles/grive.dir/src/drive/Resource.cc.i
-
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/drive/Resource.cc.s"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc -o CMakeFiles/grive.dir/src/drive/Resource.cc.s
-
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires:
-.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
-
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
-	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides.build
-.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides
-
-libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o
-
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o: libgrive/src/drive/ResourceTree.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_6)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/ResourceTree.cc
 
@@ -189,6 +143,52 @@ libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o.provides: libgrive/CMa
 .PHONY : libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o.provides
 
 libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o: libgrive/src/drive/Drive.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_5)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Drive.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/drive/Drive.cc.i"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc > CMakeFiles/grive.dir/src/drive/Drive.cc.i
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/drive/Drive.cc.s"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/drive/Drive.cc -o CMakeFiles/grive.dir/src/drive/Drive.cc.s
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires:
+.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
+	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides.build
+.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides
+
+libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o: libgrive/src/drive/Resource.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_6)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/drive/Resource.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/drive/Resource.cc.i"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc > CMakeFiles/grive.dir/src/drive/Resource.cc.i
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/drive/Resource.cc.s"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.cc -o CMakeFiles/grive.dir/src/drive/Resource.cc.s
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires:
+.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
+	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides.build
+.PHONY : libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides
+
+libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o
 
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o: libgrive/src/drive/State.cc
@@ -282,32 +282,9 @@ libgrive/CMakeFiles/grive.dir/src/drive2/Resource.cc.o.provides: libgrive/CMakeF
 
 libgrive/CMakeFiles/grive.dir/src/drive2/Resource.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/drive2/Resource.cc.o
 
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o: libgrive/src/http/CurlAgent.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_11)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/CurlAgent.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc
-
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/http/CurlAgent.cc.i"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc > CMakeFiles/grive.dir/src/http/CurlAgent.cc.i
-
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/http/CurlAgent.cc.s"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc -o CMakeFiles/grive.dir/src/http/CurlAgent.cc.s
-
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires:
-.PHONY : libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
-
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
-	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides.build
-.PHONY : libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides
-
-libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o
-
 libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o: libgrive/src/http/Download.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_12)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/Download.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/Download.cc
 
@@ -330,7 +307,7 @@ libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o.provides.build: libgrive/CM
 
 libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o: libgrive/src/http/Header.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_13)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/Header.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/Header.cc
 
@@ -353,7 +330,7 @@ libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o.provides.build: libgrive/CMak
 
 libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o: libgrive/src/http/ResponseLog.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_14)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/ResponseLog.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/ResponseLog.cc
 
@@ -376,7 +353,7 @@ libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o.provides.build: libgrive
 
 libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o: libgrive/src/http/StringResponse.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_15)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/StringResponse.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/StringResponse.cc
 
@@ -399,7 +376,7 @@ libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o.provides.build: libgr
 
 libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o: libgrive/src/http/XmlResponse.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_16)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/XmlResponse.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/XmlResponse.cc
 
@@ -419,6 +396,29 @@ libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o.provides: libgrive/CMake
 .PHONY : libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o.provides
 
 libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o: libgrive/src/http/CurlAgent.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_16)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/http/CurlAgent.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/http/CurlAgent.cc.i"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc > CMakeFiles/grive.dir/src/http/CurlAgent.cc.i
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/http/CurlAgent.cc.s"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/http/CurlAgent.cc -o CMakeFiles/grive.dir/src/http/CurlAgent.cc.s
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires:
+.PHONY : libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
+	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides.build
+.PHONY : libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides
+
+libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o
 
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o: libgrive/src/protocol/AuthAgent.cc
@@ -765,32 +765,9 @@ libgrive/CMakeFiles/grive.dir/src/util/MemMap.cc.o.provides: libgrive/CMakeFiles
 
 libgrive/CMakeFiles/grive.dir/src/util/MemMap.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/util/MemMap.cc.o
 
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o: libgrive/src/util/OS.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_32)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/OS.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc
-
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/util/OS.cc.i"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc > CMakeFiles/grive.dir/src/util/OS.cc.i
-
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/util/OS.cc.s"
-	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc -o CMakeFiles/grive.dir/src/util/OS.cc.s
-
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires:
-.PHONY : libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
-
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
-	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides.build
-.PHONY : libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides
-
-libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o
-
 libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o: libgrive/src/util/SignalHandler.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_33)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_32)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/SignalHandler.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/SignalHandler.cc
 
@@ -813,7 +790,7 @@ libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o.provides.build: libgri
 
 libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o: libgrive/src/util/StdStream.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_34)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_33)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/StdStream.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/StdStream.cc
 
@@ -836,7 +813,7 @@ libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o.provides.build: libgrive/C
 
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o: libgrive/src/util/StringStream.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_35)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_34)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/StringStream.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/StringStream.cc
 
@@ -857,9 +834,55 @@ libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o.provides: libgrive/CMak
 
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o
 
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o: libgrive/src/util/OS.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_35)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/OS.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc
+
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/util/OS.cc.i"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc > CMakeFiles/grive.dir/src/util/OS.cc.i
+
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/util/OS.cc.s"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/util/OS.cc -o CMakeFiles/grive.dir/src/util/OS.cc.s
+
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires:
+.PHONY : libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
+
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
+	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides.build
+.PHONY : libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides
+
+libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o: libgrive/src/util/StdioFile.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_36)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/StdioFile.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/StdioFile.cc
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/grive.dir/src/util/StdioFile.cc.i"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/jpuchky/Projects/grive/libgrive/src/util/StdioFile.cc > CMakeFiles/grive.dir/src/util/StdioFile.cc.i
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/grive.dir/src/util/StdioFile.cc.s"
+	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/jpuchky/Projects/grive/libgrive/src/util/StdioFile.cc -o CMakeFiles/grive.dir/src/util/StdioFile.cc.s
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.requires:
+.PHONY : libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.requires
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.provides: libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.requires
+	$(MAKE) -f libgrive/CMakeFiles/grive.dir/build.make libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.provides.build
+.PHONY : libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.provides
+
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.provides.build: libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o
+
 libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o: libgrive/src/util/log/CommonLog.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_36)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_37)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/log/CommonLog.cc
 
@@ -882,7 +905,7 @@ libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o.provides.build: libgri
 
 libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o: libgrive/src/util/log/CompositeLog.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_37)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_38)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/log/CompositeLog.cc
 
@@ -905,7 +928,7 @@ libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o.provides.build: lib
 
 libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o: libgrive/src/util/log/DefaultLog.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_38)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_39)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/log/DefaultLog.cc
 
@@ -928,7 +951,7 @@ libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o.provides.build: libgr
 
 libgrive/CMakeFiles/grive.dir/src/util/log/Log.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/util/log/Log.cc.o: libgrive/src/util/log/Log.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_39)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_40)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/util/log/Log.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/util/log/Log.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/util/log/Log.cc
 
@@ -951,7 +974,7 @@ libgrive/CMakeFiles/grive.dir/src/util/log/Log.cc.o.provides.build: libgrive/CMa
 
 libgrive/CMakeFiles/grive.dir/src/xml/Node.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/xml/Node.cc.o: libgrive/src/xml/Node.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_40)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_41)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/xml/Node.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/xml/Node.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/xml/Node.cc
 
@@ -974,7 +997,7 @@ libgrive/CMakeFiles/grive.dir/src/xml/Node.cc.o.provides.build: libgrive/CMakeFi
 
 libgrive/CMakeFiles/grive.dir/src/xml/NodeSet.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/xml/NodeSet.cc.o: libgrive/src/xml/NodeSet.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_41)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_42)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/xml/NodeSet.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/xml/NodeSet.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/xml/NodeSet.cc
 
@@ -997,7 +1020,7 @@ libgrive/CMakeFiles/grive.dir/src/xml/NodeSet.cc.o.provides.build: libgrive/CMak
 
 libgrive/CMakeFiles/grive.dir/src/xml/String.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/xml/String.cc.o: libgrive/src/xml/String.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_42)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_43)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/xml/String.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/xml/String.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/xml/String.cc
 
@@ -1020,7 +1043,7 @@ libgrive/CMakeFiles/grive.dir/src/xml/String.cc.o.provides.build: libgrive/CMake
 
 libgrive/CMakeFiles/grive.dir/src/xml/TreeBuilder.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/xml/TreeBuilder.cc.o: libgrive/src/xml/TreeBuilder.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_43)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_44)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/xml/TreeBuilder.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/xml/TreeBuilder.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/xml/TreeBuilder.cc
 
@@ -1043,7 +1066,7 @@ libgrive/CMakeFiles/grive.dir/src/xml/TreeBuilder.cc.o.provides.build: libgrive/
 
 libgrive/CMakeFiles/grive.dir/src/bfd/Backtrace.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/bfd/Backtrace.cc.o: libgrive/src/bfd/Backtrace.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_44)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_45)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/bfd/Backtrace.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/bfd/Backtrace.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/bfd/Backtrace.cc
 
@@ -1066,7 +1089,7 @@ libgrive/CMakeFiles/grive.dir/src/bfd/Backtrace.cc.o.provides.build: libgrive/CM
 
 libgrive/CMakeFiles/grive.dir/src/bfd/Debug.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/bfd/Debug.cc.o: libgrive/src/bfd/Debug.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_45)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_46)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/bfd/Debug.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/bfd/Debug.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/bfd/Debug.cc
 
@@ -1089,7 +1112,7 @@ libgrive/CMakeFiles/grive.dir/src/bfd/Debug.cc.o.provides.build: libgrive/CMakeF
 
 libgrive/CMakeFiles/grive.dir/src/bfd/SymbolInfo.cc.o: libgrive/CMakeFiles/grive.dir/flags.make
 libgrive/CMakeFiles/grive.dir/src/bfd/SymbolInfo.cc.o: libgrive/src/bfd/SymbolInfo.cc
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_46)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/jpuchky/Projects/grive/CMakeFiles $(CMAKE_PROGRESS_47)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object libgrive/CMakeFiles/grive.dir/src/bfd/SymbolInfo.cc.o"
 	cd /home/jpuchky/Projects/grive/libgrive && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/grive.dir/src/bfd/SymbolInfo.cc.o -c /home/jpuchky/Projects/grive/libgrive/src/bfd/SymbolInfo.cc
 
@@ -1113,21 +1136,21 @@ libgrive/CMakeFiles/grive.dir/src/bfd/SymbolInfo.cc.o.provides.build: libgrive/C
 # Object files for target grive
 grive_OBJECTS = \
 "CMakeFiles/grive.dir/src/drive/CommonUri.cc.o" \
-"CMakeFiles/grive.dir/src/drive/Drive.cc.o" \
 "CMakeFiles/grive.dir/src/drive/Entry.cc.o" \
 "CMakeFiles/grive.dir/src/drive/Feed.cc.o" \
-"CMakeFiles/grive.dir/src/drive/Resource.cc.o" \
 "CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o" \
+"CMakeFiles/grive.dir/src/drive/Drive.cc.o" \
+"CMakeFiles/grive.dir/src/drive/Resource.cc.o" \
 "CMakeFiles/grive.dir/src/drive/State.cc.o" \
 "CMakeFiles/grive.dir/src/drive2/Drive.cc.o" \
 "CMakeFiles/grive.dir/src/drive2/Feed.cc.o" \
 "CMakeFiles/grive.dir/src/drive2/Resource.cc.o" \
-"CMakeFiles/grive.dir/src/http/CurlAgent.cc.o" \
 "CMakeFiles/grive.dir/src/http/Download.cc.o" \
 "CMakeFiles/grive.dir/src/http/Header.cc.o" \
 "CMakeFiles/grive.dir/src/http/ResponseLog.cc.o" \
 "CMakeFiles/grive.dir/src/http/StringResponse.cc.o" \
 "CMakeFiles/grive.dir/src/http/XmlResponse.cc.o" \
+"CMakeFiles/grive.dir/src/http/CurlAgent.cc.o" \
 "CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o" \
 "CMakeFiles/grive.dir/src/protocol/Json.cc.o" \
 "CMakeFiles/grive.dir/src/protocol/JsonResponse.cc.o" \
@@ -1143,10 +1166,11 @@ grive_OBJECTS = \
 "CMakeFiles/grive.dir/src/util/Exception.cc.o" \
 "CMakeFiles/grive.dir/src/util/File.cc.o" \
 "CMakeFiles/grive.dir/src/util/MemMap.cc.o" \
-"CMakeFiles/grive.dir/src/util/OS.cc.o" \
 "CMakeFiles/grive.dir/src/util/SignalHandler.cc.o" \
 "CMakeFiles/grive.dir/src/util/StdStream.cc.o" \
 "CMakeFiles/grive.dir/src/util/StringStream.cc.o" \
+"CMakeFiles/grive.dir/src/util/OS.cc.o" \
+"CMakeFiles/grive.dir/src/util/StdioFile.cc.o" \
 "CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o" \
 "CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o" \
 "CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o" \
@@ -1163,21 +1187,21 @@ grive_OBJECTS = \
 grive_EXTERNAL_OBJECTS =
 
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/CommonUri.cc.o
-libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o
-libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o
+libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o
+libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive2/Drive.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive2/Feed.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/drive2/Resource.cc.o
-libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o
+libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/protocol/Json.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/protocol/JsonResponse.cc.o
@@ -1193,10 +1217,11 @@ libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/DateTime.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/Exception.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/File.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/MemMap.cc.o
-libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o
+libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o
+libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o
 libgrive/libgrive.a: libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o
@@ -1219,21 +1244,21 @@ libgrive/CMakeFiles/grive.dir/build: libgrive/libgrive.a
 .PHONY : libgrive/CMakeFiles/grive.dir/build
 
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/CommonUri.cc.o.requires
-libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Entry.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Feed.cc.o.requires
-libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o.requires
+libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o.requires
+libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive2/Drive.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive2/Feed.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/drive2/Resource.cc.o.requires
-libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/Download.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/Header.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/ResponseLog.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/StringResponse.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/XmlResponse.cc.o.requires
+libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/http/CurlAgent.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/protocol/Json.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/protocol/JsonResponse.cc.o.requires
@@ -1249,10 +1274,11 @@ libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/D
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/Exception.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/File.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/MemMap.cc.o.requires
-libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/SignalHandler.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o.requires
+libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/OS.cc.o.requires
+libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/log/CommonLog.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/log/CompositeLog.cc.o.requires
 libgrive/CMakeFiles/grive.dir/requires: libgrive/CMakeFiles/grive.dir/src/util/log/DefaultLog.cc.o.requires

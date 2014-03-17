@@ -216,16 +216,6 @@ Resource* State::FindByHref( const std::string& href )
 	return m_res.FindByHref( href ) ;
 }
 
-State::iterator State::begin()
-{
-	return m_res.begin() ;
-}
-
-State::iterator State::end()
-{
-	return m_res.end() ;
-}
-
 void State::Read( const fs::path& filename )
 {
 	try
@@ -260,9 +250,9 @@ void State::Write( const fs::path& filename ) const
 	fs << result ;
 }
 
-<<<<<<< HEAD
-void State::Sync( http::Agent *http, const Json& options )
-{
+//<<<<<<< HEAD
+//void State::Sync( http::Agent *http, const Json& options )
+//{
 	// set the last sync time from the time returned by the server for the last file synced
 	// if the sync time hasn't changed (i.e. now files have been uploaded)
 	// set the last sync time to the time on the client
@@ -270,25 +260,25 @@ void State::Sync( http::Agent *http, const Json& options )
 	// the last sync time would always be a server time rather than a client time
 	// TODO - WARNING - do we use the last sync time to compare to client file times
 	// need to check if this introduces a new problem
- 	DateTime last_sync_time = m_last_sync;
-	m_res.Root()->Sync( http, last_sync_time, options ) ;
+// 	DateTime last_sync_time = m_last_sync;
+//	m_res.Root()->Sync( http, last_sync_time, options ) ;
 	
-  	if ( last_sync_time == m_last_sync )
-  	{
-		Trace( "nothing changed? %1%", m_last_sync ) ;
-    	m_last_sync = DateTime::Now();
-  	}
-  	else
-  	{
-		Trace( "updating last sync? %1%", last_sync_time ) ;
-    	m_last_sync = last_sync_time;
-  	}
-=======
+ // 	if ( last_sync_time == m_last_sync )
+ // 	{
+//		Trace( "nothing changed? %1%", m_last_sync ) ;
+ //   	m_last_sync = DateTime::Now();
+ // 	}
+  //	else
+  //	{
+//		Trace( "updating last sync? %1%", last_sync_time ) ;
+ //   	m_last_sync = last_sync_time;
+ // 	}
+//=======
 void State::Sync( http::Agent *http, const http::Header& auth, OAuth2::OAuth2& oauth)
 {
 	m_res.Root()->Sync( http, auth ,oauth) ;
 	m_last_sync = DateTime::Now() ;
->>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
+//>>>>>>> f3e914a0ba807a1ebccf5d80d508c20920a7c215
 }
 
 long State::ChangeStamp() const

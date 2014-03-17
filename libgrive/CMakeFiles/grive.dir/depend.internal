@@ -28,10 +28,12 @@ libgrive/CMakeFiles/grive.dir/src/drive/Drive.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/drive/ResourceTree.hh
  /home/jpuchky/Projects/grive/libgrive/src/drive/State.hh
  libgrive/src/http/Agent.hh
+ libgrive/src/http/CurlAgent.hh
  libgrive/src/http/Header.hh
  libgrive/src/http/ResponseLog.hh
  libgrive/src/http/XmlResponse.hh
  libgrive/src/protocol/Json.hh
+ libgrive/src/protocol/OAuth2.hh
  libgrive/src/util/DataStream.hh
  libgrive/src/util/DateTime.hh
  libgrive/src/util/Destroy.hh
@@ -77,6 +79,7 @@ libgrive/CMakeFiles/grive.dir/src/drive/Resource.cc.o
  libgrive/src/http/StringResponse.hh
  libgrive/src/http/XmlResponse.hh
  libgrive/src/protocol/Json.hh
+ libgrive/src/protocol/OAuth2.hh
  libgrive/src/util/CArray.hh
  libgrive/src/util/Crypt.hh
  libgrive/src/util/DataStream.hh
@@ -95,7 +98,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/ResourceTree.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/drive/Resource.hh
  /home/jpuchky/Projects/grive/libgrive/src/drive/ResourceTree.cc
  /home/jpuchky/Projects/grive/libgrive/src/drive/ResourceTree.hh
+ libgrive/src/http/Header.hh
  libgrive/src/protocol/Json.hh
+ libgrive/src/protocol/OAuth2.hh
  libgrive/src/util/DateTime.hh
  libgrive/src/util/Destroy.hh
  libgrive/src/util/Exception.hh
@@ -109,7 +114,9 @@ libgrive/CMakeFiles/grive.dir/src/drive/State.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/drive/State.cc
  /home/jpuchky/Projects/grive/libgrive/src/drive/State.hh
  libgrive/src/http/Agent.hh
+ libgrive/src/http/Header.hh
  libgrive/src/protocol/Json.hh
+ libgrive/src/protocol/OAuth2.hh
  libgrive/src/util/Crypt.hh
  libgrive/src/util/DataStream.hh
  libgrive/src/util/DateTime.hh
@@ -223,6 +230,7 @@ libgrive/CMakeFiles/grive.dir/src/json/ValResponse.cc.o
 libgrive/CMakeFiles/grive.dir/src/protocol/AuthAgent.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/protocol/AuthAgent.cc
  /home/jpuchky/Projects/grive/libgrive/src/protocol/AuthAgent.hh
+ /home/jpuchky/Projects/grive/libgrive/src/protocol/Json.hh
  /home/jpuchky/Projects/grive/libgrive/src/protocol/OAuth2.hh
  libgrive/src/http/Agent.hh
  libgrive/src/http/Error.hh
@@ -313,6 +321,8 @@ libgrive/CMakeFiles/grive.dir/src/util/StdStream.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/util/DataStream.hh
  /home/jpuchky/Projects/grive/libgrive/src/util/StdStream.cc
  /home/jpuchky/Projects/grive/libgrive/src/util/StdStream.hh
+libgrive/CMakeFiles/grive.dir/src/util/StdioFile.cc.o
+ /home/jpuchky/Projects/grive/libgrive/src/util/StdioFile.cc
 libgrive/CMakeFiles/grive.dir/src/util/StringStream.cc.o
  /home/jpuchky/Projects/grive/libgrive/src/util/DataStream.hh
  /home/jpuchky/Projects/grive/libgrive/src/util/StringStream.cc
