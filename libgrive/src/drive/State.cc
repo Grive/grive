@@ -35,6 +35,7 @@ namespace gr { namespace v1 {
 
 State::State( const fs::path& filename, const Json& options  ) :
     m_res		( options["path"].Str() ),
+    m_dir		( options["dir"].Str() ),
 	m_cstamp	( -1 )
 {
 	Read( filename ) ;
@@ -78,6 +79,10 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
 		
+		// check if it is ignored
+		else if ( folder == m_res.Root() && m_dir != "" && fname != m_dir )
+			Log( "%1% %2% is ignored", fs::is_directory(i->path()) ? "folder" : "file", fname, log::verbose );
+		
 		// check for broken symblic links
 		else if ( !fs::exists( i->path() ) )
 			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
@@ -108,6 +113,10 @@ void State::FromRemote( const Entry& e )
 
 	if ( IsIgnore( e.Name() ) )
 		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+
+	// check if it is ignored
+	else if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
+		Log( "%1% %2% is ignored", e.Kind(), e.Name(), log::verbose );
 
 	// common checkings
 	else if ( e.Kind() != "folder" && (fn.empty() || e.ContentSrc().empty()) )
