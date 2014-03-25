@@ -12,6 +12,9 @@ find_package(CppUnit)
 find_package(Iberty)
 find_package(ZLIB)
 
+include(FindPkgConfig)
+pkg_search_module(YAJL REQUIRED yajl)
+
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
@@ -42,6 +45,7 @@ include_directories(
 	${libgrive_SOURCE_DIR}/test
 	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
+	${YAJL_INCLUDE_DIRS}
 )
 
 file(GLOB DRIVE_HEADERS
@@ -80,7 +84,6 @@ add_definitions(
 add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
-	yajl
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${LIBGCRYPT_LIBRARIES}
@@ -89,6 +92,7 @@ target_link_libraries( grive
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
+	${YAJL_LIBRARIES}
 )
 
 #set_target_properties(grive PROPERTIES
