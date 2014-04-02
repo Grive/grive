@@ -113,7 +113,7 @@ int Main( int argc, char **argv )
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
 		( "log-xml",	"Log more HTTP responses as XML for debugging.")
 		( "new-rev",	"Create new revisions in server for updated files.")
-		( "debug,d",	"Enable debug level messages. Implies -v.")
+		( "debug,d",	"Enable debug level messages. Implies -V.")
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
