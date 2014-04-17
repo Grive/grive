@@ -1,7 +1,7 @@
 %define rev %(git ls-remote https://github.com/jar1karp/grive.git refs/heads/master|awk '{print $1}')
 
 Name:           grive
-Version:        0.3.0-pre_git%{rev}
+Version:        0.3.0pre_git%{rev}
 Release:        1%{?dist}
 
 Summary:        An open source Linux client for Google Drive
@@ -44,6 +44,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT/%{_bindir}/bgrive
 
 %files
-%doc COPYING README
+%{_docdir}/%{name}/COPYING
+%{_docdir}/%{name}/README
 %{_bindir}/%{name}
 %{_mandir}/man1/%{name}.1.gz
