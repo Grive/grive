@@ -38,6 +38,8 @@ State::State( const fs::path& filename, const Json& options  ) :
 	m_cstamp	( -1 )
 {
 	Read( filename ) ;
+
+	m_filter = "GDrive";
 	
 	// the "-f" option will make grive always thinks remote is newer
 	Json force ;
@@ -58,9 +60,37 @@ void State::FromLocal( const fs::path& p )
 	FromLocal( p, m_res.Root() ) ;
 }
 
+/// returns true if a file should be ignored based
+/// on the configured filter
+bool State::IsFiltered( const std::string& filename ) 
+{
+	if (filename.length() < m_filter.length()) {
+	      return true ;
+	}
+  
+        std::string prefix = filename.substr(0, m_filter.length());
+  
+        return prefix.compare(m_filter) != 0;  
+}
+
+bool State::IsFiltered( const Entry& e ) 
+{
+	if (Resource *parent = m_res.FindByHref( e.ParentHref() ) )
+	{
+	    assert( parent->IsFolder() ) ;
+	    if (!parent->IsRoot()) 
+		  return false;
+	}
+	else
+	    return false ;
+	  
+        return IsFiltered( e.Name() );
+}
+
+
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename[0] == '.' ;
+	return (filename[0] == '.') ;
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
@@ -77,6 +107,9 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 	
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
+		
+		else if ( folder->IsRoot() && this->IsFiltered(fname))
+			Log( "file %1% is filtered by grive", fname, log::verbose ) ;
 		
 		// check for broken symblic links
 		else if ( !fs::exists( i->path() ) )
@@ -109,6 +142,9 @@ void State::FromRemote( const Entry& e )
 	if ( IsIgnore( e.Name() ) )
 		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
 
+	else if ( this->IsFiltered(e) )
+		Log( "file %1% is filtered by grive", e.Name(), log::verbose ) ;
+	
 	// common checkings
 	else if ( e.Kind() != "folder" && (fn.empty() || e.ContentSrc().empty()) )
 		Log( "%1% \"%2%\" is a google document, ignored", e.Kind(), e.Name(), log::verbose ) ;
