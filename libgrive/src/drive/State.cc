@@ -257,8 +257,8 @@ void State::Read( const fs::path& filename )
 void State::Write( const fs::path& filename ) const
 {
 	Json last_sync ;
-	last_sync.Add( "sec",	Json(m_last_sync.Sec() ) );
-	last_sync.Add( "nsec",	Json(m_last_sync.NanoSec() ) );
+	last_sync.Add( "sec",	Json( (int)m_last_sync.Sec() ) );
+	last_sync.Add( "nsec",	Json( (unsigned)m_last_sync.NanoSec() ) );
 	
 	Json result ;
 	result.Add( "last_sync", last_sync ) ;
