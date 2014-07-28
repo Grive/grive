@@ -29,8 +29,8 @@
 	#pragma warning(push)
 	#pragma warning(disable: 4005)
 #endif
-#include <json/json_tokener.h>
-#include <json/linkhash.h>
+#include <json_tokener.h>
+#include <linkhash.h>
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif
