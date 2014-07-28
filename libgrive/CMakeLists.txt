@@ -6,6 +6,7 @@ find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
+find_package(YAJL REQUIRED)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
@@ -41,6 +42,7 @@ include_directories(
 	${libgrive_SOURCE_DIR}/src
 	${libgrive_SOURCE_DIR}/test
 	${GDBM_INCLUDE_DIR}
+	${YAJL_INCLUDE_DIR}
 	${OPT_INCS}
 )
 
@@ -80,7 +82,7 @@ add_definitions(
 add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
-	yajl
+	${YAJL_LIBRARY}
 	${CURL_LIBRARIES}
 	${JSONC_LIBRARY}
 	${LIBGCRYPT_LIBRARIES}
