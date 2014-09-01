@@ -13,6 +13,8 @@
 # This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
+PIDFILE=/tmp/grive-incron.lock
+
 if [ $# != 2 ] 
 then
   >&2 echo Call from incron: \$# directory
@@ -23,14 +25,28 @@ then
   exit 0  # ignore grive housekeeping files
 fi
 # Don't run multiple copies at once
-N=2
+
 DLY=1
-while [ "$N" != 0 ]
-do
-    N=$( pgrep -c -u "$USER" ^grive$ )  # assume if 1 it is me!
-    if [ "$N" != 0 ]
-      then sleep $DLY
-	DLY=$((DLY+5))
-      fi
+
+while true
+  do
+  while [ -f "$PIDFILE"  ] && kill -0 `cat "$PIDFILE"` 2>/dev/null
+    do 
+      sleep $DLY
+      DLY=$((DLY+1))
+      DLY=$((DLY % 10 ))  # no more than 10 seconds
+    done
+    if ! kill -0 `cat "$PIDFILE" 2>/dev/null` 2>/dev/null
+    then
+      rm -f "$PIDFILE"
+    fi
+    if (set -o noclobber; echo $$>"$PIDFILE" ) >/dev/null
+    then 
+	trap 'rm -f "$PIDFILE"' INT TERM EXIT
+	break
+    fi
 done
-exec grive -p "$2"
+grive -p "$2"
+rm -f "$PIDFILE"
+trap - INT TERM EXIT
+exit 0
