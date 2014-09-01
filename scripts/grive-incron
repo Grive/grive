@@ -24,11 +24,13 @@ then
 fi
 # Don't run multiple copies at once
 N=2
-while [ "$N" != 1 ]
+DLY=1
+while [ "$N" != 0 ]
 do
-    N=$( pgrep -c -u "$USER" grive-? )  # assume if 1 it is me!
-    if [ "$N" != 1 ]
-      then sleep 1
+    N=$( pgrep -c -u "$USER" ^grive$ )  # assume if 1 it is me!
+    if [ "$N" != 0 ]
+      then sleep $DLY
+	DLY=$((DLY+5))
       fi
 done
 exec grive -p "$2"
