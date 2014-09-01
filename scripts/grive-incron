@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Allow grive to be called from incron
+# if your path is /home/User/gdrivef and this file is in /usr/local/bin then use the following incrontab line:
+# /home/User/gdrive IN_CREATE,IN_DELETE,IN_CLOSE_WRITE,IN_MOVE /usr/local/bin/grive-incron $# /home/User/gdrive
+
+# grive-incron a bash script to allow automatic push to gdrive from a directory
+# It is made to be called by # incron 
+#
+# Copyright (C) 2014 Al Williams (al.williams@awce.com)
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+if [ $# != 2 ] 
+then
+  >&2 echo Call from incron: \$# directory
+  exit 1
+fi
+if [ "$1" == .grive -o "$1" == .grive_state ] 
+then
+  exit 0  # ignore grive housekeeping files
+fi
+# Don't run multiple copies at once
+N=2
+while [ "$N" != 1 ]
+do
+    N=$( pgrep -c -u "$USER" grive-? )  # assume if 1 it is me!
+    if [ "$N" != 1 ]
+      then sleep 1
+      fi
+done
+exec grive -p "$2"

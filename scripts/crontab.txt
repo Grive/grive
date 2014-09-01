@@ -1,0 +1,5 @@
+# This example runs grive on /home/USER/gdrive
+# See man crontab for format
+# This line runs at 5 after the hour and 35 after the hour
+
+5,35 * * * * /usr/bin/grive -p /home/USER/gdrive
