@@ -39,6 +39,7 @@ Config::Config( const po::variables_map& vm )
 	m_cmd.Add( "log-xml",	Json(vm.count("log-xml") > 0) ) ;
 	m_cmd.Add( "new-rev",	Json(vm.count("new-rev") > 0) ) ;
 	m_cmd.Add( "force",		Json(vm.count("force") > 0 ) ) ;
+	m_cmd.Add( "uploadonly",		Json(vm.count("uploadonly") > 0 ) ) ;
 	m_cmd.Add( "path",		Json(vm.count("path") > 0
 		? vm["path"].as<std::string>()
 		: default_root_folder ) ) ;

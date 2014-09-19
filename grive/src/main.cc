@@ -117,6 +117,8 @@ int Main( int argc, char **argv )
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
+		( "uploadonly,u",	"Force grive to always upload a file from Google Drive "
+						"instead of downloading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
 	;
