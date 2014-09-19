@@ -39,13 +39,13 @@ public :
 	Download( const std::string& filename ) ;
 	Download( const std::string& filename, NoChecksum ) ;
 	~Download() ;
-	
+
 	std::string Finish() const ;
-	
+
 	void Clear() ;
 	std::size_t Write( const char *data, std::size_t count ) ;
-	std::size_t Read( char *, std::size_t ) ; 
-	
+	std::size_t Read( char *, std::size_t ) ;
+
 private :
 	File						m_file ;
 	std::auto_ptr<crypt::MD5>	m_crypt ;

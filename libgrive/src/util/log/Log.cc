@@ -29,7 +29,7 @@ public :
 	void Log( const log::Fmt&, log::Serverity )
 	{
 	}
-	
+
 	bool Enable( log::Serverity, bool enable )
 	{
 		return enable ;
@@ -43,10 +43,10 @@ public :
 LogBase* LogBase::Inst( std::auto_ptr<LogBase> log )
 {
 	static std::auto_ptr<LogBase> inst( new MockLog ) ;
-	
+
 	if ( log.get() != 0 )
 		inst = log ;
-		
+
 	assert( inst.get() != 0 ) ;
 	return inst.get() ;
 }

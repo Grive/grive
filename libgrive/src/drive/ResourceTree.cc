@@ -46,10 +46,10 @@ ResourceTree::ResourceTree( const ResourceTree& fs ) :
 		Resource *c = new Resource( **i ) ;
 		if ( c->SelfHref() == root_href )
 			m_root = c ;
-		
+
 		m_set.insert( c ) ;
 	}
-	
+
 	assert( m_root != 0 ) ;
 }
 
@@ -63,7 +63,7 @@ void ResourceTree::Clear()
 	// delete all pointers
 	const Set& s = m_set.get<ByIdentity>() ;
 	std::for_each( s.begin(), s.end(), Destroy() ) ;
-	
+
 	m_set.clear() ;
 	m_root = 0 ;
 }

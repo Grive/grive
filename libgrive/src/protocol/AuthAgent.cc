@@ -56,7 +56,7 @@ long AuthAgent::Put(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Put(url, data, dest, auth) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -67,11 +67,11 @@ long AuthAgent::Put(
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
-	
+
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Put( url, file, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -85,7 +85,7 @@ long AuthAgent::Get(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -96,11 +96,11 @@ long AuthAgent::Post(
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
-	
+
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -115,7 +115,7 @@ long AuthAgent::Custom(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -141,17 +141,17 @@ bool AuthAgent::CheckRetry( long response )
 	{
 		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
 			response, log::warning ) ;
-			
+
 		os::Sleep( 5 ) ;
 		return true ;
 	}
-	
+
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
 		Log( "resquest failed due to auth token expired: %1%. refreshing token",
 			response, log::warning ) ;
-			
+
 		m_auth.Refresh() ;
 		return true ;
 	}
@@ -173,7 +173,7 @@ long AuthAgent::CheckHttpResponse(
  				<< Url( url )
  				<< HttpHeader( hdr ) ) ;
 	}
-	
+
 	return response ;
 }
 

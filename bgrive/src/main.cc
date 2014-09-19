@@ -48,15 +48,15 @@ int main( int argc, char **argv )
 {
 	File file( ".grive" ) ;
 	Json cfg = Json::Parse( &file ) ;
-	
+
 	std::string refresh_token = cfg["refresh_token"].Str() ;
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	
+
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 
 	QApplication app( argc, argv ) ;
 	MainWnd wnd( &agent ) ;
 	wnd.show();
-		
+
 	return app.exec() ;
 }

@@ -35,7 +35,7 @@ MainWnd::MainWnd( http::Agent *agent ) :
 {
 	m_ui.setupUi(this) ;
 	m_ui.m_dir->setModel( &m_drive ) ;
-	
+
 	connect(
 		m_ui.m_dir,	SIGNAL(activated(const QModelIndex&)),
 		this,		SLOT(OnClick(const QModelIndex&))

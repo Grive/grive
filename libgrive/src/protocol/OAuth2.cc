@@ -80,10 +80,10 @@ std::string OAuth2::MakeAuthURL(
 
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
-			h.Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" + 
+			h.Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" +
 			h.Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
-			h.Escape( "https://docs.google.com/feeds/" )					+ "+" + 
-			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
+			h.Escape( "https://docs.google.com/feeds/" )					+ "+" +
+			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" +
 			h.Escape( "https://spreadsheets.google.com/feeds/" )			+
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
@@ -100,7 +100,7 @@ void OAuth2::Refresh( )
 
 	http::JsonResponse  resp ;
 	http::CurlAgent		http ;
-    
+
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp, http::Header() ) ;
 

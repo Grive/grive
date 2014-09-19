@@ -27,7 +27,7 @@
 namespace gr {
 
 /*!	\brief	An HTTP agent with support OAuth2
-	
+
 	This is a HTTP agent that provide support for OAuth2. It will also perform retries on
 	certain HTTP errors.
 */
@@ -41,7 +41,7 @@ public :
 		const std::string&	data,
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
-	
+
 	long Put(
 		const std::string&	url,
 		File*				file,
@@ -52,21 +52,21 @@ public :
 		const std::string& 	url,
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
-	
+
 	long Post(
 		const std::string& 	url,
 		const std::string&	data,
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
-	
+
 	long Custom(
 		const std::string&	method,
 		const std::string&	url,
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
-	
+
 	std::string RedirLocation() const ;
-	
+
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 
@@ -77,7 +77,7 @@ private :
 		long 				response,
 		const std::string&	url,
 		const http::Header&	hdr  ) ;
-	
+
 private :
 	OAuth2								m_auth ;
 	const std::auto_ptr<http::Agent>	m_agent ;

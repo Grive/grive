@@ -52,7 +52,7 @@ namespace details
 			hashed_non_unique<tag<ByID>,	const_mem_fun<Resource, std::string,	&Resource::ID> >
 		>
 	> DB ;
-	
+
 	typedef DB::index<ByID>::type		ID ;
 	typedef DB::index<ByIdentity>::type	Set ;
 }
@@ -63,7 +63,7 @@ class Drive
 {
 public :
 	Drive( ) ;
-	
+
 	void Refresh( http::Agent *agent ) ;
 
 	Resource* Find( const std::string& id ) ;
@@ -71,7 +71,7 @@ public :
 
 	Resource* Root() ;
 	const Resource* Root() const ;
-	
+
 	const Resource* Child( const Resource *parent, std::size_t idx ) const ;
 	const Resource* Parent( const Resource *child ) const ;
 
@@ -79,10 +79,10 @@ private :
 	Resource* NewResource( const Val& item ) ;
 	Resource* NewResource( http::Agent *agent, const std::string& id ) ;
 	void NewResource( http::Agent *agent, Feed& items ) ;
-	
+
 private :
 	details::DB	m_db ;
-	
+
 	Resource	*m_root ;
 } ;
 

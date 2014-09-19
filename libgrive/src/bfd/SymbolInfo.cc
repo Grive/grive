@@ -48,9 +48,9 @@ SymbolInfo::SymbolInfo( )
 	m_impl->m_bfd		= 0 ;
 	m_impl->m_symbols	= 0 ;
 	m_impl->m_symbol_count	= 0 ;
-	
+
 	bfd_init( ) ;
-	
+
 	// opening itself
 	bfd *b = bfd_openr( "/proc/self/exe", 0 ) ;
 	if ( b == NULL )
@@ -59,13 +59,13 @@ SymbolInfo::SymbolInfo( )
 		          << bfd_errmsg( bfd_get_error() ) << std::endl ;
 		return ;
 	}
-	
+
 	if ( bfd_check_format( b, bfd_archive ) )
 	{
 		bfd_close( b ) ;
 		return ;
 	}
-	
+
 	char **matching ;
 	if ( !bfd_check_format_matches( b, bfd_object, &matching ) )
 	{
@@ -77,7 +77,7 @@ SymbolInfo::SymbolInfo( )
 			std::cerr << bfd_get_filename( b ) << ": Matching formats: " ;
 			for ( char **p = matching ; *p != 0 ; p++ )
 				std::cerr << " " << *p ;
-			
+
 			std::cerr << std::endl ;
 			std::free( matching ) ;
 		}
@@ -106,7 +106,7 @@ struct SymbolInfo::BacktraceInfo
 	const char			*m_func_name ;
 	unsigned int		m_lineno ;
 	unsigned int		m_is_found ;
-	
+
 	static void Callback( bfd *abfd, asection *section, void* addr ) ;
 } ;
 
@@ -116,17 +116,17 @@ void SymbolInfo::BacktraceInfo::Callback( bfd *abfd, asection *section,
 	BacktraceInfo *info = (BacktraceInfo *)data ;
 	if ((section->flags & SEC_ALLOC) == 0)
 		return ;
-	
+
 	bfd_vma vma = bfd_get_section_vma(abfd, section);
-	
+
 	unsigned long address = (unsigned long)(info->m_addr);
 	if ( address < vma )
 		return;
-	
+
 	bfd_size_type size = bfd_section_size(abfd, section);
 	if ( address > (vma + size))
 		return ;
-	
+
 	const SymbolInfo *pthis	= info->m_pthis ;
 	info->m_is_found	=  bfd_find_nearest_line( abfd, section,
 	                                              pthis->m_impl->m_symbols,
@@ -148,7 +148,7 @@ void SymbolInfo::PrintTrace( void *addr, std::ostream& os, std::size_t idx )
 	{
 		this, addr, 0, 0, 0, false
 	} ;
-	
+
 	Dl_info sym ;
 	bfd_map_over_sections( m_impl->m_bfd,
 							&SymbolInfo::BacktraceInfo::Callback,
@@ -164,7 +164,7 @@ if ( btinfo.m_is_found )
 			filename.erase( pos, std::strlen( SRC_DIR ) ) ;
 #endif
 		os << "#"  << idx << " " << addr << " "
-			<< filename << ":" << btinfo.m_lineno 
+			<< filename << ":" << btinfo.m_lineno
 			<< " "
 			<< (btinfo.m_func_name != 0 ? Demangle(btinfo.m_func_name) : "" )
 			<< std::endl ;

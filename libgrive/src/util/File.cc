@@ -48,7 +48,7 @@ using namespace gr ;
 off_t LSeek( int fd, off_t offset, int whence )
 {
 	assert( fd >= 0 ) ;
-	
+
 	off_t r = ::lseek( fd, offset, whence ) ;
 	if ( r == static_cast<off_t>(-1) )
 	{
@@ -58,7 +58,7 @@ off_t LSeek( int fd, off_t offset, int whence )
 				<< boost::errinfo_errno(errno)
 		) ;
 	}
-	
+
 	return r ;
 }
 
@@ -104,7 +104,7 @@ File::File( const fs::path& path, int mode ) : m_fd( -1 )
 	OpenForWrite( path, mode ) ;
 }
 
-/**	The destructor will close the file. 
+/**	The destructor will close the file.
 */
 File::~File( )
 {
@@ -115,7 +115,7 @@ void File::Open( const fs::path& path, int flags, int mode )
 {
 	if ( IsOpened() )
 		Close() ;
-	
+
 	assert( m_fd == -1 ) ;
 	m_fd = ::open( path.string().c_str(), flags, mode ) ;
 	if ( m_fd == -1 )
@@ -209,9 +209,9 @@ off_t File::Tell() const
 u64_t File::Size() const
 {
 	assert( IsOpened() ) ;
-	
+
 	struct stat s = FStat(m_fd) ;
-	
+
 	assert( s.st_size >= 0 ) ;
 	return static_cast<uint64_t>( s.st_size ) ;
 }
@@ -219,7 +219,7 @@ u64_t File::Size() const
 void File::Chmod( int mode )
 {
 	assert( IsOpened() ) ;
-#ifndef WIN32	
+#ifndef WIN32
 	if ( ::fchmod( m_fd, mode ) != 0 )
 	{
 		BOOST_THROW_EXCEPTION(
@@ -235,7 +235,7 @@ void File::Chmod( int mode )
 void* File::Map( off_t offset, std::size_t length )
 {
 	assert( IsOpened() ) ;
-	
+
 #ifdef WIN32
 	assert( false ) ;
 	return 0 ;

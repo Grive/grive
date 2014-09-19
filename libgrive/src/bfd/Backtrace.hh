@@ -30,11 +30,11 @@ namespace gr {
 /**	\internal
 	The sole reason for this class to exists is to provide the
 	operator<< overload to allow:
-	
+
 \code
 std::cout << Backtrace() << std::endl ;
 \endcode
-	
+
 	\sa SymbolInfo
 */
 class Backtrace
@@ -42,7 +42,7 @@ class Backtrace
 public :
 	explicit Backtrace( std::size_t skip = 2 ) ;
 	Backtrace( const Backtrace& bt ) ;
-	
+
 	friend std::ostream& operator<<( std::ostream& os,
 	                                 const gr::Backtrace& bt ) ;
 

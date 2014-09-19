@@ -31,28 +31,28 @@ namespace log
 	{
 		/// user unfriendly messages. only meant for developers.
 		debug,
-		
+
 		/// enabled only if -V is specified. grive tries to tell you every
 		/// single thing it tries to do.
 		verbose,
-		
+
 		/// notification messages indicates nothing is going wrong
 		info,
-		
+
 		/// potential error messages
 		warning,
-		
+
 		/// an error has occurs but grive doesn't need to quit
 		error,
-		
+
 		/// grive cannot proceed
 		critical,
-		
-		
+
+
 		/// must be put at the end, equal to number of serverities
 		serverity_count
 	} ;
-	
+
 	typedef boost::format Fmt ;
 }
 
@@ -64,7 +64,7 @@ public :
 	virtual void Log( const log::Fmt& msg, log::Serverity s = log::info ) = 0 ;
 	virtual bool Enable( log::Serverity s, bool enable = true ) = 0 ;
 	virtual bool IsEnabled( log::Serverity s ) const = 0 ;
-	
+
 	static LogBase* Inst( std::auto_ptr<LogBase> log = std::auto_ptr<LogBase>() ) ;
 	~LogBase() ;
 

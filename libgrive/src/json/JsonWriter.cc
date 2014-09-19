@@ -104,7 +104,7 @@ void JsonWriter::WriteCallback( void *ctx, const char *str, std::size_t size )
 	JsonWriter *pthis = reinterpret_cast<JsonWriter*>(ctx) ;
 	assert( pthis != 0 ) ;
 	assert( pthis->m_impl->out != 0 ) ;
-	
+
 	pthis->m_impl->out->Write( str, size ) ;
 }
 

@@ -31,7 +31,7 @@ class MockAgent : public Agent
 {
 public :
 	MockAgent() ;
-	
+
 	long Put(
 		const std::string&	url,
 		const std::string&	data,
@@ -42,21 +42,21 @@ public :
 		const std::string& 	url,
 		Receivable			*dest,
 		const Header&		hdr ) ;
-	
+
 	long Post(
 		const std::string& 	url,
 		const std::string&	data,
 		Receivable			*dest,
 		const Header&		hdr ) ;
-	
+
 	long Custom(
 		const std::string&	method,
 		const std::string&	url,
 		Receivable			*dest,
 		const Header&		hdr ) ;
-	
+
 	std::string RedirLocation() const ;
-	
+
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 } ;

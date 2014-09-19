@@ -57,7 +57,7 @@ std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, 
 		std::memcpy( ptr, &(*data)[0], count ) ;
 		data->erase( 0, count ) ;
 	}
-	
+
 	return count ;
 }
 
@@ -70,10 +70,10 @@ std::size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, Fi
 		static_cast<std::size_t>(size * nmemb),
 		static_cast<std::size_t>(file->Size() - file->Tell()) ) ;
 	assert( count <= std::numeric_limits<std::size_t>::max() ) ;
-	
+
 	if ( count > 0 )
 		file->Read( static_cast<char*>(ptr), static_cast<std::size_t>(count) ) ;
-	
+
 	return count ;
 }
 
@@ -96,7 +96,7 @@ CurlAgent::CurlAgent() :
 void CurlAgent::Init()
 {
 	::curl_easy_reset( m_pimpl->curl ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ; 
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&CurlAgent::HeaderCallback ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
@@ -112,7 +112,7 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 {
 	char *str = reinterpret_cast<char*>(ptr) ;
 	std::string line( str, str + size*nmemb ) ;
-	
+
 	static const std::string loc = "Location: " ;
 	std::size_t pos = line.find( loc ) ;
 	if ( pos != line.npos )
@@ -120,7 +120,7 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 		std::size_t end_pos = line.find( "\r\n", pos ) ;
 		pthis->m_pimpl->location = line.substr( loc.size(), end_pos - loc.size() ) ;
 	}
-	
+
 	return size*nmemb ;
 }
 
@@ -153,10 +153,10 @@ long CurlAgent::ExecCurl(
 	long http_code = 0;
 	::curl_easy_getinfo(curl,	CURLINFO_RESPONSE_CODE, &http_code);
 	Trace( "HTTP response %1%", http_code ) ;
-	
+
 	// reset the curl buffer to prevent it from touch our "error" buffer
 	::curl_easy_setopt(curl,	CURLOPT_ERRORBUFFER, 	0 ) ;
-	
+
 	// only throw for libcurl errors
 	if ( curl_code != CURLE_OK )
 	{
@@ -179,7 +179,7 @@ long CurlAgent::Put(
 	const Header&			hdr )
 {
 	Trace("HTTP PUT \"%1%\"", url ) ;
-	
+
 	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
@@ -190,7 +190,7 @@ long CurlAgent::Put(
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
 	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
 	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
-	
+
 	return ExecCurl( url, dest, hdr ) ;
 }
 
@@ -200,10 +200,10 @@ long CurlAgent::Put(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	assert( file != 0 ) ;  
+	assert( file != 0 ) ;
 
 	Trace("HTTP PUT \"%1%\"", url ) ;
-	
+
 	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
@@ -212,7 +212,7 @@ long CurlAgent::Put(
 	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
 	::curl_easy_setopt(curl, CURLOPT_READDATA ,			file ) ;
 	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file->Size()) ) ;
-	
+
 	return ExecCurl( url, dest, hdr ) ;
 }
 
@@ -243,7 +243,7 @@ long CurlAgent::Post(
 
 	// make a copy because the parameter is const
 	std::string post_data = data ;
-	
+
 	// set post specific options
 	::curl_easy_setopt(curl, CURLOPT_POST, 			1L);
 	::curl_easy_setopt(curl, CURLOPT_POSTFIELDS,	&post_data[0] ) ;
@@ -274,7 +274,7 @@ void CurlAgent::SetHeader( const Header& hdr )
 	struct curl_slist *curl_hdr = 0 ;
     for ( Header::iterator i = hdr.begin() ; i != hdr.end() ; ++i )
 		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
-	
+
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
 }
 
@@ -286,23 +286,23 @@ std::string CurlAgent::RedirLocation() const
 std::string CurlAgent::Escape( const std::string& str )
 {
 	CURL *curl = m_pimpl->curl ;
-	
+
 	char *tmp = curl_easy_escape( curl, str.c_str(), str.size() ) ;
 	std::string result = tmp ;
 	curl_free( tmp ) ;
-	
+
 	return result ;
 }
 
 std::string CurlAgent::Unescape( const std::string& str )
 {
 	CURL *curl = m_pimpl->curl ;
-	
+
 	int r ;
 	char *tmp = curl_easy_unescape( curl, str.c_str(), str.size(), &r ) ;
 	std::string result = tmp ;
 	curl_free( tmp ) ;
-	
+
 	return result ;
 }
 

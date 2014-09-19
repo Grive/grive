@@ -33,7 +33,7 @@ public :
 	explicit DefaultLog( const std::string& filename ) ;
 
 	void Log( const log::Fmt& msg, log::Serverity s ) ;
-	
+
 private :
 	std::ofstream	m_file ;
 	std::ostream&	m_log ;

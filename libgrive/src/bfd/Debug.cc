@@ -52,16 +52,16 @@ std::string Demangle( const char *name )
 std::ostream& PrintHex( std::ostream& os, const void *buf, std::size_t size )
 {
 	const unsigned char *raw = static_cast<const unsigned char*>( buf ) ;
-	
+
 	for ( std::size_t i = 0 ; i < size ; i++ )
 	{
 		if ( i % 8 == 0 && i > 0 )
 			os << std::endl ;
-		
+
 		if ( i % 8 == 0 )
 			os << std::hex << std::setw(8) << std::setfill('0') << i << " " ;
-		
-		os << "0x" << std::hex << std::setw(2) << std::setfill('0') 
+
+		os << "0x" << std::hex << std::setw(2) << std::setfill('0')
 			<< (int)raw[i] << ", " ;
 	}
 	os << std::endl ;

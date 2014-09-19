@@ -68,10 +68,10 @@ std::string Download::Finish() const
 std::size_t Download::Write( const char *data, std::size_t count )
 {
 	assert( data != 0 ) ;
-	
+
 	if ( m_crypt.get() != 0 )
 		m_crypt->Write( data, count ) ;
-	
+
 	return m_file.Write( data, count ) ;
 }
 

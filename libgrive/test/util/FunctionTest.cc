@@ -38,7 +38,7 @@ void FunctionTest::TestRun( )
 {
 	Function<int(int)> f = &TestFunction ;
 	Function<std::string()> f2 ;
-	
+
 	CPPUNIT_ASSERT_EQUAL( 3, f(3) ) ;
 	CPPUNIT_ASSERT_EQUAL( std::string(), f2() ) ;
 }

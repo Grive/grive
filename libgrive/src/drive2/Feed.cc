@@ -45,7 +45,7 @@ bool Feed::Next( http::Agent *agent )
 	Val url ;
 	if ( !m_content.Get("nextLink", url) )
 		return false ;
-	
+
 	http::ValResponse out ;
 	try
 	{
@@ -57,7 +57,7 @@ bool Feed::Next( http::Agent *agent )
 		throw ;
 	}
 	m_content = out.Response() ;
-	
+
 	return true ;
 }
 

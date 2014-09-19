@@ -43,7 +43,7 @@ Config::Config( const po::variables_map& vm )
 	m_cmd.Add( "path",		Json(vm.count("path") > 0
 		? vm["path"].as<std::string>()
 		: default_root_folder ) ) ;
-	
+
 	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
 	m_file	= Read( ) ;
 }
@@ -83,10 +83,10 @@ Json Config::GetAll() const
 {
 	Json::Object obj		= m_file.AsObject() ;
 	Json::Object cmd_obj	= m_cmd.AsObject() ;
-	
+
 	for ( Json::Object::iterator i = cmd_obj.begin() ; i != cmd_obj.end() ; ++i )
 		obj[i->first] = i->second ;
-	
+
 	return Json( obj ) ;
 }
 

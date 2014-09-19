@@ -37,10 +37,10 @@ public :
 public :
 	TreeBuilder() ;
 	~TreeBuilder() ;
-	
+
 	void ParseData( const char *data, std::size_t count, bool last = false ) ;
 	Node Result( ) const ;
-	
+
 	// one shot helpers
 	static Node ParseFile( const std::string& file ) ;
 	static Node Parse( const std::string& xml ) ;
@@ -48,7 +48,7 @@ public :
 	bool is_new ;
 
 private :
-	
+
 	static void StartElement( void* pvthis, const char* name, const char** attr ) ;
 	static void EndElement( void* pvthis, const char* name ) ;
 	static void OnCharData( void *pvthis, const char *s, int len ) ;

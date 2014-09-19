@@ -35,7 +35,7 @@ public :
 public :
 	MemMap( File& file, off_t offset, std::size_t length ) ;
 	~MemMap() ;
-	
+
 	void* Addr() const ;
 	std::size_t Length() const ;
 

@@ -31,7 +31,7 @@ class DataStream ;
 namespace http {
 
 /*!	\brief	agent to provide HTTP access
-	
+
 	This class provides functions to send HTTP request in many methods (e.g. get, post and put).
 	Normally the HTTP response is returned in a Receivable.
 */
@@ -40,13 +40,13 @@ class CurlAgent : public Agent
 public :
 	CurlAgent() ;
 	~CurlAgent() ;
-	
+
 	long Put(
 		const std::string&	url,
 		const std::string&	data,
 		DataStream			*dest,
 		const Header&		hdr ) ;
-	
+
 	long Put(
 		const std::string&	url,
 		File				*file,
@@ -57,28 +57,28 @@ public :
 		const std::string& 	url,
 		DataStream			*dest,
 		const Header&		hdr ) ;
-	
+
 	long Post(
 		const std::string& 	url,
 		const std::string&	data,
 		DataStream			*dest,
 		const Header&		hdr ) ;
-	
+
 	long Custom(
 		const std::string&	method,
 		const std::string&	url,
 		DataStream			*dest,
 		const Header&		hdr ) ;
-	
+
 	std::string RedirLocation() const ;
-	
+
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv ) ;
-	
+
 	void SetHeader( const Header& hdr ) ;
 	long ExecCurl(
 		const std::string&	url,
@@ -86,7 +86,7 @@ private :
 		const Header&		hdr ) ;
 
 	void Init() ;
-	
+
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_pimpl ;

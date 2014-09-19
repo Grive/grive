@@ -40,11 +40,11 @@ TreeBuilder::TreeBuilder() : m_impl( new Impl )
 {
 	m_impl->stack.push_back( Node() ) ;
 	m_impl->psr = ::XML_ParserCreate( 0 ) ;
-	
+
 	::XML_SetElementHandler( m_impl->psr, &TreeBuilder::StartElement, &TreeBuilder::EndElement ) ;
 	::XML_SetCharacterDataHandler( m_impl->psr, &TreeBuilder::OnCharData ) ;
 	::XML_SetUserData( m_impl->psr , this ) ;
-	
+
 	is_new = true ;
 }
 
@@ -56,15 +56,15 @@ Node TreeBuilder::ParseFile( const std::string& file )
 {
 	TreeBuilder tb ;
 	::XML_Parser p = tb.m_impl->psr ;
-	
+
 	std::ifstream f( file.c_str() ) ;
-	
+
 	const std::size_t block_size = 10 ;
 	std::size_t count = 0 ;
 	while ( (count = f.rdbuf()->sgetn( (char*)::XML_GetBuffer( p, block_size ), block_size ) ) > 0 )
 		XML_ParseBuffer( p, count, false ) ;
 	XML_ParseBuffer( p, 0, true ) ;
-	
+
 	return tb.Result() ;
 }
 
@@ -87,10 +87,10 @@ Node TreeBuilder::Result() const
 {
 	// the node on the stack should be the dummy node with only one child
 	assert( m_impl->stack.size() == 1 ) ;
-	
+
 	if ( m_impl->stack.front().size() != 1 )
 		BOOST_THROW_EXCEPTION( Error() << LogicError(0) ) ;
-		
+
 	return *m_impl->stack.front().begin() ;
 }
 
@@ -101,22 +101,22 @@ void TreeBuilder::StartElement( void *pvthis, const char *name, const char **att
 	assert( attr != 0 ) ;
 
 	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
-	
+
 	Node n = pthis->m_impl->stack.back().AddElement( name ) ;
-	
+
 	for ( std::size_t i = 0 ; attr[i] != 0 ; i += 2 )
 	{
 		assert( attr[i+1] != 0 ) ;
 		n.AddAttribute( attr[i], attr[i+1] ) ;
 	}
-	
+
 	pthis->m_impl->stack.push_back( n ) ;
 }
 
 void TreeBuilder::EndElement( void* pvthis, const char* name )
 {
 	TreeBuilder *pthis = reinterpret_cast<TreeBuilder*>(pvthis) ;
-	
+
 	assert( pthis->m_impl->stack.back().Name() == name ) ;
 	pthis->m_impl->stack.pop_back() ;
 }

@@ -40,7 +40,7 @@ public :
 
 public :
 	DriveModel( http::Agent *agent ) ;
-	
+
 	// QAbstractItemModel overrides
 	Qt::ItemFlags flags( const QModelIndex & index ) const ;
 	QVariant data( const QModelIndex& index, int role ) const ;

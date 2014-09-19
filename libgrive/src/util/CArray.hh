@@ -25,10 +25,10 @@ namespace gr {
 
 /*!	\brief	get the begin iterator from an array
 	\internal
-	
+
 	This function returns the begin "iterator" of an array. It is useful to
 	treat an array like an STL container.
-	
+
 	For example:
 \code
 int array[10] = { 1, 2, 3, 4, 5 } ;
@@ -48,10 +48,10 @@ T* Begin( T (&array)[n] )
 
 /*!	\brief	get the end iterator from an array
 	\internal
-	
+
 	This function returns the end "iterator" of an array. It is useful to
 	treat an array like an STL container.
-	
+
 	\param	array	reference to the array
 	\return	the end iterator of the array. i.e. \a array+n
 	\sa Begin(), Count()

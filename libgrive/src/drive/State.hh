@@ -48,11 +48,11 @@ public :
 public :
 	explicit State( const fs::path& filename, const Json& options ) ;
 	~State() ;
-	
+
 	void FromLocal( const fs::path& p ) ;
 	void FromRemote( const Entry& e ) ;
 	void ResolveEntry() ;
-	
+
 	void Read( const fs::path& filename ) ;
 	void Write( const fs::path& filename ) const ;
 
@@ -60,13 +60,13 @@ public :
 	Resource* FindByID( const std::string& id ) ;
 
 	void Sync( http::Agent *http, const Json& options ) ;
-	
+
 	iterator begin() ;
 	iterator end() ;
-	
+
 	long ChangeStamp() const ;
 	void ChangeStamp( long cstamp ) ;
-	
+
 private :
 	void FromLocal( const fs::path& p, Resource *folder ) ;
 	void FromChange( const Entry& e ) ;
@@ -74,12 +74,12 @@ private :
 	std::size_t TryResolveEntry() ;
 
 	static bool IsIgnore( const std::string& filename ) ;
-	
+
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
 	long				m_cstamp ;
-	
+
 	std::vector<Entry>	m_unresolved ;
 } ;
 

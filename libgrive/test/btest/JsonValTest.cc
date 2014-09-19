@@ -41,16 +41,16 @@ BOOST_AUTO_TEST_CASE( Test )
 	ValBuilder b ;
 	JsonParser::Parse( "{\"key\": 100 }", &b ) ;
 	Val json = b.Result() ;
-	
+
 	BOOST_CHECK( json.Is<Val::Object>() ) ;
 	BOOST_CHECK_EQUAL( json["key"].As<long long>(), 100 ) ;
-	
+
 	StringStream ss ;
 	JsonWriter wr( &ss ) ;
 	json.Visit( &wr ) ;
-	
+
 	BOOST_CHECK_EQUAL( ss.Str(), "{\"key\":100}" ) ;
-	
+
 //	std::cout << ss.Str() << std::endl ;
 }
 

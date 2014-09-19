@@ -43,7 +43,7 @@ public :
 	typedef boost::error_info<struct DestType,	TypeEnum> DestType_ ;
 	typedef boost::error_info<struct NoKey,		std::string> NoKey_ ;
 	typedef boost::error_info<struct OutOfRange,std::size_t> OutOfRange_ ;
-	
+
 private :
 	template <typename T>
 	struct Type2Enum ;
@@ -71,10 +71,10 @@ public :
 
 	template <typename T>
 	Val& Assign( const T& t ) ;
-	
+
 	void Swap( Val& val ) ;
 	Val& operator=( const Val& val ) ;
-		
+
 	template <typename T>
 	Val& operator=( const T& t )
 	{
@@ -108,14 +108,14 @@ public :
 	bool Has( const std::string& key ) const ;
 	bool Get( const std::string& key, Val& val ) const ;
 	void Add( const std::string& key, const Val& val ) ;
-	
+
 	// shortcuts for array (and array of objects)
 	void Add( const Val& json ) ;
 	Val  FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
-	
+
 	std::vector<Val> Select( const std::string& key ) const ;
-	
+
 	friend std::ostream& operator<<( std::ostream& os, const Val& val ) ;
 	void Visit( ValVisitor *visitor ) const ;
 
@@ -124,7 +124,7 @@ private :
 
 	template <typename T>
 	struct Impl ;
-	
+
 	std::auto_ptr<Base>	m_base ;
 
 private :

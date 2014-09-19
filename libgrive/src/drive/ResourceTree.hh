@@ -49,7 +49,7 @@ namespace details
 			hashed_unique<tag<ByIdentity>,	identity<Resource*> >
 		>
 	> Folders ;
-	
+
 	typedef Folders::index<ByID>::type			IDMap ;
 	typedef Folders::index<ByHref>::type		HrefMap ;
 	typedef Folders::index<ByIdentity>::type	Set ;
@@ -69,24 +69,24 @@ public :
 	ResourceTree( const fs::path& rootFolder ) ;
 	ResourceTree( const ResourceTree& fs ) ;
 	~ResourceTree( ) ;
-	
+
 	void Swap( ResourceTree& fs ) ;
 	ResourceTree& operator=( const ResourceTree& fs ) ;
-	
+
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 
 	Resource* FindByID( const std::string& id ) ;
-	
+
 	bool ReInsert( Resource *coll ) ;
-	
+
 	void Insert( Resource *coll ) ;
 	void Erase( Resource *coll ) ;
 	void Update( Resource *coll, const Entry& e, const DateTime& last_sync ) ;
-	
+
 	Resource* Root() ;
 	const Resource* Root() const ;
-	
+
 	iterator begin() ;
 	iterator end() ;
 

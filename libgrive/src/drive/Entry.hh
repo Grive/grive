@@ -46,18 +46,18 @@ class Entry
 public :
 	Entry( ) ;
 	explicit Entry( const xml::Node& n ) ;
-	
+
 	std::string Title() const ;
 	std::string Filename() const ;
 	std::string Kind() const ;
 	std::string MD5() const ;
 	DateTime MTime() const ;
-	
+
 	std::string Name() const ;
-	
+
 	std::string ResourceID() const ;
 	std::string ETag() const ;
-	
+
 	std::string SelfHref() const ;
 	std::string AltSelf() const ;
 	std::string ParentHref() const ;
@@ -65,16 +65,16 @@ public :
 	std::string EditLink() const ;
 	std::string CreateLink() const ;
 	long ChangeStamp() const ;
-	
+
 	bool IsChange() const ;
 	bool IsRemoved() const ;
-	
+
 	const std::vector<std::string>& ParentHrefs() const ;
-	
+
 	void Swap( Entry& e ) ;
-	
+
 	void Update( const xml::Node& entry ) ;
-	
+
 private :
 	std::string		m_title ;
 	std::string		m_filename ;
@@ -84,7 +84,7 @@ private :
 	std::string		m_resource_id ;
 
 	std::vector<std::string>	m_parent_hrefs ;
-	
+
 	std::string		m_self_href ;
 	std::string		m_alt_self ;
 	std::string		m_content_src ;
@@ -92,7 +92,7 @@ private :
 	std::string		m_create_link ;
 
 	long			m_change_stamp ;
-	
+
 	DateTime		m_mtime ;
 	bool			m_is_removed ;
 } ;

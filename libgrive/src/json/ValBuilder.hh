@@ -37,7 +37,7 @@ public :
 	typedef boost::error_info<struct Mismatch,		Val> Mismatch_ ;
 	typedef boost::error_info<struct Unexpected,	Val> Unexpected_ ;
 	typedef boost::error_info<struct NoKey,			Val> NoKey_ ;
-	
+
 public :
 	ValBuilder( ) ;
 	~ValBuilder() ;

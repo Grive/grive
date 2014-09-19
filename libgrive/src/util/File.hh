@@ -57,14 +57,14 @@ public :
 	void OpenForWrite( const fs::path& path, int mode = 0600 ) ;
 	void Close() ;
 	bool IsOpened() const ;
-	
+
 	std::size_t Read( char *ptr, std::size_t size ) ;
 	std::size_t Write( const char *ptr, std::size_t size ) ;
 
 	off_t Seek( off_t offset, int whence ) ;
 	off_t Tell() const ;
 	u64_t Size() const ;
-	
+
 	void Chmod( int mode ) ;
 
 	void* Map( off_t offset, std::size_t length ) ;
@@ -74,9 +74,9 @@ public :
 
 private :
 	void Open( const fs::path& path, int flags, int mode ) ;
-	
+
 private :
 	int	m_fd ;
 } ;
-	
+
 } // end of namespace

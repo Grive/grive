@@ -43,22 +43,22 @@ public :
 
 	NodeSet& operator=( const NodeSet& ns ) ;
 	void Swap( NodeSet& ns ) ;
-	
+
 	void Add( const Node& n ) ;
-	
+
 	iterator begin() const ;
 	iterator end() const ;
 	bool empty() const ;
 	std::size_t size() const ;
 	Node front() const ;
-	
+
 	NodeSet Find( const std::string& name, const std::string& value ) const ;
 
 	// forwarding common Node operations to Node
 	operator std::string() const ;
 	NodeSet operator[]( const std::string& name ) const ;
 	bool operator==( const std::string& value ) const ;
-	
+
 private :
 	Node		m_tmp ;
 	iterator	m_first ;

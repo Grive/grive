@@ -35,63 +35,63 @@ namespace
 		b->VisitNull() ;
 		return true ;
 	}
-	
+
 	int OnBool( void *ctx, int value )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->Visit( static_cast<long long>(value) ) ;
 		return true ;
 	}
-	
+
 	int OnInt( void *ctx, long long value )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->Visit(value) ;
 		return true ;
 	}
-	
+
 	int OnDouble( void *ctx, double value )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->Visit(value) ;
 		return true ;
 	}
-	
+
 	int OnStr( void *ctx, const unsigned char *str, std::size_t len )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->Visit( std::string(reinterpret_cast<const char*>(str), len) ) ;
 		return true ;
 	}
-	
+
 	int StartMap( void *ctx )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->StartObject() ;
 		return true ;
 	}
-	
+
 	int OnMapKey( void *ctx, const unsigned char *str, std::size_t len )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->VisitKey( std::string(reinterpret_cast<const char*>(str), len) ) ;
 		return true ;
 	}
-	
+
 	int EndMap( void *ctx )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->EndObject() ;
 		return true ;
 	}
-	
+
 	int StartArray( void *ctx )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
 		b->StartArray() ;
 		return true ;
 	}
-	
+
 	int EndArray( void *ctx )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
@@ -99,19 +99,19 @@ namespace
 		return true ;
 	}
 
-	const yajl_callbacks callbacks = {  
-		OnNull,  
-		OnBool,  
-		OnInt,  
-		OnDouble,  
-		0,  
-		OnStr,  
-		StartMap,  
-		OnMapKey,  
-		EndMap,  
-		StartArray,  
-		EndArray,  
-	};  
+	const yajl_callbacks callbacks = {
+		OnNull,
+		OnBool,
+		OnInt,
+		OnDouble,
+		0,
+		OnStr,
+		StartMap,
+		OnMapKey,
+		EndMap,
+		StartArray,
+		EndArray,
+	};
 }
 
 void JsonParser::Parse( const std::string& json, ValVisitor *callback )
@@ -142,15 +142,15 @@ JsonParser::~JsonParser()
 void JsonParser::Parse( const char *str, std::size_t size )
 {
 	const unsigned char *ustr = reinterpret_cast<unsigned const char*>(str) ;
-	
+
 	yajl_status r = yajl_parse( m_impl->hand, ustr, size ) ;
-	
+
 	if ( r != yajl_status_ok )
 	{
 		unsigned char *msg = yajl_get_error( m_impl->hand, true, ustr, size ) ;
 		std::string msg_str(reinterpret_cast<char*>(msg)) ;
 		yajl_free_error(m_impl->hand, msg) ;
-		
+
 		BOOST_THROW_EXCEPTION(
 			Error()
 				<< ParseErr_(msg_str)
@@ -166,7 +166,7 @@ void JsonParser::Finish()
 		unsigned char *msg = yajl_get_error( m_impl->hand, false, 0, 0 ) ;
 		std::string msg_str(reinterpret_cast<char*>(msg)) ;
 		yajl_free_error(m_impl->hand, msg) ;
-		
+
 		BOOST_THROW_EXCEPTION( Error() << ParseErr_(msg_str) ) ;
 	}
 }

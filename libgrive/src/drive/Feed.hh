@@ -47,18 +47,18 @@ public :
 	explicit Feed( const xml::Node& root ) ;
 	Feed( ) ;
 	void Start( http::Agent *http, const std::string& url ) ;
-	
+
 	void Assign( const xml::Node& root ) ;
 	const xml::Node& Root() const ;
-	
+
 	iterator begin() const ;
 	iterator end() const ;
-	
+
 	std::string Next() const ;
 	bool GetNext( http::Agent *http ) ;
-	
+
 	void EnableLog( const std::string& prefix, const std::string& suffix ) ;
-	
+
 private :
 	struct LogInfo
 	{
@@ -82,11 +82,11 @@ class Feed::iterator : public boost::iterator_adaptor<
 {
 public :
 	iterator() ;
-	explicit iterator( xml::Node::iterator i ) ;		
+	explicit iterator( xml::Node::iterator i ) ;
 
 private :
 	friend class boost::iterator_core_access;
-	
+
 	reference dereference() const ;
 } ;
 

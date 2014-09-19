@@ -38,7 +38,7 @@ public :
 	std::string ID() const ;
 	std::string	Mime() const ;
 	std::string Title() const ;
-	
+
 	bool IsFolder() const ;
 
 	void AddChild( const std::string& child ) ;
@@ -53,9 +53,9 @@ private :
 	std::string		m_id ;
 	std::string		m_mime ;
 	std::string		m_title ;
-	
+
 	std::vector<std::string>	m_children ;
-	
+
 	std::string		m_parent ;
 } ;
 

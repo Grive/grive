@@ -472,11 +472,11 @@ void Resource::DeleteLocal()
 	assert( m_parent != 0 ) ;
 	fs::path parent = m_parent->Path() ;
 	fs::path dest	= ".trash" / parent / Name() ;
-	
+
 	std::size_t idx = 1 ;
 	while ( fs::exists( dest ) && idx != 0 )
 		dest = ".trash" / parent / (boost::format(trash_file) % Name() % idx++).str() ;
-	
+
 	// wrap around! just remove the file
 	if ( idx == 0 )
 		fs::remove_all( Path() ) ;
@@ -491,17 +491,17 @@ void Resource::DeleteRemote( http::Agent *http )
 {
 	assert( http != 0 ) ;
 	http::StringResponse str ;
-	
+
 	try
 	{
 		http::Header hdr ;
 		hdr.Add( "If-Match: " + m_etag ) ;
-		
+
 		// doesn't know why, but an update before deleting seems to work always
 		http::XmlResponse xml ;
 		http->Get( m_href, &xml, hdr ) ;
 		AssignIDs( Entry( xml.Response() ) ) ;
-	
+
 		http->Custom( "DELETE", m_href, &str, hdr ) ;
 	}
 	catch ( Exception& e )
@@ -518,7 +518,7 @@ void Resource::DeleteRemote( http::Agent *http )
 void Resource::Download( http::Agent* http, const fs::path& file ) const
 {
 	assert( http != 0 ) ;
-	
+
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_content, &dl, http::Header() ) ;
 	if ( r <= 400 )
@@ -542,7 +542,7 @@ bool Resource::EditContent( http::Agent* http, bool new_rev )
 		Log( "Cannot upload %1%: file read-only. %2%", m_name, m_state, log::warning ) ;
 		return false ;
 	}
-	
+
 	return Upload( http, m_edit + (new_rev ? "?new-revision=true" : ""), false ) ;
 }
 
@@ -552,13 +552,13 @@ bool Resource::Create( http::Agent* http )
 	assert( m_parent != 0 ) ;
 	assert( m_parent->IsFolder() ) ;
 	assert( m_parent->m_state == sync ) ;
-	
+
 	if ( IsFolder() )
 	{
 		std::string uri = feed_base ;
 		if ( !m_parent->IsRoot() )
 			uri += ("/" + http->Escape(m_parent->m_id) + "/contents") ;
-		
+
 		std::string meta = (boost::format( xml_meta )
 			% "folder"
 			% xml::Escape(m_name)
@@ -566,7 +566,7 @@ bool Resource::Create( http::Agent* http )
 
 		http::Header hdr ;
 		hdr.Add( "Content-Type: application/atom+xml" ) ;
-		
+
 		http::XmlResponse xml ;
 // 		http::ResponseLog log( "create", ".xml", &xml ) ;
 		http->Post( uri, meta, &xml, hdr ) ;
@@ -591,29 +591,29 @@ bool Resource::Upload(
 	bool 				post)
 {
 	assert( http != 0 ) ;
-	
+
 	File file( Path() ) ;
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
-	
+
 	http::Header hdr ;
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
 	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
 	hdr.Add( xcontent_len.str() ) ;
   	hdr.Add( "If-Match: " + m_etag ) ;
 	hdr.Add( "Expect:" ) ;
-	
+
 	std::string meta = (boost::format( xml_meta )
 		% m_kind
 		% xml::Escape(m_name)
 	).str() ;
-	
+
 	http::StringResponse str ;
 	if ( post )
 		http->Post( link, meta, &str, hdr ) ;
 	else
 		http->Put( link, meta, &str, hdr ) ;
-	
+
 	http::Header uphdr ;
 	uphdr.Add( "Expect:" ) ;
 	uphdr.Add( "Accept:" ) ;
@@ -621,11 +621,11 @@ bool Resource::Upload(
 	// the content upload URL is in the "Location" HTTP header
 	std::string uplink = http->RedirLocation() ;
 	http::XmlResponse xml ;
-	
+
 	http->Put( uplink, &file, &xml, uphdr ) ;
 	AssignIDs( Entry( xml.Response() ) ) ;
   m_mtime = Entry(xml.Response()).MTime();
-	
+
 	return true ;
 }
 

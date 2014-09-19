@@ -45,7 +45,7 @@ public :
 	Impl() : m_ref(1), m_type( element )
 	{
 	}
-	
+
 	Impl( const std::string& str, Type type, const std::string& value = "" ) :
 		m_ref(1),
 		m_type( type ),
@@ -53,7 +53,7 @@ public :
 		m_value( value )
 	{
 	}
-	
+
 	~Impl()
 	{
 		std::for_each( m_children.begin(), m_children.end(), std::mem_fun( &Impl::Release ) ) ;
@@ -64,13 +64,13 @@ public :
 		++m_ref ;
 		return this ;
 	}
-	
+
 	void Release()
 	{
 		if ( --m_ref == 0 )
 			delete this ;
 	}
-	
+
 	std::size_t RefCount() const
 	{
 		assert( m_ref > 0 ) ;
@@ -81,9 +81,9 @@ public :
 	{
 		assert( child != 0 ) ;
 		assert( child->m_type >= element && child->m_type <= text ) ;
-	
+
 		ImplVec *map[] = { &m_element, &m_attr, 0 } ;
-	
+
 		if ( map[child->m_type] != 0 )
 		{
 			ImplVec& vec = *map[child->m_type] ;
@@ -93,10 +93,10 @@ public :
 			// cannot allow duplicate attribute nodes
 			if ( child->m_type	== attr && p.first != p.second )
 				BOOST_THROW_EXCEPTION( Error() << DupAttr_( child->m_name ) ) ;
-			
+
 			vec.insert( p.second, child ) ;
 		}
-		
+
 		m_children.push_back( child ) ;
 	}
 
@@ -105,67 +105,67 @@ public :
 		assert( !name.empty() ) ;
 
 		return name[0] == '@'
-			? Find( m_attr, name.substr(1) ) 
+			? Find( m_attr, name.substr(1) )
 			: Find( m_element, name ) ;
 	}
-	
+
 	Impl* FindAttr( const std::string& name )
 	{
 		std::pair<iterator,iterator> r = Find( m_attr, name ) ;
 		return r.first != r.second ? *r.first : 0 ;
 	}
-	
+
 	iterator Begin()
 	{
 		return m_children.begin() ;
 	}
-	
+
 	iterator End()
 	{
 		return m_children.end() ;
 	}
-	
+
 	const_iterator Begin() const
 	{
 		return m_children.begin() ;
 	}
-	
+
 	const_iterator End() const
 	{
 		return m_children.end() ;
 	}
-	
+
 	std::size_t Size() const
 	{
 		return m_children.size() ;
 	}
-	
+
 	Range Attr()
 	{
 		return std::make_pair( m_attr.begin(), m_attr.end() ) ;
 	}
-	
+
 	const std::string& Name() const
 	{
 		return m_name ;
 	}
-	
+
 	std::string Value() const
 	{
 		assert( m_type != element || m_value.empty() ) ;
-	
+
 		std::string value = m_value ;
 		for ( const_iterator i = Begin() ; i != End() ; ++i )
 			value += (*i)->Value() ;
 
 		return value ;
 	}
-	
+
 	void Value( const std::string& val )
 	{
 		m_value = val ;
 	}
-	
+
 	Type GetType() const
 	{
 		return m_type ;
@@ -188,7 +188,7 @@ private :
 
 private :
 	std::size_t		m_ref ;
-	
+
 	Type			m_type ;
 	std::string		m_name ;
 	std::string		m_value ;
@@ -211,7 +211,7 @@ Node::iterator::reference Node::iterator::dereference() const
 {
 	Impl *p = *base_reference() ;
 	assert( p != 0 ) ;
-	
+
 	return Node( p->AddRef() ) ;
 }
 
@@ -264,7 +264,7 @@ bool Node::IsCompatible( Type parent, Type child )
 		{ false,	false,	true },		// attribute
 		{ false,	false,	false }		// text
 	} ;
-	
+
 	assert( parent >= element && parent <= text ) ;
 	assert( child  >= element && child  <= text ) ;
 	return map[parent][child] ;
@@ -274,7 +274,7 @@ Node Node::AddElement( const std::string& name )
 {
 	assert( m_ptr != 0 ) ;
 	assert( IsCompatible( GetType(), element) ) ;
-	
+
 	Impl *child = new Impl( name, element ) ;
 	m_ptr->Add( child->AddRef() ) ;
 	return Node( child ) ;
@@ -302,7 +302,7 @@ void Node::AddNode( const Node& node )
 	assert( m_ptr != 0 ) ;
 	assert( node.m_ptr != 0 ) ;
 	assert( IsCompatible( GetType(), node.GetType() ) ) ;
-	
+
 	m_ptr->Add( node.m_ptr->AddRef() ) ;
 }
 
@@ -316,7 +316,7 @@ NodeSet Node::operator[]( const std::string& name ) const
 {
 	assert( m_ptr != 0 ) ;
 	assert( !name.empty() ) ;
-	
+
 	Range is = m_ptr->Find( name ) ;
 	return NodeSet( iterator(is.first), iterator(is.second) ) ;
 }
@@ -342,7 +342,7 @@ const std::string& Node::Name() const
 std::string Node::Value() const
 {
 	assert( m_ptr != 0 ) ;
-	
+
 	return m_ptr->Value() ;
 }
 
@@ -361,13 +361,13 @@ std::ostream& operator<<( std::ostream& os, const Node& node )
 	if ( node.GetType() == Node::element )
 	{
 		os << '<' << node.Name() ;
-		
+
 		// print attributes
 		NodeSet attrs = node.Attr() ;
 		if ( !attrs.empty() )
 			os << ' ' << attrs ;
 		os << '>' ;
-		
+
 		// recursively print children
 		for ( Node::iterator i = node.begin() ; i != node.end() ; ++i )
 		{
@@ -386,7 +386,7 @@ std::ostream& operator<<( std::ostream& os, const Node& node )
 	{
 		Node::PrintString( os, node.Value() ) ;
 	}
-	
+
 	return os ;
 }
 

@@ -49,7 +49,7 @@ QVariant DriveModel::data( const QModelIndex& index, int role ) const
 			default:	break ;
 		}
 	}
-	
+
 	return QVariant() ;
 }
 
@@ -75,7 +75,7 @@ bool DriveModel::hasChildren( const QModelIndex& parent ) const
 
 QModelIndex DriveModel::index( int row, int column, const QModelIndex& parent_idx ) const
 {
-	const Resource *parent = Res(parent_idx) ; 
+	const Resource *parent = Res(parent_idx) ;
 
 	// check out-of-bound
 	if ( parent != 0 && static_cast<unsigned>(row) >= parent->ChildCount() )

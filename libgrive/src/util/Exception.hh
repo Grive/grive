@@ -42,7 +42,7 @@ struct Exception :
 	virtual public boost::exception
 {
 	Exception( ) ;
-	
+
 	virtual const char* what() const throw() ;
 } ;
 

@@ -37,13 +37,13 @@ public :
 	typedef boost::error_info<struct JsonText,	std::string> JsonText_ ;
 
 	static void Parse( const std::string& json, ValVisitor *callback ) ;
-	
+
 	explicit JsonParser( ValVisitor *callback ) ;
 	~JsonParser() ;
-	
+
 	void Parse( const char *str, std::size_t size ) ;
 	void Finish() ;
-	
+
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_impl ;

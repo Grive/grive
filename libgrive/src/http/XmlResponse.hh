@@ -42,7 +42,7 @@ public :
 	void Finish() ;
 
 	xml::Node Response() const ;
-	
+
 private :
 	std::auto_ptr<xml::TreeBuilder>	m_tb ;
 } ;

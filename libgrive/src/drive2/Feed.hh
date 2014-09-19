@@ -45,8 +45,8 @@ public :
 public :
 	Feed( const std::string& base ) ;
 	void Query( const std::string& field, const std::string& value ) ;
-	
-	
+
+
 	bool Next( http::Agent *agent ) ;
 
 	Val Content() const ;

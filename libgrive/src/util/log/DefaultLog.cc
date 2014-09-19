@@ -47,7 +47,7 @@ void DefaultLog::Log( const log::Fmt& msg, log::Serverity s )
 			case log::info:
 				m_log << msg << std::endl ;
 				break ;
-			
+
 			default:
 				m_log << msg << std::endl ;
 				break ;
