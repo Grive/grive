@@ -60,7 +60,7 @@ void State::FromLocal( const fs::path& p )
 
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename[0] == '.' ;
+	return filename == ".grive" || filename == ".grive_state";
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
