@@ -18,6 +18,10 @@
 */
 
 #include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/XmlOutputter.h>
+#include <cppunit/Outputter.h>
+
+#include <sstream>
 
 #include "util/log/DefaultLog.hh"
 
@@ -49,5 +53,9 @@ int main( int argc, char **argv )
 	runner.addTest( NodeTest::suite( ) ) ;
 	runner.run();
 
+	std::ofstream report_file( "report.xml" ) ;
+	CppUnit::XmlOutputter xmloutputter ( &runner.result( ), report_file ) ;
+	xmloutputter.write( ) ;
+	report_file.close( ) ;
 	return 0 ;
 }

@@ -42,15 +42,6 @@ SignalHandler::SignalHandler()
 
 }
 
-SignalHandler::SignalHandler( const SignalHandler& right )
-{
-
-}
-
-SignalHandler& SignalHandler::operator ==( const SignalHandler& right )
-{
-	return (*this);
-}
 
 SignalHandler::~SignalHandler()
 {
@@ -65,31 +56,25 @@ SignalHandler& SignalHandler::GetInstance()
 
 void SignalHandler::UnregisterSignal( unsigned int signumber )
 {
-	m_signals[signumber] = 0 ;
-
-	// Restore the old signal
-	signal( ( int ) signumber, m_signalsOld[signumber] );
+	if ( m_signals.erase( signumber ) )
+	{
+		signal( ( int ) signumber, m_signalsOld[signumber] );
+	}
 }
 
-void SignalHandler::RegisterSignal( unsigned int signumber, Callback callback )
+void SignalHandler::RegisterSignal( unsigned int signumber, Callback callback ) throw ( SignalError )
 {
-	signals_t::const_iterator anIterator ;
-	for (anIterator = m_signals.begin(); anIterator != m_signals.end(); ++anIterator)
+	if ( m_signals.find( signumber ) != m_signals.end() )
 	{
-		if (anIterator->first == signumber)
-		{
-			if (anIterator->second != 0)
-			{
-				std::ostringstream oss;
-				oss << "Signal " << signumber << " already has a callback!";
-				throw SignalError( oss.str() ); ;
-			}
-		}
+		std::ostringstream oss;
+		oss << "Signal " << signumber << " already has a callback!";
+		throw SignalError( oss.str() ); ;
 	}
 
 	m_signals[signumber] = callback ;
 
-	if ( ( m_signalsOld[signumber] = signal( ( int ) signumber,  m_signals[signumber] ) ) == SIG_ERR ) {
+	if ( ( m_signalsOld[signumber] = signal( ( int ) signumber,  m_signals[signumber] ) ) == SIG_ERR )
+	{
 		throw SignalError( " Error while registering the signal! " ) ;
 	}
 }
