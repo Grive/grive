@@ -36,6 +36,7 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
@@ -608,24 +609,68 @@ bool Resource::Upload(
 		% xml::Escape(m_name)
 	).str() ;
 
-	http::StringResponse str ;
-	if ( post )
-		http->Post( link, meta, &str, hdr ) ;
-	else
-		http->Put( link, meta, &str, hdr ) ;
+	bool retrying=false;
+	while ( true ) {
+		if ( retrying ) {
+			file.Seek( 0, SEEK_SET );
+			os::Sleep( 5 );
+		}
 
-	http::Header uphdr ;
-	uphdr.Add( "Expect:" ) ;
-	uphdr.Add( "Accept:" ) ;
+		try {
+			http::StringResponse str ;
+			if ( post )
+				http->Post( link, meta, &str, hdr ) ;
+			else
+				http->Put( link, meta, &str, hdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing pre-upload response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
 
-	// the content upload URL is in the "Location" HTTP header
-	std::string uplink = http->RedirLocation() ;
-	http::XmlResponse xml ;
+		http::Header uphdr ;
+		uphdr.Add( "Expect:" ) ;
+		uphdr.Add( "Accept:" ) ;
 
-	http->Put( uplink, &file, &xml, uphdr ) ;
-	AssignIDs( Entry( xml.Response() ) ) ;
-  m_mtime = Entry(xml.Response()).MTime();
+		// the content upload URL is in the "Location" HTTP header
+		std::string uplink = http->RedirLocation() ;
+		http::XmlResponse xml ;
 
+		long http_code = 0;
+		try {
+			http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
+
+		if ( http_code == 410 || http_code == 412 ) {
+			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
+					log::warning ) ;
+			retrying = true;
+			continue;
+		}
+
+		if ( retrying )
+			Log( "upload succeeded on retry", log::warning );
+		Entry responseEntry = Entry( xml.Response() );
+		AssignIDs( responseEntry ) ;
+		m_mtime = responseEntry.MTime();
+		break;
+	}
 	return true ;
 }
 

@@ -5,8 +5,12 @@ set( GRIVE_VERSION "0.3.0-pre" )
 
 # common compile options
 add_definitions( -DVERSION="${GRIVE_VERSION}" )
+add_definitions( -DPACKAGE="grive" )
+add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
 add_definitions( -D_FILE_OFFSET_BITS=64 )
 
 add_subdirectory( libgrive )
 add_subdirectory( grive )
-add_subdirectory( bgrive )
+#add_subdirectory( bgrive )
+
+install(FILES COPYING README DESTINATION share/doc/grive)
