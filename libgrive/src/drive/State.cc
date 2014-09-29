@@ -255,15 +255,8 @@ void State::Read( const fs::path& filename )
 void State::Write( const fs::path& filename ) const
 {
 	Json last_sync ;
-<<<<<<< HEAD
 	last_sync.Add( "sec",	Json((boost::uint64_t)m_last_sync.Sec() ) );
 	last_sync.Add( "nsec",	Json((boost::uint64_t)m_last_sync.NanoSec() ) );
-
-=======
-	last_sync.Add( "sec",	Json( (int)m_last_sync.Sec() ) );
-	last_sync.Add( "nsec",	Json( (unsigned)m_last_sync.NanoSec() ) );
-	
->>>>>>> 94efea11dd1735786d63ec1de3aaa385b2fd3c1d
 	Json result ;
 	result.Add( "last_sync", last_sync ) ;
 	result.Add( "change_stamp", Json((boost::uint64_t)m_cstamp) ) ;
