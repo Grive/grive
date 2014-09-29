@@ -122,6 +122,7 @@ int Main( int argc, char **argv )
 						"instead of downloading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		("docs,g",		"Synchronises Google Docs, Sheets and Slides.")
 	;
 
 	po::variables_map vm;
