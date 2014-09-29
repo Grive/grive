@@ -14,8 +14,8 @@ find_package(CppUnit)
 find_package(Iberty)
 find_package(ZLIB)
 
-find_package(PkgConfig)
-pkg_check_modules(YAJL REQUIRED yajl)
+include(FindPkgConfig)
+pkg_search_module(YAJL REQUIRED yajl)
 
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
@@ -96,6 +96,7 @@ target_link_libraries( grive
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
+	${YAJL_LIBRARIES}
 )
 
 #set_target_properties(grive PROPERTIES
