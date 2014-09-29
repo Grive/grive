@@ -1,4 +1,4 @@
-%define rev %(git ls-remote https://github.com/jar1karp/grive.git refs/heads/master|awk '{print $1}')
+%define rev %(git ls-remote https://github.com/linwiz/grive.git refs/heads/master|awk '{print $1}')
 
 Name:           grive
 Version:        0.3.0pre_git%{rev}
@@ -29,7 +29,7 @@ the servers in Google. The code is written in standard C++.
 
 %prep
 rm -rf grive-%{version}
-git clone https://github.com/jar1karp/grive.git -b master grive-%{version}
+git clone https://github.com/linwiz/grive.git -b master grive-%{version}
 cd grive-%{version}
 
 %build
