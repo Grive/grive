@@ -11,6 +11,4 @@ add_definitions( -D_FILE_OFFSET_BITS=64 )
 
 add_subdirectory( libgrive )
 add_subdirectory( grive )
-#add_subdirectory( bgrive )
-
-install(FILES COPYING README DESTINATION share/doc/grive)
+# add_subdirectory( bgrive )

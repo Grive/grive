@@ -75,12 +75,17 @@ private :
 
 	static bool IsIgnore( const std::string& filename ) ;
 
+	bool IsFiltered( const Entry& e  );
+	bool IsFiltered( const std::string& filename  );
+
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
 	int					m_cstamp ;
 	std::string			m_dir ;
 	std::vector<Entry>	m_unresolved ;
+
+	std::string m_filter;
 } ;
 
 } } // end of namespace gr::v1
