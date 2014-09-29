@@ -9,6 +9,10 @@ add_definitions( -DPACKAGE="grive" )
 add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
 add_definitions( -D_FILE_OFFSET_BITS=64 )
 
+# Package name and version for libraries depending on autotools
+add_definitions( -DPACKAGE="grive" )
+add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
+
 add_subdirectory( libgrive )
 add_subdirectory( grive )
 add_subdirectory( bgrive )

@@ -18,9 +18,12 @@ file (GLOB BGRIVE_UI
 	${bgrive_SOURCE_DIR}/ui/*.ui
 )
 
-QT4_WRAP_UI(BGRIVE_UI_SRCS		${BGRIVE_UI})
-QT4_WRAP_CPP(BGRIVE_MOC_SRCS	
-	src/MainWnd.hh )
+QT4_WRAP_UI(BGRIVE_UI_SRCS
+	${BGRIVE_UI}
+)
+QT4_WRAP_CPP(BGRIVE_MOC_SRCS
+	src/MainWnd.hh
+)
 
 add_executable( bgrive_executable
 	${BGRIVE_EXE_SRC}
