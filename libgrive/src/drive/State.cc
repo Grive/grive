@@ -116,19 +116,20 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 
 		else
 		{
+			bool is_dir = fs::is_directory(i->path());
 			// if the Resource object of the child already exists, it should
 			// have been so no need to do anything here
 			Resource *c = folder->FindChild( fname ) ;
 			if ( c == 0 )
 			{
-				c = new Resource( fname, fs::is_directory(i->path()) ? "folder" : "file" ) ;
+				c = new Resource( fname, is_dir ? "folder" : "file" ) ;
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;
 			}
 
 			c->FromLocal( m_last_sync ) ;
 
-			if ( fs::is_directory( i->path() ) )
+			if ( is_dir )
 				FromLocal( *i, c ) ;
 		}
 	}
