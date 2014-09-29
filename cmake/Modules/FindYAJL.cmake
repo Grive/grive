@@ -6,7 +6,7 @@
 #  YAJL_INCLUDE_DIR - The YAJL include directory.
 #  YAJL_LIBRARY     - The YAJL library to link against.
 
-FIND_PATH(YAJL_INCLUDE_DIR yajl/yajl_common.h)
+FIND_PATH(YAJL_INCLUDE_DIR yajl/yajl_gen.h)
 FIND_LIBRARY(YAJL_LIBRARY NAMES yajl)
 
 IF (YAJL_INCLUDE_DIR AND YAJL_LIBRARY)
@@ -28,3 +28,7 @@ ELSE (YAJL_FOUND)
    ENDIF (YAJL_FIND_REQUIRED)
 
 ENDIF (YAJL_FOUND)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1cef976cf4589c4495902702ecea6b8a3337a4a3
