@@ -40,5 +40,3 @@ set_target_properties( bgrive_executable
 )
 
 install(TARGETS bgrive_executable RUNTIME DESTINATION bin)
-# The man package is missing.
-#install(FILES doc/grive.1 DESTINATION share/man/man1 )diff --git a/package/fedora16/grive.spec b/package/fedora16/grive.spec

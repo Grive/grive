@@ -43,7 +43,9 @@ Config::Config( const po::variables_map& vm )
 	m_cmd.Add( "path",		Json(vm.count("path") > 0
 		? vm["path"].as<std::string>()
 		: default_root_folder ) ) ;
-
+	m_cmd.Add( "dir",		Json(vm.count("dir") > 0
+		? vm["dir"].as<std::string>()
+		: "" ) ) ;
 	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
 	m_file	= Read( ) ;
 }

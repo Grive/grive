@@ -78,8 +78,8 @@ private :
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
-	long				m_cstamp ;
-
+	int					m_cstamp ;
+	std::string			m_dir ;
 	std::vector<Entry>	m_unresolved ;
 } ;
 

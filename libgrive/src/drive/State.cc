@@ -35,6 +35,7 @@ namespace gr { namespace v1 {
 
 State::State( const fs::path& filename, const Json& options  ) :
     m_res		( options["path"].Str() ),
+    m_dir		( options["dir"].Str() ),
 	m_cstamp	( -1 )
 {
 	Read( filename ) ;
@@ -77,7 +78,9 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
-
+		// check if it is ignored
+		else if ( folder == m_res.Root() && m_dir != "" && fname != m_dir )
+			Log( "%1% %2% is ignored", fs::is_directory(i->path()) ? "folder" : "file", fname, log::verbose );
 		// check for broken symblic links
 		else if ( !fs::exists( i->path() ) )
 			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
@@ -108,6 +111,10 @@ void State::FromRemote( const Entry& e )
 
 	if ( IsIgnore( e.Name() ) )
 		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+
+	// check if it is ignored
+	else if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
+		Log( "%1% %2% is ignored", e.Kind(), e.Name(), log::verbose );
 
 	// common checkings
 	else if ( e.Kind() != "folder" && (fn.empty() || e.ContentSrc().empty()) )
@@ -248,9 +255,15 @@ void State::Read( const fs::path& filename )
 void State::Write( const fs::path& filename ) const
 {
 	Json last_sync ;
+<<<<<<< HEAD
 	last_sync.Add( "sec",	Json((boost::uint64_t)m_last_sync.Sec() ) );
 	last_sync.Add( "nsec",	Json((boost::uint64_t)m_last_sync.NanoSec() ) );
 
+=======
+	last_sync.Add( "sec",	Json( (int)m_last_sync.Sec() ) );
+	last_sync.Add( "nsec",	Json( (unsigned)m_last_sync.NanoSec() ) );
+	
+>>>>>>> 94efea11dd1735786d63ec1de3aaa385b2fd3c1d
 	Json result ;
 	result.Add( "last_sync", last_sync ) ;
 	result.Add( "change_stamp", Json((boost::uint64_t)m_cstamp) ) ;
