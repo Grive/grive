@@ -70,16 +70,16 @@ bool State::IsFiltered( const std::string& filename )
 	}
   
         std::string prefix = filename.substr(0, m_filter.length());
-  
-        return prefix.compare(m_filter) != 0;  
+
+        return prefix.compare(m_filter) != 0;
 }
 
-bool State::IsFiltered( const Entry& e ) 
+bool State::IsFiltered( const Entry& e )
 {
 	if (Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
 	    assert( parent->IsFolder() ) ;
-	    if (!parent->IsRoot()) 
+	    if (!parent->IsRoot())
 		  return false;
 	}
 	else
