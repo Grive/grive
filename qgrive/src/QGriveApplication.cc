@@ -87,8 +87,7 @@ void QGriveApplication::setup_environment( ) throw ( QGriveException )
 	}
 	else
 	{
-		_config_file = getenv( "HOME" ) ;
-		_config_file += "/.grive" ;
+		_config_file = "./.grive" ;
 		_config_by_file = true ;
 	}
 }
