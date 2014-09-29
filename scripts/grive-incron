@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Allow grive to be called from incron
+# if your path is /home/User/gdrivef and this file is in /usr/local/bin then use the following incrontab line:
+# /home/User/gdrive IN_CREATE,IN_DELETE,IN_CLOSE_WRITE,IN_MOVE /usr/local/bin/grive-incron $# /home/User/gdrive
+
+# grive-incron a bash script to allow automatic push to gdrive from a directory
+# It is made to be called by # incron 
+#
+# Copyright (C) 2014 Al Williams (al.williams@awce.com)
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+PIDFILE=/tmp/grive-incron.lock
+
+if [ $# != 2 ] 
+then
+  >&2 echo Call from incron: \$# directory
+  exit 1
+fi
+if [ "$1" == .grive -o "$1" == .grive_state ] 
+then
+  exit 0  # ignore grive housekeeping files
+fi
+# Don't run multiple copies at once
+
+DLY=1
+
+while true
+  do
+  while [ -f "$PIDFILE"  ] && kill -0 `cat "$PIDFILE"` 2>/dev/null
+    do 
+      sleep $DLY
+      DLY=$((DLY+1))
+      DLY=$((DLY % 10 ))  # no more than 10 seconds
+    done
+    if ! kill -0 `cat "$PIDFILE" 2>/dev/null` 2>/dev/null
+    then
+      rm -f "$PIDFILE"
+    fi
+    if (set -o noclobber; echo $$>"$PIDFILE" ) >/dev/null
+    then 
+	trap 'rm -f "$PIDFILE"' INT TERM EXIT
+	break
+    fi
+done
+grive -p "$2"
+rm -f "$PIDFILE"
+trap - INT TERM EXIT
+exit 0
