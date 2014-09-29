@@ -6,8 +6,8 @@
 #  JSONC_INCLUDE_DIR - The JSON-C include directory.
 #  JSONC_LIBRARY     - The JSON-C library to link against.
 
-FIND_PATH(JSONC_INCLUDE_DIR json-c/json.h)
-FIND_LIBRARY(JSONC_LIBRARY NAMES json-c)
+FIND_PATH(JSONC_INCLUDE_DIR json/json.h json-c/json.h)
+FIND_LIBRARY(JSONC_LIBRARY NAMES json json-c)
 
 IF (JSONC_INCLUDE_DIR AND JSONC_LIBRARY)
    SET(JSONC_FOUND TRUE)
