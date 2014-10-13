@@ -55,7 +55,7 @@ Version History:
 
 Grive v0.3.1:
 Merge Many forks (bug fixes and features) into linwiz/grive.
-Remove useless bgrive/qgrive.
+Remove useless code: bgrive and qgrive.
 
 
 Grive v0.3: Bug fix & minor feature release
