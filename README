@@ -1,5 +1,5 @@
 Grive 0.3.1
-29 September 2014
+13 October 2014
 
 Command line Google Drive Sync
 
@@ -52,6 +52,11 @@ your current directory.
 Enjoy!
 
 Version History:
+
+Grive v0.3.1:
+Merge Many forks (bug fixes and features) into linwiz/grive.
+Remove useless bgrive/qgrive.
+
 
 Grive v0.3: Bug fix & minor feature release
 Fixed bugs:
