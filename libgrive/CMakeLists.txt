@@ -4,6 +4,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(LibGcrypt REQUIRED)
 find_package(JSONC REQUIRED)
+include_directories(${JSONC_INCLUDE_DIR})
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(YAJL REQUIRED)
