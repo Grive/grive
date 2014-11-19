@@ -44,7 +44,7 @@ public :
 
 	static std::string Get( File& file ) ;
 	static std::string Get( const boost::filesystem::path& file ) ;
-	
+
 	void Write( const void *data, std::size_t size ) ;
 	std::string Get() const ;
 

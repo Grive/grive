@@ -108,7 +108,7 @@ void NodeSet::Add( const Node& n )
 	}
 
 	m_tmp.AddNode( n ) ;
-	
+
 	// the iterators may be invalidated after adding the node
 	m_first = m_tmp.begin() ;
 	m_last  = m_tmp.end() ;
@@ -129,7 +129,7 @@ Node NodeSet::front() const
 {
 	if ( empty() )
 		BOOST_THROW_EXCEPTION( Error() << EmptyNodeSet_(0) ) ;
-		
+
 	return *m_first ;
 }
 

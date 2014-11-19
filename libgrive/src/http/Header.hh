@@ -35,9 +35,9 @@ public :
 
 public :
 	Header() ;
-	
+
 	void Add( const std::string& str ) ;
-	
+
 	iterator begin() const ;
 	iterator end() const ;
 

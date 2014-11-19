@@ -42,7 +42,7 @@ public :
 	Config( const boost::program_options::variables_map& vm ) ;
 
 	const fs::path Filename() const ;
-	
+
 	void Set( const std::string& key, const Json& value ) ;
 	Json Get( const std::string& key ) const ;
 
@@ -56,12 +56,12 @@ private :
 private :
 	//! config file path
 	fs::path	m_path;
-	
+
 	//! config values loaded from config file
 	Json		m_file ;
-	
+
 	//! config values from command line
 	Json		m_cmd ;
 } ;
-	
+
 } // end of namespace

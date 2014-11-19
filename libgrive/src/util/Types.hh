@@ -25,7 +25,7 @@
 namespace gr
 {
 	using ::off_t ;
-	
+
 	// should use boost/cstdint
 	typedef unsigned long long u64_t ;
 }

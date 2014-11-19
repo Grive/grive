@@ -26,16 +26,16 @@
 namespace gr {
 
 /**	\brief	DataStream base on `std::string`s
-	
+
 	StringStream is a DataStream back-end that uses std::string for storage.
 	It is useful for unit tests and text parsing, especially when used with
 	StreamParser.
-	
+
 	StringStream has a limit on the maximum number of byte it stores. This
 	is to prevent DOS attacks in which the client sends a lot of bytes before
 	the delimiter (e.g. new-line characters) and the server is forced to hold
 	all of them in memory.
-	
+
 	The limit is current 1024 bytes.
 */
 class StringStream : public DataStream
@@ -48,7 +48,7 @@ public :
 
 	const std::string& Str() const ;
 	void Str( const std::string& str ) ;
-	
+
 private :
 	std::string	m_str ;
 } ;

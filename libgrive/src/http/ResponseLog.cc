@@ -50,7 +50,7 @@ std::size_t ResponseLog::Write( const char *data, std::size_t count )
 		assert( m_log.rdbuf() != 0 ) ;
 		m_log.rdbuf()->sputn( data, count ) ;
 	}
-	
+
 	return m_next->Write( data, count ) ;
 }
 
@@ -73,16 +73,16 @@ void ResponseLog::Enable( bool enable )
 void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, DataStream *next )
 {
 	assert( next != 0 ) ;
-	
+
 	if ( m_log.is_open() )
 		m_log.close() ;
-	
+
 	const std::string fname = Filename(prefix, suffix) ;
-	
+
 	// reset previous stream state. don't care if file can be opened
 	// successfully previously
 	m_log.clear() ;
-	
+
 	// re-open the file
 	m_log.open( fname.c_str() ) ;
 	if ( m_log )
@@ -92,7 +92,7 @@ void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, D
 	}
 	else
 		Trace( "cannot open log file %1%", fname ) ;
-	
+
 	m_next		= next ;
 }
 

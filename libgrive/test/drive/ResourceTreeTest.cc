@@ -37,7 +37,7 @@ ResourceTreeTest::ResourceTreeTest( )
 
 void ResourceTreeTest::TestSerialize( )
 {
-	
+
 }
 
 } // end of namespace grut

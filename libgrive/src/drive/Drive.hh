@@ -48,16 +48,16 @@ public :
 	void Update() ;
 	void DryRun() ;
 	void SaveState() ;
-	
+
 	struct Error : virtual Exception {} ;
-	
+
 private :
 	void SyncFolders( ) ;
     void file();
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
 	void UpdateChangeStamp( ) ;
-	
+
 private :
 	http::Agent 	*m_http ;
 	std::string		m_resume_link ;

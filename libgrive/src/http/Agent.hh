@@ -46,26 +46,26 @@ public :
 		File				*file,
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
-		
+
 	virtual long Get(
 		const std::string& 	url,
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
-	
+
 	virtual long Post(
 		const std::string& 	url,
 		const std::string&	data,
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
-	
+
 	virtual long Custom(
 		const std::string&	method,
 		const std::string&	url,
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
-	
+
 	virtual std::string RedirLocation() const = 0 ;
-	
+
 	virtual std::string Escape( const std::string& str ) = 0 ;
 	virtual std::string Unescape( const std::string& str ) = 0 ;
 } ;

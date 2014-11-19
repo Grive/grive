@@ -1,5 +1,7 @@
 Grive 0.3.0
-25 July 2012
+13 October 2014
+
+Command line Google Drive Sync
 
 http://www.lbreda.com/grive/
 
@@ -24,6 +26,7 @@ You need the following libraries:
 - libstdc++
 - libgcrypt
 - Boost (Boost filesystem and program_option are required)
+- yajl
 
 There are also some optional dependencies:
 - CppUnit (for unit tests)
@@ -49,6 +52,11 @@ your current directory.
 Enjoy!
 
 Version History:
+
+Grive v0.3.1:
+Merge Many forks (bug fixes and features) into linwiz/grive.
+Remove useless code: bgrive and qgrive.
+
 
 Grive v0.3: Bug fix & minor feature release
 Fixed bugs:

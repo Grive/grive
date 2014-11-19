@@ -21,8 +21,10 @@
 
 #include "http/Error.hh"
 #include "http/Header.hh"
+#include "http/XmlResponse.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
+#include "util/File.hh"
 
 #include <cassert>
 
@@ -56,7 +58,7 @@ long AuthAgent::Put(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Put(url, data, dest, auth) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -67,11 +69,24 @@ long AuthAgent::Put(
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
-	
+
 	long response ;
-	while ( CheckRetry(
-		response = m_agent->Put( url, file, dest, AppendHeader(hdr) ) ) ) ;
-	
+	bool keepTrying = true;
+	while ( keepTrying ) {
+		response = m_agent->Put( url, file, dest, auth );
+		keepTrying = CheckRetry( response );
+		if ( keepTrying ) {
+			file->Seek( 0, SEEK_SET );
+			XmlResponse *xmlResponse = dynamic_cast<XmlResponse*>(dest);
+			if( xmlResponse )
+			  xmlResponse->Clear();
+		}
+	}
+
+	// On 410 Gone or 412 Precondition failed, recovery may be possible so don't
+	// throw an exception
+	if ( response == 410 || response == 412 )
+		return response;
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -85,7 +100,7 @@ long AuthAgent::Get(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -96,11 +111,11 @@ long AuthAgent::Post(
 	const Header&		hdr )
 {
 	Header auth = AppendHeader(hdr) ;
-	
+
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -115,7 +130,7 @@ long AuthAgent::Custom(
 	long response ;
 	while ( CheckRetry(
 		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
-	
+
 	return CheckHttpResponse(response, url, auth) ;
 }
 
@@ -139,19 +154,19 @@ bool AuthAgent::CheckRetry( long response )
 	// HTTP 500 and 503 should be temperory. just wait a bit and retry
 	if ( response == 500 || response == 503 )
 	{
-		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
+		Log( "request failed due to temperory error: %1%. retrying in 5 seconds",
 			response, log::warning ) ;
-			
+
 		os::Sleep( 5 ) ;
 		return true ;
 	}
-	
+
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
-		Log( "resquest failed due to auth token expired: %1%. refreshing token",
+		Log( "request failed due to auth token expired: %1%. refreshing token",
 			response, log::warning ) ;
-			
+		os::Sleep( 5 ) ;
 		m_auth.Refresh() ;
 		return true ;
 	}
@@ -173,7 +188,7 @@ long AuthAgent::CheckHttpResponse(
  				<< Url( url )
  				<< HttpHeader( hdr ) ) ;
 	}
-	
+
 	return response ;
 }
 

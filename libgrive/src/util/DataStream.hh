@@ -30,7 +30,7 @@ class DataStream
 {
 protected :
 	virtual ~DataStream() {}
-	
+
 public :
 	/**	Reading from the stream. The caller indicates that it wants
 		to read `size` bytes and must provide enough space pointed

@@ -56,7 +56,7 @@ namespace grut {
 				act << *actualFirst++ << " " ;
 				exp << *expectFirst++ << " " ;
 			}
-			
+
 			CPPUNIT_NS::Asserter::failNotEqual(
 				exp.str(),
 				act.str(),
@@ -64,7 +64,7 @@ namespace grut {
 				message );
 		}
 	}
-	
+
 	inline void AssertEquals(
 		const std::wstring&		expected,
 		const std::wstring& 	actual,
@@ -77,7 +77,7 @@ namespace grut {
 			sourceLine,
 			message ) ;
 	}
-	
+
 } // end of namespace
 
 #define GRUT_ASSERT_RANGE_EQUAL(actualFirst, actualLast, expectFirst) \

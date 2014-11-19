@@ -64,7 +64,7 @@ void ValBuilder::Build( const Val& t )
 		Level l = { Val::Null(), t } ;
 		m_ctx.push( l ) ;
 	}
-	
+
 	else if ( m_ctx.top().val.Is<Val::Array>() )
 	{
 		Val::Array& ar = m_ctx.top().val.As<Val::Array>() ;
@@ -74,7 +74,7 @@ void ValBuilder::Build( const Val& t )
 	{
 		if ( !m_ctx.top().key.Is<std::string>() )
 			BOOST_THROW_EXCEPTION( Error() << NoKey_(t) ) ;
-	
+
 		else
 		{
 			Val::Object& obj = m_ctx.top().val.As<Val::Object>() ;
@@ -107,12 +107,12 @@ void ValBuilder::End( Val::TypeEnum type )
 	if ( m_ctx.top().val.Type() == type )
 	{
 		assert( m_ctx.top().key.Is<void>() ) ;
-	
+
 		// get top Val from stack
 		Val current ;
 		current.Swap( m_ctx.top().val ) ;
 		m_ctx.pop() ;
-		
+
 		Build(current) ;
 	}
 }

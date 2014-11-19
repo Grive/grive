@@ -65,14 +65,14 @@ void Drive::FromRemote( const Entry& entry )
 	// entries from change feed does not have the parent HREF,
 	// so these checkings are done in normal entries only
 	Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
-	
+
 	if ( parent != 0 && !parent->IsFolder() )
 		Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
 			entry.Title(), parent->Name(), log::verbose ) ;
-	
+
 	else if ( parent == 0 || !parent->IsInRootTree() )
 		Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
-		
+
 	else
 		m_state.FromRemote( entry ) ;
 }
@@ -81,7 +81,7 @@ void Drive::FromChange( const Entry& entry )
 {
 	if ( entry.IsRemoved() )
 		Log( "file \"%1%\" represents a deletion, ignored", entry.Title(), log::verbose ) ;
-	
+
 	// folders go directly
 	else
 		m_state.FromRemote( entry ) ;
@@ -100,7 +100,7 @@ void Drive::SyncFolders( )
 
 	http::XmlResponse xml ;
 	m_http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
-	
+
 	Feed feed( xml.Response() ) ;
 	do
 	{
@@ -112,10 +112,10 @@ void Drive::SyncFolders( )
 			{
 				if ( e.ParentHrefs().size() != 1 )
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
-				
+
 				else if ( e.Title().find('/') != std::string::npos )
 					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
-				
+
 				else
 					m_state.FromRemote( e ) ;
 			}
@@ -129,30 +129,30 @@ void Drive::DetectChanges()
 {
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( m_root ) ;
-	
+
 	long prev_stamp = m_state.ChangeStamp() ;
 	Trace( "previous change stamp is %1%", prev_stamp ) ;
-	
+
 	SyncFolders( ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
 	Feed feed ;
 	if ( m_options["log-xml"].Bool() )
 		feed.EnableLog( "/tmp/file", ".xml" ) ;
-	
+
 	feed.Start( m_http, feed_base + "?showfolders=true&showroot=true" ) ;
-	
+
 	m_resume_link = feed.Root()["link"].
 		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-		
+
 	do
 	{
 		std::for_each(
 			feed.begin(), feed.end(),
 			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
-			
+
 	} while ( feed.GetNext( m_http ) ) ;
-	
+
 	// pull the changes feed
 	if ( prev_stamp != -1 )
 	{
@@ -160,9 +160,9 @@ void Drive::DetectChanges()
 		Feed changes ;
 		if ( m_options["log-xml"].Bool() )
 			feed.EnableLog( "/tmp/changes", ".xml" ) ;
-			
+
 		feed.Start( m_http, ChangesFeed(prev_stamp+1) ) ;
-		
+
 		std::for_each(
 			changes.begin(), changes.end(),
 			boost::bind( &Drive::FromChange, this, _1 ) ) ;
@@ -173,7 +173,7 @@ void Drive::Update()
 {
 	Log( "Synchronizing files", log::info ) ;
 	m_state.Sync( m_http, m_options ) ;
-	
+
 	UpdateChangeStamp( ) ;
 }
 
@@ -190,10 +190,10 @@ void Drive::UpdateChangeStamp( )
 	// get changed feed
 	http::XmlResponse xrsp ;
 	m_http->Get( ChangesFeed(m_state.ChangeStamp()+1), &xrsp, http::Header() ) ;
-	
+
 	// we should go through the changes to see if it was really Grive to made that change
 	// maybe by recording the updated timestamp and compare it?
-	m_state.ChangeStamp( 
+	m_state.ChangeStamp(
 		std::atoi(xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str()) ) ;
 }
 

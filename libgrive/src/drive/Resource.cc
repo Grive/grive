@@ -36,6 +36,7 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
@@ -84,7 +85,7 @@ void Resource::SetState( State new_state )
 		new_state == remote_new || new_state == remote_deleted ||
 		new_state == local_new  || new_state == local_deleted
 	) ;
-	
+
 	m_state = new_state ;
 	std::for_each( m_child.begin(), m_child.end(),
 		boost::bind( &Resource::SetState, _1, new_state ) ) ;
@@ -93,17 +94,17 @@ void Resource::SetState( State new_state )
 void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync )
 {
 	fs::path path = Path() ;
-	
+
 	if ( remote.CreateLink().empty() )
 		Log( "folder %1% is read-only", path, log::verbose ) ;
-		
+
 	// already sync
 	if ( fs::is_directory( path ) )
 	{
 		Log( "folder %1% is in sync", path, log::verbose ) ;
 		m_state = sync ;
 	}
-	
+
 	// remote file created after last sync, so remote is newer
 	else if ( remote.MTime() > last_sync )
 	{
@@ -146,11 +147,11 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 		FromRemoteFolder( remote, last_sync ) ;
 	else
 		FromRemoteFile( remote, last_sync ) ;
-	
+
 	AssignIDs( remote ) ;
-	
+
 	assert( m_state != unknown ) ;
-	
+
 	if ( m_state == remote_new || m_state == remote_changed )
 	{
 		m_md5	= remote.MD5() ;
@@ -175,7 +176,7 @@ void Resource::AssignIDs( const Entry& remote )
 void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 {
 	assert( m_parent != 0 ) ;
-	
+
 	fs::path path = Path() ;
 
 	// recursively create/delete folder
@@ -186,7 +187,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 			( m_parent->m_state == remote_new || m_parent->m_state == local_new )      ? "created" : "deleted",
 			( m_parent->m_state == remote_new || m_parent->m_state == remote_deleted ) ? "remote"  : "local",
 			m_parent->m_state, log::verbose ) ;
-		
+
 		m_state = m_parent->m_state ;
 	}
 
@@ -194,12 +195,12 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 	else if ( !fs::exists( path ) )
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
-		
+
 		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
 		{
 			Log( "file %1% is created in remote (change %2%)", path,
 				remote.ChangeStamp(), log::verbose ) ;
-			
+
 			m_state = remote_new ;
 		}
 		else
@@ -208,7 +209,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 			m_state = local_deleted ;
 		}
 	}
-	
+
 	// remote checksum unknown, assume the file is not changed in remote
 	else if ( remote.MD5().empty() )
 	{
@@ -216,7 +217,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 			Path(), log::verbose ) ;
 		m_state = sync ;
 	}
-	
+
 	// if checksum is equal, no need to compare the mtime
 	else if ( remote.MD5() == m_md5 )
 	{
@@ -235,7 +236,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 			Log( "file %1% is changed in remote", path, log::verbose ) ;
 			m_state = remote_changed ;
 		}
-		
+
 		// remote also has the file, so it's not new in local
 		else if ( m_state == local_new || m_state == remote_deleted )
 		{
@@ -252,7 +253,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 void Resource::FromLocal( const DateTime& last_sync )
 {
 	fs::path path = Path() ;
-	assert( fs::exists( path ) ) ;
+	//assert( fs::exists( path ) ) ;
 
 	// root folder is always in sync
 	if ( !IsRoot() )
@@ -262,18 +263,18 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// follow parent recursively
 		if ( m_parent->m_state == local_new || m_parent->m_state == local_deleted )
 			m_state = local_new ;
-		
+
 		// if the file is not created after last sync, assume file is
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
 		else
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
-		
+
 		m_name		= path.filename().string() ;
-		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
-		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
+		//m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
+		m_md5		= IsFolder() ? ""		: crypt::MD5::Get( path ) ;
 	}
-	
+
 	assert( m_state != unknown ) ;
 }
 
@@ -323,12 +324,12 @@ void Resource::Swap( Resource& coll )
 	m_id.swap( coll.m_id ) ;
 
 	m_href.swap( coll.m_href ) ;
-	m_content.swap( coll.m_content ) ;	
+	m_content.swap( coll.m_content ) ;
 	m_edit.swap( coll.m_edit ) ;
 	m_create.swap( coll.m_create ) ;
-	
+
 	m_mtime.Swap( coll.m_mtime ) ;
-	
+
 	std::swap( m_parent, coll.m_parent ) ;
 	m_child.swap( coll.m_child ) ;
 	std::swap( m_state, coll.m_state ) ;
@@ -369,13 +370,13 @@ void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
-	
+
 	SyncSelf( http, options ) ;
-	
+
 	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
 	// m_mtime is updated to server modified time when the file is uploaded
 	sync_time = std::max(sync_time, m_mtime);
-	
+
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
@@ -391,28 +392,33 @@ void Resource::SyncSelf( http::Agent* http, const Json& options )
 
 	const fs::path path = Path() ;
 
+	Json uploadonly ;
+
 	switch ( m_state )
 	{
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
-		
 		if ( http != 0 && Create( http ) )
 			m_state = sync ;
 		break ;
-	
+
 	case local_deleted :
+		if ( options.Get("uploadonly", uploadonly) && uploadonly.Bool() )
+			break ;
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
 		if ( http != 0 )
 			DeleteRemote( http ) ;
 		break ;
-	
+
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
 		if ( http != 0 && EditContent( http, options["new-rev"].Bool() ) )
 			m_state = sync ;
 		break ;
-	
+
 	case remote_new :
+		if ( options.Get("uploadonly", uploadonly) && uploadonly.Bool() )
+			break ;
 		Log( "sync %1% created in remote. creating local", path, log::info ) ;
 		if ( http != 0 )
 		{
@@ -420,12 +426,14 @@ void Resource::SyncSelf( http::Agent* http, const Json& options )
 				fs::create_directories( path ) ;
 			else
 				Download( http, path ) ;
-			
+
 			m_state = sync ;
 		}
 		break ;
-	
+
 	case remote_changed :
+		if ( options.Get("uploadonly", uploadonly) && uploadonly.Bool() )
+			break ;
 		assert( !IsFolder() ) ;
 		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
 		if ( http != 0 )
@@ -434,13 +442,15 @@ void Resource::SyncSelf( http::Agent* http, const Json& options )
 			m_state = sync ;
 		}
 		break ;
-	
+
 	case remote_deleted :
+		if ( options.Get("uploadonly", uploadonly) && uploadonly.Bool() )
+			break ;
 		Log( "sync %1% deleted in remote. deleting local", path, log::info ) ;
 		if ( http != 0 )
 			DeleteLocal() ;
 		break ;
-	
+
 	case sync :
 		Log( "sync %1% already in sync", path, log::verbose ) ;
 		break ;
@@ -449,7 +459,7 @@ void Resource::SyncSelf( http::Agent* http, const Json& options )
 	case unknown :
 		assert( false ) ;
 		break ;
-		
+
 	default :
 		break ;
 	}
@@ -463,11 +473,11 @@ void Resource::DeleteLocal()
 	assert( m_parent != 0 ) ;
 	fs::path parent = m_parent->Path() ;
 	fs::path dest	= ".trash" / parent / Name() ;
-	
+
 	std::size_t idx = 1 ;
 	while ( fs::exists( dest ) && idx != 0 )
 		dest = ".trash" / parent / (boost::format(trash_file) % Name() % idx++).str() ;
-	
+
 	// wrap around! just remove the file
 	if ( idx == 0 )
 		fs::remove_all( Path() ) ;
@@ -482,17 +492,17 @@ void Resource::DeleteRemote( http::Agent *http )
 {
 	assert( http != 0 ) ;
 	http::StringResponse str ;
-	
+
 	try
 	{
 		http::Header hdr ;
 		hdr.Add( "If-Match: " + m_etag ) ;
-		
+
 		// doesn't know why, but an update before deleting seems to work always
 		http::XmlResponse xml ;
 		http->Get( m_href, &xml, hdr ) ;
 		AssignIDs( Entry( xml.Response() ) ) ;
-	
+
 		http->Custom( "DELETE", m_href, &str, hdr ) ;
 	}
 	catch ( Exception& e )
@@ -509,7 +519,7 @@ void Resource::DeleteRemote( http::Agent *http )
 void Resource::Download( http::Agent* http, const fs::path& file ) const
 {
 	assert( http != 0 ) ;
-	
+
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
 	long r = http->Get( m_content, &dl, http::Header() ) ;
 	if ( r <= 400 )
@@ -533,7 +543,7 @@ bool Resource::EditContent( http::Agent* http, bool new_rev )
 		Log( "Cannot upload %1%: file read-only. %2%", m_name, m_state, log::warning ) ;
 		return false ;
 	}
-	
+
 	return Upload( http, m_edit + (new_rev ? "?new-revision=true" : ""), false ) ;
 }
 
@@ -543,13 +553,13 @@ bool Resource::Create( http::Agent* http )
 	assert( m_parent != 0 ) ;
 	assert( m_parent->IsFolder() ) ;
 	assert( m_parent->m_state == sync ) ;
-	
+
 	if ( IsFolder() )
 	{
 		std::string uri = feed_base ;
 		if ( !m_parent->IsRoot() )
 			uri += ("/" + http->Escape(m_parent->m_id) + "/contents") ;
-		
+
 		std::string meta = (boost::format( xml_meta )
 			% "folder"
 			% xml::Escape(m_name)
@@ -557,7 +567,7 @@ bool Resource::Create( http::Agent* http )
 
 		http::Header hdr ;
 		hdr.Add( "Content-Type: application/atom+xml" ) ;
-		
+
 		http::XmlResponse xml ;
 // 		http::ResponseLog log( "create", ".xml", &xml ) ;
 		http->Post( uri, meta, &xml, hdr ) ;
@@ -582,41 +592,85 @@ bool Resource::Upload(
 	bool 				post)
 {
 	assert( http != 0 ) ;
-	
+
 	File file( Path() ) ;
 	std::ostringstream xcontent_len ;
 	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
-	
+
 	http::Header hdr ;
 	hdr.Add( "Content-Type: application/atom+xml" ) ;
 	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
 	hdr.Add( xcontent_len.str() ) ;
   	hdr.Add( "If-Match: " + m_etag ) ;
 	hdr.Add( "Expect:" ) ;
-	
+
 	std::string meta = (boost::format( xml_meta )
 		% m_kind
 		% xml::Escape(m_name)
 	).str() ;
-	
-	http::StringResponse str ;
-	if ( post )
-		http->Post( link, meta, &str, hdr ) ;
-	else
-		http->Put( link, meta, &str, hdr ) ;
-	
-	http::Header uphdr ;
-	uphdr.Add( "Expect:" ) ;
-	uphdr.Add( "Accept:" ) ;
 
-	// the content upload URL is in the "Location" HTTP header
-	std::string uplink = http->RedirLocation() ;
-	http::XmlResponse xml ;
-	
-	http->Put( uplink, &file, &xml, uphdr ) ;
-	AssignIDs( Entry( xml.Response() ) ) ;
-  m_mtime = Entry(xml.Response()).MTime();
-	
+	bool retrying=false;
+	while ( true ) {
+		if ( retrying ) {
+			file.Seek( 0, SEEK_SET );
+			os::Sleep( 5 );
+		}
+
+		try {
+			http::StringResponse str ;
+			if ( post )
+				http->Post( link, meta, &str, hdr ) ;
+			else
+				http->Put( link, meta, &str, hdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing pre-upload response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
+
+		http::Header uphdr ;
+		uphdr.Add( "Expect:" ) ;
+		uphdr.Add( "Accept:" ) ;
+
+		// the content upload URL is in the "Location" HTTP header
+		std::string uplink = http->RedirLocation() ;
+		http::XmlResponse xml ;
+
+		long http_code = 0;
+		try {
+			http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
+
+		if ( http_code == 410 || http_code == 412 ) {
+			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
+					log::warning ) ;
+			retrying = true;
+			continue;
+		}
+
+		if ( retrying )
+			Log( "upload succeeded on retry", log::warning );
+		Entry responseEntry = Entry( xml.Response() );
+		AssignIDs( responseEntry ) ;
+		m_mtime = responseEntry.MTime();
+		break;
+	}
 	return true ;
 }
 

@@ -46,12 +46,12 @@ void Drive::Refresh( http::Agent *agent )
 	// find root node ID
 	assert( m_root == 0 ) ;
 	m_root = NewResource( agent, "root" ) ;
-	
+
 	// get all folders first
 	Feed folders( feeds::files ) ;
 	folders.Query( "mimeType", mime_types::folder ) ;
 	NewResource( agent, folders )  ;
-	
+
 	// get all files
 	Feed files( feeds::files ) ;
 	NewResource( agent, files ) ;
@@ -61,7 +61,7 @@ void Drive::Refresh( http::Agent *agent )
 	{
 		Resource *parent = Find( (*i)->Parent() ), *child = *i ;
 		assert( child != 0 ) ;
-		
+
 		if ( parent != 0 )
 		{
 			// initialize parent IDs
@@ -74,7 +74,7 @@ void Drive::Refresh( http::Agent *agent )
 void Drive::NewResource( http::Agent *agent, Feed& items )
 {
 	assert( agent != 0 ) ;
-	
+
 	while ( items.Next( agent ) )
 	{
 		std::vector<Val> item_json = items.Content()["items"].AsArray() ;
@@ -88,7 +88,7 @@ Resource* Drive::NewResource( http::Agent *agent, const std::string& id )
 {
 	Feed feed( feeds::files + "/" + id ) ;
 	feed.Next( agent ) ;
-	
+
 	return NewResource( feed.Content() ) ;
 }
 
@@ -96,7 +96,7 @@ Resource* Drive::NewResource( const Val& item )
 {
 	// assume resource is directly under root
 	std::string parent_id = m_root != 0 ? m_root->ID() : "" ;
-	
+
 	Val parents ;
 	if ( item.Get( "parents", parents ) )
 	{
@@ -116,10 +116,10 @@ Resource* Drive::NewResource( const Val& item )
 		item["mimeType"].Str(),
 		item["title"].Str(),
 		parent_id ) ;
-	
+
 	m_db.insert(r) ;
 	assert( Find(r->ID()) == r ) ;
-	
+
 	return r ;
 }
 
@@ -151,7 +151,7 @@ const Resource* Drive::Child( const Resource *parent, std::size_t idx ) const
 		BOOST_THROW_EXCEPTION(
 			Exception()
 		) ;
-	
+
 	return Find( parent->At(idx) ) ;
 }
 

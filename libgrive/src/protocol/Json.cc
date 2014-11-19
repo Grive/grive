@@ -149,7 +149,7 @@ Json::Json( const std::vector<Json>& arr ) :
 {
 	if ( m_json == 0 )
 		BOOST_THROW_EXCEPTION( Error() << JsonCApi_( "json_object_new_array" ) ) ;
-	
+
 	for ( std::vector<Json>::const_iterator i = arr.begin() ; i != arr.end() ; ++i )
 		Add( *i ) ;
 }
@@ -221,7 +221,7 @@ void Json::Swap( Json& other )
 Json Json::operator[]( const std::string& key ) const
 {
 	assert( m_json != 0 ) ;
-	
+
 	struct json_object *j = 0 ;
 	if ( !::json_object_object_get_ex( m_json, key.c_str(), &j ) )
 		BOOST_THROW_EXCEPTION(
@@ -229,7 +229,7 @@ Json Json::operator[]( const std::string& key ) const
 				<< JsonCApi_( "json_object_object_get" )
 				<< KeyNotFound_( key )
 				<< Json_( ::json_object_to_json_string(m_json) ) ) ;
-	
+
 	assert( j != 0 ) ;
 	return Json( j ) ;
 }
@@ -247,7 +247,7 @@ Json Json::operator[]( const std::size_t& idx ) const
 				<< OutOfRange_( idx )
 				<< Json_( ::json_object_to_json_string(m_json) ) ) ;
 	}
-	
+
 	return Json( j ) ;
 }
 
@@ -264,7 +264,7 @@ bool Json::Get( const std::string& key, Json& json ) const
 	if ( ::json_object_object_get_ex( m_json, key.c_str(), &j ) )
 	{
 		assert( j != 0 ) ;
-		
+
 		Json tmp( j ) ;
 		json.Swap( tmp ) ;
 		return true ;
@@ -286,7 +286,7 @@ void Json::Add( const Json& json )
 {
 	assert( m_json != 0 ) ;
 	assert( json.m_json != 0 ) ;
-	
+
 	::json_object_get( json.m_json ) ;
 	::json_object_array_add( m_json, json.m_json ) ;
 }
@@ -389,12 +389,12 @@ Json::Type Json::DataType() const
 Json::Object Json::AsObject() const
 {
 	Object result ;
-	
+
 	json_object_object_foreach( m_json, key, val )
 	{
 		result.insert( Object::value_type( key, Json( val ) ) ) ;
 	}
-	
+
 	return result ;
 }
 
@@ -415,10 +415,10 @@ Json::Array Json::AsArray() const
 {
 	std::size_t count = ::json_object_array_length( m_json ) ;
 	Array result ;
-	
+
 	for ( std::size_t i = 0 ; i < count ; ++i )
 		result.push_back( Json( ::json_object_array_get_idx( m_json, i ) ) ) ;
-	
+
 	return result ;
 }
 
@@ -441,21 +441,21 @@ Json::Array Json::As<Json::Array>() const
 Json Json::FindInArray( const std::string& key, const std::string& value ) const
 {
 	std::size_t count = ::json_object_array_length( m_json ) ;
-	
+
 	for ( std::size_t i = 0 ; i < count ; ++i )
 	{
 		Json item( ::json_object_array_get_idx( m_json, i ) ) ;
 		if ( item.Has(key) && item[key].Str() == value )
 			return item ;
 	}
-	
+
 	BOOST_THROW_EXCEPTION(
 		Error()
 			<< JsonCApi_( "Json::FindInArray" )
 			<< KeyNotFound_( key )
 			<< Value_(value)
 	) ;
-	
+
 	// shut off compiler warnings
 	return Json() ;
 }
@@ -482,7 +482,7 @@ Json Json::Parse( const std::string& str )
 				<< JsonCApi_( "json_tokener_parse" )
 				<< ValueErr( str )
 		) ;
-	
+
 	return Json( json, NotOwned() ) ;
 }
 
@@ -495,23 +495,23 @@ Json Json::Parse( DataStream *in )
 
 	struct json_tokener *tok = ::json_tokener_new() ;
 	struct json_object *json = 0 ;
-	
+
 	char buf[1024] ;
 	std::size_t count = 0 ;
 
 	while ( (count = in->Read( buf, sizeof(buf) ) ) > 0 )
 	{
 		json = ::json_tokener_parse_ex( tok, buf, count ) ;
-		
+
 		// check for parse error
 		if ( ::json_tokener_get_error(tok) == ::json_tokener_continue )
 			break ;
 	}
-	
+
 	// save the error code and free the tokener before throwing exceptions
 	::json_tokener_error err = ::json_tokener_get_error(tok) ;
 	::json_tokener_free( tok ) ; tok = 0 ;
-	
+
 	if ( err != json_tokener_success || json == 0 )
 	{
 		BOOST_THROW_EXCEPTION(
@@ -520,7 +520,7 @@ Json Json::Parse( DataStream *in )
 				<< ErrMsg_( ::json_tokener_error_desc(err) )
 		) ;
 	}
-		
+
 	return Json( json, NotOwned() ) ;
 }
 

@@ -86,7 +86,7 @@ DateTime DateTime::Now()
 				<< boost::errinfo_errno(errno)
 		) ;
 	}
-	
+
 	return DateTime( tv.tv_sec, tv.tv_usec * 1000 ) ;
 }
 
@@ -96,7 +96,7 @@ std::string DateTime::Format( const std::string& format ) const
 
 	char tmp[1024] ;
 	std::size_t count = ::strftime( tmp, sizeof(tmp), format.c_str(), &tp ) ;
-	return count > 0 ? std::string( tmp, count ) : "" ;	
+	return count > 0 ? std::string( tmp, count ) : "" ;
 }
 
 struct tm DateTime::Tm() const
@@ -129,7 +129,7 @@ std::ostream& operator<<( std::ostream& os, const DateTime& dt )
 struct timeval DateTime::Tv() const
 {
 	assert( m_nsec < 1000000000 ) ;
-	
+
 	timeval result ;
 	result.tv_sec	= m_sec ;
 	result.tv_usec	= m_nsec / 1000 ;

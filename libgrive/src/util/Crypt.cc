@@ -66,7 +66,7 @@ std::string MD5::Get() const
 {
 	unsigned char *md5 = ::gcry_md_read( m_impl->hd, GCRY_MD_MD5 ) ;
 	unsigned int  len  = ::gcry_md_get_algo_dlen(GCRY_MD_MD5) ;
-	
+
 	// format the MD5 string
 	std::ostringstream ss ;
 	for ( unsigned int i = 0 ; i < len ; i++ )
@@ -91,7 +91,7 @@ std::string MD5::Get( const fs::path& file )
 std::string MD5::Get( File& file )
 {
 	MD5 crypt ;
-	
+
 	u64_t size = file.Size() ;
 	for ( u64_t i = 0 ; i < size ; i += read_size )
 	{

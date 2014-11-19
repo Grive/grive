@@ -56,7 +56,7 @@ DateTime FileCTime( const std::string& filename )
 				<< boost::errinfo_file_name(filename)
 		) ;
 	}
-	
+
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
 	return DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
@@ -84,7 +84,7 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 void Sleep( unsigned int sec )
 {
 	struct timespec ts = { sec, 0 } ;
-	
+
 	int result = 0 ;
 	do
 	{

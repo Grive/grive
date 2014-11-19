@@ -34,10 +34,10 @@ CommonLog::CommonLog()
 bool CommonLog::Enable( log::Serverity s, bool enable )
 {
 	assert( s >= debug && s < serverity_count ) ;
-	
+
 	bool prev = m_enabled[s] ;
 	m_enabled[s] = enable ;
-	
+
 	return prev ;
 }
 

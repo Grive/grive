@@ -78,19 +78,19 @@ void InitLog( const po::variables_map& vm )
 		file_log->Enable( log::warning ) ;
 		file_log->Enable( log::error ) ;
 		file_log->Enable( log::critical ) ;
-		
+
 		// log grive version to log file
 		file_log->Log( log::Fmt("grive version " VERSION " " __DATE__ " " __TIME__), log::verbose ) ;
 		file_log->Log( log::Fmt("current time: %1%") % DateTime::Now(), log::verbose ) ;
-		
+
 		comp_log->Add( file_log ) ;
 	}
-	
+
 	if ( vm.count( "verbose" ) )
 	{
 		console_log->Enable( log::verbose ) ;
 	}
-	
+
 	if ( vm.count( "debug" ) )
 	{
 		console_log->Enable( log::verbose ) ;
@@ -102,7 +102,7 @@ void InitLog( const po::variables_map& vm )
 int Main( int argc, char **argv )
 {
 	InitGCrypt() ;
-	
+
 	// construct the program options
 	po::options_description desc( "Grive options" );
 	desc.add_options()
@@ -110,6 +110,7 @@ int Main( int argc, char **argv )
 		( "version,v",	"Display Grive version" )
 		( "auth,a",		"Request authorization token" )
 		( "path,p",		po::value<std::string>(), "Path to sync")
+		( "dir,s",		po::value<std::string>(), "Subdirectory to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
 		( "log-xml",	"Log more HTTP responses as XML for debugging.")
 		( "new-rev",	"Create new revisions in server for updated files.")
@@ -117,14 +118,17 @@ int Main( int argc, char **argv )
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
+		( "uploadonly,u",	"Force grive to always upload a file from Google Drive "
+						"instead of downloading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		("docs,g",		"Synchronises Google Docs, Sheets and Slides.")
 	;
-	
+
 	po::variables_map vm;
 	po::store(po::parse_command_line( argc, argv, desc), vm );
 	po::notify(vm);
-	
+
 	// simple commands that doesn't require log or config
 	if ( vm.count("help") )
 	{
@@ -140,9 +144,9 @@ int Main( int argc, char **argv )
 
 	// initialize logging
 	InitLog(vm) ;
-	
+
 	Config config(vm) ;
-	
+
 	Log( "config file name %1%", config.Filename(), log::verbose );
 
 	if ( vm.count( "auth" ) )
@@ -152,21 +156,21 @@ int Main( int argc, char **argv )
 			<< "Please go to this URL and get an authentication code:\n\n"
 			<< OAuth2::MakeAuthURL( client_id )
 			<< std::endl ;
-		
+
 		std::cout
 			<< "\n-----------------------\n"
 			<< "Please input the authentication code here: " << std::endl ;
 		std::string code ;
 		std::cin >> code ;
-		
+
 		OAuth2 token( client_id, client_secret ) ;
 		token.Auth( code ) ;
-		
+
 		// save to config
 		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
 		config.Save() ;
 	}
-	
+
 	std::string refresh_token ;
 	try
 	{
@@ -178,10 +182,10 @@ int Main( int argc, char **argv )
 			"Please run grive with the \"-a\" option if this is the "
 			"first time you're accessing your Google Drive!",
 			log::critical ) ;
-		
+
 		return -1;
 	}
-	
+
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
 
@@ -195,7 +199,7 @@ int Main( int argc, char **argv )
 	}
 	else
 		drive.DryRun() ;
-	
+
 	config.Save() ;
 	Log( "Finished!", log::info ) ;
 	return 0 ;

@@ -50,16 +50,16 @@ void ResourceTest::TestNormal( )
 	Resource root( TEST_DATA, "folder" ) ;
 	Resource subject( "entry.xml", "file" ) ;
 	root.AddChild( &subject ) ;
-	
+
 	GRUT_ASSERT_EQUAL( subject.Path(), fs::path( TEST_DATA ) / "entry.xml" ) ;
-	
+
 	subject.FromLocal( DateTime() ) ;
 	GRUT_ASSERT_EQUAL( subject.MD5(), "c0742c0a32b2c909b6f176d17a6992d0" ) ;
 	GRUT_ASSERT_EQUAL( subject.StateStr(), "local_new" ) ;
-	
+
 	xml::Node entry = xml::Node::Element( "entry" ) ;
 	entry.AddElement( "updated" ).AddText( "2012-05-09T16:13:22.401Z" ) ;
-	
+
 	Entry remote( entry ) ;
 	subject.FromRemote( remote, DateTime() ) ;
 	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;

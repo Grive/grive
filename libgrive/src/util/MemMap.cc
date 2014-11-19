@@ -32,7 +32,7 @@ MemMap::~MemMap()
 {
 	File::UnMap( m_addr, m_length ) ;
 }
-	
+
 void* MemMap::Addr() const
 {
 	return m_addr ;

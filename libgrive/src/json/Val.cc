@@ -48,7 +48,7 @@ Val::Val( TypeEnum type )
 		case string_type:	m_base.reset( new Impl<std::string> ) ;	break ;
 		case array_type:	m_base.reset( new Impl<Array> ) ; break ;
 		case object_type:	m_base.reset( new Impl<Object> ) ; break ;
-		case null_type:	
+		case null_type:
 		default:			m_base.reset( new Impl<void> ) ; break ;
 	}
 }
@@ -85,7 +85,7 @@ const Val& Val::operator[]( const std::string& key ) const
 	Object::const_iterator i = obj.find(key) ;
 	if ( i != obj.end() )
 		return i->second ;
-	
+
 	// shut off compiler warning
 	BOOST_THROW_EXCEPTION(Error() << NoKey_(key)) ;
 	throw ;
@@ -96,7 +96,7 @@ const Val& Val::operator[]( std::size_t index ) const
 	const Array& ar = As<Array>() ;
 	if ( index < ar.size() )
 		return ar[index] ;
-	
+
 	// shut off compiler warning
 	BOOST_THROW_EXCEPTION(Error() << OutOfRange_(index)) ;
 	throw ;
@@ -165,18 +165,18 @@ void Val::Visit( ValVisitor *visitor ) const
 		case double_type:	visitor->Visit( As<double>() ) ;		break ;
 		case string_type:	visitor->Visit( As<std::string>() ) ;	break ;
 		case bool_type:		visitor->Visit( As<bool>() ) ;			break ;
-		
+
 		case object_type:
 		{
 			visitor->StartObject() ;
-			
+
 			const Object& obj = As<Object>() ;
 			for ( Object::const_iterator i = obj.begin() ; i != obj.end() ; ++i )
 			{
 				visitor->VisitKey( i->first ) ;
 				i->second.Visit( visitor ) ;
 			}
-			
+
 			visitor->EndObject() ;
 			break ;
 		}
@@ -184,11 +184,11 @@ void Val::Visit( ValVisitor *visitor ) const
 		case array_type:
 		{
 			visitor->StartArray() ;
-			
+
 			const Array& arr = As<Array>() ;
 			for ( Array::const_iterator i = arr.begin() ; i != arr.end() ; ++i )
 				i->Visit( visitor ) ;
-			
+
 			visitor->EndArray() ;
 			break ;
 		}
@@ -204,14 +204,14 @@ void Val::Select( const Object& obj, const std::string& key, std::vector<Val>& r
 
 /**	If \a this is an array of objects, this function returns all values of
 	the objects in the array with the key \a key. If \a this is an object,
-	just return the value with the key \a key. 
+	just return the value with the key \a key.
 */
 std::vector<Val> Val::Select( const std::string& key ) const
 {
 	std::vector<Val> result ;
 	if ( Is<Object>() )
 		Select( As<Object>(), key, result ) ;
-	
+
 	else if ( Is<Array>() )
 	{
 		const Array& array = As<Array>() ;
@@ -241,7 +241,7 @@ namespace std
 	{
 		v1.Swap( v2 ) ;
 	}
-	
+
 	ostream& operator<<( ostream& os, gr::Val::TypeEnum t )
 	{
 		return os << static_cast<int>(t) ;

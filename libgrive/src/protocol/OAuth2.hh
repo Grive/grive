@@ -35,26 +35,26 @@ public :
 		const std::string&	client_secret ) ;
 
 	std::string Str() const ;
-	
+
 	static std::string MakeAuthURL(
 		const std::string&	client_id,
 		const std::string&	state = std::string() ) ;
 
 	void Auth( const std::string& auth_code ) ;
 	void Refresh( ) ;
-		
+
 	std::string RefreshToken( ) const ;
 	std::string AccessToken( ) const ;
-	
+
 	// adding HTTP auth header
 	std::string HttpHeader( ) const ;
-	
+
 private :
 	std::string m_access ;
 	std::string m_refresh ;
-	
+
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;
 } ;
-	
+
 } // end of namespace

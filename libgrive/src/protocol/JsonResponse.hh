@@ -38,7 +38,7 @@ public :
 	std::size_t Read( char *data, std::size_t count ) ;
 
 	Json Response() const ;
-	
+
 private :
 	StringResponse	m_resp ;
 } ;

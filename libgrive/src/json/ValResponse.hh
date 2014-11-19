@@ -42,7 +42,7 @@ public :
 
 	void Finish() ;
 	Val Response() const ;
-	
+
 private :
 	ValBuilder	m_val ;
 	JsonParser	m_parser ;

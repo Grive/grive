@@ -27,7 +27,7 @@ namespace gr {
 namespace impl
 {
 	template <typename Type> class FuncImpl ;
-	
+
 	template <typename R> class FuncImpl<R (void)>
 	{
 	public :
@@ -43,7 +43,7 @@ namespace impl
 		virtual FuncImpl* Clone() const = 0 ;
 		virtual ~FuncImpl() {}
 	} ;
-	
+
 	template <typename R, typename P1, typename P2> class FuncImpl<R (P1,P2)>
 	{
 	public :
@@ -54,23 +54,23 @@ namespace impl
 
 	template <typename Type>
 	struct FuncTrait ;
-	
+
 	struct NullType {} ;
-	
+
 	template <typename R> struct FuncTrait<R(void)>
 	{
 		typedef R			ReturnType ;
 		typedef NullType	Param1Type ;
 		typedef NullType	Param2Type ;
 	} ;
-	
+
 	template <typename R, typename P1> struct FuncTrait<R(P1)>
 	{
 		typedef R			ReturnType ;
 		typedef P1			Param1Type ;
 		typedef NullType	Param2Type ;
 	} ;
-	
+
 	template <typename R, typename P1, typename P2> struct FuncTrait<R(P1,P2)>
 	{
 		typedef R	ReturnType ;
@@ -83,11 +83,11 @@ namespace impl
 	public :
 		explicit FuncHolder( const F& f ) : m_func( f ) { }
 		FuncHolder* Clone() const {	return new FuncHolder( *this ) ; }
-		
+
 		typedef typename FuncTrait<Type>::ReturnType ReturnType ;
-		
+
 		ReturnType operator()() { return m_func(); }
-		
+
 		ReturnType operator()( typename FuncTrait<Type>::Param1Type p1)
 		{
 			return m_func(p1);
@@ -103,7 +103,7 @@ namespace impl
 	private :
 		F m_func ;
 	} ;
-	
+
 	template <typename Type>
 	struct NullFunc
 	{
@@ -123,7 +123,7 @@ namespace impl
 			return ReturnType() ;
 		}
 	} ;
-	
+
 	template <typename Type, typename F>
 	FuncHolder<Type,F>* MakeFuncHolder( F func )
 	{
@@ -148,7 +148,7 @@ public :
 		m_pimpl( impl::MakeFuncHolder<Type>( f ) )
 	{
 	}
-	
+
 	Function& operator=( const Function& f )
 	{
 		Function tmp( f ) ;
@@ -160,17 +160,17 @@ public :
 	}
 
 	typedef typename impl::FuncTrait<Type>::ReturnType ReturnType ;
-	
+
 	ReturnType operator()( )
 	{
 		return (*m_pimpl)() ;
 	}
-	
+
 	template <typename P1> ReturnType operator()( P1 p1 )
 	{
 		return (*m_pimpl)( p1 ) ;
 	}
-	
+
 	template <typename P1, typename P2> ReturnType operator()( P1 p1, P2 p2 )
 	{
 		return (*m_pimpl)( p1, p2 ) ;

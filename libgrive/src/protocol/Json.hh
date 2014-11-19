@@ -59,25 +59,25 @@ public :
 public :
 	template <typename T>
 	explicit Json( const T& val ) ;
-	
+
 	template <std::size_t n>
 	explicit Json( const char (&str)[n] ) :
 		m_json( InitStr( str, n ) )
 	{
 	}
-	
+
 	Json() ;
 	Json( const Json& rhs ) ;
 	Json( const char *str ) ;
 	~Json() ;
-	
+
 	static Json Parse( const std::string& str ) ;
 	static Json Parse( DataStream *in ) ;
-	
+
 	Json operator[]( const std::string& key ) const ;
 	Json operator[]( const std::size_t& idx ) const ;
 	Json& operator=( const Json& rhs ) ;
-	
+
 	void Swap( Json& other ) ;
 
 	std::string Str() const ;
@@ -89,17 +89,17 @@ public :
 
 	template <typename T>
 	bool Is() const ;
-	
+
 	template <typename T>
 	T As() const ;
-	
+
 	bool Has( const std::string& key ) const ;
 	bool Get( const std::string& key, Json& json ) const ;
 	void Add( const std::string& key, const Json& json ) ;
 	void Add( const Json& json ) ;
 	Json FindInArray( const std::string& key, const std::string& value ) const ;
 	bool FindInArray( const std::string& key, const std::string& value, Json& result ) const ;
-	
+
 	/**	Expect *this is a JSON array of objects. Select all "key" values inside each
 		objects in the array and copies them in the output iterator \a out.
 	*/
@@ -115,17 +115,17 @@ public :
 		}
 		return out ;
 	}
-	
+
 	friend std::ostream& operator<<( std::ostream& os, const Json& json ) ;
 	void Write( DataStream *out ) const ;
 
 	enum Type { null_type, bool_type, double_type, int_type, object_type, array_type, string_type } ;
-	
+
 	Type DataType() const ;
-	
+
 private :
 	Json( struct json_object *json ) ;
-	
+
 	struct NotOwned {} ;
 	Json( struct json_object *json, NotOwned ) ;
 

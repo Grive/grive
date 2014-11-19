@@ -1,0 +1,3 @@
+# Fix path below (2 places) and location of grive-incron script
+/home/USER/gdrive IN_CREATE,IN_DELETE,IN_CLOSE_WRITE,IN_MOVE /usr/bin/grive-incron $# /home/USER/gdrive
+

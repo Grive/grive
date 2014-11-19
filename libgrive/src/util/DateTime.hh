@@ -35,26 +35,26 @@ public :
 	explicit DateTime( std::time_t sec, unsigned long nsec = 0 ) ;
 
 	void Assign( std::time_t sec, unsigned long nsec = 0 ) ;
-	
+
 	static DateTime Now() ;
-	
+
 	std::time_t Sec( ) const ;
 	unsigned long NanoSec( ) const ;
 	std::string Format( const std::string& format ) const ;
-	
+
 	tm Tm() const ;
 	timeval Tv() const ;
-	
+
 	bool operator==( const DateTime& dt ) const ;
 	bool operator!=( const DateTime& dt ) const ;
 	bool operator>( const DateTime& dt ) const ;
 	bool operator>=( const DateTime& dt ) const ;
 	bool operator<( const DateTime& dt ) const ;
 	bool operator<=( const DateTime& dt ) const ;
-	
+
 	void Swap( DateTime& dt ) ;
 	std::string ToString() const ;
-	
+
 private :
 	std::time_t		m_sec ;
 	unsigned long	m_nsec ;

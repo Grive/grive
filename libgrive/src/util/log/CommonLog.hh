@@ -29,10 +29,10 @@ class CommonLog : public LogBase
 {
 public :
 	CommonLog() ;
-	
+
 	bool Enable( log::Serverity s, bool enable = true ) ;
 	bool IsEnabled( log::Serverity s ) const ;
-	
+
 private :
 	std::bitset<serverity_count>	m_enabled ;
 } ;

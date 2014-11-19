@@ -26,11 +26,11 @@ namespace gr { namespace v1
 	const std::string feed_base		= "https://docs.google.com/feeds/default/private/full" ;
 	const std::string feed_changes	= "https://docs.google.com/feeds/default/private/changes" ;
 	const std::string feed_metadata	= "https://docs.google.com/feeds/metadata/default" ;
-	
+
 	const std::string root_href =
 		"https://docs.google.com/feeds/default/private/full/folder%3Aroot" ;
 	const std::string root_create =
 		"https://docs.google.com/feeds/upload/create-session/default/private/full" ;
-	
+
 	std::string ChangesFeed( int changestamp ) ;
 } }

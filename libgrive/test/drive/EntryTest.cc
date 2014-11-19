@@ -40,19 +40,19 @@ EntryTest::EntryTest( )
 void EntryTest::TestXml( )
 {
 	xml::Node root = xml::TreeBuilder::ParseFile( TEST_DATA "entry.xml" )  ;
-	
+
 	CPPUNIT_ASSERT( !root["entry"].empty() ) ;
-	
+
 	Entry subject( root["entry"].front() ) ;
 	GRUT_ASSERT_EQUAL( "snes", subject.Title() ) ;
 	GRUT_ASSERT_EQUAL( "\"WxYPGE8CDyt7ImBk\"", subject.ETag() ) ;
 	GRUT_ASSERT_EQUAL( "https://docs.google.com/feeds/default/private/full/folder%3A0B5KhdsbryVeGMl83OEV1ZVc3cUE",
 		subject.SelfHref() ) ;
-	
+
 	GRUT_ASSERT_EQUAL( 1U, subject.ParentHrefs().size() ) ;
 	GRUT_ASSERT_EQUAL( "https://docs.google.com/feeds/default/private/full/folder%3A0B5KhdsbryVeGNEZjdUxzZHl3Sjg",
 		subject.ParentHrefs().front() ) ;
-	
+
 	GRUT_ASSERT_EQUAL( "folder", subject.Kind() ) ;
 }
 

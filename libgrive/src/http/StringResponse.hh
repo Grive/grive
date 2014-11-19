@@ -35,7 +35,7 @@ public :
 	void Clear() ;
 
 	const std::string& Response() const ;
-	
+
 private :
 	std::string	m_resp ;
 } ;
