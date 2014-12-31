@@ -29,8 +29,13 @@
 	#pragma warning(push)
 	#pragma warning(disable: 4005)
 #endif
+#ifdef JSONC_FEDORA
+#include <json-c/json_tokener.h>
+#include <json-c/linkhash.h>
+#else
 #include <json/json_tokener.h>
 #include <json/linkhash.h>
+#endif
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif
