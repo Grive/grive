@@ -12,6 +12,10 @@ find_package(CppUnit)
 find_package(Iberty)
 find_package(ZLIB)
 
+if (JSONC_FOUND_FEDORA)
+    set( JSONC_LIBRARY ${JSONC_LIBRARY_FEDORA} )
+ENDIF (JSONC_FOUND_FEDORA)
+
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
