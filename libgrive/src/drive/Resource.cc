@@ -582,41 +582,46 @@ bool Resource::Upload(
 	bool 				post)
 {
 	assert( http != 0 ) ;
-	
-	File file( Path() ) ;
-	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
-	
-	http::Header hdr ;
-	hdr.Add( "Content-Type: application/atom+xml" ) ;
-	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
-	hdr.Add( xcontent_len.str() ) ;
-  	hdr.Add( "If-Match: " + m_etag ) ;
-	hdr.Add( "Expect:" ) ;
-	
-	std::string meta = (boost::format( xml_meta )
-		% m_kind
-		% xml::Escape(m_name)
-	).str() ;
-	
-	http::StringResponse str ;
-	if ( post )
-		http->Post( link, meta, &str, hdr ) ;
-	else
-		http->Put( link, meta, &str, hdr ) ;
-	
-	http::Header uphdr ;
-	uphdr.Add( "Expect:" ) ;
-	uphdr.Add( "Accept:" ) ;
+	try {
+	  File file( Path() ) ;
+	  std::ostringstream xcontent_len ;
+	  xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
+	  
+	  http::Header hdr ;
+	  hdr.Add( "Content-Type: application/atom+xml" ) ;
+	  hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
+	  hdr.Add( xcontent_len.str() ) ;
+	  hdr.Add( "If-Match: " + m_etag ) ;
+	  hdr.Add( "Expect:" ) ;
+	  
+	  std::string meta = (boost::format( xml_meta )
+		  % m_kind
+		  % xml::Escape(m_name)
+	  ).str() ;
+	  
+	  http::StringResponse str ;
+	  if ( post )
+		  http->Post( link, meta, &str, hdr ) ;
+	  else
+		  http->Put( link, meta, &str, hdr ) ;
+	  
+	  http::Header uphdr ;
+	  uphdr.Add( "Expect:" ) ;
+	  uphdr.Add( "Accept:" ) ;
 
-	// the content upload URL is in the "Location" HTTP header
-	std::string uplink = http->RedirLocation() ;
-	http::XmlResponse xml ;
-	
-	http->Put( uplink, &file, &xml, uphdr ) ;
-	AssignIDs( Entry( xml.Response() ) ) ;
-  m_mtime = Entry(xml.Response()).MTime();
-	
+	  // the content upload URL is in the "Location" HTTP header
+	  std::string uplink = http->RedirLocation() ;
+	  http::XmlResponse xml ;
+	  
+	  http->Put( uplink, &file, &xml, uphdr ) ;
+	  AssignIDs( Entry( xml.Response() ) ) ;
+    m_mtime = Entry(xml.Response()).MTime();
+	}
+	catch (gr::Exception& exc)
+	{
+	  Log( "cannot upload: Exception %s", exc.what(), gr::log::critical) ;
+	  return false;
+	}
 	return true ;
 }
 
