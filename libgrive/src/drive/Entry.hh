@@ -71,8 +71,6 @@ public :
 	
 	const std::vector<std::string>& ParentHrefs() const ;
 	
-	void Swap( Entry& e ) ;
-	
 	void Update( const xml::Node& entry ) ;
 	
 private :

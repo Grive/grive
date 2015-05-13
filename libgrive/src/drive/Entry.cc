@@ -152,29 +152,6 @@ std::string Entry::CreateLink() const
 	return m_create_link ;
 }
 
-void Entry::Swap( Entry& e )
-{
-	m_title.swap( e.m_title ) ;
-	m_filename.swap( e.m_filename ) ;
-	m_kind.swap( e.m_kind ) ;
-	m_md5.swap( e.m_md5 ) ;
-	m_etag.swap( e.m_etag ) ;
-	m_resource_id.swap( e.m_resource_id ) ;
-
-	m_parent_hrefs.swap( e.m_parent_hrefs ) ;
-
-	m_self_href.swap( e.m_self_href ) ;
-	m_alt_self.swap( e.m_alt_self ) ;
-	m_content_src.swap( e.m_content_src ) ;
-	m_edit_link.swap( e.m_edit_link ) ;
-	m_create_link.swap( e.m_create_link ) ;
-
-	m_mtime.Swap( e.m_mtime ) ;
-
-	std::swap( m_change_stamp, e.m_change_stamp ) ;
-	std::swap( m_is_removed, e.m_is_removed ) ;
-}
-
 long Entry::ChangeStamp() const
 {
 	return m_change_stamp ;

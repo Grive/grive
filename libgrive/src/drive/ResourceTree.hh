@@ -70,9 +70,6 @@ public :
 	ResourceTree( const ResourceTree& fs ) ;
 	~ResourceTree( ) ;
 	
-	void Swap( ResourceTree& fs ) ;
-	ResourceTree& operator=( const ResourceTree& fs ) ;
-	
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 

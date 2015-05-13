@@ -314,26 +314,6 @@ void Resource::AddChild( Resource *child )
 	m_child.push_back( child ) ;
 }
 
-void Resource::Swap( Resource& coll )
-{
-	m_name.swap( coll.m_name ) ;
-	m_kind.swap( coll.m_kind ) ;
-	m_md5.swap( coll.m_md5 ) ;
-	m_etag.swap( coll.m_etag ) ;
-	m_id.swap( coll.m_id ) ;
-
-	m_href.swap( coll.m_href ) ;
-	m_content.swap( coll.m_content ) ;	
-	m_edit.swap( coll.m_edit ) ;
-	m_create.swap( coll.m_create ) ;
-	
-	m_mtime.Swap( coll.m_mtime ) ;
-	
-	std::swap( m_parent, coll.m_parent ) ;
-	m_child.swap( coll.m_child ) ;
-	std::swap( m_state, coll.m_state ) ;
-}
-
 bool Resource::IsFolder() const
 {
 	return m_kind == "folder" ;
@@ -669,11 +649,3 @@ bool Resource::HasID() const
 }
 
 } } // end of namespace
-
-namespace std
-{
-	void swap( gr::v1::Resource& c1, gr::v1::Resource& c2 )
-	{
-		c1.Swap( c2 ) ;
-	}
-}

@@ -57,9 +57,6 @@ public :
 	Resource(const fs::path& root_folder) ;
 	Resource( const std::string& name, const std::string& kind ) ;
 	
-	// default copy ctor & op= are fine
-	void Swap( Resource& coll ) ;
-
 	bool IsFolder() const ;
 
 	std::string Name() const ;
@@ -162,8 +159,3 @@ private :
 } ;
 
 } } // end of namespace gr::v1
-
-namespace std
-{
-	void swap( gr::v1::Resource& c1, gr::v1::Resource& c2 ) ;
-}

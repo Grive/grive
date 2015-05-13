@@ -80,18 +80,6 @@ const Resource* ResourceTree::Root() const
 	return m_root ;
 }
 
-void ResourceTree::Swap( ResourceTree& fs )
-{
-	m_set.swap( fs.m_set ) ;
-}
-
-ResourceTree& ResourceTree::operator=( const ResourceTree& fs )
-{
-	ResourceTree tmp( fs ) ;
-	Swap( tmp ) ;
-	return *this ;
-}
-
 Resource* ResourceTree::FindByHref( const std::string& href )
 {
 	// for the resource that not yet have href (e.g. not yet fetched from server)
