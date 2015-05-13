@@ -3,7 +3,6 @@ project(libgrive)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(LibGcrypt REQUIRED)
-find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
@@ -13,6 +12,7 @@ find_package(Iberty)
 find_package(ZLIB)
 
 find_package(PkgConfig)
+pkg_check_modules(JSONC REQUIRED json-c)
 pkg_check_modules(YAJL REQUIRED yajl)
 
 # additional headers if build unit tests
@@ -45,6 +45,7 @@ include_directories(
 	${libgrive_SOURCE_DIR}/test
 	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
+	${JSONC_INCLUDE_DIRS}
 	${YAJL_INCLUDE_DIRS}
 )
 
@@ -86,7 +87,7 @@ add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 target_link_libraries( grive
 	${YAJL_LIBRARIES}
 	${CURL_LIBRARIES}
-	${JSONC_LIBRARY}
+	${JSONC_LIBRARIES}
 	${LIBGCRYPT_LIBRARIES}
 	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
