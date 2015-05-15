@@ -271,7 +271,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_name		= path.filename().string() ;
-		//m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
+		m_kind		= IsFolder() ? "folder" : "file" ;
 		m_md5		= IsFolder() ? ""		: crypt::MD5::Get( path ) ;
 	}
 	
@@ -366,7 +366,7 @@ void Resource::Sync( http::Agent *http, DateTime& sync_time, const Val& options 
 void Resource::SyncSelf( http::Agent* http, const Val& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
-	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;
+	assert( IsRoot() || http == 0 || m_parent->IsFolder() ) ;
 	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
 	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
 

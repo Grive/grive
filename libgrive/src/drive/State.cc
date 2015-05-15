@@ -76,21 +76,22 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
 		std::string fname = i->path().filename().string() ;
+		fs::file_status st = fs::status(i->path());
 	
 		if ( IsIgnore(fname) )
 			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
 		
 		// check if it is ignored
 		else if ( folder == m_res.Root() && m_dir != "" && fname != m_dir )
-			Log( "%1% %2% is ignored", fs::is_directory(i->path()) ? "folder" : "file", fname, log::verbose );
+			Log( "%1% %2% is ignored", st.type() == fs::directory_file ? "folder" : "file", fname, log::verbose );
 		
 		// check for broken symblic links
-		else if ( !fs::exists( i->path() ) )
+		else if ( st.type() == fs::file_not_found )
 			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
 		
 		else
 		{
-			bool is_dir = fs::is_directory(i->path());
+			bool is_dir = st.type() == fs::directory_file;
 			// if the Resource object of the child already exists, it should
 			// have been so no need to do anything here
 			Resource *c = folder->FindChild( fname ) ;
@@ -101,7 +102,7 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 				m_res.Insert( c ) ;
 			}
 			
-			c->FromLocal( m_last_sync ) ;			
+			c->FromLocal( m_last_sync ) ;
 			
 			if ( is_dir )
 				FromLocal( *i, c ) ;
