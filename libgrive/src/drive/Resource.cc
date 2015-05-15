@@ -36,6 +36,7 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 #include "xml/String.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <boost/bind.hpp>
 #include <boost/exception/all.hpp>
@@ -252,7 +253,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 void Resource::FromLocal( const DateTime& last_sync )
 {
 	fs::path path = Path() ;
-	assert( fs::exists( path ) ) ;
+	//assert( fs::exists( path ) ) ;
 
 	// root folder is always in sync
 	if ( !IsRoot() )
@@ -270,8 +271,8 @@ void Resource::FromLocal( const DateTime& last_sync )
 			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
 		
 		m_name		= path.filename().string() ;
-		m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
-		m_md5		= fs::is_directory(path) ? ""		: crypt::MD5::Get( path ) ;
+		//m_kind		= fs::is_directory(path) ? "folder"	: "file" ;
+		m_md5		= IsFolder() ? ""		: crypt::MD5::Get( path ) ;
 	}
 	
 	assert( m_state != unknown ) ;
@@ -579,23 +580,68 @@ bool Resource::Upload(
 		% xml::Escape(m_name)
 	).str() ;
 	
-	http::StringResponse str ;
-	if ( post )
-		http->Post( link, meta, &str, hdr ) ;
-	else
-		http->Put( link, meta, &str, hdr ) ;
-	
-	http::Header uphdr ;
-	uphdr.Add( "Expect:" ) ;
-	uphdr.Add( "Accept:" ) ;
+	bool retrying=false;
+	while ( true ) {
+		if ( retrying ) {
+			file.Seek( 0, SEEK_SET );
+			os::Sleep( 5 );
+		}
 
-	// the content upload URL is in the "Location" HTTP header
-	std::string uplink = http->RedirLocation() ;
-	http::XmlResponse xml ;
-	
-	http->Put( uplink, &file, &xml, uphdr ) ;
-	AssignIDs( Entry( xml.Response() ) ) ;
-  m_mtime = Entry(xml.Response()).MTime();
+		try {
+			http::StringResponse str ;
+			if ( post )
+				http->Post( link, meta, &str, hdr ) ;
+			else
+				http->Put( link, meta, &str, hdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing pre-upload response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
+
+		http::Header uphdr ;
+		uphdr.Add( "Expect:" ) ;
+		uphdr.Add( "Accept:" ) ;
+
+		// the content upload URL is in the "Location" HTTP header
+		std::string uplink = http->RedirLocation() ;
+		http::XmlResponse xml ;
+
+		long http_code = 0;
+		try {
+			http_code = http->Put( uplink, &file, &xml, uphdr ) ;
+		} catch ( Error &e ) {
+			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
+			if ( info && (*info == "XML_Parse") ) {
+				Log( "Error parsing response XML, retrying whole upload in 5s",
+						log::warning );
+				retrying = true;
+				continue;
+			} else {
+				throw e;
+			}
+		}
+
+		if ( http_code == 410 || http_code == 412 ) {
+			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
+					log::warning ) ;
+			retrying = true;
+			continue;
+		}
+
+		if ( retrying )
+			Log( "upload succeeded on retry", log::warning );
+		Entry responseEntry = Entry( xml.Response() );
+		AssignIDs( responseEntry ) ;
+		m_mtime = responseEntry.MTime();
+		break;
+	}
 	
 	return true ;
 }
