@@ -22,7 +22,7 @@
 #include "Assert.hh"
 
 #include "drive/State.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/log/Log.hh"
 
 #include <iostream>

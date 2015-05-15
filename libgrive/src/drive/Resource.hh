@@ -34,7 +34,7 @@ namespace http
 	class Agent ;
 }
 
-class Json ;
+class Val ;
 
 namespace v1 {
 
@@ -77,7 +77,7 @@ public :
 	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
-	void Sync( http::Agent* http, DateTime& sync_time, const Json& options ) ;
+	void Sync( http::Agent* http, DateTime& sync_time, const Val& options ) ;
 
 	// children access
 	iterator begin() const ;
@@ -136,7 +136,7 @@ private :
 	void DeleteRemote( http::Agent* http ) ;
 	
 	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, const Json& options ) ;
+	void SyncSelf( http::Agent* http, const Val& options ) ;
 	
 private :
 	std::string				m_name ;

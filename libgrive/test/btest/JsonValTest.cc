@@ -38,9 +38,7 @@ BOOST_FIXTURE_TEST_SUITE( JsonValTest, F )
 
 BOOST_AUTO_TEST_CASE( Test )
 {
-	ValBuilder b ;
-	JsonParser::Parse( "{\"key\": 100 }", &b ) ;
-	Val json = b.Result() ;
+	Val json = ParseJson( "{\"key\": 100 }" ) ;
 	
 	BOOST_CHECK( json.Is<Val::Object>() ) ;
 	BOOST_CHECK_EQUAL( json["key"].As<long long>(), 100 ) ;

@@ -30,8 +30,6 @@
 
 namespace gr {
 
-class Json ;
-
 namespace v1 {
 
 namespace details

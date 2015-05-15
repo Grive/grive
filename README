@@ -19,7 +19,7 @@ Of course these will be added in the future, possibly the next release.
 
 You need the following libraries:
 
-- json-c
+- yajl
 - libcurl
 - libstdc++
 - libgcrypt

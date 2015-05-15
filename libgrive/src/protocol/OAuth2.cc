@@ -19,8 +19,7 @@
 
 #include "OAuth2.hh"
 
-#include "JsonResponse.hh"
-#include "Json.hh"
+#include "json/ValResponse.hh"
 
 #include "http/CurlAgent.hh"
 #include "http/Header.hh"
@@ -61,13 +60,13 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&redirect_uri="	+ "urn:ietf:wg:oauth:2.0:oob" +
 		"&grant_type=authorization_code" ;
 
-	http::JsonResponse  resp ;
+	http::ValResponse  resp ;
 	http::CurlAgent		http ;
 
 	DisableLog dlog( log::debug ) ;
 	http.Post( token_url, post, &resp, http::Header() ) ;
 
-	Json jresp	= resp.Response() ;
+	Val jresp	= resp.Response() ;
 	m_access	= jresp["access_token"].Str() ;
 	m_refresh	= jresp["refresh_token"].Str() ;
 }
@@ -98,7 +97,7 @@ void OAuth2::Refresh( )
 		"&client_secret="	+ m_client_secret +
 		"&grant_type=refresh_token" ;
 
-	http::JsonResponse  resp ;
+	http::ValResponse  resp ;
 	http::CurlAgent		http ;
     
 	DisableLog dlog( log::debug ) ;

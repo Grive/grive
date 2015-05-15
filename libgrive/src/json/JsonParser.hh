@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "Val.hh"
 #include "util/Exception.hh"
+#include "util/DataStream.hh"
 
 #include <string>
 #include <memory>
@@ -29,6 +31,9 @@ namespace gr {
 
 class ValVisitor ;
 
+Val ParseJson( const std::string& json ) ;
+Val ParseJson( DataStream &in ) ;
+
 class JsonParser
 {
 public :
@@ -36,12 +41,11 @@ public :
 	typedef boost::error_info<struct ParseErr,	std::string> ParseErr_ ;
 	typedef boost::error_info<struct JsonText,	std::string> JsonText_ ;
 
-	static void Parse( const std::string& json, ValVisitor *callback ) ;
-	
 	explicit JsonParser( ValVisitor *callback ) ;
 	~JsonParser() ;
 	
 	void Parse( const char *str, std::size_t size ) ;
+	void Parse( DataStream &in ) ;
 	void Finish() ;
 	
 private :

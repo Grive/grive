@@ -12,7 +12,6 @@ find_package(Iberty)
 find_package(ZLIB)
 
 find_package(PkgConfig)
-pkg_check_modules(JSONC REQUIRED json-c)
 pkg_check_modules(YAJL REQUIRED yajl)
 
 # additional headers if build unit tests
@@ -45,7 +44,6 @@ include_directories(
 	${libgrive_SOURCE_DIR}/test
 	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
-	${JSONC_INCLUDE_DIRS}
 	${YAJL_INCLUDE_DIRS}
 )
 
@@ -87,7 +85,6 @@ add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 target_link_libraries( grive
 	${YAJL_LIBRARIES}
 	${CURL_LIBRARIES}
-	${JSONC_LIBRARIES}
 	${LIBGCRYPT_LIBRARIES}
 	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}

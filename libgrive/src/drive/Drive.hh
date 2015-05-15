@@ -22,7 +22,7 @@
 #include "State.hh"
 
 #include "http/Header.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/Exception.hh"
 
 #include <string>
@@ -42,7 +42,7 @@ class Entry ;
 class Drive
 {
 public :
-	Drive( http::Agent *agent, const Json& options ) ;
+	Drive( http::Agent *agent, const Val& options ) ;
 
 	void DetectChanges() ;
 	void Update() ;
@@ -63,7 +63,7 @@ private :
 	std::string		m_resume_link ;
 	fs::path		m_root ;
 	State			m_state ;
-	Json			m_options ;
+	Val				m_options ;
 } ;
 
 } } // end of namespace

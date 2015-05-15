@@ -27,13 +27,14 @@
 #include "util/Crypt.hh"
 #include "util/File.hh"
 #include "util/log/Log.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
+#include "json/JsonParser.hh"
 
 #include <fstream>
 
 namespace gr { namespace v1 {
 
-State::State( const fs::path& filename, const Json& options  ) :
+State::State( const fs::path& filename, const Val& options  ) :
     m_res		( options["path"].Str() ),
     m_dir		( options["dir"].Str() ),
 	m_cstamp	( -1 )
@@ -41,7 +42,7 @@ State::State( const fs::path& filename, const Json& options  ) :
 	Read( filename ) ;
 	
 	// the "-f" option will make grive always thinks remote is newer
-	Json force ;
+	Val force ;
 	if ( options.Get("force", force) && force.Bool() )
 		m_last_sync = DateTime() ;
 	
@@ -240,9 +241,10 @@ void State::Read( const fs::path& filename )
 	try
 	{
 		File file( filename ) ;
-		Json json = Json::Parse( &file ) ;
-		
-		Json last_sync = json["last_sync"] ;
+
+		Val json = ParseJson( file );
+
+		Val last_sync = json["last_sync"] ;
 		m_last_sync.Assign(
 			last_sync["sec"].Int(),
 			last_sync["nsec"].Int() ) ;
@@ -257,19 +259,19 @@ void State::Read( const fs::path& filename )
 
 void State::Write( const fs::path& filename ) const
 {
-	Json last_sync ;
-	last_sync.Add( "sec",	Json( (int)m_last_sync.Sec() ) );
-	last_sync.Add( "nsec",	Json( (unsigned)m_last_sync.NanoSec() ) );
+	Val last_sync ;
+	last_sync.Add( "sec",	Val( (int)m_last_sync.Sec() ) );
+	last_sync.Add( "nsec",	Val( (unsigned)m_last_sync.NanoSec() ) );
 	
-	Json result ;
+	Val result ;
 	result.Add( "last_sync", last_sync ) ;
-	result.Add( "change_stamp", Json(m_cstamp) ) ;
+	result.Add( "change_stamp", Val(m_cstamp) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;
 }
 
-void State::Sync( http::Agent *http, const Json& options )
+void State::Sync( http::Agent *http, const Val& options )
 {
 	// set the last sync time from the time returned by the server for the last file synced
 	// if the sync time hasn't changed (i.e. now files have been uploaded)

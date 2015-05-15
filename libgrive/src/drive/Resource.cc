@@ -27,7 +27,7 @@
 // #include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/CArray.hh"
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
@@ -346,7 +346,7 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options )
+void Resource::Sync( http::Agent *http, DateTime& sync_time, const Val& options )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
@@ -363,7 +363,7 @@ void Resource::Sync( http::Agent *http, DateTime& sync_time, const Json& options
 			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time), options ) ) ;
 }
 
-void Resource::SyncSelf( http::Agent* http, const Json& options )
+void Resource::SyncSelf( http::Agent* http, const Val& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || http == 0 || fs::is_directory( m_parent->Path() ) ) ;

@@ -51,7 +51,7 @@ namespace
 	const std::string state_file = ".grive_state" ;
 }
 
-Drive::Drive( http::Agent *agent, const Json& options ) :
+Drive::Drive( http::Agent *agent, const Val& options ) :
 	m_http		( agent ),
 	m_root		( options["path"].Str() ),
 	m_state		( m_root / state_file, options ),

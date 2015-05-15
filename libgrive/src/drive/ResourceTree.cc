@@ -20,7 +20,6 @@
 #include "ResourceTree.hh"
 #include "CommonUri.hh"
 
-#include "protocol/Json.hh"
 #include "util/Destroy.hh"
 #include "util/log/Log.hh"
 

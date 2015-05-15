@@ -24,7 +24,7 @@
 #include "http/CurlAgent.hh"
 #include "protocol/AuthAgent.hh"
 #include "protocol/OAuth2.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 
 #include "bfd/Backtrace.hh"
 #include "util/Exception.hh"
@@ -164,7 +164,7 @@ int Main( int argc, char **argv )
 		token.Auth( code ) ;
 		
 		// save to config
-		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
+		config.Set( "refresh_token", Val( token.RefreshToken() ) ) ;
 		config.Save() ;
 	}
 	

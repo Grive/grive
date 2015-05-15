@@ -21,7 +21,7 @@
 
 #include "Exception.hh"
 #include "FileSystem.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 
 namespace boost
 {
@@ -43,14 +43,14 @@ public :
 
 	const fs::path Filename() const ;
 	
-	void Set( const std::string& key, const Json& value ) ;
-	Json Get( const std::string& key ) const ;
+	void Set( const std::string& key, const Val& value ) ;
+	Val Get( const std::string& key ) const ;
 
-	Json GetAll() const ;
+	Val GetAll() const ;
 	void Save() ;
 
 private :
-	Json Read( ) ;
+	Val Read( ) ;
 	static fs::path GetPath( const fs::path& root_path ) ;
 
 private :
@@ -58,10 +58,10 @@ private :
 	fs::path	m_path;
 	
 	//! config values loaded from config file
-	Json		m_file ;
+	Val		m_file ;
 	
 	//! config values from command line
-	Json		m_cmd ;
+	Val		m_cmd ;
 } ;
 	
 } // end of namespace

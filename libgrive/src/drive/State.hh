@@ -33,7 +33,7 @@ namespace http
 	class Agent ;
 }
 
-class Json ;
+class Val ;
 
 namespace v1 {
 
@@ -46,7 +46,7 @@ public :
 	typedef ResourceTree::iterator iterator ;
 
 public :
-	explicit State( const fs::path& filename, const Json& options ) ;
+	explicit State( const fs::path& filename, const Val& options ) ;
 	~State() ;
 	
 	void FromLocal( const fs::path& p ) ;
@@ -59,7 +59,7 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
 
-	void Sync( http::Agent *http, const Json& options ) ;
+	void Sync( http::Agent *http, const Val& options ) ;
 	
 	iterator begin() ;
 	iterator end() ;
