@@ -19,7 +19,7 @@
 
 #include "Resource.hh"
 #include "CommonUri.hh"
-#include "Entry.hh"
+#include "Entry1.hh"
 
 #include "http/Agent.hh"
 #include "http/Download.hh"
@@ -472,7 +472,7 @@ void Resource::DeleteRemote( http::Agent *http )
 		// doesn't know why, but an update before deleting seems to work always
 		http::XmlResponse xml ;
 		http->Get( m_href, &xml, hdr ) ;
-		AssignIDs( Entry( xml.Response() ) ) ;
+		AssignIDs( Entry1( xml.Response() ) ) ;
 	
 		http->Custom( "DELETE", m_href, &str, hdr ) ;
 	}
@@ -542,7 +542,7 @@ bool Resource::Create( http::Agent* http )
 		http::XmlResponse xml ;
 // 		http::ResponseLog log( "create", ".xml", &xml ) ;
 		http->Post( uri, meta, &xml, hdr ) ;
-		AssignIDs( Entry( xml.Response() ) ) ;
+		AssignIDs( Entry1( xml.Response() ) ) ;
 
 		return true ;
 	}
@@ -637,7 +637,7 @@ bool Resource::Upload(
 
 		if ( retrying )
 			Log( "upload succeeded on retry", log::warning );
-		Entry responseEntry = Entry( xml.Response() );
+		Entry1 responseEntry = Entry1( xml.Response() );
 		AssignIDs( responseEntry ) ;
 		m_mtime = responseEntry.MTime();
 		break;

@@ -64,6 +64,7 @@ file (GLOB XML_HEADERS
 )
 
 file (GLOB LIBGRIVE_SRC
+	src/base/*.cc
 	src/drive/*.cc
 	src/drive2/*.cc
 	src/http/*.cc

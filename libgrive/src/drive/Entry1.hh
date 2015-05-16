@@ -19,51 +19,24 @@
 
 #pragma once
 
-#include "State.hh"
-
-#include "http/Header.hh"
-#include "json/Val.hh"
-#include "util/Exception.hh"
-
-#include <string>
-#include <vector>
+#include "base/Entry.hh"
 
 namespace gr {
 
-namespace http
+namespace xml
 {
-	class Agent ;
+	class Node ;
 }
-
-class Entry ;
 
 namespace v1 {
 
-class Drive
+class Entry1: public Entry
 {
 public :
-	Drive( http::Agent *agent, const Val& options ) ;
-
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
+	Entry1( ) ;
+	explicit Entry1( const xml::Node& n ) ;
 private :
-	void SyncFolders( ) ;
-    void file();
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
-	fs::path		m_root ;
-	State			m_state ;
-	Val				m_options ;
+	void Update( const xml::Node& entry ) ;
 } ;
 
-} } // end of namespace
+} } // end of namespace gr::v1

@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Entry.hh"
+#include "base/Entry.hh"
 
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"

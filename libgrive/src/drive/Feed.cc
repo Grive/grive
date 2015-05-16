@@ -19,6 +19,8 @@
 
 #include "Feed.hh"
 
+#include "Entry1.hh"
+
 #include "http/Agent.hh"
 #include "http/Header.hh"
 #include "http/ResponseLog.hh"
@@ -107,7 +109,7 @@ Feed::iterator::iterator( xml::Node::iterator i )
 
 Feed::iterator::reference Feed::iterator::dereference() const
 {
-	return Entry( *base_reference() ) ;
+	return Entry1( *base_reference() ) ;
 }
 
 void Feed::EnableLog( const std::string& prefix, const std::string& suffix )

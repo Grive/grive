@@ -19,7 +19,7 @@
 
 #include "State.hh"
 
-#include "Entry.hh"
+#include "base/Entry.hh"
 #include "Resource.hh"
 #include "CommonUri.hh"
 

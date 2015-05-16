@@ -20,7 +20,7 @@
 #include "Drive.hh"
 
 #include "CommonUri.hh"
-#include "Entry.hh"
+#include "base/Entry.hh"
 #include "Feed.hh"
 
 #include "http/Agent.hh"

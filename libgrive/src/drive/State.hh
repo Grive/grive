@@ -35,10 +35,11 @@ namespace http
 
 class Val ;
 
+class Entry ;
+
 namespace v1 {
 
 class Resource ;
-class Entry ;
 
 class State
 {

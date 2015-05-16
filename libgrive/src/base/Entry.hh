@@ -28,15 +28,6 @@
 
 namespace gr {
 
-class Val ;
-
-namespace xml
-{
-	class Node ;
-}
-
-namespace v1 {
-
 /*!	\brief	corresponds to an "entry" in the resource feed
 
 	This class is decodes an entry in the resource feed. It will stored the properties like
@@ -47,8 +38,6 @@ class Entry
 {
 public :
 	Entry( ) ;
-	explicit Entry( const xml::Node& n ) ;
-	explicit Entry( const Val& item ) ;
 	
 	std::string Title() const ;
 	std::string Filename() const ;
@@ -72,10 +61,7 @@ public :
 	
 	const std::vector<std::string>& ParentHrefs() const ;
 	
-private :
-	void Update( const xml::Node& entry ) ;
-	void Update( const Val& item ) ;
-	
+protected :
 	std::string		m_title ;
 	std::string		m_filename ;
 	bool			m_is_dir ;
@@ -96,4 +82,4 @@ private :
 	bool			m_is_removed ;
 } ;
 
-} } // end of namespace gr::v1
+} // end of namespace gr

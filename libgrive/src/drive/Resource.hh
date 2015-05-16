@@ -36,9 +36,9 @@ namespace http
 
 class Val ;
 
-namespace v1 {
-
 class Entry ;
+
+namespace v1 {
 
 /*!	\brief	A resource can be a file or a folder in the google drive
 
