@@ -34,6 +34,7 @@ Feed::Feed( const std::string& base ) :
 	m_content.Add( "nextLink", Val(base) ) ;
 }
 
+// for example to find dirs: Query( "mimeType", mime_types::folder )
 void Feed::Query( const std::string& field, const std::string& value )
 {
 	std::string url = m_content["nextLink"].Str() ;

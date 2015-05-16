@@ -18,55 +18,33 @@
 */
 
 #include "Resource.hh"
-#include "CommonUri.hh"
-#include "Entry1.hh"
+#include "Entry.hh"
+#include "Syncer.hh"
 
-#include "http/Agent.hh"
-#include "http/Download.hh"
-#include "http/Header.hh"
-// #include "http/ResponseLog.hh"
-#include "http/StringResponse.hh"
-#include "http/XmlResponse.hh"
 #include "json/Val.hh"
 #include "util/CArray.hh"
 #include "util/Crypt.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
 #include "util/File.hh"
-#include "xml/Node.hh"
-#include "xml/NodeSet.hh"
-#include "xml/String.hh"
-#include "xml/TreeBuilder.hh"
 
 #include <boost/bind.hpp>
-#include <boost/exception/all.hpp>
 
 #include <cassert>
 
 // for debugging
 #include <iostream>
 
-namespace gr { namespace v1 {
-
-// hard coded XML file
-const std::string xml_meta =
-	"<?xml version='1.0' encoding='UTF-8'?>\n"
-	"<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:docs=\"http://schemas.google.com/docs/2007\">"
-		"<category scheme=\"http://schemas.google.com/g/2005#kind\" "
-		"term=\"http://schemas.google.com/docs/2007#%1%\"/>"
-		"<title>%2%</title>"
-	"</entry>" ;
-
+namespace gr {
 
 /// default constructor creates the root folder
 Resource::Resource(const fs::path& root_folder) :
 	m_name		( root_folder.string() ),
 	m_kind		( "folder" ),
 	m_id		( "folder:root" ),
-	m_href		( root_href ),
-	m_create	( root_create ),
 	m_parent	( 0 ),
-	m_state		( sync )
+	m_state		( sync ),
+	m_is_editable( true )
 {
 }
 
@@ -74,7 +52,8 @@ Resource::Resource( const std::string& name, const std::string& kind ) :
 	m_name		( name ),
 	m_kind		( kind ),
 	m_parent	( 0 ),
-	m_state		( unknown )
+	m_state		( unknown ),
+	m_is_editable( true )
 {
 }
 
@@ -166,9 +145,8 @@ void Resource::AssignIDs( const Entry& remote )
 	{
 		m_id		= remote.ResourceID() ;
 		m_href		= remote.SelfHref() ;
-		m_edit		= remote.IsEditable() ? feed_base + "/" + remote.ResourceID() : "";
-		m_create	= remote.IsEditable() && remote.IsDir() ? root_create + (remote.ResourceID() == "folder:root" ? "" : "/" + remote.ResourceID() + "/contents") : "";
 		m_content	= remote.ContentSrc() ;
+		m_is_editable = remote.IsEditable() ;
 		m_etag		= remote.ETag() ;
 	}
 }
@@ -283,14 +261,39 @@ std::string Resource::SelfHref() const
 	return m_href ;
 }
 
+std::string Resource::ContentSrc() const
+{
+	return m_content ;
+}
+
+std::string Resource::ETag() const
+{
+	return m_etag ;
+}
+
 std::string Resource::Name() const
 {
 	return m_name ;
 }
 
+std::string Resource::Kind() const
+{
+	return m_kind ;
+}
+
+DateTime Resource::MTime() const
+{
+	return m_mtime ;
+}
+
 std::string Resource::ResourceID() const
 {
 	return m_id ;
+}
+
+Resource::State Resource::GetState() const
+{
+	return m_state ;
 }
 
 const Resource* Resource::Parent() const
@@ -320,6 +323,11 @@ bool Resource::IsFolder() const
 	return m_kind == "folder" ;
 }
 
+bool Resource::IsEditable() const
+{
+	return m_is_editable ;
+}
+
 fs::path Resource::Path() const
 {
 	assert( m_parent != this ) ;
@@ -331,7 +339,7 @@ fs::path Resource::Path() const
 bool Resource::IsInRootTree() const
 {
 	assert( m_parent == 0 || m_parent->IsFolder() ) ;
-	return m_parent == 0 ? (SelfHref() == root_href) : m_parent->IsInRootTree() ;
+	return m_parent == 0 ? SelfHref().empty() : m_parent->IsInRootTree() ;
 }
 
 Resource* Resource::FindChild( const std::string& name )
@@ -346,12 +354,12 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( http::Agent *http, DateTime& sync_time, const Val& options )
+void Resource::Sync( Syncer *syncer, DateTime& sync_time, const Val& options )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
-	SyncSelf( http, options ) ;
+	SyncSelf( syncer, options ) ;
 	
 	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
 	// m_mtime is updated to server modified time when the file is uploaded
@@ -360,13 +368,13 @@ void Resource::Sync( http::Agent *http, DateTime& sync_time, const Val& options 
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, http, boost::ref(sync_time), options ) ) ;
+			boost::bind( &Resource::Sync, _1, syncer, boost::ref(sync_time), options ) ) ;
 }
 
-void Resource::SyncSelf( http::Agent* http, const Val& options )
+void Resource::SyncSelf( Syncer* syncer, const Val& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
-	assert( IsRoot() || http == 0 || m_parent->IsFolder() ) ;
+	assert( IsRoot() || !syncer || m_parent->IsFolder() ) ;
 	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
 	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
 
@@ -377,30 +385,30 @@ void Resource::SyncSelf( http::Agent* http, const Val& options )
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
-		if ( http != 0 && Create( http ) )
+		if ( syncer && syncer->Create( this ) )
 			m_state = sync ;
 		break ;
 	
 	case local_deleted :
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
-		if ( http != 0 )
-			DeleteRemote( http ) ;
+		if ( syncer )
+			syncer->DeleteRemote( this ) ;
 		break ;
 	
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
-		if ( http != 0 && EditContent( http, options["new-rev"].Bool() ) )
+		if ( syncer && syncer->EditContent( this, options["new-rev"].Bool() ) )
 			m_state = sync ;
 		break ;
 	
 	case remote_new :
 		Log( "sync %1% created in remote. creating local", path, log::info ) ;
-		if ( http != 0 )
+		if ( syncer )
 		{
 			if ( IsFolder() )
 				fs::create_directories( path ) ;
 			else
-				Download( http, path ) ;
+				syncer->Download( this, path ) ;
 			
 			m_state = sync ;
 		}
@@ -409,16 +417,16 @@ void Resource::SyncSelf( http::Agent* http, const Val& options )
 	case remote_changed :
 		assert( !IsFolder() ) ;
 		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
-		if ( http != 0 )
+		if ( syncer )
 		{
-			Download( http, path ) ;
+			syncer->Download( this, path ) ;
 			m_state = sync ;
 		}
 		break ;
 	
 	case remote_deleted :
 		Log( "sync %1% deleted in remote. deleting local", path, log::info ) ;
-		if ( http != 0 )
+		if ( syncer )
 			DeleteLocal() ;
 		break ;
 	
@@ -457,193 +465,6 @@ void Resource::DeleteLocal()
 		fs::create_directories( dest.parent_path() ) ;
 		fs::rename( Path(), dest ) ;
 	}
-}
-
-void Resource::DeleteRemote( http::Agent *http )
-{
-	assert( http != 0 ) ;
-	http::StringResponse str ;
-	
-	try
-	{
-		http::Header hdr ;
-		hdr.Add( "If-Match: " + m_etag ) ;
-		
-		// doesn't know why, but an update before deleting seems to work always
-		http::XmlResponse xml ;
-		http->Get( m_href, &xml, hdr ) ;
-		AssignIDs( Entry1( xml.Response() ) ) ;
-	
-		http->Custom( "DELETE", m_href, &str, hdr ) ;
-	}
-	catch ( Exception& e )
-	{
-		// don't rethrow here. there are some cases that I don't know why
-		// the delete will fail.
-		Trace( "Exception %1% %2%",
-			boost::diagnostic_information(e),
-			str.Response() ) ;
-	}
-}
-
-
-void Resource::Download( http::Agent* http, const fs::path& file ) const
-{
-	assert( http != 0 ) ;
-	
-	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
-	long r = http->Get( m_content, &dl, http::Header() ) ;
-	if ( r <= 400 )
-	{
-		if ( m_mtime != DateTime() )
-			os::SetFileTime( file, m_mtime ) ;
-		else
-			Log( "encountered zero date time after downloading %1%", file, log::warning ) ;
-	}
-}
-
-bool Resource::EditContent( http::Agent* http, bool new_rev )
-{
-	assert( http != 0 ) ;
-	assert( m_parent != 0 ) ;
-	assert( m_parent->m_state == sync ) ;
-
-	// upload link missing means that file is read only
-	if ( m_edit.empty() )
-	{
-		Log( "Cannot upload %1%: file read-only. %2%", m_name, m_state, log::warning ) ;
-		return false ;
-	}
-	
-	return Upload( http, m_edit + (new_rev ? "?new-revision=true" : ""), false ) ;
-}
-
-bool Resource::Create( http::Agent* http )
-{
-	assert( http != 0 ) ;
-	assert( m_parent != 0 ) ;
-	assert( m_parent->IsFolder() ) ;
-	assert( m_parent->m_state == sync ) ;
-	
-	if ( IsFolder() )
-	{
-		std::string uri = feed_base ;
-		if ( !m_parent->IsRoot() )
-			uri += ("/" + http->Escape(m_parent->m_id) + "/contents") ;
-		
-		std::string meta = (boost::format( xml_meta )
-			% "folder"
-			% xml::Escape(m_name)
-		).str() ;
-
-		http::Header hdr ;
-		hdr.Add( "Content-Type: application/atom+xml" ) ;
-		
-		http::XmlResponse xml ;
-// 		http::ResponseLog log( "create", ".xml", &xml ) ;
-		http->Post( uri, meta, &xml, hdr ) ;
-		AssignIDs( Entry1( xml.Response() ) ) ;
-
-		return true ;
-	}
-	else if ( !m_parent->m_create.empty() )
-	{
-		return Upload( http, m_parent->m_create + "?convert=false", true ) ;
-	}
-	else
-	{
-		Log( "parent of %1% does not exist: cannot upload", Name(), log::warning ) ;
-		return false ;
-	}
-}
-
-bool Resource::Upload(
-	http::Agent* 		http,
-	const std::string&	link,
-	bool 				post)
-{
-	assert( http != 0 ) ;
-	
-	File file( Path() ) ;
-	std::ostringstream xcontent_len ;
-	xcontent_len << "X-Upload-Content-Length: " << file.Size() ;
-	
-	http::Header hdr ;
-	hdr.Add( "Content-Type: application/atom+xml" ) ;
-	hdr.Add( "X-Upload-Content-Type: application/octet-stream" ) ;
-	hdr.Add( xcontent_len.str() ) ;
-  	hdr.Add( "If-Match: " + m_etag ) ;
-	hdr.Add( "Expect:" ) ;
-	
-	std::string meta = (boost::format( xml_meta )
-		% m_kind
-		% xml::Escape(m_name)
-	).str() ;
-	
-	bool retrying=false;
-	while ( true ) {
-		if ( retrying ) {
-			file.Seek( 0, SEEK_SET );
-			os::Sleep( 5 );
-		}
-
-		try {
-			http::StringResponse str ;
-			if ( post )
-				http->Post( link, meta, &str, hdr ) ;
-			else
-				http->Put( link, meta, &str, hdr ) ;
-		} catch ( Error &e ) {
-			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
-			if ( info && (*info == "XML_Parse") ) {
-				Log( "Error parsing pre-upload response XML, retrying whole upload in 5s",
-						log::warning );
-				retrying = true;
-				continue;
-			} else {
-				throw e;
-			}
-		}
-
-		http::Header uphdr ;
-		uphdr.Add( "Expect:" ) ;
-		uphdr.Add( "Accept:" ) ;
-
-		// the content upload URL is in the "Location" HTTP header
-		std::string uplink = http->RedirLocation() ;
-		http::XmlResponse xml ;
-
-		long http_code = 0;
-		try {
-			http_code = http->Put( uplink, &file, &xml, uphdr ) ;
-		} catch ( Error &e ) {
-			std::string const *info = boost::get_error_info<xml::TreeBuilder::ExpatApiError>(e);
-			if ( info && (*info == "XML_Parse") ) {
-				Log( "Error parsing response XML, retrying whole upload in 5s",
-						log::warning );
-				retrying = true;
-				continue;
-			} else {
-				throw e;
-			}
-		}
-
-		if ( http_code == 410 || http_code == 412 ) {
-			Log( "request failed with %1%, retrying whole upload in 5s", http_code,
-					log::warning ) ;
-			retrying = true;
-			continue;
-		}
-
-		if ( retrying )
-			Log( "upload succeeded on retry", log::warning );
-		Entry1 responseEntry = Entry1( xml.Response() );
-		AssignIDs( responseEntry ) ;
-		m_mtime = responseEntry.MTime();
-		break;
-	}
-	
-	return true ;
 }
 
 Resource::iterator Resource::begin() const
@@ -694,4 +515,4 @@ bool Resource::HasID() const
 	return !m_href.empty() && !m_id.empty() ;
 }
 
-} } // end of namespace
+} // end of namespace

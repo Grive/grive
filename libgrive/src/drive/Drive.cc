@@ -22,6 +22,7 @@
 #include "CommonUri.hh"
 #include "base/Entry.hh"
 #include "Feed.hh"
+#include "Syncer1.hh"
 
 #include "http/Agent.hh"
 #include "http/ResponseLog.hh"
@@ -107,7 +108,7 @@ void Drive::SyncFolders( )
 		// first, get all collections from the query result
 		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
 		{
-			Entry e( *i ) ;
+			const Entry &e = *i ;
 			if ( e.IsDir() )
 			{
 				if ( e.ParentHrefs().size() != 1 )
@@ -171,8 +172,10 @@ void Drive::DetectChanges()
 
 void Drive::Update()
 {
+	Syncer1 syncer( m_http );
+	
 	Log( "Synchronizing files", log::info ) ;
-	m_state.Sync( m_http, m_options ) ;
+	m_state.Sync( &syncer, m_options ) ;
 	
 	UpdateChangeStamp( ) ;
 }

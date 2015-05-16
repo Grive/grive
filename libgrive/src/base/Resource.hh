@@ -29,16 +29,11 @@
 
 namespace gr {
 
-namespace http
-{
-	class Agent ;
-}
+class Syncer ;
 
 class Val ;
 
 class Entry ;
-
-namespace v1 {
 
 /*!	\brief	A resource can be a file or a folder in the google drive
 
@@ -48,45 +43,9 @@ namespace v1 {
 class Resource
 {
 public :
-	struct Error : virtual Exception {} ;
-
 	typedef std::vector<Resource*> Children ;
 	typedef Children::const_iterator iterator ;
 	
-public :
-	Resource(const fs::path& root_folder) ;
-	Resource( const std::string& name, const std::string& kind ) ;
-	
-	bool IsFolder() const ;
-
-	std::string Name() const ;
-	std::string SelfHref() const ;
-	std::string ResourceID() const ;
-	
-	const Resource* Parent() const ;
-	Resource* Parent() ;
-	void AddChild( Resource *child ) ;
-	Resource* FindChild( const std::string& title ) ;
-	
-	fs::path Path() const ;
-	bool IsInRootTree() const ;
-	bool IsRoot() const ;
-	bool HasID() const ;
-	std::string MD5() const ;
-
-	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
-	void FromLocal( const DateTime& last_sync ) ;
-	
-	void Sync( http::Agent* http, DateTime& sync_time, const Val& options ) ;
-
-	// children access
-	iterator begin() const ;
-	iterator end() const ;
-	std::size_t size() const ;
-	
-	std::string StateStr() const ;
-	
-private :
 	/// State of the resource. indicating what to do with the resource
 	enum State
 	{
@@ -119,43 +78,79 @@ private :
 		unknown
 	} ;
 
-	friend std::ostream& operator<<( std::ostream& os, State s ) ;
+public :
+	Resource(const fs::path& root_folder) ;
+	Resource( const std::string& name, const std::string& kind ) ;
 	
+	bool IsFolder() const ;
+	bool IsEditable() const ;
+
+	std::string Name() const ;
+	std::string Kind() const ;
+	DateTime MTime() const ;
+	std::string SelfHref() const ;
+	std::string ContentSrc() const ;
+	std::string ETag() const ;
+	std::string ResourceID() const ;
+	State GetState() const;
+	
+	const Resource* Parent() const ;
+	Resource* Parent() ;
+	void AddChild( Resource *child ) ;
+	Resource* FindChild( const std::string& title ) ;
+	
+	fs::path Path() const ;
+	bool IsInRootTree() const ;
+	bool IsRoot() const ;
+	bool HasID() const ;
+	std::string MD5() const ;
+
+	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
+	void FromLocal( const DateTime& last_sync ) ;
+	
+	void Sync( Syncer* syncer, DateTime& sync_time, const Val& options ) ;
+
+	// children access
+	iterator begin() const ;
+	iterator end() const ;
+	std::size_t size() const ;
+	
+	std::string StateStr() const ;
+
+private :
+
+	void AssignIDs( const Entry& remote ) ;
+
+	friend std::ostream& operator<<( std::ostream& os, State s ) ;
+	friend class Syncer ;
+
 private :
 	void SetState( State new_state ) ;
-
-	void Download( http::Agent* http, const fs::path& file ) const ;
-	bool EditContent( http::Agent* http, bool new_rev ) ;
-	bool Create( http::Agent* http ) ;
-	bool Upload( http::Agent* http, const std::string& link, bool post ) ;
 	
 	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
 	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
 	
 	void DeleteLocal() ;
-	void DeleteRemote( http::Agent* http ) ;
 	
-	void AssignIDs( const Entry& remote ) ;
-	void SyncSelf( http::Agent* http, const Val& options ) ;
-	
+	void SyncSelf( Syncer* syncer, const Val& options ) ;
+
 private :
 	std::string				m_name ;
 	std::string				m_kind ;
 	std::string				m_md5 ;
 	DateTime				m_mtime ;
-	
+
 	std::string				m_id ;
 	std::string				m_href ;
-	std::string				m_edit ;
-	std::string				m_create ;
 	std::string				m_content ;
 	std::string				m_etag ;
+	bool					m_is_editable ;
 
 	// not owned
 	Resource				*m_parent ;
 	std::vector<Resource*>	m_child ;
-	
+
 	State					m_state ;
 } ;
 
-} } // end of namespace gr::v1
+} // end of namespace gr::v1

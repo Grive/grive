@@ -28,18 +28,15 @@
 
 namespace gr {
 
-namespace http
-{
-	class Agent ;
-}
-
 class Val ;
 
 class Entry ;
 
-namespace v1 {
+class Syncer ;
 
 class Resource ;
+
+namespace v1 {
 
 class State
 {
@@ -60,7 +57,7 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
 
-	void Sync( http::Agent *http, const Val& options ) ;
+	void Sync( Syncer *syncer, const Val& options ) ;
 	
 	iterator begin() ;
 	iterator end() ;

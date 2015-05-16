@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Resource.hh"
+#include "base/Resource.hh"
 
 #include "util/FileSystem.hh"
 
