@@ -49,7 +49,7 @@ public :
 	
 	std::string Title() const ;
 	std::string Filename() const ;
-	std::string Kind() const ;
+	bool IsDir() const ;
 	std::string MD5() const ;
 	DateTime MTime() const ;
 	
@@ -59,11 +59,9 @@ public :
 	std::string ETag() const ;
 	
 	std::string SelfHref() const ;
-	std::string AltSelf() const ;
 	std::string ParentHref() const ;
 	std::string ContentSrc() const ;
-	std::string EditLink() const ;
-	std::string CreateLink() const ;
+	bool IsEditable() const ;
 	long ChangeStamp() const ;
 	
 	bool IsChange() const ;
@@ -76,21 +74,20 @@ public :
 private :
 	std::string		m_title ;
 	std::string		m_filename ;
-	std::string		m_kind ;
+	bool			m_is_dir ;
 	std::string		m_md5 ;
 	std::string		m_etag ;
 	std::string		m_resource_id ;
 
 	std::vector<std::string>	m_parent_hrefs ;
-	
+
 	std::string		m_self_href ;
-	std::string		m_alt_self ;
 	std::string		m_content_src ;
-	std::string		m_edit_link ;
-	std::string		m_create_link ;
+
+	bool			m_is_editable ;
 
 	long			m_change_stamp ;
-	
+
 	DateTime		m_mtime ;
 	bool			m_is_removed ;
 } ;

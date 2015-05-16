@@ -95,7 +95,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 {
 	fs::path path = Path() ;
 	
-	if ( remote.CreateLink().empty() )
+	if ( !remote.IsEditable() )
 		Log( "folder %1% is read-only", path, log::verbose ) ;
 		
 	// already sync
@@ -143,7 +143,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
 {
 	// sync folder
-	if ( remote.Kind() == "folder" && IsFolder() )
+	if ( remote.IsDir() && IsFolder() )
 		FromRemoteFolder( remote, last_sync ) ;
 	else
 		FromRemoteFile( remote, last_sync ) ;
@@ -166,8 +166,8 @@ void Resource::AssignIDs( const Entry& remote )
 	{
 		m_id		= remote.ResourceID() ;
 		m_href		= remote.SelfHref() ;
-		m_edit		= remote.EditLink() ;
-		m_create	= remote.CreateLink() ;
+		m_edit		= remote.IsEditable() ? feed_base + "/" + remote.ResourceID() : "";
+		m_create	= remote.IsEditable() && remote.IsDir() ? root_create + (remote.ResourceID() == "folder:root" ? "" : "/" + remote.ResourceID() + "/contents") : "";
 		m_content	= remote.ContentSrc() ;
 		m_etag		= remote.ETag() ;
 	}

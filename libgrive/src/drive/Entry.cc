@@ -34,10 +34,9 @@ namespace gr { namespace v1 {
 /// construct an entry for the root folder
 Entry::Entry( ) :
 	m_title			( "." ),
-	m_kind			( "folder" ),
+	m_is_dir		( true ),
 	m_resource_id	( "folder:root" ),
 	m_self_href		( root_href ),
-	m_create_link	( root_create ),
 	m_change_stamp	( -1 ),
 	m_is_removed	( false )
 {
@@ -58,18 +57,22 @@ void Entry::Update( const xml::Node& n )
 	m_filename		= n["docs:suggestedFilename"] ;
 	m_content_src	= n["content"]["@src"] ;
 	m_self_href		= n["link"].Find( "@rel", "self" )["@href"] ;
-	m_alt_self		= n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#alt-self" )["@href"] ;
 	m_mtime			= DateTime( n["updated"] ) ;
 
 	m_resource_id	= n["gd:resourceId"] ;
 	m_md5			= n["docs:md5Checksum"] ;
-	m_kind			= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] ;
-	m_edit_link		= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-edit-media")["@href"] ;
-	m_create_link	= n["link"].Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media")["@href"] ;
+	m_is_dir		= n["category"].Find( "@scheme", "http://schemas.google.com/g/2005#kind" )["@label"] == "folder" ;
+	m_is_editable	= !n["link"].Find( "@rel", m_is_dir
+		? "http://schemas.google.com/g/2005#resumable-create-media" : "http://schemas.google.com/g/2005#resumable-edit-media" )
+		["@href"].empty() ;
 
 	// changestamp only appear in change feed entries
 	xml::NodeSet cs	= n["docs:changestamp"]["@value"] ;
 	m_change_stamp	= cs.empty() ? -1 : std::atoi( cs.front().Value().c_str() ) ;
+	if ( m_change_stamp != -1 )
+	{
+		m_self_href	= n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#alt-self" )["@href"] ;
+	}
 
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
@@ -97,9 +100,9 @@ std::string Entry::Filename() const
 	return m_filename ;
 }
 
-std::string Entry::Kind() const
+bool Entry::IsDir() const
 {
-	return m_kind ;
+	return m_is_dir ;
 }
 
 std::string Entry::MD5() const
@@ -115,11 +118,6 @@ DateTime Entry::MTime() const
 std::string Entry::SelfHref() const
 {
 	return m_self_href ;
-}
-
-std::string Entry::AltSelf() const
-{
-	return m_alt_self ;
 }
 
 std::string Entry::ParentHref() const
@@ -142,14 +140,9 @@ std::string Entry::ContentSrc() const
 	return m_content_src ;
 }
 
-std::string Entry::EditLink() const
+bool Entry::IsEditable() const
 {
-	return m_edit_link ;
-}
-
-std::string Entry::CreateLink() const
-{
-	return m_create_link ;
+	return m_is_editable ;
 }
 
 long Entry::ChangeStamp() const
@@ -169,7 +162,7 @@ bool Entry::IsRemoved() const
 
 std::string Entry::Name() const
 {
-	return (m_kind == "file" || m_kind == "pdf") ? m_filename : m_title ;
+	return !m_filename.empty() ? m_filename : m_title ;
 }
 
 } } // end of namespace gr::v1

@@ -112,24 +112,25 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 
 void State::FromRemote( const Entry& e )
 {
-	std::string fn = e.Filename() ;				
+	std::string fn = e.Filename() ;
+	std::string k = e.IsDir() ? "folder" : "file";
 
 	if ( IsIgnore( e.Name() ) )
-		Log( "%1% %2% is ignored by grive", e.Kind(), e.Name(), log::verbose ) ;
+		Log( "%1% %2% is ignored by grive", k, e.Name(), log::verbose ) ;
 
 	// check if it is ignored
 	else if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
-		Log( "%1% %2% is ignored", e.Kind(), e.Name(), log::verbose );
+		Log( "%1% %2% is ignored", k, e.Name(), log::verbose );
 
 	// common checkings
-	else if ( e.Kind() != "folder" && (fn.empty() || e.ContentSrc().empty()) )
-		Log( "%1% \"%2%\" is a google document, ignored", e.Kind(), e.Name(), log::verbose ) ;
+	else if ( !e.IsDir() && (fn.empty() || e.ContentSrc().empty()) )
+		Log( "%1% \"%2%\" is a google document, ignored", k, e.Name(), log::verbose ) ;
 	
 	else if ( fn.find('/') != fn.npos )
-		Log( "%1% \"%2%\" contains a slash in its name, ignored", e.Kind(), e.Name(), log::verbose ) ;
+		Log( "%1% \"%2%\" contains a slash in its name, ignored", k, e.Name(), log::verbose ) ;
 	
 	else if ( !e.IsChange() && e.ParentHrefs().size() != 1 )
-		Log( "%1% \"%2%\" has multiple parents, ignored", e.Kind(), e.Name(), log::verbose ) ;
+		Log( "%1% \"%2%\" has multiple parents, ignored", k, e.Name(), log::verbose ) ;
 
 	else if ( e.IsChange() )
 		FromChange( e ) ;
@@ -176,7 +177,7 @@ void State::FromChange( const Entry& e )
 	
 	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
-	if ( Resource *res = m_res.FindByHref( e.AltSelf() ) )
+	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
 		m_res.Update( res, e, DateTime() ) ;
 }
 
@@ -205,10 +206,10 @@ bool State::Update( const Entry& e )
 		
 		// folder entry exist in google drive, but not local. we should create
 		// the directory
-		else if ( e.Kind() == "folder" || !e.Filename().empty() )
+		else if ( e.IsDir() || !e.Filename().empty() )
 		{
 			// first create a dummy resource and update it later
-			child = new Resource( name, e.Kind() ) ;
+			child = new Resource( name, e.IsDir() ? "folder" : "file" ) ;
 			parent->AddChild( child ) ;
 			m_res.Insert( child ) ;
 			

@@ -108,7 +108,7 @@ void Drive::SyncFolders( )
 		for ( Feed::iterator i = feed.begin() ; i != feed.end() ; ++i )
 		{
 			Entry e( *i ) ;
-			if ( e.Kind() == "folder" )
+			if ( e.IsDir() )
 			{
 				if ( e.ParentHrefs().size() != 1 )
 					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
