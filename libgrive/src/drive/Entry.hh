@@ -28,6 +28,8 @@
 
 namespace gr {
 
+class Val ;
+
 namespace xml
 {
 	class Node ;
@@ -46,6 +48,7 @@ class Entry
 public :
 	Entry( ) ;
 	explicit Entry( const xml::Node& n ) ;
+	explicit Entry( const Val& item ) ;
 	
 	std::string Title() const ;
 	std::string Filename() const ;
@@ -69,9 +72,10 @@ public :
 	
 	const std::vector<std::string>& ParentHrefs() const ;
 	
-	void Update( const xml::Node& entry ) ;
-	
 private :
+	void Update( const xml::Node& entry ) ;
+	void Update( const Val& item ) ;
+	
 	std::string		m_title ;
 	std::string		m_filename ;
 	bool			m_is_dir ;

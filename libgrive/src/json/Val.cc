@@ -107,17 +107,22 @@ std::string Val::Str() const
 	return As<std::string>() ;
 }
 
-int     Val::Int() const
+Val::operator std::string() const
+{
+	return As<std::string>() ;
+}
+
+int Val::Int() const
 {
 	return static_cast<int>(As<long long>()) ;
 }
 
-double	Val::Double() const
+double Val::Double() const
 {
 	return As<double>() ;
 }
 
-bool	Val::Bool() const
+bool Val::Bool() const
 {
 	return As<bool>() ;
 }

@@ -26,6 +26,9 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
+#include "json/Val.hh"
+#include "drive2/CommonUri.hh"
+
 #include <algorithm>
 #include <iterator>
 
@@ -42,12 +45,20 @@ Entry::Entry( ) :
 {
 }
 
-/// construct an entry for remote
+/// construct an entry for remote - Doclist API v3
 Entry::Entry( const xml::Node& n ) :
 	m_change_stamp( -1 ),
 	m_is_removed( false )
 {
 	Update( n ) ;
+}
+
+/// construct an entry for remote, from "file" JSON object - Drive REST API
+Entry::Entry( const Val& item ) :
+	m_change_stamp( -1 ),
+	m_is_removed( false )
+{
+	Update( item ) ;
 }
 
 void Entry::Update( const xml::Node& n )
@@ -83,6 +94,45 @@ void Entry::Update( const xml::Node& n )
 	std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
 
 	m_is_removed = !n["gd:deleted"].empty() || !n["docs:removed"].empty() ;
+}
+
+void Entry::Update( const Val& item )
+{
+	bool is_chg = item["kind"].Str() == "drive#change";
+
+	// changestamp only appears in change feed entries
+	m_change_stamp	= is_chg ? item["id"].Int() : -1 ;
+	m_is_removed	= is_chg && item["deleted"].Bool() ;
+
+	const Val& file = is_chg && !m_is_removed ? item["file"] : item;
+
+	if ( m_is_removed )
+	{
+		m_resource_id = item["fileId"];
+	}
+	else
+	{
+		m_title			= file["title"] ;
+		m_etag			= file["etag"] ;
+		m_filename		= file["originalFilename"] ;
+		m_content_src	= file["downloadUrl"] ;
+		m_self_href		= file["selfLink"] ;
+		m_mtime			= DateTime( file["modificationDate"] ) ;
+
+		m_resource_id	= file["id"]; // file#id ?
+		m_md5			= file["md5Checksum"] ;
+		m_is_dir		= file["mimeType"].Str() == v2::mime_types::folder ;
+		m_is_editable	= file["editable"].Bool() ;
+
+		m_parent_hrefs.clear( ) ;
+
+		Val::Array parents = file["parents"].AsArray() ;
+		for ( Val::Array::iterator i = parents.begin() ; i != parents.end() ; ++i )
+			m_parent_hrefs.push_back( (*i)["parentLink"] ) ; // maybe .id?
+
+		// convert to lower case for easy comparison
+		std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
+	}
 }
 
 const std::vector<std::string>& Entry::ParentHrefs() const

@@ -81,6 +81,8 @@ public :
 		return Assign(t) ;
 	}
 
+	operator std::string() const ;
+
 	template <typename T>
 	const T& As() const ;
 
@@ -111,8 +113,6 @@ public :
 	
 	// shortcuts for array (and array of objects)
 	void Add( const Val& json ) ;
-	Val  FindInArray( const std::string& key, const std::string& value ) const ;
-	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
 	
 	std::vector<Val> Select( const std::string& key ) const ;
 	
