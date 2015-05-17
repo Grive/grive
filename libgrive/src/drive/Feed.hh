@@ -24,7 +24,7 @@
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
 
-#include <boost/iterator_adaptors.hpp>
+#include <vector>
 
 #include <string>
 
@@ -40,13 +40,13 @@ namespace v1 {
 class Feed
 {
 public :
-	class iterator ;
+	typedef std::vector<Entry> Entries;
+	typedef std::vector<Entry>::const_iterator iterator;
 
 public :
 	Feed( ) ;
 	void Start( http::Agent *http, const std::string& url ) ;
 	bool GetNext( http::Agent *http ) ;
-	
 	iterator begin() const ;
 	iterator end() const ;
 	
@@ -61,25 +61,7 @@ private :
 	std::auto_ptr<LogInfo>	m_log ;
 
 	xml::Node		m_root ;
-	xml::NodeSet	m_entries ;
+	Entries			m_entries ;
 } ;
 
-class Feed::iterator : public boost::iterator_adaptor<
-	Feed::iterator,
-	xml::Node::iterator,
-	Entry,
-	boost::random_access_traversal_tag,
-	Entry
->
-{
-public :
-	iterator() ;
-	explicit iterator( xml::Node::iterator i ) ;		
-
-private :
-	friend class boost::iterator_core_access;
-	
-	reference dereference() const ;
-} ;
-
-} } // end of namespace
+} } // end of namespace gr::v1

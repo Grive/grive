@@ -39,12 +39,12 @@ Feed::Feed( )
 
 Feed::iterator Feed::begin() const
 {
-	return iterator( m_entries.begin() ) ;
+	return m_entries.begin() ;
 }
 
 Feed::iterator Feed::end() const
 {
-	return iterator( m_entries.end() ) ;
+	return m_entries.end() ;
 }
 
 void Feed::Start( http::Agent *http, const std::string& url )
@@ -60,8 +60,13 @@ void Feed::Start( http::Agent *http, const std::string& url )
 	
 	http->Get( url, &log, http::Header() ) ;
 	
-	m_root		= xrsp.Response() ;
-	m_entries	= m_root["entry"] ;
+	m_root = xrsp.Response() ;
+	xml::NodeSet xe = m_root["entry"] ;
+	m_entries.clear() ;
+	for ( xml::NodeSet::iterator i = xe.begin() ; i != xe.end() ; ++i )
+	{
+		m_entries.push_back( Entry1( *i ) );
+	}
 }
 
 bool Feed::GetNext( http::Agent *http )
@@ -78,28 +83,12 @@ bool Feed::GetNext( http::Agent *http )
 		return false ;
 }
 
-Feed::iterator::iterator( )
-{
-}
-
-Feed::iterator::iterator( xml::Node::iterator i )
-{
-	// for some reason, gcc 4.4.4 doesn't allow me to initialize the base class
-	// in the initializer. I have no choice but to initialize here.
-	base_reference() = i ;
-}
-
-Feed::iterator::reference Feed::iterator::dereference() const
-{
-	return Entry1( *base_reference() ) ;
-}
-
 void Feed::EnableLog( const std::string& prefix, const std::string& suffix )
 {
 	m_log.reset( new LogInfo ) ;
-	m_log->prefix	= prefix ;
-	m_log->suffix	= suffix ;
-	m_log->sequence	= 0 ;
+	m_log->prefix   = prefix ;
+	m_log->suffix   = suffix ;
+	m_log->sequence = 0 ;
 }
 
 } } // end of namespace gr::v1
