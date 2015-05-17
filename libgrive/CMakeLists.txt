@@ -8,7 +8,6 @@ find_package(EXPAT REQUIRED)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
-find_package(Iberty)
 find_package(ZLIB)
 
 find_package(PkgConfig)
@@ -29,12 +28,6 @@ if ( BFD_FOUND )
 	
 endif ( BFD_FOUND )
 
-if ( IBERTY_FOUND )
-	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
-else ( IBERTY_FOUND )
-  set( IBERTY_LIBRARY "" )
-endif ( IBERTY_FOUND )
-
 if ( ZLIB_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${ZLIB_LIBRARIES} )
 endif ( ZLIB_FOUND )
@@ -42,7 +35,6 @@ endif ( ZLIB_FOUND )
 include_directories(
 	${libgrive_SOURCE_DIR}/src
 	${libgrive_SOURCE_DIR}/test
-	${GDBM_INCLUDE_DIR}
 	${OPT_INCS}
 	${YAJL_INCLUDE_DIRS}
 )
@@ -87,9 +79,7 @@ target_link_libraries( grive
 	${YAJL_LIBRARIES}
 	${CURL_LIBRARIES}
 	${LIBGCRYPT_LIBRARIES}
-	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
-	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
 )
