@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "base/Entry.hh"
+#include "base/Feed.hh"
 
 #include "xml/Node.hh"
 #include "xml/NodeSet.hh"
@@ -28,40 +28,13 @@
 
 #include <string>
 
-namespace gr {
+namespace gr { namespace v1 {
 
-namespace http
-{
-	class Agent ;
-}
-
-namespace v1 {
-
-class Feed
+class Feed1: public Feed
 {
 public :
-	typedef std::vector<Entry> Entries;
-	typedef std::vector<Entry>::const_iterator iterator;
-
-public :
-	Feed( ) ;
-	void Start( http::Agent *http, const std::string& url ) ;
+	Feed1( const std::string& url ) ;
 	bool GetNext( http::Agent *http ) ;
-	iterator begin() const ;
-	iterator end() const ;
-	
-	void EnableLog( const std::string& prefix, const std::string& suffix ) ;
-private :
-	struct LogInfo
-	{
-		std::string	prefix ;
-		std::string	suffix ;
-		std::size_t	sequence ;
-	} ;
-	std::auto_ptr<LogInfo>	m_log ;
-
-	xml::Node		m_root ;
-	Entries			m_entries ;
 } ;
 
 } } // end of namespace gr::v1

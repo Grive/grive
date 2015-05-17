@@ -18,7 +18,6 @@
 */
 
 #include "ResourceTree.hh"
-#include "CommonUri.hh"
 
 #include "util/Destroy.hh"
 #include "util/log/Log.hh"
@@ -26,12 +25,12 @@
 #include <algorithm>
 #include <cassert>
 
-namespace gr { namespace v1 {
+namespace gr {
 
 using namespace details ;
 
 ResourceTree::ResourceTree( const fs::path& rootFolder ) :
-    m_root(new Resource(rootFolder))
+    m_root( new Resource( rootFolder ) )
 {
 	m_set.insert( m_root ) ;
 }
@@ -43,7 +42,7 @@ ResourceTree::ResourceTree( const ResourceTree& fs ) :
 	for ( Set::const_iterator i = s.begin() ; i != s.end() ; ++i )
 	{
 		Resource *c = new Resource( **i ) ;
-		if ( c->SelfHref() == root_href )
+		if ( c->IsRoot() )
 			m_root = c ;
 		
 		m_set.insert( c ) ;
@@ -142,4 +141,4 @@ ResourceTree::iterator ResourceTree::end()
 	return m_set.get<ByIdentity>().end() ;
 }
 
-} } // end of namespace gr::v1
+} // end of namespace gr

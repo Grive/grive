@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "base/Resource.hh"
+#include "Resource.hh"
 
 #include "util/FileSystem.hh"
 
@@ -29,8 +29,6 @@
 #include <boost/multi_index/mem_fun.hpp>
 
 namespace gr {
-
-namespace v1 {
 
 namespace details
 {
@@ -93,4 +91,4 @@ private :
 	Resource*			m_root ;
 } ;
 
-} } // end of namespace gr::v1
+} // end of namespace gr

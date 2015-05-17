@@ -19,31 +19,19 @@
 
 #pragma once
 
-#include "json/Val.hh"
+#include "base/Feed.hh"
+
 #include "util/Exception.hh"
 
 #include <string>
 
-namespace gr
-{
-namespace http
-{
-	class Agent ;
-}
+namespace gr { namespace v2 {
 
-class Val ;
-
-namespace v2 {
-
-class Feed
+class Feed2: public Feed
 {
 public :
-	Feed( ) ;
-	void Start( http::Agent *http, const std::string& url ) ;
+	Feed2( const std::string& url ) ;
 	bool GetNext( http::Agent *http ) ;
-
-private :
-	Val m_content ;
 } ;
 
 } } // end of namespace gr::v2

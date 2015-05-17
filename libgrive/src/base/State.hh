@@ -36,8 +36,6 @@ class Syncer ;
 
 class Resource ;
 
-namespace v1 {
-
 class State
 {
 public :
@@ -82,4 +80,4 @@ private :
 	std::vector<Entry>	m_unresolved ;
 } ;
 
-} } // end of namespace gr::v1
+} // end of namespace gr

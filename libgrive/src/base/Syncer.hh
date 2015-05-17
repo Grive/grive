@@ -38,6 +38,8 @@ class Resource ;
 
 class Entry ;
 
+class Feed ;
+
 /*!	\brief	A Syncer incapsulates all resource-related upload/download/edit methods */
 class Syncer
 {
@@ -45,10 +47,17 @@ public :
 
 	Syncer( http::Agent *http );
 
+	http::Agent* Agent() const;
+
 	virtual void DeleteRemote( Resource *res ) = 0;
 	virtual void Download( Resource *res, const fs::path& file ) = 0;
 	virtual bool EditContent( Resource *res, bool new_rev ) = 0;
 	virtual bool Create( Resource *res ) = 0;
+
+	virtual std::auto_ptr<Feed> GetFolders() = 0;
+	virtual std::auto_ptr<Feed> GetAll() = 0;
+	virtual std::auto_ptr<Feed> GetChanges( long min_cstamp ) = 0;
+	virtual long GetChangeStamp( long min_cstamp ) = 0;
 
 protected:
 

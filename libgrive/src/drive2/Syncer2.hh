@@ -17,42 +17,35 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Feed.hh"
+#pragma once
 
-#include "http/Agent.hh"
-#include "http/Header.hh"
-#include "json/ValResponse.hh"
+#include "base/Syncer.hh"
 
-#include <iostream>
+namespace gr {
 
-namespace gr { namespace v2 {
+class Feed;
 
-Feed::Feed( )
+namespace v2 {
+
+class Syncer2: public Syncer
 {
-}
 
-// for example to find dirs: '?q=mimeType%3d%27' + mime_types::folder + '%27'
-void Feed::Start( http::Agent *http, const std::string& url )
-{
-	http::ValResponse out ;
-	
-	http->Get( url, &out, http::Header() ) ;
-	
-	m_content = out.Response() ;
-}
+public :
 
-bool Feed::GetNext( http::Agent *http )
-{
-	assert( http != 0 ) ;
+	Syncer2( http::Agent *http );
 
-	Val url ;
-	if ( m_content.Get( "nextLink", url ) )
-	{
-		Start( http, url ) ;
-		return true ;
-	}
-	else
-		return false ;
-}
+	void DeleteRemote( Resource *res );
+	void Download( Resource *res, const fs::path& file );
+	bool EditContent( Resource *res, bool new_rev );
+	bool Create( Resource *res );
 
-} } // end of namespace
+	std::auto_ptr<Feed> GetFolders();
+	std::auto_ptr<Feed> GetAll();
+	std::auto_ptr<Feed> GetChanges( long min_cstamp );
+	long GetChangeStamp( long min_cstamp );
+
+private :
+
+} ;
+
+} } // end of namespace gr::v2

@@ -69,7 +69,9 @@ void Entry2::Update( const Val& item )
 
 		Val::Array parents = file["parents"].AsArray() ;
 		for ( Val::Array::iterator i = parents.begin() ; i != parents.end() ; ++i )
-			m_parent_hrefs.push_back( (*i)["parentLink"] ) ; // maybe .id?
+		{
+			m_parent_hrefs.push_back( (*i)["isRoot"].Bool() ? std::string() : (*i)["parentLink"] ) ; // maybe .id?
+		}
 
 		// convert to lower case for easy comparison
 		std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;

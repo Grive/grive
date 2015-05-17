@@ -70,7 +70,12 @@ void Entry1::Update( const xml::Node& n )
 	m_parent_hrefs.clear( ) ;
 	xml::NodeSet parents = n["link"].Find( "@rel", "http://schemas.google.com/docs/2007#parent" ) ;
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
-		m_parent_hrefs.push_back( (*i)["@href"] ) ;
+	{
+		std::string href = (*i)["@href"];
+		if ( href == root_href ) // API-independent root href is empty!
+			href = "";
+		m_parent_hrefs.push_back( href ) ;
+	}
 
 	// convert to lower case for easy comparison
 	std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;

@@ -23,6 +23,8 @@
 
 namespace gr {
 
+class Feed;
+
 namespace v1 {
 
 class Syncer1: public Syncer
@@ -36,6 +38,11 @@ public :
 	void Download( Resource *res, const fs::path& file );
 	bool EditContent( Resource *res, bool new_rev );
 	bool Create( Resource *res );
+
+	std::auto_ptr<Feed> GetFolders();
+	std::auto_ptr<Feed> GetAll();
+	std::auto_ptr<Feed> GetChanges( long min_cstamp );
+	long GetChangeStamp( long min_cstamp );
 
 private :
 

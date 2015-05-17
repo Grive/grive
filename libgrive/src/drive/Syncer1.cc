@@ -20,6 +20,7 @@
 #include "base/Resource.hh"
 #include "CommonUri.hh"
 #include "Entry1.hh"
+#include "Feed1.hh"
 #include "Syncer1.hh"
 
 #include "http/Agent.hh"
@@ -58,6 +59,7 @@ const std::string xml_meta =
 Syncer1::Syncer1( http::Agent *http ):
 	Syncer( http )
 {
+	assert( http != 0 ) ;
 }
 
 void Syncer1::DeleteRemote( Resource *res )
@@ -250,6 +252,35 @@ bool Syncer1::Upload( Resource *res,
 	}
 	
 	return true ;
+}
+
+std::auto_ptr<Feed> Syncer1::GetFolders()
+{
+	return std::auto_ptr<Feed>( new Feed1( feed_base + "/-/folder?max-results=50&showroot=true" ) );
+}
+
+std::auto_ptr<Feed> Syncer1::GetAll()
+{
+	return std::auto_ptr<Feed>( new Feed1( feed_base + "?showfolders=true&showroot=true" ) );
+}
+
+std::string ChangesFeed( int changestamp )
+{
+	boost::format feed( feed_changes + "?start-index=%1%" ) ;
+	return changestamp > 0 ? ( feed % changestamp ).str() : feed_changes ;
+}
+
+std::auto_ptr<Feed> Syncer1::GetChanges( long min_cstamp )
+{
+	return std::auto_ptr<Feed>( new Feed1( ChangesFeed( min_cstamp ) ) );
+}
+
+long Syncer1::GetChangeStamp( long min_cstamp )
+{
+	http::XmlResponse xrsp ;
+	m_http->Get( ChangesFeed( min_cstamp ), &xrsp, http::Header() ) ;
+
+	return std::atoi( xrsp.Response()["docs:largestChangestamp"]["@value"].front().Value().c_str() );
 }
 
 } } // end of namespace gr::v1

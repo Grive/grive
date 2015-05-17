@@ -38,7 +38,7 @@
 namespace gr {
 
 /// default constructor creates the root folder
-Resource::Resource(const fs::path& root_folder) :
+Resource::Resource( const fs::path& root_folder ) :
 	m_name		( root_folder.string() ),
 	m_kind		( "folder" ),
 	m_id		( "folder:root" ),
@@ -339,7 +339,7 @@ fs::path Resource::Path() const
 bool Resource::IsInRootTree() const
 {
 	assert( m_parent == 0 || m_parent->IsFolder() ) ;
-	return m_parent == 0 ? SelfHref().empty() : m_parent->IsInRootTree() ;
+	return m_parent == 0 ? IsRoot() : m_parent->IsInRootTree() ;
 }
 
 Resource* Resource::FindChild( const std::string& name )
@@ -507,6 +507,7 @@ std::string Resource::MD5() const
 
 bool Resource::IsRoot() const
 {
+	// Root entry does not show up in file feeds, so we check for empty parent (and self-href)
 	return m_parent == 0 ;
 }
 

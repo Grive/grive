@@ -19,19 +19,42 @@
 
 #pragma once
 
+#include "base/Entry.hh"
+
+#include <vector>
+
 #include <string>
 
-namespace gr { namespace v2 {
+namespace gr {
 
-namespace feeds
+namespace http
 {
-	const std::string files		= "https://www.googleapis.com/drive/v2/files" ;
-	const std::string changes	= "https://www.googleapis.com/drive/v2/changes" ;
+	class Agent ;
 }
 
-namespace mime_types
+class Feed
 {
-	const std::string folder	= "application/vnd.google-apps.folder" ;
-}
+public :
+	typedef std::vector<Entry> Entries;
+	typedef std::vector<Entry>::const_iterator iterator;
 
-} } // end of namespace gr::v2
+public :
+	Feed( const std::string& url );
+	virtual bool GetNext( http::Agent *http ) = 0 ;
+	iterator begin() const ;
+	iterator end() const ;
+	virtual void EnableLog( const std::string& prefix, const std::string& suffix ) ;
+
+protected :
+	struct LogInfo
+	{
+		std::string prefix ;
+		std::string suffix ;
+		std::size_t sequence ;
+	} ;
+	std::auto_ptr<LogInfo> m_log ;
+	Entries m_entries ;
+	std::string m_next ;
+} ;
+
+} // end of namespace gr

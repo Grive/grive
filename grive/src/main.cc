@@ -19,7 +19,8 @@
 
 #include "util/Config.hh"
 
-#include "drive/Drive.hh"
+#include "base/Drive.hh"
+#include "drive/Syncer1.hh"
 
 #include "http/CurlAgent.hh"
 #include "protocol/AuthAgent.hh"
@@ -185,8 +186,9 @@ int Main( int argc, char **argv )
 	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
+	Syncer1 syncer( &agent );
 
-	Drive drive( &agent, config.GetAll() ) ;
+	Drive drive( &syncer, config.GetAll() ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )

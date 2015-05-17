@@ -17,21 +17,42 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "CommonUri.hh"
+#include "Feed2.hh"
+#include "Entry2.hh"
 
-#include <string>
+#include "http/Agent.hh"
+#include "http/Header.hh"
+#include "json/Val.hh"
+#include "json/ValResponse.hh"
+
+#include <iostream>
+#include <boost/format.hpp>
 
 namespace gr { namespace v2 {
 
-namespace feeds
+Feed2::Feed2( const std::string& url ):
+	Feed( url )
 {
-	const std::string files		= "https://www.googleapis.com/drive/v2/files" ;
-	const std::string changes	= "https://www.googleapis.com/drive/v2/changes" ;
 }
 
-namespace mime_types
+bool Feed2::GetNext( http::Agent *http )
 {
-	const std::string folder	= "application/vnd.google-apps.folder" ;
+	if ( m_next.empty() )
+		return false ;
+	
+	http::ValResponse out ;
+	http->Get( m_next, &out, http::Header() ) ;
+	Val m_content = out.Response() ;
+	
+	Val::Array items = m_content["items"].AsArray() ;
+	m_entries.clear() ;
+	for ( Val::Array::iterator i = items.begin() ; i != items.end() ; ++i )
+		m_entries.push_back( Entry2( *i ) );
+	
+	Val url ;
+	m_next = m_content.Get( "nextLink", url ) ? url : std::string( "" ) ;
+	return true ;
 }
 
 } } // end of namespace gr::v2

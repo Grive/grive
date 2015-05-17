@@ -19,10 +19,9 @@
 
 #include "State.hh"
 
-#include "base/Entry.hh"
-#include "base/Resource.hh"
-#include "base/Syncer.hh"
-#include "CommonUri.hh"
+#include "Entry.hh"
+#include "Resource.hh"
+#include "Syncer.hh"
 
 #include "util/Crypt.hh"
 #include "util/File.hh"
@@ -32,11 +31,11 @@
 
 #include <fstream>
 
-namespace gr { namespace v1 {
+namespace gr {
 
 State::State( const fs::path& filename, const Val& options  ) :
-    m_res		( options["path"].Str() ),
-    m_dir		( options["dir"].Str() ),
+	m_res		( options["path"].Str() ),
+	m_dir		( options["dir"].Str() ),
 	m_cstamp	( -1 )
 {
 	Read( filename ) ;
@@ -308,4 +307,4 @@ void State::ChangeStamp( long cstamp )
 	m_cstamp = cstamp ;
 }
 
-} } // end of namespace gr::v1
+} // end of namespace gr

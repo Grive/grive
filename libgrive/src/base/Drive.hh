@@ -17,15 +17,47 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "CommonUri.hh"
-#include <boost/format.hpp>
+#pragma once
 
-namespace gr { namespace v1 {
+#include "base/State.hh"
 
-std::string ChangesFeed( int changestamp )
+#include "json/Val.hh"
+#include "util/Exception.hh"
+
+#include <string>
+#include <vector>
+
+namespace gr {
+
+class Syncer ;
+
+class Entry ;
+
+class State ;
+
+class Drive
 {
-	boost::format feed( feed_changes + "?start-index=%1%" ) ;
-	return changestamp > 0 ? (feed%changestamp).str() : feed_changes ;
-}
+public :
+	Drive( Syncer *syncer, const Val& options ) ;
 
-} }
+	void DetectChanges() ;
+	void Update() ;
+	void DryRun() ;
+	void SaveState() ;
+	
+	struct Error : virtual Exception {} ;
+	
+private :
+	void SyncFolders( ) ;
+	void FromRemote( const Entry& entry ) ;
+	void FromChange( const Entry& entry ) ;
+	void UpdateChangeStamp( ) ;
+	
+private :
+	Syncer			*m_syncer ;
+	fs::path		m_root ;
+	State			m_state ;
+	Val				m_options ;
+} ;
+
+} // end of namespace gr

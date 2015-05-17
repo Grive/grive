@@ -17,51 +17,35 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "Feed.hh"
 
-#include "State.hh"
+#include "Entry.hh"
 
-#include "http/Header.hh"
-#include "json/Val.hh"
-#include "util/Exception.hh"
-
-#include <string>
-#include <vector>
+#include "http/Agent.hh"
 
 namespace gr {
 
-namespace http
+Feed::Feed( const std::string &url ):
+	m_next( url )
 {
-	class Agent ;
 }
 
-class Entry ;
-
-namespace v1 {
-
-class Drive
+Feed::iterator Feed::begin() const
 {
-public :
-	Drive( http::Agent *agent, const Val& options ) ;
+	return m_entries.begin() ;
+}
 
-	void DetectChanges() ;
-	void Update() ;
-	void DryRun() ;
-	void SaveState() ;
-	
-	struct Error : virtual Exception {} ;
-	
-private :
-	void SyncFolders( ) ;
-	void FromRemote( const Entry& entry ) ;
-	void FromChange( const Entry& entry ) ;
-	void UpdateChangeStamp( ) ;
-	
-private :
-	http::Agent 	*m_http ;
-	fs::path		m_root ;
-	State			m_state ;
-	Val				m_options ;
-} ;
+Feed::iterator Feed::end() const
+{
+	return m_entries.end() ;
+}
 
-} } // end of namespace
+void Feed::EnableLog( const std::string& prefix, const std::string& suffix )
+{
+	m_log.reset( new LogInfo ) ;
+	m_log->prefix   = prefix ;
+	m_log->suffix   = suffix ;
+	m_log->sequence = 0 ;
+}
+
+} // end of namespace gr::v1

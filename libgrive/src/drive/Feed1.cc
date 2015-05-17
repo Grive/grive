@@ -17,7 +17,8 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "Feed.hh"
+#include "CommonUri.hh"
+#include "Feed1.hh"
 
 #include "Entry1.hh"
 
@@ -33,24 +34,18 @@
 
 namespace gr { namespace v1 {
 
-Feed::Feed( )
+Feed1::Feed1( const std::string &url ):
+	Feed( url )
 {
 }
 
-Feed::iterator Feed::begin() const
-{
-	return m_entries.begin() ;
-}
-
-Feed::iterator Feed::end() const
-{
-	return m_entries.end() ;
-}
-
-void Feed::Start( http::Agent *http, const std::string& url )
+bool Feed1::GetNext( http::Agent *http )
 {
 	http::XmlResponse xrsp ;
 	http::ResponseLog log( &xrsp ) ;
+	
+	if ( m_next.empty() )
+		return false;
 	
 	if ( m_log.get() != 0 )
 		log.Reset(
@@ -58,37 +53,20 @@ void Feed::Start( http::Agent *http, const std::string& url )
 			(boost::format( "-#%1%%2%" ) % m_log->sequence++ % m_log->suffix ).str(),
 			&xrsp ) ;
 	
-	http->Get( url, &log, http::Header() ) ;
+	http->Get( m_next, &log, http::Header() ) ;
 	
-	m_root = xrsp.Response() ;
+	xml::Node m_root = xrsp.Response() ;
 	xml::NodeSet xe = m_root["entry"] ;
 	m_entries.clear() ;
 	for ( xml::NodeSet::iterator i = xe.begin() ; i != xe.end() ; ++i )
 	{
 		m_entries.push_back( Entry1( *i ) );
 	}
-}
-
-bool Feed::GetNext( http::Agent *http )
-{
-	assert( http != 0 ) ;
-
+	
 	xml::NodeSet nss = m_root["link"].Find( "@rel", "next" ) ;
-	if ( !nss.empty() )
-	{
-		Start( http, nss["@href"] ) ;
-		return true ;
-	}
-	else
-		return false ;
-}
-
-void Feed::EnableLog( const std::string& prefix, const std::string& suffix )
-{
-	m_log.reset( new LogInfo ) ;
-	m_log->prefix   = prefix ;
-	m_log->suffix   = suffix ;
-	m_log->sequence = 0 ;
+	m_next = nss.empty() ? std::string( "" ) : nss["@href"];
+	
+	return true;
 }
 
 } } // end of namespace gr::v1

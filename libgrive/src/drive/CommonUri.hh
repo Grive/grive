@@ -31,6 +31,4 @@ namespace gr { namespace v1
 		"https://docs.google.com/feeds/default/private/full/folder%3Aroot" ;
 	const std::string root_create =
 		"https://docs.google.com/feeds/upload/create-session/default/private/full" ;
-	
-	std::string ChangesFeed( int changestamp ) ;
 } }

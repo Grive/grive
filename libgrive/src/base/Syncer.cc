@@ -29,6 +29,11 @@ Syncer::Syncer( http::Agent *http ):
 {
 }
 
+http::Agent* Syncer::Agent() const
+{
+	return m_http;
+}
+
 void Syncer::AssignIDs( Resource *res, const Entry& remote )
 {
 	res->AssignIDs( remote );
