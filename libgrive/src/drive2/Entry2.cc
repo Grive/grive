@@ -57,26 +57,28 @@ void Entry2::Update( const Val& item )
 		m_etag			= file["etag"] ;
 		Val fn;
 		m_filename		= file.Get( "originalFilename", fn ) ? fn.Str() : std::string();
-		m_content_src	= file["downloadUrl"] ;
 		m_self_href		= file["selfLink"] ;
 		m_mtime			= DateTime( file["modifiedDate"] ) ;
 
 		m_resource_id	= file["id"];
-		m_md5			= file["md5Checksum"] ;
 		m_is_dir		= file["mimeType"].Str() == mime_types::folder ;
 		m_is_editable	= file["editable"].Bool() ;
 		m_is_removed	= file["labels"]["trashed"].Bool() ;
+		if ( !m_is_dir )
+		{
+			m_md5			= file["md5Checksum"] ;
+			m_content_src	= file["downloadUrl"] ;
+			// convert to lower case for easy comparison
+			std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
+		}
 
 		m_parent_hrefs.clear( ) ;
 
 		Val::Array parents = file["parents"].AsArray() ;
 		for ( Val::Array::iterator i = parents.begin() ; i != parents.end() ; ++i )
 		{
-			m_parent_hrefs.push_back( (*i)["isRoot"].Bool() ? std::string() : (*i)["parentLink"] ) ; // maybe .id?
+			m_parent_hrefs.push_back( (*i)["isRoot"].Bool() ? std::string( "root" ) : (*i)["parentLink"] ) ;
 		}
-
-		// convert to lower case for easy comparison
-		std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
 	}
 }
 

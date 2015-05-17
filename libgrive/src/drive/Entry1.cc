@@ -72,8 +72,8 @@ void Entry1::Update( const xml::Node& n )
 	for ( xml::NodeSet::iterator i = parents.begin() ; i != parents.end() ; ++i )
 	{
 		std::string href = (*i)["@href"];
-		if ( href == root_href ) // API-independent root href is empty!
-			href = "";
+		if ( href == root_href )
+			href = "root"; // API-independent root href
 		m_parent_hrefs.push_back( href ) ;
 	}
 

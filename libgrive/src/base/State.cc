@@ -61,7 +61,7 @@ void State::FromLocal( const fs::path& p )
 
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename == ".grive" || filename == ".grive_state";
+	return filename == ".grive" || filename == ".grive_state" || filename == ".trash";
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
@@ -135,9 +135,7 @@ void State::FromRemote( const Entry& e )
 		FromChange( e ) ;
 
 	else if ( !Update( e ) )
-	{
 		m_unresolved.push_back( e ) ;
-	}
 }
 
 void State::ResolveEntry()

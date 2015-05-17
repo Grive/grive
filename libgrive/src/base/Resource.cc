@@ -42,6 +42,7 @@ Resource::Resource( const fs::path& root_folder ) :
 	m_name		( root_folder.string() ),
 	m_kind		( "folder" ),
 	m_id		( "folder:root" ),
+	m_href		( "root" ),
 	m_parent	( 0 ),
 	m_state		( sync ),
 	m_is_editable( true )
