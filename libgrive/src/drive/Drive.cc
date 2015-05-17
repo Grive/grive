@@ -99,10 +99,8 @@ void Drive::SyncFolders( )
 
 	Log( "Synchronizing folders", log::info ) ;
 
-	http::XmlResponse xml ;
-	m_http->Get( feed_base + "/-/folder?max-results=50&showroot=true", &xml, http::Header() ) ;
-	
-	Feed feed( xml.Response() ) ;
+	Feed feed ;
+	feed.Start( m_http, feed_base + "/-/folder?max-results=50&showroot=true" ) ;
 	do
 	{
 		// first, get all collections from the query result
@@ -143,9 +141,6 @@ void Drive::DetectChanges()
 	
 	feed.Start( m_http, feed_base + "?showfolders=true&showroot=true" ) ;
 	
-	m_resume_link = feed.Root()["link"].
-		Find( "@rel", "http://schemas.google.com/g/2005#resumable-create-media" )["@href"] ;
-		
 	do
 	{
 		std::for_each(

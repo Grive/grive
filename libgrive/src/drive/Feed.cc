@@ -37,18 +37,6 @@ Feed::Feed( )
 {
 }
 
-Feed::Feed( const xml::Node& root ) :
-	m_root		( root ),
-	m_entries	( m_root["entry"] )
-{
-}
-
-void Feed::Assign( const xml::Node& root )
-{
-	m_root		= root ;
-	m_entries	= m_root["entry"] ;
-}
-
 Feed::iterator Feed::begin() const
 {
 	return iterator( m_entries.begin() ) ;
@@ -57,12 +45,6 @@ Feed::iterator Feed::begin() const
 Feed::iterator Feed::end() const
 {
 	return iterator( m_entries.end() ) ;
-}
-
-std::string Feed::Next() const
-{
-	xml::NodeSet nss = m_root["link"].Find( "@rel", "next" ) ;
-	return nss.empty() ? "" : std::string(nss["@href"]) ;
 }
 
 void Feed::Start( http::Agent *http, const std::string& url )
@@ -118,11 +100,6 @@ void Feed::EnableLog( const std::string& prefix, const std::string& suffix )
 	m_log->prefix	= prefix ;
 	m_log->suffix	= suffix ;
 	m_log->sequence	= 0 ;
-}
-
-const xml::Node& Feed::Root() const
-{
-	return m_root ;
 }
 
 } } // end of namespace gr::v1

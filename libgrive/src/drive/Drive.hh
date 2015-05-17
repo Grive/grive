@@ -53,14 +53,12 @@ public :
 	
 private :
 	void SyncFolders( ) ;
-    void file();
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
 	void UpdateChangeStamp( ) ;
 	
 private :
 	http::Agent 	*m_http ;
-	std::string		m_resume_link ;
 	fs::path		m_root ;
 	State			m_state ;
 	Val				m_options ;

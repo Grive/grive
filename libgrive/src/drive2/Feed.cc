@@ -27,44 +27,32 @@
 
 namespace gr { namespace v2 {
 
-Feed::Feed( const std::string& base ) :
-	m_base( base )
+Feed::Feed( )
 {
-	// Next() will grab this link
-	m_content.Add( "nextLink", Val(base) ) ;
 }
 
-// for example to find dirs: Query( "mimeType", mime_types::folder )
-void Feed::Query( const std::string& field, const std::string& value )
+// for example to find dirs: '?q=mimeType%3d%27' + mime_types::folder + '%27'
+void Feed::Start( http::Agent *http, const std::string& url )
 {
-	std::string url = m_content["nextLink"].Str() ;
-	m_content.Add( "nextLink", Val( url + "?q=" + field + "+%3d+%27" + value + "%27" ) ) ;
-}
-
-bool Feed::Next( http::Agent *agent )
-{
-	Val url ;
-	if ( !m_content.Get("nextLink", url) )
-		return false ;
-	
 	http::ValResponse out ;
-	try
-	{
-		agent->Get( url.Str(), &out, http::Header() ) ;
-	}
-	catch ( Exception& e )
-	{
-		e << DriveFeed_( m_content ) ;
-		throw ;
-	}
-	m_content = out.Response() ;
 	
-	return true ;
+	http->Get( url, &out, http::Header() ) ;
+	
+	m_content = out.Response() ;
 }
 
-Val Feed::Content() const
+bool Feed::GetNext( http::Agent *http )
 {
-	return m_content ;
+	assert( http != 0 ) ;
+
+	Val url ;
+	if ( m_content.Get( "nextLink", url ) )
+	{
+		Start( http, url ) ;
+		return true ;
+	}
+	else
+		return false ;
 }
 
 } } // end of namespace

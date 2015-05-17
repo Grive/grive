@@ -29,7 +29,6 @@ namespace gr
 namespace http
 {
 	class Agent ;
-	class Header ;
 }
 
 class Val ;
@@ -39,21 +38,12 @@ namespace v2 {
 class Feed
 {
 public :
-	// exception info
-	typedef boost::error_info<struct DriveFeed,	Val>	DriveFeed_ ;
-
-public :
-	Feed( const std::string& base ) ;
-	void Query( const std::string& field, const std::string& value ) ;
-	
-	
-	bool Next( http::Agent *agent ) ;
-
-	Val Content() const ;
+	Feed( ) ;
+	void Start( http::Agent *http, const std::string& url ) ;
+	bool GetNext( http::Agent *http ) ;
 
 private :
-	std::string	m_base ;
-	Val 		m_content ;
+	Val m_content ;
 } ;
 
 } } // end of namespace gr::v2
