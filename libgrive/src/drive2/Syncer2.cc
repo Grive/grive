@@ -26,8 +26,10 @@
 #include "http/Agent.hh"
 #include "http/Download.hh"
 #include "http/Header.hh"
+#include "http/StringResponse.hh"
 //#include "http/ResponseLog.hh"
 #include "json/ValResponse.hh"
+#include "json/JsonWriter.hh"
 
 #include "util/OS.hh"
 #include "util/log/Log.hh"
@@ -49,30 +51,129 @@ Syncer2::Syncer2( http::Agent *http ):
 
 void Syncer2::DeleteRemote( Resource *res )
 {
-}
-
-void Syncer2::Download( Resource *res, const fs::path& file )
-{
+	http::StringResponse str ;
+	http::Header hdr ;
+	hdr.Add( "If-Match: " + res->ETag() ) ;
+	m_http->Post( res->SelfHref() + "/trash", "", &str, hdr ) ;
 }
 
 bool Syncer2::EditContent( Resource *res, bool new_rev )
 {
-	return false ;
+	assert( res->Parent() ) ;
+	assert( !res->ResourceID().empty() ) ;
+	assert( res->Parent()->GetState() == Resource::sync ) ;
+
+	if ( !res->IsEditable() )
+	{
+		Log( "Cannot upload %1%: file read-only. %2%", res->Name(), res->StateStr(), log::warning ) ;
+		return false ;
+	}
+
+	return Upload( res ) ;
 }
 
 bool Syncer2::Create( Resource *res )
 {
-	return false ;
+	assert( res->Parent() ) ;
+	assert( res->Parent()->IsFolder() ) ;
+	assert( res->Parent()->GetState() == Resource::sync ) ;
+	assert( res->ResourceID().empty() ) ;
+	
+	if ( !res->Parent()->IsEditable() )
+	{
+		Log( "Cannot upload %1%: parent directory read-only. %2%", res->Name(), res->StateStr(), log::warning ) ;
+		return false ;
+	}
+	
+	return Upload( res );
+}
+
+bool Syncer2::Upload( Resource *res )
+{
+	File file( res->Path() ) ;
+	std::ostringstream xcontent_len ;
+	xcontent_len << "Content-Length: " << file.Size() ;
+
+	http::Header hdr ;
+	hdr.Add( "Content-Type: application/octet-stream" ) ;
+	hdr.Add( xcontent_len.str() ) ;
+	if ( !res->ETag().empty() )
+		hdr.Add( "If-Match: " + res->ETag() ) ;
+
+	Val meta;
+	meta.Add( "title", Val( res->Name() ) );
+	if ( res->IsFolder() )
+	{
+		meta.Add( "mimeType", Val( mime_types::folder ) );
+	}
+	if ( !res->Parent()->IsRoot() )
+	{
+		Val parent;
+		parent.Add( "id", Val( res->Parent()->ResourceID() ) );
+		Val parents( Val::array_type );
+		parents.Add( parent );
+		meta.Add( "parents", parents );
+	}
+	std::string json_meta = WriteJson( meta );
+
+	Val valr ;
+
+	// Issue metadata update request
+	{
+		http::Header hdr2 ;
+		hdr2.Add( "Content-Type: application/json" );
+		http::ValResponse vrsp ;
+		long http_code = 0;
+		if ( res->ResourceID().empty() )
+			http_code = m_http->Post( feeds::files, json_meta, &vrsp, hdr2 ) ;
+		else
+			http_code = m_http->Put( feeds::files + "/" + res->ResourceID(), json_meta, &vrsp, hdr2 ) ;
+		valr = vrsp.Response();
+		assert( !(valr["id"].Str().empty()) );
+	}
+
+	bool retrying = false;
+	while ( true )
+	{
+		if ( retrying )
+		{
+			file.Seek( 0, SEEK_SET );
+			os::Sleep( 5 );
+		}
+
+		if ( !res->IsFolder() )
+		{
+			http::ValResponse vrsp;
+			long http_code = m_http->Put( upload_base + "/" + valr["id"].Str() + "?uploadType=media", &file, &vrsp, hdr ) ;
+			if ( http_code == 410 || http_code == 412 )
+			{
+				Log( "request failed with %1%, retrying whole upload in 5s", http_code, log::warning ) ;
+				retrying = true;
+				continue;
+			}
+			valr = vrsp.Response();
+			assert( !(valr["id"].Str().empty()) );
+		}
+
+		if ( retrying )
+			Log( "upload succeeded on retry", log::warning );
+		Entry2 responseEntry = Entry2( valr );
+		AssignIDs( res, responseEntry ) ;
+		AssignMTime( res, responseEntry.MTime() );
+		break;
+	}
+	
+	return true ;
 }
 
 std::auto_ptr<Feed> Syncer2::GetFolders()
 {
-	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=%27me%27+in+readers+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
+	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=%27me%27+in+readers+and+trashed%3dfalse+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
 }
 
 std::auto_ptr<Feed> Syncer2::GetAll()
 {
-	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=%27me%27+in+readers" ) );
+	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=%27me%27+in+readers+and+trashed%3dfalse" ) );
 }
 
 std::string ChangesFeed( long changestamp, int maxResults = 1000 )

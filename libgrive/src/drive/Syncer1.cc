@@ -24,7 +24,6 @@
 #include "Syncer1.hh"
 
 #include "http/Agent.hh"
-#include "http/Download.hh"
 #include "http/Header.hh"
 //#include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
@@ -35,6 +34,7 @@
 #include "xml/String.hh"
 #include "xml/TreeBuilder.hh"
 
+#include "util/File.hh"
 #include "util/OS.hh"
 #include "util/log/Log.hh"
 
@@ -85,19 +85,6 @@ void Syncer1::DeleteRemote( Resource *res )
 		Trace( "Exception %1% %2%",
 			boost::diagnostic_information(e),
 			str.Response() ) ;
-	}
-}
-
-void Syncer1::Download( Resource *res, const fs::path& file )
-{
-	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
-	long r = m_http->Get( res->ContentSrc(), &dl, http::Header() ) ;
-	if ( r <= 400 )
-	{
-		if ( res->MTime() != DateTime() )
-			os::SetFileTime( file, res->MTime() ) ;
-		else
-			Log( "encountered zero date time after downloading %1%", file, log::warning ) ;
 	}
 }
 
@@ -180,7 +167,7 @@ bool Syncer1::Upload( Resource *res,
 		if ( retrying )
 		{
 			file.Seek( 0, SEEK_SET );
-			os::Sleep( 2 );
+			os::Sleep( 5 );
 		}
 
 		try

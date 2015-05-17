@@ -50,7 +50,7 @@ public :
 	http::Agent* Agent() const;
 
 	virtual void DeleteRemote( Resource *res ) = 0;
-	virtual void Download( Resource *res, const fs::path& file ) = 0;
+	virtual void Download( Resource *res, const fs::path& file );
 	virtual bool EditContent( Resource *res, bool new_rev ) = 0;
 	virtual bool Create( Resource *res ) = 0;
 

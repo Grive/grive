@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "Val.hh"
 #include "ValVisitor.hh"
 #include <memory>
 
@@ -52,6 +53,8 @@ private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_impl ;
 } ;
+
+std::string WriteJson( const Val& val );
 
 } // end of namespace
 

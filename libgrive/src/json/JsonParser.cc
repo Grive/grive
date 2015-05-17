@@ -39,7 +39,7 @@ namespace
 	int OnBool( void *ctx, int value )
 	{
 		ValVisitor *b = reinterpret_cast<ValVisitor*>(ctx) ;
-		b->Visit( static_cast<long long>(value) ) ;
+		b->Visit( static_cast<bool>(value) ) ;
 		return true ;
 	}
 	

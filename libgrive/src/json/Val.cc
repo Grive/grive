@@ -114,11 +114,15 @@ Val::operator std::string() const
 
 int Val::Int() const
 {
+	if ( Type() == string_type )
+		return std::atoi( As<std::string>().c_str() );
 	return static_cast<int>(As<long long>()) ;
 }
 
 double Val::Double() const
 {
+	if ( Type() == string_type )
+		return std::atof( As<std::string>().c_str() );
 	return As<double>() ;
 }
 
@@ -159,6 +163,11 @@ bool Val::Get( const std::string& key, Val& val ) const
 void Val::Add( const std::string& key, const Val& value )
 {
 	As<Object>().insert( std::make_pair(key, value) ) ;
+}
+
+void Val::Add( const Val& json )
+{
+	As<Array>().push_back( json ) ;
 }
 
 void Val::Visit( ValVisitor *visitor ) const

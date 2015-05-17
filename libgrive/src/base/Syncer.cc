@@ -21,6 +21,10 @@
 #include "Resource.hh"
 #include "Entry.hh"
 #include "http/Agent.hh"
+#include "http/Header.hh"
+#include "http/Download.hh"
+#include "util/OS.hh"
+#include "util/log/Log.hh"
 
 namespace gr {
 
@@ -32,6 +36,19 @@ Syncer::Syncer( http::Agent *http ):
 http::Agent* Syncer::Agent() const
 {
 	return m_http;
+}
+
+void Syncer::Download( Resource *res, const fs::path& file )
+{
+	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
+	long r = m_http->Get( res->ContentSrc(), &dl, http::Header() ) ;
+	if ( r <= 400 )
+	{
+		if ( res->MTime() != DateTime() )
+			os::SetFileTime( file, res->MTime() ) ;
+		else
+			Log( "encountered zero date time after downloading %1%", file, log::warning ) ;
+	}
 }
 
 void Syncer::AssignIDs( Resource *res, const Entry& remote )

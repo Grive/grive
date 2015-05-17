@@ -23,6 +23,8 @@
 
 namespace gr { namespace v2 {
 
+const std::string upload_base = "https://www.googleapis.com/upload/drive/v2/files" ;
+
 namespace feeds
 {
 	const std::string files		= "https://www.googleapis.com/drive/v2/files" ;

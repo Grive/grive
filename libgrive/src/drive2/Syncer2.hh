@@ -35,7 +35,6 @@ public :
 	Syncer2( http::Agent *http );
 
 	void DeleteRemote( Resource *res );
-	void Download( Resource *res, const fs::path& file );
 	bool EditContent( Resource *res, bool new_rev );
 	bool Create( Resource *res );
 
@@ -45,6 +44,8 @@ public :
 	long GetChangeStamp( long min_cstamp );
 
 private :
+
+	bool Upload( Resource *res );
 
 } ;
 

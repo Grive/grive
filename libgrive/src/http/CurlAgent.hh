@@ -43,7 +43,7 @@ public :
 	
 	long Put(
 		const std::string&	url,
-		const std::string&	data,
+		const std::string&	post_data,
 		DataStream			*dest,
 		const Header&		hdr ) ;
 	

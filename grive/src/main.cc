@@ -20,7 +20,7 @@
 #include "util/Config.hh"
 
 #include "base/Drive.hh"
-#include "drive/Syncer1.hh"
+#include "drive2/Syncer2.hh"
 
 #include "http/CurlAgent.hh"
 #include "protocol/AuthAgent.hh"
@@ -49,7 +49,6 @@ const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 using namespace gr ;
-using namespace gr::v1 ;
 namespace po = boost::program_options;
 
 // libgcrypt insist this to be done in application, not library
@@ -186,7 +185,7 @@ int Main( int argc, char **argv )
 	
 	OAuth2 token( refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
-	Syncer1 syncer( &agent );
+	v2::Syncer2 syncer( &agent );
 
 	Drive drive( &syncer, config.GetAll() ) ;
 	drive.DetectChanges() ;

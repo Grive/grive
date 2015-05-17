@@ -19,7 +19,7 @@
 */
 
 #include "JsonWriter.hh"
-#include "util/DataStream.hh"
+#include "util/StringStream.hh"
 
 #include <yajl/yajl_gen.h>
 
@@ -106,6 +106,14 @@ void JsonWriter::WriteCallback( void *ctx, const char *str, std::size_t size )
 	assert( pthis->m_impl->out != 0 ) ;
 	
 	pthis->m_impl->out->Write( str, size ) ;
+}
+
+std::string WriteJson( const Val& val )
+{
+	StringStream ss ;
+	JsonWriter wr( &ss ) ;
+	val.Visit( &wr ) ;
+	return ss.Str() ;
 }
 
 } // end of namespace

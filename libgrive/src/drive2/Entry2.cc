@@ -55,15 +55,17 @@ void Entry2::Update( const Val& item )
 	{
 		m_title			= file["title"] ;
 		m_etag			= file["etag"] ;
-		m_filename		= file["originalFilename"] ;
+		Val fn;
+		m_filename		= file.Get( "originalFilename", fn ) ? fn.Str() : std::string();
 		m_content_src	= file["downloadUrl"] ;
 		m_self_href		= file["selfLink"] ;
-		m_mtime			= DateTime( file["modificationDate"] ) ;
+		m_mtime			= DateTime( file["modifiedDate"] ) ;
 
-		m_resource_id	= file["id"]; // file#id ?
+		m_resource_id	= file["id"];
 		m_md5			= file["md5Checksum"] ;
-		m_is_dir		= file["mimeType"].Str() == v2::mime_types::folder ;
+		m_is_dir		= file["mimeType"].Str() == mime_types::folder ;
 		m_is_editable	= file["editable"].Bool() ;
+		m_is_removed	= file["labels"]["trashed"].Bool() ;
 
 		m_parent_hrefs.clear( ) ;
 
