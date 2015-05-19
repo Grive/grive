@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#define PACKAGE "libgrive"
 #include <bfd.h>
 #include <execinfo.h>
 #include <dlfcn.h>
