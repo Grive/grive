@@ -8,6 +8,7 @@ find_package(EXPAT REQUIRED)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
+find_package(Iberty)
 find_package(ZLIB)
 
 find_package(PkgConfig)
@@ -27,6 +28,12 @@ if ( BFD_FOUND )
 	add_definitions( -DHAVE_BFD )
 	
 endif ( BFD_FOUND )
+
+if ( IBERTY_FOUND )
+	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
+else ( IBERTY_FOUND )
+  set( IBERTY_LIBRARY "" )
+endif ( IBERTY_FOUND )
 
 if ( ZLIB_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${ZLIB_LIBRARIES} )
@@ -80,6 +87,7 @@ target_link_libraries( grive
 	${CURL_LIBRARIES}
 	${LIBGCRYPT_LIBRARIES}
 	${Boost_LIBRARIES}
+	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
 )
