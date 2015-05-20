@@ -66,10 +66,19 @@ void Entry2::Update( const Val& item )
 		m_is_removed	= file["labels"]["trashed"].Bool() ;
 		if ( !m_is_dir )
 		{
-			m_md5			= file["md5Checksum"] ;
-			m_content_src	= file["downloadUrl"] ;
-			// convert to lower case for easy comparison
-			std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
+			if ( !file.Has( "md5Checksum" ) )
+			{
+				// This is either a google docs document or a not-yet-uploaded file. Ignore it.
+				// FIXME: We'll need to compare timestamps to support google docs.
+				m_is_removed = true;
+			}
+			else
+			{
+				m_md5			= file["md5Checksum"] ;
+				m_content_src	= file["downloadUrl"] ;
+				// convert to lower case for easy comparison
+				std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;
+			}
 		}
 
 		m_parent_hrefs.clear( ) ;
