@@ -386,6 +386,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
+		// FIXME: (?) do not write new timestamp on failed upload
 		if ( syncer && syncer->Create( this ) )
 			m_state = sync ;
 		break ;

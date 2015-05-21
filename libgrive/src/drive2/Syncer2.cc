@@ -90,16 +90,6 @@ bool Syncer2::Create( Resource *res )
 
 bool Syncer2::Upload( Resource *res )
 {
-	File file( res->Path() ) ;
-	std::ostringstream xcontent_len ;
-	xcontent_len << "Content-Length: " << file.Size() ;
-
-	http::Header hdr ;
-	hdr.Add( "Content-Type: application/octet-stream" ) ;
-	hdr.Add( xcontent_len.str() ) ;
-	if ( !res->ETag().empty() )
-		hdr.Add( "If-Match: " + res->ETag() ) ;
-
 	Val meta;
 	meta.Add( "title", Val( res->Name() ) );
 	if ( res->IsFolder() )
@@ -129,40 +119,43 @@ bool Syncer2::Upload( Resource *res )
 		else
 			http_code = m_http->Put( feeds::files + "/" + res->ResourceID(), json_meta, &vrsp, hdr2 ) ;
 		valr = vrsp.Response();
-		assert( !(valr["id"].Str().empty()) );
+		assert( !( valr["id"].Str().empty() ) );
 	}
 
-	bool retrying = false;
-	while ( true )
+	if ( !res->IsFolder() )
 	{
-		if ( retrying )
+		while ( true )
 		{
-			file.Seek( 0, SEEK_SET );
-			os::Sleep( 5 );
-		}
+			File file( res->Path() ) ;
+			std::ostringstream xcontent_len ;
+			xcontent_len << "Content-Length: " << file.Size() ;
 
-		if ( !res->IsFolder() )
-		{
+			http::Header hdr ;
+			hdr.Add( "Content-Type: application/octet-stream" ) ;
+			hdr.Add( xcontent_len.str() ) ;
+			if ( valr.Has( "etag" ) )
+				hdr.Add( "If-Match: " + valr["etag"].Str() ) ;
+
 			http::ValResponse vrsp;
 			long http_code = m_http->Put( upload_base + "/" + valr["id"].Str() + "?uploadType=media", &file, &vrsp, hdr ) ;
 			if ( http_code == 410 || http_code == 412 )
 			{
 				Log( "request failed with %1%, retrying whole upload in 5s", http_code, log::warning ) ;
-				retrying = true;
-				continue;
+				os::Sleep( 5 );
 			}
-			valr = vrsp.Response();
-			assert( !(valr["id"].Str().empty()) );
+			else
+			{
+				valr = vrsp.Response() ;
+				assert( !( valr["id"].Str().empty() ) );
+				break ;
+			}
 		}
-
-		if ( retrying )
-			Log( "upload succeeded on retry", log::warning );
-		Entry2 responseEntry = Entry2( valr );
-		AssignIDs( res, responseEntry ) ;
-		AssignMTime( res, responseEntry.MTime() );
-		break;
 	}
-	
+
+	Entry2 responseEntry = Entry2( valr ) ;
+	AssignIDs( res, responseEntry ) ;
+	AssignMTime( res, responseEntry.MTime() ) ;
+
 	return true ;
 }
 
