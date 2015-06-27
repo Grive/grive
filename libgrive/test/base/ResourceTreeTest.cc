@@ -21,15 +21,14 @@
 
 #include "Assert.hh"
 
-#include "drive/ResourceTree.hh"
-#include "drive/Resource.hh"
+#include "base/ResourceTree.hh"
+#include "base/Resource.hh"
 
 #include <iostream>
 
 namespace grut {
 
 using namespace gr ;
-using namespace gr::v1 ;
 
 ResourceTreeTest::ResourceTreeTest( )
 {

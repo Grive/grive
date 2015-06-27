@@ -21,9 +21,9 @@
 
 #include "Assert.hh"
 
-#include "drive/Resource.hh"
+#include "base/Resource.hh"
 
-#include "drive/Entry.hh"
+#include "drive/Entry1.hh"
 #include "xml/Node.hh"
 
 #include <iostream>
@@ -60,7 +60,7 @@ void ResourceTest::TestNormal( )
 	xml::Node entry = xml::Node::Element( "entry" ) ;
 	entry.AddElement( "updated" ).AddText( "2012-05-09T16:13:22.401Z" ) ;
 	
-	Entry remote( entry ) ;
+	Entry1 remote( entry ) ;
 	subject.FromRemote( remote, DateTime() ) ;
 	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;
 }

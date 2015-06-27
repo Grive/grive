@@ -22,9 +22,9 @@
 #include "util/log/DefaultLog.hh"
 
 #include "drive/EntryTest.hh"
-#include "drive/ResourceTest.hh"
-#include "drive/ResourceTreeTest.hh"
-#include "drive/StateTest.hh"
+#include "base/ResourceTest.hh"
+#include "base/ResourceTreeTest.hh"
+#include "base/StateTest.hh"
 #include "util/DateTimeTest.hh"
 #include "util/FunctionTest.hh"
 #include "util/ConfigTest.hh"
@@ -38,7 +38,7 @@ int main( int argc, char **argv )
 	gr::LogBase::Inst( std::auto_ptr<gr::LogBase>(new gr::log::DefaultLog) ) ;
 	
 	CppUnit::TextUi::TestRunner runner;
-	runner.addTest( EntryTest::suite( ) ) ;
+	runner.addTest( Entry1Test::suite( ) ) ;
 	runner.addTest( StateTest::suite( ) ) ;
 	runner.addTest( ResourceTest::suite( ) ) ;
 	runner.addTest( ResourceTreeTest::suite( ) ) ;

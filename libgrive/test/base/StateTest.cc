@@ -21,7 +21,7 @@
 
 #include "Assert.hh"
 
-#include "drive/State.hh"
+#include "base/State.hh"
 #include "json/Val.hh"
 #include "util/log/Log.hh"
 
@@ -30,7 +30,6 @@
 namespace grut {
 
 using namespace gr ;
-using namespace gr::v1 ;
 
 StateTest::StateTest( )
 {

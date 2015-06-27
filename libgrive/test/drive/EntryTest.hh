@@ -24,13 +24,13 @@
 
 namespace grut {
 
-class EntryTest : public CppUnit::TestFixture
+class Entry1Test : public CppUnit::TestFixture
 {
 public :
-	EntryTest( ) ;
+	Entry1Test( ) ;
 
 	// declare suit function
-	CPPUNIT_TEST_SUITE( EntryTest ) ;
+	CPPUNIT_TEST_SUITE( Entry1Test ) ;
 		CPPUNIT_TEST( TestXml ) ;
 	CPPUNIT_TEST_SUITE_END();
 
