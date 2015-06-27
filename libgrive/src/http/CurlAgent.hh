@@ -70,6 +70,9 @@ public :
 		DataStream			*dest,
 		const Header&		hdr ) ;
 	
+	std::string LastError() const ;
+	std::string LastErrorHeaders() const ;
+	
 	std::string RedirLocation() const ;
 	
 	std::string Escape( const std::string& str ) ;
@@ -77,7 +80,7 @@ public :
 
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
-	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv ) ;
+	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	
 	void SetHeader( const Header& hdr ) ;
 	long ExecCurl(

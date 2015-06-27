@@ -65,6 +65,9 @@ public :
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	
+	std::string LastError() const ;
+	std::string LastErrorHeaders() const ;
+	
 	std::string RedirLocation() const ;
 	
 	std::string Escape( const std::string& str ) ;

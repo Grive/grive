@@ -225,7 +225,7 @@ bool Syncer1::Upload( Resource *res,
 
 		if ( http_code == 410 || http_code == 412 )
 		{
-			Log( "request failed with %1%, retrying whole upload in 5s", http_code, log::warning ) ;
+			Log( "request failed with %1%, body: %2%, retrying whole upload in 5s", http_code, m_http->LastError(), log::warning ) ;
 			retrying = true;
 			continue;
 		}

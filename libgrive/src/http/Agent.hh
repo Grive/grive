@@ -64,6 +64,9 @@ public :
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
 	
+	virtual std::string LastError() const = 0 ;
+	virtual std::string LastErrorHeaders() const = 0 ;
+	
 	virtual std::string RedirLocation() const = 0 ;
 	
 	virtual std::string Escape( const std::string& str ) = 0 ;

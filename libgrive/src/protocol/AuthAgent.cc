@@ -21,7 +21,6 @@
 
 #include "http/Error.hh"
 #include "http/Header.hh"
-#include "http/XmlResponse.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
 #include "util/File.hh"
@@ -77,9 +76,6 @@ long AuthAgent::Put(
 		keepTrying = CheckRetry( response );
 		if ( keepTrying ) {
 			file->Seek( 0, SEEK_SET );
-			XmlResponse *xmlResponse = dynamic_cast<XmlResponse*>(dest);
-			if( xmlResponse )
-			  xmlResponse->Clear();
 		}
 	}
 
@@ -135,6 +131,16 @@ long AuthAgent::Custom(
 	return CheckHttpResponse(response, url, auth) ;
 }
 
+std::string AuthAgent::LastError() const
+{
+	return m_agent->LastError() ;
+}
+
+std::string AuthAgent::LastErrorHeaders() const
+{
+	return m_agent->LastErrorHeaders() ;
+}
+
 std::string AuthAgent::RedirLocation() const
 {
 	return m_agent->RedirLocation() ;
@@ -152,11 +158,11 @@ std::string AuthAgent::Unescape( const std::string& str )
 
 bool AuthAgent::CheckRetry( long response )
 {
-	// HTTP 500 and 503 should be temperory. just wait a bit and retry
+	// HTTP 500 and 503 should be temporary. just wait a bit and retry
 	if ( response == 500 || response == 503 )
 	{
-		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
-			response, log::warning ) ;
+		Log( "request failed due to temporary error: %1%, body: %2%. retrying in 5 seconds",
+			response, m_agent->LastError(), log::warning ) ;
 			
 		os::Sleep( 5 ) ;
 		return true ;
@@ -165,7 +171,7 @@ bool AuthAgent::CheckRetry( long response )
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
-		Log( "resquest failed due to auth token expired: %1%. refreshing token",
+		Log( "request failed due to auth token expired: %1%. refreshing token",
 			response, log::warning ) ;
 			
 		os::Sleep( 5 ) ;
@@ -182,13 +188,15 @@ long AuthAgent::CheckHttpResponse(
 		const http::Header&	hdr  )
 {
 	// throw for other HTTP errors
-	if ( response >= 400 && response < 500 )
+	if ( response >= 400 )
 	{
- 		BOOST_THROW_EXCEPTION(
- 			Error()
-				<< HttpResponse( response )
- 				<< Url( url )
- 				<< HttpHeader( hdr ) ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< HttpResponseCode( response )
+				<< HttpResponseHeaders( m_agent->LastErrorHeaders() )
+				<< HttpResponseText( m_agent->LastError() )
+				<< Url( url )
+				<< HttpRequestHeaders( hdr ) ) ;
 	}
 	
 	return response ;

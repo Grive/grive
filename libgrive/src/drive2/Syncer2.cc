@@ -140,7 +140,7 @@ bool Syncer2::Upload( Resource *res )
 			long http_code = m_http->Put( upload_base + "/" + valr["id"].Str() + "?uploadType=media", &file, &vrsp, hdr ) ;
 			if ( http_code == 410 || http_code == 412 )
 			{
-				Log( "request failed with %1%, retrying whole upload in 5s", http_code, log::warning ) ;
+				Log( "request failed with %1%, body: %2%. retrying whole upload in 5s", http_code, m_http->LastError(), log::warning ) ;
 				os::Sleep( 5 );
 			}
 			else

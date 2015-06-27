@@ -85,6 +85,10 @@ struct CurlAgent::Impl
 {
 	CURL			*curl ;
 	std::string		location ;
+	bool			error ;
+	std::string		error_headers ;
+	std::string		error_data ;
+	DataStream		*dest ;
 } ;
 
 CurlAgent::CurlAgent() :
@@ -96,11 +100,15 @@ CurlAgent::CurlAgent() :
 void CurlAgent::Init()
 {
 	::curl_easy_reset( m_pimpl->curl ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ; 
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYPEER,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_SSL_VERIFYHOST,	0L ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&CurlAgent::HeaderCallback ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_WRITEHEADER ,	this ) ;
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER, 			0L ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERDATA,		this ) ;
+	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER,			0L ) ;
+	m_pimpl->error = false;
+	m_pimpl->error_headers = "";
+	m_pimpl->error_data = "";
+	m_pimpl->dest = NULL;
 }
 
 CurlAgent::~CurlAgent()
@@ -110,8 +118,15 @@ CurlAgent::~CurlAgent()
 
 std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis )
 {
-	char *str = reinterpret_cast<char*>(ptr) ;
+	char *str = static_cast<char*>(ptr) ;
 	std::string line( str, str + size*nmemb ) ;
+	
+	// Check for error (HTTP 400 and above)
+	if ( line.substr( 0, 5 ) == "HTTP/" && line[9] >= '4' )
+		pthis->m_pimpl->error = true;
+	
+	if ( pthis->m_pimpl->error )
+		pthis->m_pimpl->error_headers += line;
 	
 	static const std::string loc = "Location: " ;
 	std::size_t pos = line.find( loc ) ;
@@ -124,10 +139,16 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 	return size*nmemb ;
 }
 
-std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv )
+std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis )
 {
-	assert( recv != 0 ) ;
-	return recv->Write( static_cast<char*>(ptr), size * nmemb ) ;
+	assert( pthis != 0 ) ;
+	if ( pthis->m_pimpl->error && pthis->m_pimpl->error_data.size() < 65536 )
+	{
+		// Do not feed error responses to destination stream
+		pthis->m_pimpl->error_data.append( static_cast<char*>(ptr), size * nmemb ) ;
+		return size * nmemb ;
+	}
+	return pthis->m_pimpl->dest->Write( static_cast<char*>(ptr), size * nmemb ) ;
 }
 
 long CurlAgent::ExecCurl(
@@ -142,21 +163,23 @@ long CurlAgent::ExecCurl(
 	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, 	error ) ;
 	::curl_easy_setopt(curl, CURLOPT_URL, 			url.c_str());
 	::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,	&CurlAgent::Receive ) ;
-	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		dest ) ;
+	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		this ) ;
+	m_pimpl->dest = dest ;
 
 	SetHeader( hdr ) ;
 
-//	dest->Clear() ;
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
 	// get the HTTP response code
 	long http_code = 0;
 	::curl_easy_getinfo(curl,	CURLINFO_RESPONSE_CODE, &http_code);
 	Trace( "HTTP response %1%", http_code ) ;
-	
-	// reset the curl buffer to prevent it from touch our "error" buffer
+
+	// reset the curl buffer to prevent it from touching our "error" buffer
 	::curl_easy_setopt(curl,	CURLOPT_ERRORBUFFER, 	0 ) ;
-	
+
+	m_pimpl->dest = NULL;
+
 	// only throw for libcurl errors
 	if ( curl_code != CURLE_OK )
 	{
@@ -165,7 +188,7 @@ long CurlAgent::ExecCurl(
 				<< CurlCode( curl_code )
 				<< Url( url )
 				<< CurlErrMsg( error )
-				<< HttpHeader( hdr )
+				<< HttpRequestHeaders( hdr )
 		) ;
 	}
 
@@ -273,6 +296,16 @@ void CurlAgent::SetHeader( const Header& hdr )
 		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
 	
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
+}
+
+std::string CurlAgent::LastError() const
+{
+	return m_pimpl->error_data ;
+}
+
+std::string CurlAgent::LastErrorHeaders() const
+{
+	return m_pimpl->error_headers ;
 }
 
 std::string CurlAgent::RedirLocation() const
