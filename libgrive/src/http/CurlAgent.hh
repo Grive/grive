@@ -82,7 +82,6 @@ private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	
-	void SetHeader( const Header& hdr ) ;
 	long ExecCurl(
 		const std::string&	url,
 		DataStream			*dest,

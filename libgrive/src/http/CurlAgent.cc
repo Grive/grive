@@ -91,6 +91,8 @@ struct CurlAgent::Impl
 	DataStream		*dest ;
 } ;
 
+static struct curl_slist* SetHeader( CURL* handle, const Header& hdr );
+
 CurlAgent::CurlAgent() :
 	m_pimpl( new Impl )
 {
@@ -166,9 +168,11 @@ long CurlAgent::ExecCurl(
 	::curl_easy_setopt(curl, CURLOPT_WRITEDATA,		this ) ;
 	m_pimpl->dest = dest ;
 
-	SetHeader( hdr ) ;
+	struct curl_slist *slist = SetHeader( m_pimpl->curl, hdr ) ;
 
 	CURLcode curl_code = ::curl_easy_perform(curl);
+
+	curl_slist_free_all(slist);
 
 	// get the HTTP response code
 	long http_code = 0;
@@ -288,14 +292,15 @@ long CurlAgent::Custom(
 	return ExecCurl( url, dest, hdr ) ;
 }
 
-void CurlAgent::SetHeader( const Header& hdr )
+static struct curl_slist* SetHeader( CURL *handle, const Header& hdr )
 {
 	// set headers
 	struct curl_slist *curl_hdr = 0 ;
     for ( Header::iterator i = hdr.begin() ; i != hdr.end() ; ++i )
 		curl_hdr = curl_slist_append( curl_hdr, i->c_str() ) ;
 	
-	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HTTPHEADER, curl_hdr ) ;
+	::curl_easy_setopt( handle, CURLOPT_HTTPHEADER, curl_hdr ) ;
+	return curl_hdr;
 }
 
 std::string CurlAgent::LastError() const
