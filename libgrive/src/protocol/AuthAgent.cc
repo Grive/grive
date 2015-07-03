@@ -161,7 +161,7 @@ bool AuthAgent::CheckRetry( long response )
 	// HTTP 500 and 503 should be temporary. just wait a bit and retry
 	if ( response == 500 || response == 503 )
 	{
-		Log( "request failed due to temporary error: %1%, body: %2%. retrying in 5 seconds",
+		Log( "request failed due to temporary error: %1% (body: %2%). retrying in 5 seconds",
 			response, m_agent->LastError(), log::warning ) ;
 			
 		os::Sleep( 5 ) ;
@@ -171,8 +171,8 @@ bool AuthAgent::CheckRetry( long response )
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
-		Log( "request failed due to auth token expired: %1%. refreshing token",
-			response, log::warning ) ;
+		Log( "request failed due to auth token expired: %1% (body: %2%). refreshing token",
+			response, m_agent->LastError(), log::warning ) ;
 			
 		os::Sleep( 5 ) ;
 		m_auth.Refresh() ;
