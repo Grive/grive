@@ -52,13 +52,14 @@ long AuthAgent::Put(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	Header auth = AppendHeader(hdr) ;
-
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Put(url, data, dest, auth) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
+	long response;
+	Header auth;
+	do
+	{
+		auth = AppendHeader( hdr );
+		response = m_agent->Put( url, data, dest, auth );
+	} while ( CheckRetry( response ) );
+	return CheckHttpResponse( response, url, auth );
 }
 
 long AuthAgent::Put(
@@ -67,16 +68,15 @@ long AuthAgent::Put(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	Header auth = AppendHeader(hdr) ;
-	
-	long response ;
-	bool keepTrying = true;
-	while ( keepTrying ) {
+	long response;
+	Header auth;
+	while ( true )
+	{
+		auth = AppendHeader( hdr );
 		response = m_agent->Put( url, file, dest, auth );
-		keepTrying = CheckRetry( response );
-		if ( keepTrying ) {
-			file->Seek( 0, SEEK_SET );
-		}
+		if ( !CheckRetry( response ) )
+			break;
+		file->Seek( 0, SEEK_SET );
 	}
 
 	// On 410 Gone or 412 Precondition failed, recovery may be possible so don't
@@ -84,7 +84,7 @@ long AuthAgent::Put(
 	if ( response == 410 || response == 412 )
 		return response;
 	
-	return CheckHttpResponse(response, url, auth) ;
+	return CheckHttpResponse( response, url, auth );
 }
 
 long AuthAgent::Get(
@@ -92,13 +92,14 @@ long AuthAgent::Get(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	Header auth = AppendHeader(hdr) ;
-
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
+	long response;
+	Header auth;
+	do
+	{
+		auth = AppendHeader( hdr );
+		response = m_agent->Get( url, dest, auth );
+	} while ( CheckRetry( response ) );
+	return CheckHttpResponse( response, url, auth );
 }
 
 long AuthAgent::Post(
@@ -107,13 +108,14 @@ long AuthAgent::Post(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	Header auth = AppendHeader(hdr) ;
-	
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
+	long response;
+	Header auth;
+	do
+	{
+		auth = AppendHeader( hdr );
+		response = m_agent->Post( url, data, dest, auth );
+	} while ( CheckRetry( response ) );
+	return CheckHttpResponse( response, url, auth );
 }
 
 long AuthAgent::Custom(
@@ -122,13 +124,14 @@ long AuthAgent::Custom(
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	Header auth = AppendHeader(hdr) ;
-
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
+	long response;
+	Header auth;
+	do
+	{
+		auth = AppendHeader( hdr );
+		response = m_agent->Custom( method, url, dest, auth );
+	} while ( CheckRetry( response ) );
+	return CheckHttpResponse( response, url, auth );
 }
 
 std::string AuthAgent::LastError() const
