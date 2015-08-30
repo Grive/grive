@@ -29,6 +29,7 @@ You need the following libraries:
 - libstdc++
 - libgcrypt
 - Boost (Boost filesystem and program_option are required)
+- expat
 
 There are also some optional dependencies:
 - CppUnit (for unit tests)
