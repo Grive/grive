@@ -1,6 +1,6 @@
-# Grive2 0.4.0
+# Grive2 0.4.1
 
-17 May 2015, Vitaliy Filippov
+4 Aug 2015, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -28,7 +28,7 @@ You need the following libraries:
 - libcurl
 - libstdc++
 - libgcrypt
-- Boost (Boost filesystem and program_option are required)
+- Boost (Boost filesystem, program_options and regex are required)
 - expat
 
 There are also some optional dependencies:
@@ -60,7 +60,15 @@ Enjoy!
 
 ## Version History
 
-### Grive2 v0.4
+### Grive2 v0.4.2 (unreleased)
+
+- Exclude files by perl regexp
+
+### Grive2 v0.4.1
+
+- Bug fixes
+
+### Grive2 v0.4.0
 
 First fork release, by Vitaliy Filippov / vitalif at mail*ru
 - Support for the new Google Drive REST API (old "Document List" API is shut down by Google 20 April 2015)
