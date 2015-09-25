@@ -36,11 +36,12 @@ namespace gr {
 State::State( const fs::path& filename, const Val& options  ) :
 	m_res		( options["path"].Str() ),
 	m_dir		( options["dir"].Str() ),
-	m_cstamp	( -1 )
+	m_cstamp	( -1 ),
+	m_ign		( !options["ignore"].Str().empty() ? options["ignore"].Str()+"|^\\.(grive|grive_state|trash)" : "^\\.(grive|grive_state|trash)" )
 {
 	Read( filename ) ;
 	
-	// the "-f" option will make grive always thinks remote is newer
+	// the "-f" option will make grive always think remote is newer
 	Val force ;
 	if ( options.Get("force", force) && force.Bool() )
 		m_last_sync = DateTime() ;
@@ -61,7 +62,7 @@ void State::FromLocal( const fs::path& p )
 
 bool State::IsIgnore( const std::string& filename )
 {
-	return filename == ".grive" || filename == ".grive_state" || filename == ".trash";
+	return regex_match( filename.c_str(), m_ign );
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
@@ -77,8 +78,9 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 		std::string fname = i->path().filename().string() ;
 		fs::file_status st = fs::status(i->path());
 	
-		if ( IsIgnore(fname) )
-			Log( "file %1% is ignored by grive", fname, log::verbose ) ;
+		std::string path = folder->IsRoot() ? fname : ( folder->RelPath() / fname ).string();
+		if ( IsIgnore( path ) )
+			Log( "file %1% is ignored by grive", path, log::verbose ) ;
 		
 		// check if it is ignored
 		else if ( folder == m_res.Root() && m_dir != "" && fname != m_dir )
@@ -114,11 +116,7 @@ void State::FromRemote( const Entry& e )
 	std::string fn = e.Filename() ;
 	std::string k = e.IsDir() ? "folder" : "file";
 
-	if ( IsIgnore( e.Name() ) )
-		Log( "%1% %2% is ignored by grive", k, e.Name(), log::verbose ) ;
-
-	// check if it is ignored
-	else if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
+	if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
 		Log( "%1% %2% is ignored", k, e.Name(), log::verbose );
 
 	// common checkings
@@ -170,7 +168,6 @@ std::size_t State::TryResolveEntry()
 void State::FromChange( const Entry& e )
 {
 	assert( e.IsChange() ) ;
-	assert( !IsIgnore( e.Name() ) ) ;
 	
 	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
@@ -185,12 +182,24 @@ bool State::Update( const Entry& e )
 
 	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
 	{
+		std::string path = res->RelPath().string();
+		if ( IsIgnore( path ) )
+		{
+			Log( "%1% is ignored by grive", path, log::verbose ) ;
+			return true;
+		}
 		m_res.Update( res, e, m_last_sync ) ;
-		return true ;
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
 		assert( parent->IsFolder() ) ;
+
+		std::string path = parent->IsRoot() ? e.Name() : ( parent->RelPath() / e.Name() ).string();
+		if ( IsIgnore( path ) )
+		{
+			Log( "%1% is ignored by grive", path, log::verbose ) ;
+			return true;
+		}
 
 		// see if the entry already exist in local
 		std::string name = e.Name() ;

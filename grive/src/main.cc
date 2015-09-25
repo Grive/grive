@@ -120,6 +120,7 @@ int Main( int argc, char **argv )
 						"instead of uploading it." )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		( "ignore",		po::value<std::string>(), "Ignore files relative paths of which match this Perl RegExp." )
 	;
 	
 	po::variables_map vm;

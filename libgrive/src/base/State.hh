@@ -25,6 +25,7 @@
 #include "util/FileSystem.hh"
 
 #include <memory>
+#include <boost/regex.hpp>
 
 namespace gr {
 
@@ -69,13 +70,14 @@ private :
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
 
-	static bool IsIgnore( const std::string& filename ) ;
+	bool IsIgnore( const std::string& filename ) ;
 	
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
 	int					m_cstamp ;
 	std::string			m_dir ;
+	boost::regex		m_ign ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;

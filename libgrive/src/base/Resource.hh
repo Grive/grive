@@ -100,6 +100,7 @@ public :
 	Resource* FindChild( const std::string& title ) ;
 	
 	fs::path Path() const ;
+	fs::path RelPath() const ;
 	bool IsInRootTree() const ;
 	bool IsRoot() const ;
 	bool HasID() const ;
