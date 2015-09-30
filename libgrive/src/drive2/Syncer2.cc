@@ -27,7 +27,6 @@
 #include "http/Download.hh"
 #include "http/Header.hh"
 #include "http/StringResponse.hh"
-//#include "http/ResponseLog.hh"
 #include "json/ValResponse.hh"
 #include "json/JsonWriter.hh"
 

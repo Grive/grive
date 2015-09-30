@@ -40,12 +40,4 @@ Feed::iterator Feed::end() const
 	return m_entries.end() ;
 }
 
-void Feed::EnableLog( const std::string& prefix, const std::string& suffix )
-{
-	m_log.reset( new LogInfo ) ;
-	m_log->prefix   = prefix ;
-	m_log->suffix   = suffix ;
-	m_log->sequence = 0 ;
-}
-
 } // end of namespace gr::v1

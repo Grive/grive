@@ -43,16 +43,8 @@ public :
 	virtual bool GetNext( http::Agent *http ) = 0 ;
 	iterator begin() const ;
 	iterator end() const ;
-	virtual void EnableLog( const std::string& prefix, const std::string& suffix ) ;
 
 protected :
-	struct LogInfo
-	{
-		std::string prefix ;
-		std::string suffix ;
-		std::size_t sequence ;
-	} ;
-	std::auto_ptr<LogInfo> m_log ;
 	Entries m_entries ;
 	std::string m_next ;
 } ;

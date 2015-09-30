@@ -24,7 +24,6 @@
 
 #include "http/Agent.hh"
 #include "http/Header.hh"
-#include "http/ResponseLog.hh"
 #include "http/XmlResponse.hh"
 #include "xml/NodeSet.hh"
 
@@ -42,18 +41,11 @@ Feed1::Feed1( const std::string &url ):
 bool Feed1::GetNext( http::Agent *http )
 {
 	http::XmlResponse xrsp ;
-	http::ResponseLog log( &xrsp ) ;
 	
 	if ( m_next.empty() )
 		return false;
 	
-	if ( m_log.get() != 0 )
-		log.Reset(
-			m_log->prefix,
-			(boost::format( "-#%1%%2%" ) % m_log->sequence++ % m_log->suffix ).str(),
-			&xrsp ) ;
-	
-	http->Get( m_next, &log, http::Header() ) ;
+	http->Get( m_next, &xrsp, http::Header() ) ;
 	
 	xml::Node m_root = xrsp.Response() ;
 	xml::NodeSet xe = m_root["entry"] ;

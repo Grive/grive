@@ -25,7 +25,6 @@
 
 #include "http/Agent.hh"
 #include "http/Header.hh"
-//#include "http/ResponseLog.hh"
 #include "http/StringResponse.hh"
 #include "http/XmlResponse.hh"
 
@@ -123,7 +122,6 @@ bool Syncer1::Create( Resource *res )
 		hdr.Add( "Content-Type: application/atom+xml" ) ;
 
 		http::XmlResponse xml ;
-//		http::ResponseLog log( "create", ".xml", &xml ) ;
 		m_http->Post( uri, meta, &xml, hdr ) ;
 		AssignIDs( res, Entry1( xml.Response() ) ) ;
 
