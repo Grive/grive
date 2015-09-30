@@ -20,6 +20,7 @@
 #pragma once
 
 #include "http/Agent.hh"
+#include "util/Exception.hh"
 #include <string>
 #include <memory>
 
@@ -27,6 +28,9 @@ namespace gr {
 
 class OAuth2
 {
+public :
+	struct AuthFailed : virtual Exception {} ;
+
 public :
 	OAuth2(
 		std::auto_ptr<http::Agent>& agent,

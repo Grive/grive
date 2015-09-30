@@ -66,11 +66,19 @@ void OAuth2::Auth( const std::string&	auth_code )
 
 	http::ValResponse  resp ;
 
-	m_agent->Post( token_url, post, &resp, http::Header() ) ;
-
-	Val jresp	= resp.Response() ;
-	m_access	= jresp["access_token"].Str() ;
-	m_refresh	= jresp["refresh_token"].Str() ;
+	long code = m_agent->Post( token_url, post, &resp, http::Header() ) ;
+	if ( code >= 200 && code < 300 )
+	{
+		Val jresp	= resp.Response() ;
+		m_access	= jresp["access_token"].Str() ;
+		m_refresh	= jresp["refresh_token"].Str() ;
+	}
+	else
+	{
+		Log( "Failed to obtain auth token: HTTP %1%, body: %2%",
+			code, m_agent->LastError(), log::error ) ;
+		BOOST_THROW_EXCEPTION( AuthFailed() );
+	}
 }
 
 std::string OAuth2::MakeAuthURL()
@@ -97,9 +105,16 @@ void OAuth2::Refresh( )
 
 	http::ValResponse  resp ;
 
-	m_agent->Post( token_url, post, &resp, http::Header() ) ;
+	long code = m_agent->Post( token_url, post, &resp, http::Header() ) ;
 
-	m_access	= resp.Response()["access_token"].Str() ;
+	if ( code >= 200 && code < 300 )
+		m_access = resp.Response()["access_token"].Str() ;
+	else
+	{
+		Log( "Failed to refresh auth token: HTTP %1%, body: %2%",
+			code, m_agent->LastError(), log::error ) ;
+		BOOST_THROW_EXCEPTION( AuthFailed() );
+	}
 }
 
 std::string OAuth2::RefreshToken( ) const
