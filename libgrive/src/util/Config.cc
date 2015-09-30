@@ -38,7 +38,6 @@ const std::string	default_root_folder = ".";
 
 Config::Config( const po::variables_map& vm )
 {
-	m_cmd.Add( "log-xml",	Val(vm.count("log-xml") > 0) ) ;
 	m_cmd.Add( "new-rev",	Val(vm.count("new-rev") > 0) ) ;
 	m_cmd.Add( "force",		Val(vm.count("force") > 0 ) ) ;
 	m_cmd.Add( "path",		Val(vm.count("path") > 0

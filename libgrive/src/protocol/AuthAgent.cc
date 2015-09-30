@@ -31,11 +31,21 @@ namespace gr {
 
 using namespace http ;
 
-AuthAgent::AuthAgent( const OAuth2& auth, std::auto_ptr<Agent> real_agent ) :
+AuthAgent::AuthAgent( OAuth2& auth, std::auto_ptr<Agent> real_agent ) :
 	m_auth	( auth ),
 	m_agent	( real_agent )
 {
 	assert( m_agent.get() != 0 ) ;
+}
+
+http::ResponseLog* AuthAgent::GetLog() const
+{
+	return m_agent->GetLog();
+}
+
+void AuthAgent::SetLog( http::ResponseLog *log )
+{
+	return m_agent->SetLog( log );
 }
 
 Header AuthAgent::AppendHeader( const Header& hdr ) const

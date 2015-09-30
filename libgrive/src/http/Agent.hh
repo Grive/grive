@@ -20,6 +20,7 @@
 #pragma once
 
 #include <string>
+#include "ResponseLog.hh"
 
 namespace gr {
 
@@ -34,6 +35,9 @@ class Agent
 {
 public :
 	virtual ~Agent() {}
+
+	virtual ResponseLog* GetLog() const = 0 ;
+	virtual void SetLog( ResponseLog* ) = 0 ;
 
 	virtual long Put(
 		const std::string&	url,

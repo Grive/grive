@@ -118,6 +118,16 @@ CurlAgent::~CurlAgent()
 	::curl_easy_cleanup( m_pimpl->curl );
 }
 
+ResponseLog* CurlAgent::GetLog() const
+{
+	return m_log.get();
+}
+
+void CurlAgent::SetLog(ResponseLog *log)
+{
+	m_log.reset( log );
+}
+
 std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis )
 {
 	char *str = static_cast<char*>(ptr) ;
@@ -129,6 +139,9 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 	
 	if ( pthis->m_pimpl->error )
 		pthis->m_pimpl->error_headers += line;
+	
+	if ( pthis->m_log.get() )
+		pthis->m_log->Write( str, size*nmemb );
 	
 	static const std::string loc = "Location: " ;
 	std::size_t pos = line.find( loc ) ;
@@ -144,6 +157,8 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis )
 {
 	assert( pthis != 0 ) ;
+	if ( pthis->m_log.get() )
+		pthis->m_log->Write( (const char*)ptr, size*nmemb );
 	if ( pthis->m_pimpl->error && pthis->m_pimpl->error_data.size() < 65536 )
 	{
 		// Do not feed error responses to destination stream
@@ -284,6 +299,7 @@ long CurlAgent::Custom(
 {
 	Trace("HTTP %2% \"%1%\"", url, method ) ;
 
+	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );

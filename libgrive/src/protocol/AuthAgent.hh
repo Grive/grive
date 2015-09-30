@@ -34,7 +34,10 @@ namespace gr {
 class AuthAgent : public http::Agent
 {
 public :
-	AuthAgent( const OAuth2& auth, std::auto_ptr<http::Agent> real_agent ) ;
+	AuthAgent( OAuth2& auth, std::auto_ptr<http::Agent> real_agent ) ;
+
+	http::ResponseLog* GetLog() const ;
+	void SetLog( http::ResponseLog *log ) ;
 
 	long Put(
 		const std::string&	url,
@@ -82,7 +85,7 @@ private :
 		const http::Header&	hdr  ) ;
 	
 private :
-	OAuth2								m_auth ;
+	OAuth2&		m_auth ;
 	const std::auto_ptr<http::Agent>	m_agent ;
 } ;
 

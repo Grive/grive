@@ -31,23 +31,19 @@ class ResponseLog : public DataStream
 public :
 	ResponseLog(
 		const std::string&	prefix,
-		const std::string&	suffix,
-		DataStream			*next ) ;
-	ResponseLog( DataStream	*next ) ;
-		
+		const std::string&	suffix ) ;
+	
 	std::size_t Write( const char *data, std::size_t count ) ;
 	std::size_t Read( char *data, std::size_t count ) ;
 	
-	void Enable( bool enable = true ) ;
-	void Reset( const std::string& prefix, const std::string& suffix, DataStream *next ) ;
+	void Reset( const std::string& prefix, const std::string& suffix ) ;
 	
 private :
 	static std::string Filename( const std::string& prefix, const std::string& suffix ) ;
 	
 private :
-	bool            m_enabled ;
+	bool	m_enabled ;
 	std::ofstream	m_log ;
-	DataStream		*m_next ;
 } ;
 
 } } // end of namespace

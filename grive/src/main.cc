@@ -112,7 +112,7 @@ int Main( int argc, char **argv )
 		( "path,p",		po::value<std::string>(), "Path to sync")
 		( "dir,s",		po::value<std::string>(), "Subdirectory to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
-		( "log-xml",	"Log more HTTP responses as XML for debugging.")
+		( "log-http",	po::value<std::string>(), "Log all HTTP responses in this file for debugging.")
 		( "new-rev",	"Create new revisions in server for updated files.")
 		( "debug,d",	"Enable debug level messages. Implies -v.")
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
@@ -147,12 +147,18 @@ int Main( int argc, char **argv )
 	
 	Log( "config file name %1%", config.Filename(), log::verbose );
 
+	std::auto_ptr<http::Agent> http( new http::CurlAgent );
+	if ( vm.count( "log-http" ) )
+		http->SetLog( new http::ResponseLog( vm["log-http"].as<std::string>(), ".txt" ) );
+
 	if ( vm.count( "auth" ) )
 	{
+		OAuth2 token( http, client_id, client_secret ) ;
+		
 		std::cout
 			<< "-----------------------\n"
 			<< "Please go to this URL and get an authentication code:\n\n"
-			<< OAuth2::MakeAuthURL( client_id )
+			<< token.MakeAuthURL()
 			<< std::endl ;
 		
 		std::cout
@@ -161,7 +167,6 @@ int Main( int argc, char **argv )
 		std::string code ;
 		std::cin >> code ;
 		
-		OAuth2 token( client_id, client_secret ) ;
 		token.Auth( code ) ;
 		
 		// save to config
@@ -184,8 +189,8 @@ int Main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
+	OAuth2 token( http, refresh_token, client_id, client_secret ) ;
+	AuthAgent agent( token, http ) ;
 	v2::Syncer2 syncer( &agent );
 
 	Drive drive( &syncer, config.GetAll() ) ;

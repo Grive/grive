@@ -40,7 +40,10 @@ class CurlAgent : public Agent
 public :
 	CurlAgent() ;
 	~CurlAgent() ;
-	
+
+	ResponseLog* GetLog() const ;
+	void SetLog( ResponseLog *log ) ;
+
 	long Put(
 		const std::string&	url,
 		const std::string&	post_data,
@@ -92,6 +95,7 @@ private :
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_pimpl ;
+	std::auto_ptr<ResponseLog>	m_log ;
 } ;
 
 } } // end of namespace

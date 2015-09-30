@@ -33,9 +33,11 @@ namespace gr {
 const std::string token_url		= "https://accounts.google.com/o/oauth2/token" ;
 
 OAuth2::OAuth2(
+	std::auto_ptr<http::Agent>& agent,
 	const std::string& refresh_code,
 	const std::string&	client_id,
 	const std::string&	client_secret ) :
+	m_agent( agent ),
 	m_refresh( refresh_code ),
 	m_client_id( client_id ),
 	m_client_secret( client_secret )
@@ -44,8 +46,10 @@ OAuth2::OAuth2(
 }
 
 OAuth2::OAuth2(
+	std::auto_ptr<http::Agent>& agent,
 	const std::string&	client_id,
 	const std::string&	client_secret ) :
+	m_agent( agent ),
 	m_client_id( client_id ),
 	m_client_secret( client_secret )
 {
@@ -61,32 +65,26 @@ void OAuth2::Auth( const std::string&	auth_code )
 		"&grant_type=authorization_code" ;
 
 	http::ValResponse  resp ;
-	http::CurlAgent		http ;
 
-	DisableLog dlog( log::debug ) ;
-	http.Post( token_url, post, &resp, http::Header() ) ;
+	m_agent->Post( token_url, post, &resp, http::Header() ) ;
 
 	Val jresp	= resp.Response() ;
 	m_access	= jresp["access_token"].Str() ;
 	m_refresh	= jresp["refresh_token"].Str() ;
 }
 
-std::string OAuth2::MakeAuthURL(
-	const std::string&	client_id,
-	const std::string&	state )
+std::string OAuth2::MakeAuthURL()
 {
-	http::CurlAgent h ;
-
 	return "https://accounts.google.com/o/oauth2/auth"
 		"?scope=" +
-			h.Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" + 
-			h.Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
-			h.Escape( "https://docs.google.com/feeds/" )					+ "+" + 
-			h.Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
-			h.Escape( "https://spreadsheets.google.com/feeds/" )			+
+			m_agent->Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" + 
+			m_agent->Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
+			m_agent->Escape( "https://docs.google.com/feeds/" )					+ "+" + 
+			m_agent->Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
+			m_agent->Escape( "https://spreadsheets.google.com/feeds/" )			+
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
-		"&client_id=" + client_id ;
+		"&client_id=" + m_client_id ;
 }
 
 void OAuth2::Refresh( )
@@ -98,10 +96,8 @@ void OAuth2::Refresh( )
 		"&grant_type=refresh_token" ;
 
 	http::ValResponse  resp ;
-	http::CurlAgent		http ;
-    
-	DisableLog dlog( log::debug ) ;
-	http.Post( token_url, post, &resp, http::Header() ) ;
+
+	m_agent->Post( token_url, post, &resp, http::Header() ) ;
 
 	m_access	= resp.Response()["access_token"].Str() ;
 }

@@ -20,8 +20,6 @@
 
 #include "ValBuilder.hh"
 
-#include <cassert>
-
 namespace gr {
 
 ValBuilder::ValBuilder( )
@@ -106,7 +104,8 @@ void ValBuilder::End( Val::TypeEnum type )
 {
 	if ( m_ctx.top().val.Type() == type )
 	{
-		assert( m_ctx.top().key.Is<void>() ) ;
+		if( !m_ctx.top().key.Is<void>() )
+			BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top().key) ) ;
 	
 		// get top Val from stack
 		Val current ;
@@ -130,8 +129,12 @@ void ValBuilder::EndObject()
 
 Val ValBuilder::Result() const
 {
-	assert( m_ctx.size() == 1U ) ;
-	return m_ctx.top().val ;
+	if ( !m_ctx.size() )
+		BOOST_THROW_EXCEPTION( Error() << NoKey_( Val(std::string("")) ) ) ;
+	Val r = m_ctx.top().val;
+	if ( m_ctx.size() > 0 )
+		BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top().val) ) ;
+	return r;
 }
 
 } // end of namespace
