@@ -132,7 +132,7 @@ Val ValBuilder::Result() const
 	if ( !m_ctx.size() )
 		BOOST_THROW_EXCEPTION( Error() << NoKey_( Val(std::string("")) ) ) ;
 	Val r = m_ctx.top().val;
-	if ( m_ctx.size() > 0 )
+	if ( m_ctx.size() > 1 )
 		BOOST_THROW_EXCEPTION( Error() << Unexpected_(m_ctx.top().val) ) ;
 	return r;
 }

@@ -153,7 +153,7 @@ int Main( int argc, char **argv )
 
 	if ( vm.count( "auth" ) )
 	{
-		OAuth2 token( http, client_id, client_secret ) ;
+		OAuth2 token( http.get(), client_id, client_secret ) ;
 		
 		std::cout
 			<< "-----------------------\n"
@@ -189,8 +189,8 @@ int Main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( http, refresh_token, client_id, client_secret ) ;
-	AuthAgent agent( token, http ) ;
+	OAuth2 token( http.get(), refresh_token, client_id, client_secret ) ;
+	AuthAgent agent( token, http.get() ) ;
 	v2::Syncer2 syncer( &agent );
 
 	Drive drive( &syncer, config.GetAll() ) ;

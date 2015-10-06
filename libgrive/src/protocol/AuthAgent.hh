@@ -34,7 +34,7 @@ namespace gr {
 class AuthAgent : public http::Agent
 {
 public :
-	AuthAgent( OAuth2& auth, std::auto_ptr<http::Agent> real_agent ) ;
+	AuthAgent( OAuth2& auth, http::Agent* real_agent ) ;
 
 	http::ResponseLog* GetLog() const ;
 	void SetLog( http::ResponseLog *log ) ;
@@ -86,7 +86,7 @@ private :
 	
 private :
 	OAuth2&		m_auth ;
-	const std::auto_ptr<http::Agent>	m_agent ;
+	http::Agent*	m_agent ;
 } ;
 
 } // end of namespace

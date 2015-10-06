@@ -33,7 +33,7 @@ namespace gr {
 const std::string token_url		= "https://accounts.google.com/o/oauth2/token" ;
 
 OAuth2::OAuth2(
-	std::auto_ptr<http::Agent>& agent,
+	http::Agent* agent,
 	const std::string& refresh_code,
 	const std::string&	client_id,
 	const std::string&	client_secret ) :
@@ -46,7 +46,7 @@ OAuth2::OAuth2(
 }
 
 OAuth2::OAuth2(
-	std::auto_ptr<http::Agent>& agent,
+	http::Agent* agent,
 	const std::string&	client_id,
 	const std::string&	client_secret ) :
 	m_agent( agent ),

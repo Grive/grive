@@ -33,11 +33,11 @@ public :
 
 public :
 	OAuth2(
-		std::auto_ptr<http::Agent>& agent,
+		http::Agent* agent,
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
 	OAuth2(
-		std::auto_ptr<http::Agent>& agent,
+		http::Agent* agent,
 		const std::string&	refresh_code,
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
@@ -58,7 +58,7 @@ public :
 private :
 	std::string m_access ;
 	std::string m_refresh ;
-	std::auto_ptr<http::Agent> m_agent ;
+	http::Agent* m_agent ;
 	
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;
