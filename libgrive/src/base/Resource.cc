@@ -461,13 +461,20 @@ void Resource::DeleteLocal()
 	static const boost::format trash_file( "%1%-%2%" ) ;
 
 	assert( m_parent != 0 ) ;
-	fs::path parent = m_parent->Path() ;
-	fs::path dest	= ".trash" / parent / Name() ;
-	
+	Resource* p = m_parent;
+	fs::path destdir;
+	while ( !p->IsRoot() )
+	{
+		destdir = p->Name() / destdir;
+		p = p->Parent();
+	}
+	destdir = p->Path() / ".trash" / destdir;
+
+	fs::path dest = destdir / Name();
 	std::size_t idx = 1 ;
 	while ( fs::exists( dest ) && idx != 0 )
-		dest = ".trash" / parent / (boost::format(trash_file) % Name() % idx++).str() ;
-	
+		dest = destdir / (boost::format(trash_file) % Name() % idx++).str() ;
+
 	// wrap around! just remove the file
 	if ( idx == 0 )
 		fs::remove_all( Path() ) ;

@@ -85,7 +85,7 @@ void Drive::FromChange( const Entry& entry )
 
 void Drive::SaveState()
 {
-	m_state.Write( state_file ) ;
+	m_state.Write( m_root / state_file ) ;
 }
 
 void Drive::SyncFolders( )
