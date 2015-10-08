@@ -44,9 +44,12 @@ State::State( const fs::path& filename, const Val& options  ) :
 	// the "-f" option will make grive always think remote is newer
 	Val force ;
 	if ( options.Get("force", force) && force.Bool() )
-		m_last_sync = DateTime() ;
+	{
+		m_last_change = DateTime() ;
+		m_last_sync = DateTime::Now() ;
+	}
 	
-	Log( "last sync time: %1%", m_last_sync, log::verbose ) ;
+	Log( "last server change time: %1%; last sync time: %2%", m_last_change, m_last_sync, log::verbose ) ;
 }
 
 State::~State()
@@ -69,7 +72,7 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
-	
+
 	// sync the folder itself
 	folder->FromLocal( m_last_sync ) ;
 
@@ -188,7 +191,7 @@ bool State::Update( const Entry& e )
 			Log( "%1% is ignored by grive", path, log::verbose ) ;
 			return true;
 		}
-		m_res.Update( res, e, m_last_sync ) ;
+		m_res.Update( res, e, m_last_change ) ;
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
@@ -207,7 +210,7 @@ bool State::Update( const Entry& e )
 		if ( child != 0 )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			m_res.Update( child, e, m_last_sync ) ;
+			m_res.Update( child, e, m_last_change ) ;
 		}
 		
 		// folder entry exist in google drive, but not local. we should create
@@ -220,7 +223,7 @@ bool State::Update( const Entry& e )
 			m_res.Insert( child ) ;
 			
 			// update the state of the resource
-			m_res.Update( child, e, m_last_sync ) ;
+			m_res.Update( child, e, m_last_change ) ;
 		}
 		
 		return true ;
@@ -246,22 +249,22 @@ State::iterator State::end()
 
 void State::Read( const fs::path& filename )
 {
+	m_last_sync.Assign( 0 ) ;
+	m_last_change.Assign( 0 ) ;
 	try
 	{
 		File file( filename ) ;
 
 		Val json = ParseJson( file );
-
 		Val last_sync = json["last_sync"] ;
-		m_last_sync.Assign(
-			last_sync["sec"].Int(),
-			last_sync["nsec"].Int() ) ;
-		
+		Val last_change = json.Has( "last_change" ) ? json["last_change"] : json["last_sync"] ;
+		m_last_sync.Assign( last_sync["sec"].Int(), last_sync["nsec"].Int() ) ;
+		m_last_change.Assign( last_change["sec"].Int(), last_change["nsec"].Int() ) ;
+
 		m_cstamp = json["change_stamp"].Int() ;
 	}
 	catch ( Exception& )
 	{
-		m_last_sync.Assign(0) ;
 	}
 }
 
@@ -271,8 +274,13 @@ void State::Write( const fs::path& filename ) const
 	last_sync.Add( "sec",	Val( (int)m_last_sync.Sec() ) );
 	last_sync.Add( "nsec",	Val( (unsigned)m_last_sync.NanoSec() ) );
 	
+	Val last_change ;
+	last_change.Add( "sec",	Val( (int)m_last_change.Sec() ) );
+	last_change.Add( "nsec",	Val( (unsigned)m_last_change.NanoSec() ) );
+	
 	Val result ;
 	result.Add( "last_sync", last_sync ) ;
+	result.Add( "last_change", last_change ) ;
 	result.Add( "change_stamp", Val(m_cstamp) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
@@ -288,19 +296,17 @@ void State::Sync( Syncer *syncer, const Val& options )
 	// the last sync time would always be a server time rather than a client time
 	// TODO - WARNING - do we use the last sync time to compare to client file times
 	// need to check if this introduces a new problem
- 	DateTime last_sync_time = m_last_sync;
-	m_res.Root()->Sync( syncer, last_sync_time, options ) ;
+	DateTime last_change_time = m_last_change;
+	m_res.Root()->Sync( syncer, last_change_time, options ) ;
 	
-  	if ( last_sync_time == m_last_sync )
-  	{
-		Trace( "nothing changed? %1%", m_last_sync ) ;
-    	m_last_sync = DateTime::Now();
-  	}
-  	else
-  	{
-		Trace( "updating last sync? %1%", last_sync_time ) ;
-    	m_last_sync = last_sync_time;
-  	}
+	if ( last_change_time == m_last_change )
+		Trace( "nothing changed at the server side since %1%", m_last_change ) ;
+	else
+	{
+		Trace( "updating last server-side change time to %1%", last_change_time ) ;
+		m_last_change = last_change_time;
+	}
+	m_last_sync = DateTime::Now();
 }
 
 long State::ChangeStamp() const

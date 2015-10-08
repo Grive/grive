@@ -106,7 +106,7 @@ public :
 	bool HasID() const ;
 	std::string MD5() const ;
 
-	void FromRemote( const Entry& remote, const DateTime& last_sync ) ;
+	void FromRemote( const Entry& remote, const DateTime& last_change ) ;
 	void FromLocal( const DateTime& last_sync ) ;
 	
 	void Sync( Syncer* syncer, DateTime& sync_time, const Val& options ) ;
@@ -128,8 +128,8 @@ private :
 private :
 	void SetState( State new_state ) ;
 	
-	void FromRemoteFolder( const Entry& remote, const DateTime& last_sync ) ;
-	void FromRemoteFile( const Entry& remote, const DateTime& last_sync ) ;
+	void FromRemoteFolder( const Entry& remote, const DateTime& last_change ) ;
+	void FromRemoteFile( const Entry& remote, const DateTime& last_change ) ;
 	
 	void DeleteLocal() ;
 	

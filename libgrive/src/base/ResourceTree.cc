@@ -123,11 +123,11 @@ void ResourceTree::Erase( Resource *coll )
 	s.erase( s.find( coll ) ) ;
 }
 
-void ResourceTree::Update( Resource *coll, const Entry& e, const DateTime& last_sync )
+void ResourceTree::Update( Resource *coll, const Entry& e, const DateTime& last_change )
 {
 	assert( coll != 0 ) ;
 
-	coll->FromRemote( e, last_sync ) ;
+	coll->FromRemote( e, last_change ) ;
 	ReInsert( coll ) ;
 }
 

@@ -71,7 +71,7 @@ void Resource::SetState( State new_state )
 		boost::bind( &Resource::SetState, _1, new_state ) ) ;
 }
 
-void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync )
+void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_change )
 {
 	fs::path path = Path() ;
 	
@@ -86,7 +86,7 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 	}
 	
 	// remote file created after last sync, so remote is newer
-	else if ( remote.MTime() > last_sync )
+	else if ( remote.MTime() > last_change )
 	{
 		if ( fs::exists( path ) )
 		{
@@ -120,13 +120,13 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_sync 
 /// Update the state according to information (i.e. Entry) from remote. This function
 /// compares the modification time and checksum of both copies and determine which
 /// one is newer.
-void Resource::FromRemote( const Entry& remote, const DateTime& last_sync )
+void Resource::FromRemote( const Entry& remote, const DateTime& last_change )
 {
 	// sync folder
 	if ( remote.IsDir() && IsFolder() )
-		FromRemoteFolder( remote, last_sync ) ;
+		FromRemoteFolder( remote, last_change ) ;
 	else
-		FromRemoteFile( remote, last_sync ) ;
+		FromRemoteFile( remote, last_change ) ;
 	
 	AssignIDs( remote ) ;
 	
@@ -152,7 +152,7 @@ void Resource::AssignIDs( const Entry& remote )
 	}
 }
 
-void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
+void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change )
 {
 	assert( m_parent != 0 ) ;
 	
@@ -175,7 +175,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_sync )
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
 		
-		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
+		if ( remote.MTime() > last_change || remote.ChangeStamp() > 0 )
 		{
 			Log( "file %1% is created in remote (change %2%)", path,
 				remote.ChangeStamp(), log::verbose ) ;

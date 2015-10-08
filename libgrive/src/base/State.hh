@@ -75,6 +75,7 @@ private :
 private :
 	ResourceTree		m_res ;
 	DateTime			m_last_sync ;
+	DateTime			m_last_change ;
 	int					m_cstamp ;
 	std::string			m_dir ;
 	boost::regex		m_ign ;
