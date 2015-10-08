@@ -56,7 +56,7 @@ void Entry2::Update( const Val& item )
 		m_title			= file["title"] ;
 		m_etag			= file["etag"] ;
 		Val fn;
-		m_filename		= file.Get( "originalFilename", fn ) ? fn.Str() : std::string();
+		m_filename		= file.Get( "title", fn ) ? fn.Str() : std::string();
 		m_self_href		= file["selfLink"] ;
 		m_mtime			= DateTime( file["modifiedDate"] ) ;
 
