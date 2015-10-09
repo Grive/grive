@@ -1,6 +1,6 @@
-# Grive2 0.4.1
+# Grive2 0.4.2-dev
 
-4 Aug 2015, Vitaliy Filippov
+10 Oct 2015, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -28,7 +28,7 @@ You need the following libraries:
 - libcurl
 - libstdc++
 - libgcrypt
-- Boost (Boost filesystem, program_options and regex are required)
+- Boost (Boost filesystem, program_options, regex, unit_test_framework and system are required)
 - expat
 
 There are also some optional dependencies:
@@ -62,7 +62,10 @@ Enjoy!
 
 ### Grive2 v0.4.2 (unreleased)
 
-- Exclude files by perl regexp
+- Option to exclude files by perl regexp
+- Reimplemented HTTP response logging for debug purposes
+- Use multipart uploads (update metadata and contents at the same time) for improved perfomance & stability
+- Bug fixes
 
 ### Grive2 v0.4.1
 

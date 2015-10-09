@@ -20,6 +20,7 @@
 #pragma once
 
 #include <cstddef>
+#include "util/Types.hh"
 
 namespace gr {
 
@@ -47,9 +48,13 @@ public :
 	virtual std::size_t Write( const char *data, std::size_t size ) = 0 ;
 } ;
 
-/// Stream for /dev/null, i.e. read and writing nothing
-DataStream* DevNull() ;
-
+class SeekStream: public DataStream
+{
+public :
+	virtual off_t Seek( off_t offset, int whence ) = 0 ;
+	virtual off_t Tell() const = 0 ;
+	virtual u64_t Size() const = 0 ;
+} ;
 
 
 } // end of namespace

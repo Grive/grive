@@ -46,35 +46,15 @@ namespace {
 using namespace gr::http ;
 using namespace gr ;
 
-std::size_t ReadStringCallback( void *ptr, std::size_t size, std::size_t nmemb, std::string *data )
-{
-	assert( ptr != 0 ) ;
-	assert( data != 0 ) ;
-
-	std::size_t count = std::min( size * nmemb, data->size() ) ;
-	if ( count > 0 )
-	{
-		std::memcpy( ptr, &(*data)[0], count ) ;
-		data->erase( 0, count ) ;
-	}
-	
-	return count ;
-}
-
-std::size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, File *file )
+std::size_t ReadFileCallback( void *ptr, std::size_t size, std::size_t nmemb, SeekStream *file )
 {
 	assert( ptr != 0 ) ;
 	assert( file != 0 ) ;
 
-	std::size_t count = std::min(
-		static_cast<std::size_t>(size * nmemb),
-		static_cast<std::size_t>(file->Size() - file->Tell()) ) ;
-	assert( count <= std::numeric_limits<std::size_t>::max() ) ;
-	
-	if ( count > 0 )
-		file->Read( static_cast<char*>(ptr), static_cast<std::size_t>(count) ) ;
-	
-	return count ;
+	if ( size*nmemb > 0 )
+		return file->Read( static_cast<char*>(ptr), size*nmemb ) ;
+
+	return 0 ;
 }
 
 } // end of local namespace
@@ -214,96 +194,27 @@ long CurlAgent::ExecCurl(
 	return http_code ;
 }
 
-long CurlAgent::Put(
-	const std::string&		url,
-	const std::string&		data,
-	DataStream				*dest,
-	const Header&			hdr )
-{
-	Trace("HTTP PUT \"%1%\"", url ) ;
-	
-	Init() ;
-	CURL *curl = m_pimpl->curl ;
-
-	std::string put_data = data ;
-
-	// set common options
-	::curl_easy_setopt(curl, CURLOPT_UPLOAD,		1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,	&ReadStringCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,		&put_data ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE, 	put_data.size() ) ;
-	
-	return ExecCurl( url, dest, hdr ) ;
-}
-
-long CurlAgent::Put(
+long CurlAgent::Request(
+	const std::string&	method,
 	const std::string&	url,
-	File				*file,
+	SeekStream			*in,
 	DataStream			*dest,
 	const Header&		hdr )
 {
-	assert( file != 0 ) ;  
+	Trace("HTTP %1% \"%2%\"", method, url ) ;
 
-	Trace("HTTP PUT \"%1%\"", url ) ;
-	
 	Init() ;
 	CURL *curl = m_pimpl->curl ;
 
 	// set common options
-	::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
-	::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
-	::curl_easy_setopt(curl, CURLOPT_READDATA ,			file ) ;
-	::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>(file->Size()) ) ;
-	
-	return ExecCurl( url, dest, hdr ) ;
-}
-
-long CurlAgent::Get(
-	const std::string& 		url,
-	DataStream				*dest,
-	const Header&			hdr )
-{
-	Trace("HTTP GET \"%1%\"", url ) ;
-	Init() ;
-
-	// set get specific options
-	::curl_easy_setopt(m_pimpl->curl, CURLOPT_HTTPGET, 		1L);
-
-	return ExecCurl( url, dest, hdr ) ;
-}
-
-long CurlAgent::Post(
-	const std::string& 		url,
-	const std::string&		post_data,
-	DataStream				*dest,
-	const Header&			hdr )
-{
-	Trace("HTTP POST \"%1%\" with \"%2%\"", url, post_data ) ;
-
-	Init() ;
-	CURL *curl = m_pimpl->curl ;
-
-	// set post specific options
-	::curl_easy_setopt(curl, CURLOPT_POST, 			1L);
-	::curl_easy_setopt(curl, CURLOPT_POSTFIELDS,	&post_data[0] ) ;
-	::curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size() ) ;
-
-	return ExecCurl( url, dest, hdr ) ;
-}
-
-long CurlAgent::Custom(
-	const std::string&		method,
-	const std::string&		url,
-	DataStream				*dest,
-	const Header&			hdr )
-{
-	Trace("HTTP %2% \"%1%\"", url, method ) ;
-
-	Init() ;
-	CURL *curl = m_pimpl->curl ;
-
 	::curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str() );
-// 	::curl_easy_setopt(curl, CURLOPT_VERBOSE,		1 );
+	if ( in )
+	{
+		::curl_easy_setopt(curl, CURLOPT_UPLOAD,			1L ) ;
+		::curl_easy_setopt(curl, CURLOPT_READFUNCTION,		&ReadFileCallback ) ;
+		::curl_easy_setopt(curl, CURLOPT_READDATA ,			in ) ;
+		::curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, 	static_cast<curl_off_t>( in->Size() ) ) ;
+	}
 
 	return ExecCurl( url, dest, hdr ) ;
 }

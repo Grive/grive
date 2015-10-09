@@ -1,6 +1,6 @@
 /*
-	webwrite: an GPL program to sync a local directory with Google Drive
-	Copyright (C) 2012  Wan Wai Ho
+	A stream representing a concatenation of several underlying streams
+	Copyright (C) 2015 Vitaliy Filippov
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -21,25 +21,14 @@
 
 #include "DataStream.hh"
 
-#include <string>
+#include <vector>
 
 namespace gr {
 
-/**	\brief	DataStream base on `std::string`s
-	
-	StringStream is a DataStream back-end that uses std::string for storage.
-	It is useful for unit tests and text parsing, especially when used with
-	StreamParser.
-	
-	StringStream has a limit on the maximum number of byte it stores. This
-	is to prevent DOS attacks in which the client sends a lot of bytes before
-	the delimiter (e.g. new-line characters) and the server is forced to hold
-	all of them in memory.
-*/
-class StringStream : public SeekStream
+class ConcatStream : public SeekStream
 {
 public :
-	explicit StringStream( const std::string& init = std::string() ) ;
+	ConcatStream() ;
 
 	std::size_t Read( char *data, std::size_t size ) ;
 	std::size_t Write( const char *data, std::size_t size ) ;
@@ -48,12 +37,12 @@ public :
 	off_t Tell() const ;
 	u64_t Size() const ;
 
-	const std::string& Str() const ;
-	void Str( const std::string& str ) ;
+	void Append( SeekStream *stream ) ;
 
 private :
-	std::string	m_str ;
-	std::size_t	m_pos ;
+	std::vector<SeekStream*> m_streams ;
+	off_t m_size, m_pos ;
+	int m_cur ;
 } ;
 
 } // end of namespace

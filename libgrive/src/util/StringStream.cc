@@ -27,31 +27,53 @@ namespace
 {
 	// the max size of the cached string. this is to prevent allocating
 	// too much memory if client sends a line too long (i.e. DOS attack)
-	const std::size_t capacity = 1024 ;
+	const std::size_t capacity = 4096 ;
 }
 
 StringStream::StringStream( const std::string& init ) :
-	m_str( init )
+	// FIXME avoid copy
+	m_str( init ), m_pos( 0 )
 {
 }
 
-/// Read `size` bytes from the stream. Those bytes will be removed from
-/// the underlying string by calling `std::string::erase()`. Therefore, it is
-/// not a good idea to call Read() to read byte-by-byte.
+/// Read `size` bytes from the stream.
 std::size_t StringStream::Read( char *data, std::size_t size )
 {
 	// wow! no need to count count == 0
-	std::size_t count = std::min( m_str.size(), size ) ;
-	std::copy( m_str.begin(), m_str.begin() + count, data ) ;
-	m_str.erase( 0, count ) ;
+	std::size_t count = std::min( m_str.size()-m_pos, size ) ;
+	std::copy( m_str.begin() + m_pos, m_str.begin() + m_pos + count, data ) ;
+	m_pos += count ;
 	return count ;
 }
 
 std::size_t StringStream::Write( const char *data, std::size_t size )
 {
 	std::size_t count = std::min( size, capacity - m_str.size() ) ;
-	m_str.insert( m_str.end(), data, data+count ) ;
+	m_str.replace( m_str.begin() + m_pos, m_str.begin() + m_pos + count, data, data+count ) ;
+	m_pos += count ;
 	return count ;
+}
+
+off_t StringStream::Seek( off_t offset, int whence )
+{
+	if ( whence == 1 )
+		offset += m_pos;
+	else if ( whence == 2 )
+		offset += Size();
+	if ( offset > Size() )
+		offset = Size();
+	m_pos = (size_t)offset;
+	return m_pos;
+}
+
+off_t StringStream::Tell() const
+{
+	return m_pos;
+}
+
+u64_t StringStream::Size() const
+{
+	return m_str.size();
 }
 
 const std::string& StringStream::Str() const

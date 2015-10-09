@@ -32,6 +32,8 @@
 
 #include "util/OS.hh"
 #include "util/log/Log.hh"
+#include "util/StringStream.hh"
+#include "util/ConcatStream.hh"
 
 #include <boost/exception/all.hpp>
 
@@ -87,14 +89,19 @@ bool Syncer2::Create( Resource *res )
 	return Upload( res );
 }
 
+std::string to_string( uint64_t n )
+{
+	std::ostringstream s;
+	s << n;
+	return s.str();
+}
+
 bool Syncer2::Upload( Resource *res )
 {
 	Val meta;
 	meta.Add( "title", Val( res->Name() ) );
 	if ( res->IsFolder() )
-	{
 		meta.Add( "mimeType", Val( mime_types::folder ) );
-	}
 	if ( !res->Parent()->IsRoot() )
 	{
 		Val parent;
@@ -107,8 +114,9 @@ bool Syncer2::Upload( Resource *res )
 
 	Val valr ;
 
-	// Issue metadata update request
+	if ( res->IsFolder() )
 	{
+		// Only issue metadata update request
 		http::Header hdr2 ;
 		hdr2.Add( "Content-Type: application/json" );
 		http::ValResponse vrsp ;
@@ -120,35 +128,34 @@ bool Syncer2::Upload( Resource *res )
 		valr = vrsp.Response();
 		assert( !( valr["id"].Str().empty() ) );
 	}
-
-	if ( !res->IsFolder() )
+	else
 	{
-		while ( true )
-		{
-			File file( res->Path() ) ;
-			std::ostringstream xcontent_len ;
-			xcontent_len << "Content-Length: " << file.Size() ;
+		File file( res->Path() ) ;
+		ConcatStream multipart ;
+		StringStream p1(
+			"--file_contents\r\nContent-Type: application/json; charset=utf-8\r\n\r\n" + json_meta +
+			"\r\n--file_contents\r\nContent-Type: application/octet-stream\r\nContent-Length: " + to_string( file.Size() ) +
+			"\r\n\r\n"
+		);
+		StringStream p2("\r\n--file_contents--\r\n");
+		multipart.Append( &p1 );
+		multipart.Append( &file );
+		multipart.Append( &p2 );
 
-			http::Header hdr ;
-			hdr.Add( "Content-Type: application/octet-stream" ) ;
-			hdr.Add( xcontent_len.str() ) ;
-			if ( valr.Has( "etag" ) )
-				hdr.Add( "If-Match: " + valr["etag"].Str() ) ;
+		http::Header hdr ;
+		if ( !res->ETag().empty() )
+			hdr.Add( "If-Match: " + res->ETag() ) ;
+		hdr.Add( "Content-Type: multipart/related; boundary=\"file_contents\"" );
+		hdr.Add( "Content-Length: " + to_string( multipart.Size() ) );
 
-			http::ValResponse vrsp;
-			long http_code = m_http->Put( upload_base + "/" + valr["id"].Str() + "?uploadType=media", &file, &vrsp, hdr ) ;
-			if ( http_code == 410 || http_code == 412 )
-			{
-				Log( "request failed with %1%, body: %2%. retrying whole upload in 5s", http_code, m_http->LastError(), log::warning ) ;
-				os::Sleep( 5 );
-			}
-			else
-			{
-				valr = vrsp.Response() ;
-				assert( !( valr["id"].Str().empty() ) );
-				break ;
-			}
-		}
+		http::ValResponse vrsp;
+		m_http->Request(
+			res->ResourceID().empty() ? "POST" : "PUT",
+			upload_base + ( res->ResourceID().empty() ? "" : "/" + res->ResourceID() ) + "?uploadType=multipart",
+			&multipart, &vrsp, hdr
+		) ;
+		valr = vrsp.Response() ;
+		assert( !( valr["id"].Str().empty() ) );
 	}
 
 	Entry2 responseEntry = Entry2( valr ) ;

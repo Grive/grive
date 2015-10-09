@@ -35,7 +35,7 @@ namespace gr {
 	It is a simple wrapper around the UNIX file descriptor. It will
 	throw exceptions (i.e. Error) when it encounters errors.
 */
-class File : public DataStream
+class File : public SeekStream
 {
 public :
 	/// File specific errors. It often includes

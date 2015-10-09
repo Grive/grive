@@ -39,32 +39,10 @@ public :
 	http::ResponseLog* GetLog() const ;
 	void SetLog( http::ResponseLog *log ) ;
 
-	long Put(
-		const std::string&	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Put(
-		const std::string&	url,
-		File*				file,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-
-	long Get(
-		const std::string& 	url,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Post(
-		const std::string& 	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Custom(
+	long Request(
 		const std::string&	method,
 		const std::string&	url,
+		SeekStream			*in,
 		DataStream			*dest,
 		const http::Header&	hdr ) ;
 	

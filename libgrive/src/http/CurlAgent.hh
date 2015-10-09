@@ -44,35 +44,13 @@ public :
 	ResponseLog* GetLog() const ;
 	void SetLog( ResponseLog *log ) ;
 
-	long Put(
+	long Request(
+		const std::string&	method,
 		const std::string&	url,
-		const std::string&	post_data,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Put(
-		const std::string&	url,
-		File				*file,
+		SeekStream			*in,
 		DataStream			*dest,
 		const Header&		hdr ) ;
 
-	long Get(
-		const std::string& 	url,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Post(
-		const std::string& 	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Custom(
-		const std::string&	method,
-		const std::string&	url,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
 	std::string LastError() const ;
 	std::string LastErrorHeaders() const ;
 	
@@ -84,14 +62,14 @@ public :
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
 	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
-	
+
 	long ExecCurl(
 		const std::string&	url,
 		DataStream			*dest,
 		const Header&		hdr ) ;
 
 	void Init() ;
-	
+
 private :
 	struct Impl ;
 	std::auto_ptr<Impl>	m_pimpl ;
