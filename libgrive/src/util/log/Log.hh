@@ -66,7 +66,7 @@ public :
 	virtual bool IsEnabled( log::Serverity s ) const = 0 ;
 	
 	static LogBase* Inst( std::auto_ptr<LogBase> log = std::auto_ptr<LogBase>() ) ;
-	~LogBase() ;
+	virtual ~LogBase() ;
 
 protected :
 	LogBase() ;

@@ -192,6 +192,7 @@ bool State::Update( const Entry& e )
 			return true;
 		}
 		m_res.Update( res, e, m_last_change ) ;
+		return true;
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
