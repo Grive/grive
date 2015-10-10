@@ -23,13 +23,6 @@
 
 namespace gr {
 
-namespace
-{
-	// the max size of the cached string. this is to prevent allocating
-	// too much memory if client sends a line too long (i.e. DOS attack)
-	const std::size_t capacity = 4096 ;
-}
-
 StringStream::StringStream( const std::string& init ) :
 	// FIXME avoid copy
 	m_str( init ), m_pos( 0 )
@@ -48,10 +41,8 @@ std::size_t StringStream::Read( char *data, std::size_t size )
 
 std::size_t StringStream::Write( const char *data, std::size_t size )
 {
-	std::size_t count = std::min( size, capacity - m_str.size() ) ;
-	m_str.replace( m_str.begin() + m_pos, m_str.begin() + m_pos + count, data, data+count ) ;
-	m_pos += count ;
-	return count ;
+	m_str.insert( m_str.size(), data, size ) ;
+	return size ;
 }
 
 off_t StringStream::Seek( off_t offset, int whence )
