@@ -1,0 +1,25 @@
+Source: grive2
+Section: net
+Priority: optional
+Maintainer: Vitaliy Filippov <vitalif@mail.ru>
+Build-Depends: debhelper, cmake, pkg-config, zlib1g-dev, libcurl4-openssl-dev, libstdc++6-4.4-dev | libstdc++-4.9-dev | libstdc++-5-dev, libboost-filesystem-dev, libboost-program-options-dev, libboost-test-dev, libboost-regex-dev, libexpat1-dev, binutils-dev, libgcrypt-dev, libyajl-dev
+Standards-Version: 3.9.6
+Homepage: https://yourcmc.ru/wiki/Grive2
+
+Package: grive
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Grive2: an open source Linux client for Google Drive
+ .
+ This is the up-to-date fork of the original "Grive" (https://github.com/Grive/grive) 
+ Google Drive client with the support for the new Drive REST API and partial 
+ sync.
+ .
+ For the first time running grive, you should use the "-a" argument to grant
+ permission to grive to access to your Google Drive. An URL should be printed.
+ Go to the page. You will need to login to your google account if you haven't
+ done so. After granting the permission to grive, the browser will show you
+ an authenication code. Copy-and-paste that to the standard input of grive.
+ If everything works fine, grive will create .grive and .grive_state inside the
+ synchronized directory. It will also start downloading files from your Google
+ Drive to that directory.
