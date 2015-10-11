@@ -24,7 +24,7 @@ These may be added in the future, possibly the next release.
 
 You need the following libraries:
 
-- yajl
+- yajl 2.x
 - libcurl
 - libstdc++
 - libgcrypt
