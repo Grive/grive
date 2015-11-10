@@ -66,7 +66,7 @@ void Entry2::Update( const Val& item )
 		m_is_removed	= file["labels"]["trashed"].Bool() ;
 		if ( !m_is_dir )
 		{
-			if ( !file.Has( "md5Checksum" ) )
+			if ( !file.Has( "md5Checksum" ) || !file.Has("downloadUrl") )
 			{
 				// This is either a google docs document or a not-yet-uploaded file. Ignore it.
 				// FIXME: We'll need to compare timestamps to support google docs.
