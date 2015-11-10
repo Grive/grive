@@ -66,6 +66,7 @@ Enjoy!
 - Reimplemented HTTP response logging for debug purposes
 - Use multipart uploads (update metadata and contents at the same time) for improved perfomance & stability
 - Bug fixes
+- Simple option to move/rename files and directories, via `grive -m oldpath newpath` (by Dylan Wulf, wulfd1@tcnj.edu)
 
 ### Grive2 v0.4.1
 
