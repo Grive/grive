@@ -150,6 +150,11 @@ void Drive::DetectChanges()
 	}
 }
 
+bool Drive::Move( fs::path old_p, fs::path new_p )
+{
+	return m_state.Move( m_syncer, old_p, new_p, m_options["path"].Str() );
+}
+
 void Drive::Update()
 {
 	Log( "Synchronizing files", log::info ) ;

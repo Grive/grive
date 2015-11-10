@@ -37,6 +37,7 @@ public :
 	void DeleteRemote( Resource *res );
 	bool EditContent( Resource *res, bool new_rev );
 	bool Create( Resource *res );
+	bool Move( Resource* res, Resource* newParent, std::string newFilename );
 
 	std::auto_ptr<Feed> GetFolders();
 	std::auto_ptr<Feed> GetAll();

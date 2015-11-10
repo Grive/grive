@@ -53,6 +53,7 @@ public :
 	virtual void Download( Resource *res, const fs::path& file );
 	virtual bool EditContent( Resource *res, bool new_rev ) = 0;
 	virtual bool Create( Resource *res ) = 0;
+	virtual bool Move( Resource* res, Resource* newParent, std::string newFilename ) = 0;
 
 	virtual std::auto_ptr<Feed> GetFolders() = 0;
 	virtual std::auto_ptr<Feed> GetAll() = 0;

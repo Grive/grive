@@ -121,6 +121,7 @@ int Main( int argc, char **argv )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
 		( "ignore",		po::value<std::string>(), "Ignore files relative paths of which match this Perl RegExp." )
+		( "move,m", po::value<std::vector<std::string> >()->multitoken(), "Syncs, then moves a file (first argument) to new location (second argument) without reuploading or redownloading." )
 	;
 	
 	po::variables_map vm;
@@ -203,6 +204,21 @@ int Main( int argc, char **argv )
 	}
 	else
 		drive.DryRun() ;
+		
+	if ( vm.count ( "move" ) > 0 && vm.count( "dry-run" ) == 0 )
+	{
+		if (vm["move"].as<std::vector<std::string> >().size() < 2 )
+			Log( "Not enough arguments for move. Move failed.", log::error );
+		else
+		{
+			bool success = drive.Move( vm["move"].as<std::vector<std::string> >()[0],
+			                           vm["move"].as<std::vector<std::string> >()[1] );
+			if (success)
+				Log( "Move successful!", log::info );
+			else
+				Log( "Move failed.", log::error);
+		}
+	}
 	
 	config.Save() ;
 	Log( "Finished!", log::info ) ;
