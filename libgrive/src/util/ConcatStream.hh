@@ -41,6 +41,7 @@ public :
 
 private :
 	std::vector<SeekStream*> m_streams ;
+	std::vector<off_t> m_sizes ;
 	off_t m_size, m_pos ;
 	int m_cur ;
 } ;

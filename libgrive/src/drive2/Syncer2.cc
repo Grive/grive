@@ -172,10 +172,11 @@ bool Syncer2::Upload( Resource *res )
 	else
 	{
 		File file( res->Path() ) ;
+		uint64_t size = file.Size() ;
 		ConcatStream multipart ;
 		StringStream p1(
 			"--file_contents\r\nContent-Type: application/json; charset=utf-8\r\n\r\n" + json_meta +
-			"\r\n--file_contents\r\nContent-Type: application/octet-stream\r\nContent-Length: " + to_string( file.Size() ) +
+			"\r\n--file_contents\r\nContent-Type: application/octet-stream\r\nContent-Length: " + to_string( size ) +
 			"\r\n\r\n"
 		);
 		StringStream p2("\r\n--file_contents--\r\n");

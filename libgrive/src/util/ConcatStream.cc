@@ -17,6 +17,7 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <string.h>
 #include "ConcatStream.hh"
 
 namespace gr {
@@ -31,15 +32,22 @@ std::size_t ConcatStream::Read( char *data, std::size_t size )
 	std::size_t done = 0, l;
 	while ( done < size && m_cur < m_streams.size() )
 	{
-		l = m_streams[m_cur]->Read( data+done, size-done );
+		l = m_streams[m_cur]->Read( data+done, ( size-done < m_sizes[m_cur]-m_pos ? size-done : m_sizes[m_cur]-m_pos ) );
+		done += l;
+		m_pos += l;
 		if ( !l )
+		{
+			// current stream was truncated in the meantime, pad output with zeros
+			memset( data+done, 0, m_sizes[m_cur]-m_pos );
+			done += m_sizes[m_cur]-m_pos;
+			m_pos = m_sizes[m_cur];
+		}
+		if ( m_pos >= m_sizes[m_cur] )
 		{
 			m_cur++;
 			if ( m_cur < m_streams.size() )
 				m_streams[m_cur]->Seek( 0, 0 );
 		}
-		done += l;
-		m_pos += l;
 	}
 	return done ;
 }
@@ -61,12 +69,9 @@ off_t ConcatStream::Seek( off_t offset, int whence )
 	m_pos = offset;
 	if ( m_streams.size() )
 	{
-		while ( offset > m_streams[m_cur]->Size() )
-		{
-			offset -= m_streams[m_cur]->Size();
+		while ( offset > m_sizes[m_cur] )
 			m_cur++;
-		}
-		m_streams[m_cur]->Seek( offset, 0 );
+		m_streams[m_cur]->Seek( offset - ( m_cur > 0 ? m_sizes[m_cur-1] : 0 ), 0 );
 	}
 	return m_pos ;
 }
@@ -85,8 +90,15 @@ void ConcatStream::Append( SeekStream *stream )
 {
 	if ( stream )
 	{
-		m_streams.push_back( stream );
-		m_size += stream->Size();
+		off_t size = stream->Size();
+		if ( size > 0 )
+		{
+			// "fix" stream size at the moment of adding so further changes of underlying files
+			// don't affect the total size of resulting stream...
+			m_size += size;
+			m_streams.push_back( stream );
+			m_sizes.push_back( m_size );
+		}
 	}
 }
 
