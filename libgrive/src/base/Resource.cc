@@ -343,7 +343,7 @@ fs::path Resource::RelPath() const
 	assert( m_parent != this ) ;
 	assert( m_parent == 0 || m_parent->IsFolder() ) ;
 
-	return m_parent != 0 && !m_parent->IsRoot() ? (m_parent->Path() / m_name) : m_name ;
+	return m_parent != 0 && !m_parent->IsRoot() ? (m_parent->RelPath() / m_name) : m_name ;
 }
 
 bool Resource::IsInRootTree() const
