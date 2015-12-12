@@ -36,18 +36,28 @@ namespace gr {
 State::State( const fs::path& filename, const Val& options  ) :
 	m_res		( options["path"].Str() ),
 	m_dir		( options["dir"].Str() ),
-	m_cstamp	( -1 ),
-	m_ign		( !options["ignore"].Str().empty() ? options["ignore"].Str()+"|^\\.(grive|grive_state|trash)" : "^\\.(grive|grive_state|trash)" )
+	m_cstamp	( -1 )
 {
 	Read( filename ) ;
 	
+	bool force = options.Has( "force" ) ? options["force"].Bool() : false ;
+	
+	if ( options.Has( "ignore" ) && !m_ign.empty() && options["ignore"].Str() != m_ign )
+	{
+		// also "-f" is implicitly turned on when ignore regexp is changed
+		// because without it grive would think that previously ignored files are deleted locally
+		m_ign = options["ignore"].Str();
+		force = true;
+	}
+	
 	// the "-f" option will make grive always think remote is newer
-	Val force ;
-	if ( options.Get("force", force) && force.Bool() )
+	if ( force )
 	{
 		m_last_change = DateTime() ;
 		m_last_sync = DateTime::Now() ;
 	}
+	
+	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
 	
 	Log( "last server change time: %1%; last sync time: %2%", m_last_change, m_last_sync, log::verbose ) ;
 }
@@ -65,7 +75,7 @@ void State::FromLocal( const fs::path& p )
 
 bool State::IsIgnore( const std::string& filename )
 {
-	return regex_match( filename.c_str(), m_ign );
+	return regex_search( filename.c_str(), m_ign_re );
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder )
@@ -261,6 +271,7 @@ void State::Read( const fs::path& filename )
 		Val last_change = json.Has( "last_change" ) ? json["last_change"] : json["last_sync"] ;
 		m_last_sync.Assign( last_sync["sec"].Int(), last_sync["nsec"].Int() ) ;
 		m_last_change.Assign( last_change["sec"].Int(), last_change["nsec"].Int() ) ;
+		m_ign = json.Has( "ignore_regexp" ) ? json["ignore_regexp"].Str() : std::string();
 
 		m_cstamp = json["change_stamp"].Int() ;
 	}
@@ -283,6 +294,7 @@ void State::Write( const fs::path& filename ) const
 	result.Add( "last_sync", last_sync ) ;
 	result.Add( "last_change", last_change ) ;
 	result.Add( "change_stamp", Val(m_cstamp) ) ;
+	result.Add( "ignore_regexp", Val(m_ign) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << result ;

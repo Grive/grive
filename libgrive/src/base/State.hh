@@ -79,7 +79,8 @@ private :
 	DateTime			m_last_change ;
 	int					m_cstamp ;
 	std::string			m_dir ;
-	boost::regex		m_ign ;
+	std::string			m_ign ;
+	boost::regex		m_ign_re ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;
