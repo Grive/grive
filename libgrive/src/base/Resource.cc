@@ -28,7 +28,11 @@
 #include "util/OS.hh"
 #include "util/File.hh"
 
+#include <boost/exception/all.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/bind.hpp>
+
+#include <errno.h>
 
 #include <cassert>
 
@@ -369,7 +373,21 @@ void Resource::Sync( Syncer *syncer, DateTime& sync_time, const Val& options )
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
-	SyncSelf( syncer, options ) ;
+	try
+	{
+		SyncSelf( syncer, options ) ;
+	}
+	catch ( File::Error &e )
+	{
+		int *en = boost::get_error_info< boost::errinfo_errno > ( e ) ;
+		Log( "Error syncing %1%: %2%", Path(), en ? strerror( *en ) : "", log::error );
+		return;
+	}
+	catch ( boost::filesystem::filesystem_error &e )
+	{
+		Log( "Error syncing %1%: %2%", Path(), e.what(), log::error );
+		return;
+	}
 	
 	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
 	// m_mtime is updated to server modified time when the file is uploaded
