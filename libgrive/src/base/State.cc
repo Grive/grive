@@ -35,7 +35,6 @@ namespace gr {
 
 State::State( const fs::path& filename, const Val& options  ) :
 	m_res		( options["path"].Str() ),
-	m_dir		( options["dir"].Str() ),
 	m_cstamp	( -1 )
 {
 	Read( filename ) ;
@@ -48,6 +47,20 @@ State::State( const fs::path& filename, const Val& options  ) :
 		// because without it grive would think that previously ignored files are deleted locally
 		m_ign = options["ignore"].Str();
 		force = true;
+	}
+	else if ( options.Has( "dir" ) )
+	{
+		const boost::regex trim_path( "^/+|/+$" );
+		std::string m_dir = regex_replace( options["dir"].Str(), trim_path, "" );
+		if ( !m_dir.empty() )
+		{
+			// "-s" is internally converted to an ignore regexp
+			const boost::regex esc( "[.^$|()\\[\\]{}*+?\\\\]" );
+			std::string ign = "^(?!"+regex_replace( m_dir, esc, "\\\\&", boost::format_sed )+"(/|$))";
+			if ( !m_ign.empty() && ign != m_ign )
+				force = true;
+			m_ign = ign;
+		}
 	}
 	
 	// the "-f" option will make grive always think remote is newer
@@ -95,10 +108,6 @@ void State::FromLocal( const fs::path& p, Resource* folder )
 		if ( IsIgnore( path ) )
 			Log( "file %1% is ignored by grive", path, log::verbose ) ;
 		
-		// check if it is ignored
-		else if ( folder == m_res.Root() && m_dir != "" && fname != m_dir )
-			Log( "%1% %2% is ignored", st.type() == fs::directory_file ? "folder" : "file", fname, log::verbose );
-		
 		// check for broken symblic links
 		else if ( st.type() == fs::file_not_found )
 			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
@@ -129,11 +138,8 @@ void State::FromRemote( const Entry& e )
 	std::string fn = e.Filename() ;
 	std::string k = e.IsDir() ? "folder" : "file";
 
-	if ( e.ParentHref() == m_res.Root()->SelfHref() && m_dir != "" && e.Name() != m_dir )
-		Log( "%1% %2% is ignored", k, e.Name(), log::verbose );
-
 	// common checkings
-	else if ( !e.IsDir() && (fn.empty() || e.ContentSrc().empty()) )
+	if ( !e.IsDir() && (fn.empty() || e.ContentSrc().empty()) )
 		Log( "%1% \"%2%\" is a google document, ignored", k, e.Name(), log::verbose ) ;
 	
 	else if ( fn.find('/') != fn.npos )

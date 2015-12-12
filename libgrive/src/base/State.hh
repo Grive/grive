@@ -78,7 +78,6 @@ private :
 	DateTime			m_last_sync ;
 	DateTime			m_last_change ;
 	int					m_cstamp ;
-	std::string			m_dir ;
 	std::string			m_ign ;
 	boost::regex		m_ign_re ;
 	
