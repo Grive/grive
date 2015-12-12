@@ -1,6 +1,6 @@
 # Grive2 0.4.2-dev
 
-10 Oct 2015, Vitaliy Filippov
+12 Dec 2015, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
