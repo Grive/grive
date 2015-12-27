@@ -41,12 +41,13 @@ State::State( const fs::path& filename, const Val& options  ) :
 	
 	bool force = options.Has( "force" ) ? options["force"].Bool() : false ;
 	
-	if ( options.Has( "ignore" ) && !m_ign.empty() && options["ignore"].Str() != m_ign )
+	if ( options.Has( "ignore" ) && options["ignore"].Str() != m_ign )
 	{
 		// also "-f" is implicitly turned on when ignore regexp is changed
 		// because without it grive would think that previously ignored files are deleted locally
+		if ( !m_ign.empty() )
+			force = true;
 		m_ign = options["ignore"].Str();
-		force = true;
 	}
 	else if ( options.Has( "dir" ) )
 	{
