@@ -23,13 +23,12 @@
 
 #include "util/DateTime.hh"
 #include "util/FileSystem.hh"
+#include "json/Val.hh"
 
 #include <memory>
 #include <boost/regex.hpp>
 
 namespace gr {
-
-class Val ;
 
 class Entry ;
 
@@ -51,7 +50,7 @@ public :
 	void ResolveEntry() ;
 	
 	void Read( const fs::path& filename ) ;
-	void Write( const fs::path& filename ) const ;
+	void Write( const fs::path& filename ) ;
 
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
@@ -66,7 +65,7 @@ public :
 	bool Move( Syncer* syncer, fs::path old_p, fs::path new_p, fs::path grive_root );
 
 private :
-	void FromLocal( const fs::path& p, Resource *folder ) ;
+	void FromLocal( const fs::path& p, Resource *folder, Val& tree ) ;
 	void FromChange( const Entry& e ) ;
 	bool Update( const Entry& e ) ;
 	std::size_t TryResolveEntry() ;
@@ -80,6 +79,7 @@ private :
 	int					m_cstamp ;
 	std::string			m_ign ;
 	boost::regex		m_ign_re ;
+	Val					m_st ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;

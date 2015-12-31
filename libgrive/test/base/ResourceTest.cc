@@ -25,6 +25,7 @@
 
 #include "drive/Entry1.hh"
 #include "xml/Node.hh"
+#include "json/Val.hh"
 
 #include <iostream>
 
@@ -53,7 +54,8 @@ void ResourceTest::TestNormal( )
 	
 	GRUT_ASSERT_EQUAL( subject.Path(), fs::path( TEST_DATA ) / "entry.xml" ) ;
 	
-	subject.FromLocal( DateTime() ) ;
+	Val st;
+	subject.FromLocal( DateTime(), st ) ;
 	GRUT_ASSERT_EQUAL( subject.MD5(), "c0742c0a32b2c909b6f176d17a6992d0" ) ;
 	GRUT_ASSERT_EQUAL( subject.StateStr(), "local_new" ) ;
 	

@@ -44,8 +44,8 @@ void Syncer::Download( Resource *res, const fs::path& file )
 	long r = m_http->Get( res->ContentSrc(), &dl, http::Header() ) ;
 	if ( r <= 400 )
 	{
-		if ( res->MTime() != DateTime() )
-			os::SetFileTime( file, res->MTime() ) ;
+		if ( res->ServerTime() != DateTime() )
+			os::SetFileTime( file, res->ServerTime() ) ;
 		else
 			Log( "encountered zero date time after downloading %1%", file, log::warning ) ;
 	}
@@ -54,11 +54,6 @@ void Syncer::Download( Resource *res, const fs::path& file )
 void Syncer::AssignIDs( Resource *res, const Entry& remote )
 {
 	res->AssignIDs( remote );
-}
-
-void Syncer::AssignMTime( Resource *res, const DateTime& mtime )
-{
-	res->m_mtime = mtime;
 }
 
 } // end of namespace gr

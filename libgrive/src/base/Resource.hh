@@ -87,7 +87,7 @@ public :
 
 	std::string Name() const ;
 	std::string Kind() const ;
-	DateTime MTime() const ;
+	DateTime ServerTime() const ;
 	std::string SelfHref() const ;
 	std::string ContentSrc() const ;
 	std::string ETag() const ;
@@ -107,9 +107,10 @@ public :
 	std::string MD5() const ;
 
 	void FromRemote( const Entry& remote, const DateTime& last_change ) ;
-	void FromLocal( const DateTime& last_sync ) ;
+	void FromLocal( const DateTime& last_sync, Val& state ) ;
 	
 	void Sync( Syncer* syncer, DateTime& sync_time, const Val& options ) ;
+	void SetServerTime( const DateTime& time ) ;
 
 	// children access
 	iterator begin() const ;
@@ -132,6 +133,7 @@ private :
 	void FromRemoteFile( const Entry& remote, const DateTime& last_change ) ;
 	
 	void DeleteLocal() ;
+	void SetIndex() ;
 	
 	void SyncSelf( Syncer* syncer, const Val& options ) ;
 
@@ -140,6 +142,8 @@ private :
 	std::string				m_kind ;
 	std::string				m_md5 ;
 	DateTime				m_mtime ;
+	DateTime				m_ctime ;
+	off_t					m_size ;
 
 	std::string				m_id ;
 	std::string				m_href ;

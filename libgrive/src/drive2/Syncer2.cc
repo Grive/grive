@@ -201,7 +201,7 @@ bool Syncer2::Upload( Resource *res )
 
 	Entry2 responseEntry = Entry2( valr ) ;
 	AssignIDs( res, responseEntry ) ;
-	AssignMTime( res, responseEntry.MTime() ) ;
+	res->SetServerTime( responseEntry.MTime() );
 
 	return true ;
 }

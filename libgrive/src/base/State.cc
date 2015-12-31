@@ -26,7 +26,6 @@
 #include "util/Crypt.hh"
 #include "util/File.hh"
 #include "util/log/Log.hh"
-#include "json/Val.hh"
 #include "json/JsonParser.hh"
 
 #include <fstream>
@@ -84,7 +83,10 @@ State::~State()
 /// of local directory.
 void State::FromLocal( const fs::path& p )
 {
-	FromLocal( p, m_res.Root() ) ;
+	if ( !m_st.Has( "tree" ) )
+		m_st.Add( "tree", Val() );
+	m_res.Root()->FromLocal( m_last_sync, m_st ) ;
+	FromLocal( p, m_res.Root(), m_st["tree"] ) ;
 }
 
 bool State::IsIgnore( const std::string& filename )
@@ -92,44 +94,39 @@ bool State::IsIgnore( const std::string& filename )
 	return regex_search( filename.c_str(), m_ign_re );
 }
 
-void State::FromLocal( const fs::path& p, Resource* folder )
+void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
 
-	// sync the folder itself
-	folder->FromLocal( m_last_sync ) ;
-
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
 		std::string fname = i->path().filename().string() ;
-		fs::file_status st = fs::status(i->path());
-	
 		std::string path = folder->IsRoot() ? fname : ( folder->RelPath() / fname ).string();
+		
 		if ( IsIgnore( path ) )
 			Log( "file %1% is ignored by grive", path, log::verbose ) ;
-		
-		// check for broken symblic links
-		else if ( st.type() == fs::file_not_found )
-			Log( "file %1% doesn't exist (broken link?), ignored", i->path(), log::verbose ) ;
-		
 		else
 		{
-			bool is_dir = st.type() == fs::directory_file;
 			// if the Resource object of the child already exists, it should
 			// have been so no need to do anything here
 			Resource *c = folder->FindChild( fname ) ;
-			if ( c == 0 )
+			if ( !c )
 			{
-				c = new Resource( fname, is_dir ? "folder" : "file" ) ;
+				c = new Resource( fname, "" ) ;
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;
 			}
-			
-			c->FromLocal( m_last_sync ) ;
-			
-			if ( is_dir )
-				FromLocal( *i, c ) ;
+			if ( !tree.Has( fname ) )
+				tree.Add( fname, Val() );
+			Val& rec = tree[fname];
+			c->FromLocal( m_last_sync, rec ) ;
+			if ( c->IsFolder() )
+			{
+				if ( !rec.Has("tree") )
+					rec.Add( "tree", Val() );
+				FromLocal( *i, c, rec["tree"] ) ;
+			}
 		}
 	}
 }
@@ -140,7 +137,7 @@ void State::FromRemote( const Entry& e )
 	std::string k = e.IsDir() ? "folder" : "file";
 
 	// common checkings
-	if ( !e.IsDir() && (fn.empty() || e.ContentSrc().empty()) )
+	if ( !e.IsDir() && ( fn.empty() || e.ContentSrc().empty() ) )
 		Log( "%1% \"%2%\" is a google document, ignored", k, e.Name(), log::verbose ) ;
 	
 	else if ( fn.find('/') != fn.npos )
@@ -225,7 +222,7 @@ bool State::Update( const Entry& e )
 		// see if the entry already exist in local
 		std::string name = e.Name() ;
 		Resource *child = parent->FindChild( name ) ;
-		if ( child != 0 )
+		if ( child )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
 			m_res.Update( child, e, m_last_change ) ;
@@ -273,21 +270,21 @@ void State::Read( const fs::path& filename )
 	{
 		File file( filename ) ;
 
-		Val json = ParseJson( file );
-		Val last_sync = json["last_sync"] ;
-		Val last_change = json.Has( "last_change" ) ? json["last_change"] : json["last_sync"] ;
+		m_st = ParseJson( file );
+		Val last_sync = m_st["last_sync"] ;
+		Val last_change = m_st.Has( "last_change" ) ? m_st["last_change"] : m_st["last_sync"] ;
 		m_last_sync.Assign( last_sync["sec"].Int(), last_sync["nsec"].Int() ) ;
 		m_last_change.Assign( last_change["sec"].Int(), last_change["nsec"].Int() ) ;
-		m_ign = json.Has( "ignore_regexp" ) ? json["ignore_regexp"].Str() : std::string();
+		m_ign = m_st.Has( "ignore_regexp" ) ? m_st["ignore_regexp"].Str() : std::string();
 
-		m_cstamp = json["change_stamp"].Int() ;
+		m_cstamp = m_st["change_stamp"].Int() ;
 	}
 	catch ( Exception& )
 	{
 	}
 }
 
-void State::Write( const fs::path& filename ) const
+void State::Write( const fs::path& filename )
 {
 	Val last_sync ;
 	last_sync.Add( "sec",	Val( (int)m_last_sync.Sec() ) );
@@ -297,14 +294,13 @@ void State::Write( const fs::path& filename ) const
 	last_change.Add( "sec",	Val( (int)m_last_change.Sec() ) );
 	last_change.Add( "nsec",	Val( (unsigned)m_last_change.NanoSec() ) );
 	
-	Val result ;
-	result.Add( "last_sync", last_sync ) ;
-	result.Add( "last_change", last_change ) ;
-	result.Add( "change_stamp", Val(m_cstamp) ) ;
-	result.Add( "ignore_regexp", Val(m_ign) ) ;
+	m_st.Set( "last_sync", last_sync ) ;
+	m_st.Set( "last_change", last_change ) ;
+	m_st.Set( "change_stamp", Val( m_cstamp ) ) ;
+	m_st.Set( "ignore_regexp", Val( m_ign ) ) ;
 	
 	std::ofstream fs( filename.string().c_str() ) ;
-	fs << result ;
+	fs << m_st ;
 }
 
 void State::Sync( Syncer *syncer, const Val& options )

@@ -48,8 +48,9 @@ Resource::Resource( const fs::path& root_folder ) :
 	m_id		( "folder:root" ),
 	m_href		( "root" ),
 	m_is_editable( true ),
-	m_parent	( NULL ),
-	m_state		( sync )
+	m_parent	( 0 ),
+	m_state		( sync ),
+	m_json		( NULL )
 {
 }
 
@@ -57,8 +58,9 @@ Resource::Resource( const std::string& name, const std::string& kind ) :
 	m_name		( name ),
 	m_kind		( kind ),
 	m_is_editable( true ),
-	m_parent	( NULL ),
-	m_state		( unknown )
+	m_parent	( 0 ),
+	m_state		( unknown ),
+	m_json		( NULL )
 {
 }
 
@@ -137,10 +139,8 @@ void Resource::FromRemote( const Entry& remote, const DateTime& last_change )
 	assert( m_state != unknown ) ;
 	
 	if ( m_state == remote_new || m_state == remote_changed )
-	{
-		m_md5	= remote.MD5() ;
-		m_mtime	= remote.MTime() ;
-	}
+		m_md5 = remote.MD5() ;
+	m_mtime = remote.MTime() ;
 }
 
 void Resource::AssignIDs( const Entry& remote )
@@ -233,15 +233,40 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change 
 
 /// Update the resource with the attributes of local file or directory. This
 /// function will propulate the fields in m_entry.
-void Resource::FromLocal( const DateTime& last_sync )
+void Resource::FromLocal( const DateTime& last_sync, Val& state )
 {
-	fs::path path = Path() ;
-	//assert( fs::exists( path ) ) ;
+	assert( !m_json );
+	m_json = &state;
 
 	// root folder is always in sync
 	if ( !IsRoot() )
 	{
-		m_mtime = os::FileCTime( path ) ;
+		fs::path path = Path() ;
+		bool is_dir;
+		os::Stat( path, &m_ctime, &m_size, &is_dir ) ;
+
+		m_name = path.filename().string() ;
+		if ( !is_dir )
+		{
+			m_kind = "file";
+			if ( state.Has( "ctime" ) && state.Has( "md5" ) && (u64_t) m_ctime.Sec() == state["ctime"].U64() )
+				m_md5 = state["md5"];
+			else
+			{
+				m_md5 = crypt::MD5::Get( path );
+				state.Set( "md5", Val( m_md5 ) );
+				state.Set( "ctime", Val( m_ctime.Sec() ) );
+			}
+			if ( state.Has( "srv_time" ) && m_mtime != DateTime() )
+				m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
+		}
+		else
+		{
+			m_kind = "folder";
+			state.Del( "md5" );
+			state.Del( "ctime" );
+			state.Del( "srv_time" );
+		}
 
 		// follow parent recursively
 		if ( m_parent->m_state == local_new || m_parent->m_state == local_deleted )
@@ -251,11 +276,7 @@ void Resource::FromLocal( const DateTime& last_sync )
 		// remote_deleted first, it will be updated to sync/remote_changed
 		// in FromRemote()
 		else
-			m_state = ( m_mtime > last_sync ? local_new : remote_deleted ) ;
-		
-		m_name		= path.filename().string() ;
-		m_kind		= IsFolder() ? "folder" : "file" ;
-		m_md5		= IsFolder() ? ""		: crypt::MD5::Get( path ) ;
+			m_state = ( m_ctime > last_sync ? local_new : remote_deleted ) ;
 	}
 	
 	assert( m_state != unknown ) ;
@@ -286,7 +307,7 @@ std::string Resource::Kind() const
 	return m_kind ;
 }
 
-DateTime Resource::MTime() const
+DateTime Resource::ServerTime() const
 {
 	return m_mtime ;
 }
@@ -395,8 +416,26 @@ void Resource::Sync( Syncer *syncer, DateTime& sync_time, const Val& options )
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
+	{
 		std::for_each( m_child.begin(), m_child.end(),
 			boost::bind( &Resource::Sync, _1, syncer, boost::ref(sync_time), options ) ) ;
+		if ( IsFolder() )
+		{
+			// delete state of removed files
+			Val& tree = (*m_json)["tree"];
+			Val::Object leftover = tree.AsObject();
+			for( iterator i = m_child.begin(); i != m_child.end(); i++ )
+			{
+				Resource *r = *i;
+				if ( r->m_state != local_deleted && r->m_state != remote_deleted )
+					leftover.erase( r->Name() );
+				else
+					r->m_json = NULL;
+			}
+			for( Val::Object::iterator i = leftover.begin(); i != leftover.end(); i++ )
+				tree.Del( i->first );
+		}
+	}
 }
 
 void Resource::SyncSelf( Syncer* syncer, const Val& options )
@@ -438,7 +477,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 				fs::create_directories( path ) ;
 			else
 				syncer->Download( this, path ) ;
-			
+			SetIndex() ;
 			m_state = sync ;
 		}
 		break ;
@@ -449,6 +488,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 		if ( syncer )
 		{
 			syncer->Download( this, path ) ;
+			SetIndex() ;
 			m_state = sync ;
 		}
 		break ;
@@ -462,7 +502,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	case sync :
 		Log( "sync %1% already in sync", path, log::verbose ) ;
 		break ;
-
+	
 	// shouldn't go here
 	case unknown :
 		assert( false ) ;
@@ -471,6 +511,17 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	default :
 		break ;
 	}
+	
+	if ( m_state != local_deleted && m_state != remote_deleted && !IsFolder() )
+	{
+		// Update server time of this file
+		m_json->Set( "srv_time", Val( m_mtime.Sec() ) );
+	}
+}
+
+void Resource::SetServerTime( const DateTime& time )
+{
+	m_mtime = time ;
 }
 
 /// this function doesn't really remove the local file. it renames it.
@@ -478,7 +529,7 @@ void Resource::DeleteLocal()
 {
 	static const boost::format trash_file( "%1%-%2%" ) ;
 
-	assert( m_parent != 0 ) ;
+	assert( m_parent != NULL ) ;
 	Resource* p = m_parent;
 	fs::path destdir;
 	while ( !p->IsRoot() )
@@ -500,6 +551,20 @@ void Resource::DeleteLocal()
 	{
 		fs::create_directories( dest.parent_path() ) ;
 		fs::rename( Path(), dest ) ;
+	}
+}
+
+void Resource::SetIndex()
+{
+	assert( m_parent->m_json != NULL );
+	if ( !m_json )
+		m_json = &((*m_parent->m_json)["tree"]).Item( Name() );
+	bool is_dir;
+	os::Stat( Path(), &m_ctime, &m_size, &is_dir );
+	if ( !is_dir )
+	{
+		m_json->Set( "ctime", Val( m_ctime.Sec() ) );
+		m_json->Set( "md5", Val( m_md5 ) );
 	}
 }
 

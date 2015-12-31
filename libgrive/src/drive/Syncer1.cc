@@ -232,7 +232,7 @@ bool Syncer1::Upload( Resource *res,
 			Log( "upload succeeded on retry", log::warning );
 		Entry1 responseEntry = Entry1( xml.Response() );
 		AssignIDs( res, responseEntry ) ;
-		AssignMTime( res, responseEntry.MTime() );
+		res->SetServerTime( responseEntry.MTime() );
 		break;
 	}
 	

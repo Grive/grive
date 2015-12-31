@@ -62,11 +62,11 @@ void Drive::FromRemote( const Entry& entry )
 	// so these checkings are done in normal entries only
 	Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
 	
-	if ( parent != 0 && !parent->IsFolder() )
+	if ( parent && !parent->IsFolder() )
 		Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
 			entry.Title(), parent->Name(), log::verbose ) ;
 	
-	else if ( parent == 0 || !parent->IsInRootTree() )
+	else if ( !parent || !parent->IsInRootTree() )
 		Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
 		
 	else

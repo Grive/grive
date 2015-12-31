@@ -65,7 +65,6 @@ protected:
 	http::Agent *m_http;
 
 	void AssignIDs( Resource *res, const Entry& remote );
-	void AssignMTime( Resource *res, const DateTime& mtime );
 
 } ;
 
