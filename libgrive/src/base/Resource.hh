@@ -152,6 +152,7 @@ private :
 	std::vector<Resource*>	m_child ;
 
 	State					m_state ;
+	Val*					m_json ;
 } ;
 
 } // end of namespace gr::v1

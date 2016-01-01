@@ -23,7 +23,7 @@
 namespace gr {
 
 ConcatStream::ConcatStream() :
-	m_cur( 0 ), m_size( 0 ), m_pos( 0 )
+	m_size( 0 ), m_pos( 0 ), m_cur( 0 )
 {
 }
 
@@ -63,13 +63,13 @@ off_t ConcatStream::Seek( off_t offset, int whence )
 		offset += m_pos;
 	else if ( whence == 2 )
 		offset += Size();
-	if ( offset > Size() )
+	if ( (u64_t)offset > Size() )
 		offset = Size();
 	m_cur = 0;
 	m_pos = offset;
 	if ( m_streams.size() )
 	{
-		while ( offset > m_sizes[m_cur] )
+		while ( (u64_t)offset > m_sizes[m_cur] )
 			m_cur++;
 		m_streams[m_cur]->Seek( offset - ( m_cur > 0 ? m_sizes[m_cur-1] : 0 ), 0 );
 	}
@@ -90,7 +90,7 @@ void ConcatStream::Append( SeekStream *stream )
 {
 	if ( stream )
 	{
-		off_t size = stream->Size();
+		u64_t size = stream->Size();
 		if ( size > 0 )
 		{
 			// "fix" stream size at the moment of adding so further changes of underlying files

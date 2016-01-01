@@ -14,6 +14,8 @@ find_package(ZLIB)
 find_package(PkgConfig)
 pkg_check_modules(YAJL REQUIRED yajl)
 
+add_definitions(-Wall)
+
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )

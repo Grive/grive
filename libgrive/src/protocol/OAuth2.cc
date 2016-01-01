@@ -37,8 +37,8 @@ OAuth2::OAuth2(
 	const std::string& refresh_code,
 	const std::string&	client_id,
 	const std::string&	client_secret ) :
-	m_agent( agent ),
 	m_refresh( refresh_code ),
+	m_agent( agent ),
 	m_client_id( client_id ),
 	m_client_secret( client_secret )
 {

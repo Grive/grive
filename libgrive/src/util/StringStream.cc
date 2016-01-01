@@ -51,7 +51,7 @@ off_t StringStream::Seek( off_t offset, int whence )
 		offset += m_pos;
 	else if ( whence == 2 )
 		offset += Size();
-	if ( offset > Size() )
+	if ( (u64_t)offset > Size() )
 		offset = Size();
 	m_pos = (size_t)offset;
 	return m_pos;

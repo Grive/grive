@@ -342,51 +342,49 @@ void State::ChangeStamp( long cstamp )
 
 bool State::Move( Syncer* syncer, fs::path old_p, fs::path new_p, fs::path grive_root )
 {
-	//Convert paths to canonical representations
-	//Also seems to remove trailing / at the end of directory paths
+	// Convert paths to canonical representations
+	// Also seems to remove trailing / at the end of directory paths
 	old_p = fs::canonical( old_p );
 	grive_root = fs::canonical( grive_root );
 	
-	//new_p is a little special because fs::canonical() requires that the path exists
-	if ( new_p.string()[ new_p.string().size() - 1 ] == '/') //If new_p ends with a /, remove it
+	// new_p is a little special because fs::canonical() requires that the path exists
+	if ( new_p.string()[ new_p.string().size() - 1 ] == '/') // If new_p ends with a /, remove it
 		new_p = new_p.parent_path();
 	new_p = fs::canonical( new_p.parent_path() ) / new_p.filename();
 	
-	//Fails if source file doesn't exist, or if destination file already
-	//exists and is not a directory, or if the source and destination are exactly the same
-	if ( (fs::exists(new_p) && !fs::is_directory(new_p) ) || !fs::exists(old_p) || fs::equivalent( old_p, new_p ) )
+	// Fails if source file doesn't exist, or if destination file already
+	// exists and is not a directory, or if the source and destination are exactly the same
+	if ( (fs::exists(new_p) && !fs::is_directory(new_p)) || !fs::exists(old_p) || fs::equivalent( old_p, new_p ) )
 		return false;
 	
-	//If new path is an existing directory, move the file into the directory
-	//instead of trying to rename it
-	if ( fs::is_directory(new_p) ){
+	// If new path is an existing directory, move the file into the directory
+	// instead of trying to rename it
+	if ( fs::is_directory( new_p ) )
 		new_p = new_p / old_p.filename();
-	}
 	
-	//Get the paths relative to grive root.
-	//Just finds the substring from the end of the grive_root to the end of the path
-	//+1s are to exclude slash at beginning of relative path
-	int start = grive_root.string().size() + 1;
-	int nLen = new_p.string().size() - (grive_root.string().size() + 1);
-	int oLen = old_p.string().size() - (grive_root.string().size() + 1);
-	if ( start + nLen != new_p.string().size() || start + oLen != old_p.string().size() )
+	// Get the paths relative to grive root.
+	// Just finds the substring from the end of the grive_root to the end of the path
+	// +1s are to exclude slash at beginning of relative path
+	std::string root( grive_root.string() + "/" );
+	if ( new_p.string().substr( 0, root.length() ).compare( root ) != 0 ||
+		old_p.string().substr( 0, root.length() ).compare( root ) != 0 )
 		return false;
-	fs::path new_p_rootrel( new_p.string().substr( start, nLen ) );
-	fs::path old_p_rootrel( old_p.string().substr( start, oLen ) );
+	fs::path new_p_rootrel( new_p.string().substr( root.length() ) );
+	fs::path old_p_rootrel( old_p.string().substr( root.length() ) );
 	
 	//Get resources
 	Resource* res = m_res.Root();
 	Resource* newParentRes = m_res.Root();
 	for ( fs::path::iterator it = old_p_rootrel.begin(); it != old_p_rootrel.end(); ++it )
 	{
-		if ( *it != "." && *it != ".." && res != 0 )
+		if ( *it != "." && *it != ".." && res )
 			res = res->FindChild(it->string());
 		if ( *it == ".." )
 			res = res->Parent();
 	}
 	for ( fs::path::iterator it = new_p_rootrel.begin(); it != new_p_rootrel.end(); ++it )
 	{
-		if ( *it != "." && *it != ".." && *it != new_p.filename() && newParentRes != 0 )
+		if ( *it != "." && *it != ".." && *it != new_p.filename() && newParentRes )
 			newParentRes = newParentRes->FindChild(it->string());
 		if ( *it == "..")
 			res = res->Parent();

@@ -47,18 +47,18 @@ Resource::Resource( const fs::path& root_folder ) :
 	m_kind		( "folder" ),
 	m_id		( "folder:root" ),
 	m_href		( "root" ),
-	m_parent	( 0 ),
-	m_state		( sync ),
-	m_is_editable( true )
+	m_is_editable( true ),
+	m_parent	( NULL ),
+	m_state		( sync )
 {
 }
 
 Resource::Resource( const std::string& name, const std::string& kind ) :
 	m_name		( name ),
 	m_kind		( kind ),
-	m_parent	( 0 ),
-	m_state		( unknown ),
-	m_is_editable( true )
+	m_is_editable( true ),
+	m_parent	( NULL ),
+	m_state		( unknown )
 {
 }
 

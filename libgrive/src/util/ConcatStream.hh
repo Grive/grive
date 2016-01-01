@@ -41,9 +41,9 @@ public :
 
 private :
 	std::vector<SeekStream*> m_streams ;
-	std::vector<off_t> m_sizes ;
-	off_t m_size, m_pos ;
-	int m_cur ;
+	std::vector<u64_t> m_sizes ;
+	u64_t m_size, m_pos ;
+	size_t m_cur ;
 } ;
 
 } // end of namespace
