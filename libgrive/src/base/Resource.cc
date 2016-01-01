@@ -77,13 +77,13 @@ void Resource::SetState( State new_state )
 		boost::bind( &Resource::SetState, _1, new_state ) ) ;
 }
 
-void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_change )
+void Resource::FromRemoteFolder( const Entry& remote )
 {
 	fs::path path = Path() ;
 	
 	if ( !remote.IsEditable() )
 		Log( "folder %1% is read-only", path, log::verbose ) ;
-		
+	
 	// already sync
 	if ( fs::is_directory( path ) )
 	{
@@ -91,48 +91,39 @@ void Resource::FromRemoteFolder( const Entry& remote, const DateTime& last_chang
 		m_state = sync ;
 	}
 	
-	// remote file created after last sync, so remote is newer
-	else if ( remote.MTime() > last_change )
+	else if ( fs::exists( path ) )
 	{
-		if ( fs::exists( path ) )
-		{
-			// TODO: handle type change
-			Log( "%1% changed from folder to file", path, log::verbose ) ;
-			m_state = sync ;
-		}
-		else
-		{
-			// make all children as remote_new, if any
-			Log( "folder %1% is created in remote", path, log::verbose ) ;
-			SetState( remote_new ) ;
-		}
+		// TODO: handle type change
+		Log( "%1% changed from folder to file", path, log::verbose ) ;
+		m_state = sync ;
 	}
+	
+	// remote file created after last sync, so remote is newer
+	// TODO: Check local index instead of last_sync time
+	else if ( remote.MTime() > last_sync )
+	{
+		// make all children as remote_new, if any
+		Log( "folder %1% is created in remote", path, log::verbose ) ;
+		SetState( remote_new ) ;
+	}
+	
 	else
 	{
-		if ( fs::exists( path ) )
-		{
-			// TODO: handle type chage
-			Log( "%1% changed from file to folder", path, log::verbose ) ;
-			m_state = sync ;
-		}
-		else
-		{
-			Log( "folder %1% is deleted in local", path, log::verbose ) ;
-			SetState( local_deleted ) ;
-		}
+		Log( "folder %1% is deleted in local", path, log::verbose ) ;
+		SetState( local_deleted ) ;
 	}
 }
 
 /// Update the state according to information (i.e. Entry) from remote. This function
 /// compares the modification time and checksum of both copies and determine which
 /// one is newer.
-void Resource::FromRemote( const Entry& remote, const DateTime& last_change )
+void Resource::FromRemote( const Entry& remote )
 {
 	// sync folder
 	if ( remote.IsDir() && IsFolder() )
-		FromRemoteFolder( remote, last_change ) ;
+		FromRemoteFolder( remote ) ;
 	else
-		FromRemoteFile( remote, last_change ) ;
+		FromRemoteFile( remote ) ;
 	
 	AssignIDs( remote ) ;
 	
@@ -156,7 +147,7 @@ void Resource::AssignIDs( const Entry& remote )
 	}
 }
 
-void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change )
+void Resource::FromRemoteFile( const Entry& remote )
 {
 	assert( m_parent != 0 ) ;
 	
@@ -179,7 +170,8 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change 
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
 		
-		if ( remote.MTime() > last_change || remote.ChangeStamp() > 0 )
+		// TODO: Check local index instead of last_sync time
+		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
 		{
 			Log( "file %1% is created in remote (change %2%)", path,
 				remote.ChangeStamp(), log::verbose ) ;
@@ -214,7 +206,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change 
 		assert( m_state != unknown ) ;
 
 		// if remote is modified
-		if ( remote.MTime() > m_mtime )
+		if ( remote.MTime().Sec() > m_mtime.Sec() )
 		{
 			Log( "file %1% is changed in remote", path, log::verbose ) ;
 			m_state = remote_changed ;
@@ -233,7 +225,7 @@ void Resource::FromRemoteFile( const Entry& remote, const DateTime& last_change 
 
 /// Update the resource with the attributes of local file or directory. This
 /// function will propulate the fields in m_entry.
-void Resource::FromLocal( const DateTime& last_sync, Val& state )
+void Resource::FromLocal( Val& state )
 {
 	assert( !m_json );
 	m_json = &state;
@@ -246,37 +238,43 @@ void Resource::FromLocal( const DateTime& last_sync, Val& state )
 		os::Stat( path, &m_ctime, &m_size, &is_dir ) ;
 
 		m_name = path.filename().string() ;
-		if ( !is_dir )
+		m_kind = is_dir ? "folder" : "file";
+
+		bool is_changed;
+		if ( state.Has( "ctime" ) && (u64_t) m_ctime.Sec() <= state["ctime"].U64() &&
+			( is_dir || state.Has( "md5" ) ) )
 		{
-			m_kind = "file";
-			if ( state.Has( "ctime" ) && state.Has( "md5" ) && (u64_t) m_ctime.Sec() == state["ctime"].U64() )
+			if ( !is_dir )
 				m_md5 = state["md5"];
-			else
-			{
-				m_md5 = crypt::MD5::Get( path );
-				state.Set( "md5", Val( m_md5 ) );
-				state.Set( "ctime", Val( m_ctime.Sec() ) );
-			}
-			if ( state.Has( "srv_time" ) && m_mtime != DateTime() )
-				m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
+			is_changed = false;
 		}
 		else
 		{
-			m_kind = "folder";
-			state.Del( "md5" );
-			state.Del( "ctime" );
-			state.Del( "srv_time" );
+			if ( !is_dir )
+			{
+				m_md5 = crypt::MD5::Get( path );
+				// File is changed locally. TODO: Detect conflicts
+				is_changed = state.Has( "md5" ) && m_md5 != state["md5"].Str();
+				state.Set( "md5", Val( m_md5 ) );
+			}
+			else
+				is_changed = true;
+			state.Set( "ctime", Val( m_ctime.Sec() ) );
 		}
+		if ( state.Has( "srv_time" ) && m_mtime != DateTime() )
+			m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
+		if ( is_dir )
+			state.Del( "md5" );
 
 		// follow parent recursively
 		if ( m_parent->m_state == local_new || m_parent->m_state == local_deleted )
-			m_state = local_new ;
-		
-		// if the file is not created after last sync, assume file is
-		// remote_deleted first, it will be updated to sync/remote_changed
-		// in FromRemote()
+			m_state = m_parent->m_state ;
 		else
-			m_state = ( m_ctime > last_sync ? local_new : remote_deleted ) ;
+		{
+			// Upload file if it is changed and remove if not.
+			// State will be updated to sync/remote_changed in FromRemote()
+			m_state = is_changed ? local_new : remote_deleted;
+		}
 	}
 	
 	assert( m_state != unknown ) ;
@@ -389,7 +387,7 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( Syncer *syncer, DateTime& sync_time, const Val& options )
+void Resource::Sync( Syncer *syncer, const Val& options )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
@@ -410,15 +408,11 @@ void Resource::Sync( Syncer *syncer, DateTime& sync_time, const Val& options )
 		return;
 	}
 	
-	// we want the server sync time, so we will take the server time of the last file uploaded to store as the sync time
-	// m_mtime is updated to server modified time when the file is uploaded
-	sync_time = std::max(sync_time, m_mtime);
-	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
 	{
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, syncer, boost::ref(sync_time), options ) ) ;
+			boost::bind( &Resource::Sync, _1, syncer, options ) ) ;
 		if ( IsFolder() )
 		{
 			// delete state of removed files
@@ -512,7 +506,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 		break ;
 	}
 	
-	if ( m_state != local_deleted && m_state != remote_deleted && !IsFolder() )
+	if ( m_state != local_deleted && m_state != remote_deleted )
 	{
 		// Update server time of this file
 		m_json->Set( "srv_time", Val( m_mtime.Sec() ) );

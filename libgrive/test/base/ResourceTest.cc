@@ -63,7 +63,7 @@ void ResourceTest::TestNormal( )
 	entry.AddElement( "updated" ).AddText( "2012-05-09T16:13:22.401Z" ) ;
 	
 	Entry1 remote( entry ) ;
-	subject.FromRemote( remote, DateTime() ) ;
+	subject.FromRemote( remote ) ;
 	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;
 }
 

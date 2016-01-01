@@ -65,14 +65,11 @@ State::State( const fs::path& filename, const Val& options  ) :
 	
 	// the "-f" option will make grive always think remote is newer
 	if ( force )
-	{
-		m_last_change = DateTime() ;
-		m_last_sync = DateTime::Now() ;
-	}
+		m_last_sync = new DateTime() ;
 	
 	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
 	
-	Log( "last server change time: %1%; last sync time: %2%", m_last_change, m_last_sync, log::verbose ) ;
+	Log( "last sync time: %2%", m_last_sync, log::verbose ) ;
 }
 
 State::~State()
@@ -85,7 +82,9 @@ void State::FromLocal( const fs::path& p )
 {
 	if ( !m_st.Has( "tree" ) )
 		m_st.Add( "tree", Val() );
-	m_res.Root()->FromLocal( m_last_sync, m_st ) ;
+	// Remember m_update_sync just before reading local file tree
+	m_update_sync = DateTime::Now() ;
+	m_res.Root()->FromLocal( m_st ) ;
 	FromLocal( p, m_res.Root(), m_st["tree"] ) ;
 }
 
@@ -120,7 +119,7 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 			if ( !tree.Has( fname ) )
 				tree.Add( fname, Val() );
 			Val& rec = tree[fname];
-			c->FromLocal( m_last_sync, rec ) ;
+			c->FromLocal( rec ) ;
 			if ( c->IsFolder() )
 			{
 				if ( !rec.Has("tree") )
@@ -189,7 +188,7 @@ void State::FromChange( const Entry& e )
 	// entries in the change feed is always treated as newer in remote,
 	// so we override the last sync time to 0
 	if ( Resource *res = m_res.FindByHref( e.SelfHref() ) )
-		m_res.Update( res, e, DateTime() ) ;
+		m_res.Update( res, e ) ;
 }
 
 bool State::Update( const Entry& e )
@@ -205,7 +204,7 @@ bool State::Update( const Entry& e )
 			Log( "%1% is ignored by grive", path, log::verbose ) ;
 			return true;
 		}
-		m_res.Update( res, e, m_last_change ) ;
+		m_res.Update( res, e ) ;
 		return true;
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
@@ -225,7 +224,7 @@ bool State::Update( const Entry& e )
 		if ( child )
 		{
 			// since we are updating the ID and Href, we need to remove it and re-add it.
-			m_res.Update( child, e, m_last_change ) ;
+			m_res.Update( child, e ) ;
 		}
 		
 		// folder entry exist in google drive, but not local. we should create
@@ -238,7 +237,7 @@ bool State::Update( const Entry& e )
 			m_res.Insert( child ) ;
 			
 			// update the state of the resource
-			m_res.Update( child, e, m_last_change ) ;
+			m_res.Update( child, e ) ;
 		}
 		
 		return true ;
@@ -265,16 +264,13 @@ State::iterator State::end()
 void State::Read( const fs::path& filename )
 {
 	m_last_sync.Assign( 0 ) ;
-	m_last_change.Assign( 0 ) ;
 	try
 	{
 		File file( filename ) ;
 
 		m_st = ParseJson( file );
 		Val last_sync = m_st["last_sync"] ;
-		Val last_change = m_st.Has( "last_change" ) ? m_st["last_change"] : m_st["last_sync"] ;
 		m_last_sync.Assign( last_sync["sec"].Int(), last_sync["nsec"].Int() ) ;
-		m_last_change.Assign( last_change["sec"].Int(), last_change["nsec"].Int() ) ;
 		m_ign = m_st.Has( "ignore_regexp" ) ? m_st["ignore_regexp"].Str() : std::string();
 
 		m_cstamp = m_st["change_stamp"].Int() ;
@@ -290,12 +286,7 @@ void State::Write( const fs::path& filename )
 	last_sync.Add( "sec",	Val( (int)m_last_sync.Sec() ) );
 	last_sync.Add( "nsec",	Val( (unsigned)m_last_sync.NanoSec() ) );
 	
-	Val last_change ;
-	last_change.Add( "sec",	Val( (int)m_last_change.Sec() ) );
-	last_change.Add( "nsec",	Val( (unsigned)m_last_change.NanoSec() ) );
-	
 	m_st.Set( "last_sync", last_sync ) ;
-	m_st.Set( "last_change", last_change ) ;
 	m_st.Set( "change_stamp", Val( m_cstamp ) ) ;
 	m_st.Set( "ignore_regexp", Val( m_ign ) ) ;
 	
@@ -305,24 +296,9 @@ void State::Write( const fs::path& filename )
 
 void State::Sync( Syncer *syncer, const Val& options )
 {
-	// set the last sync time from the time returned by the server for the last file synced
-	// if the sync time hasn't changed (i.e. now files have been uploaded)
 	// set the last sync time to the time on the client
-	// ideally because we compare server file times to the last sync time
-	// the last sync time would always be a server time rather than a client time
-	// TODO - WARNING - do we use the last sync time to compare to client file times
-	// need to check if this introduces a new problem
-	DateTime last_change_time = m_last_change;
-	m_res.Root()->Sync( syncer, last_change_time, options ) ;
-	
-	if ( last_change_time == m_last_change )
-		Trace( "nothing changed at the server side since %1%", m_last_change ) ;
-	else
-	{
-		Trace( "updating last server-side change time to %1%", last_change_time ) ;
-		m_last_change = last_change_time;
-	}
-	m_last_sync = DateTime::Now();
+	m_res.Root()->Sync( syncer, options ) ;
+	m_last_sync = m_update_sync;
 }
 
 long State::ChangeStamp() const

@@ -106,10 +106,10 @@ public :
 	bool HasID() const ;
 	std::string MD5() const ;
 
-	void FromRemote( const Entry& remote, const DateTime& last_change ) ;
-	void FromLocal( const DateTime& last_sync, Val& state ) ;
+	void FromRemote( const Entry& remote ) ;
+	void FromLocal( Val& state ) ;
 	
-	void Sync( Syncer* syncer, DateTime& sync_time, const Val& options ) ;
+	void Sync( Syncer* syncer, const Val& options ) ;
 	void SetServerTime( const DateTime& time ) ;
 
 	// children access
@@ -129,8 +129,8 @@ private :
 private :
 	void SetState( State new_state ) ;
 	
-	void FromRemoteFolder( const Entry& remote, const DateTime& last_change ) ;
-	void FromRemoteFile( const Entry& remote, const DateTime& last_change ) ;
+	void FromRemoteFolder( const Entry& remote ) ;
+	void FromRemoteFile( const Entry& remote ) ;
 	
 	void DeleteLocal() ;
 	void SetIndex() ;

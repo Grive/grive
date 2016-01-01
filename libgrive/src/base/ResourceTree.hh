@@ -75,7 +75,7 @@ public :
 	
 	void Insert( Resource *coll ) ;
 	void Erase( Resource *coll ) ;
-	void Update( Resource *coll, const Entry& e, const DateTime& last_change ) ;
+	void Update( Resource *coll, const Entry& e ) ;
 	
 	Resource* Root() ;
 	const Resource* Root() const ;
