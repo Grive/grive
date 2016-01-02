@@ -29,6 +29,8 @@
 
 namespace gr {
 
+class ResourceTree ;
+
 class Syncer ;
 
 class Val ;
@@ -112,7 +114,7 @@ public :
 	void FromDeleted( Val& state ) ;
 	void FromLocal( Val& state ) ;
 	
-	void Sync( Syncer* syncer, const Val& options ) ;
+	void Sync( Syncer* syncer, ResourceTree *res_tree, const Val& options ) ;
 	void SetServerTime( const DateTime& time ) ;
 
 	// children access
@@ -139,7 +141,7 @@ private :
 	void DeleteIndex() ;
 	void SetIndex() ;
 	
-	void SyncSelf( Syncer* syncer, const Val& options ) ;
+	void SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options ) ;
 
 private :
 	std::string				m_name ;

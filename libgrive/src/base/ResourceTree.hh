@@ -33,7 +33,7 @@ namespace gr {
 namespace details
 {
 	using namespace boost::multi_index ;
-	struct ByID {} ;
+	struct ByMD5 {} ;
 	struct ByHref {} ;
 	struct ByIdentity {} ;
 
@@ -41,14 +41,15 @@ namespace details
 		Resource*,
 		indexed_by<
 			hashed_non_unique<tag<ByHref>,	const_mem_fun<Resource, std::string,	&Resource::SelfHref> >,
-			hashed_non_unique<tag<ByID>,	const_mem_fun<Resource, std::string,	&Resource::ResourceID> >,
+			hashed_non_unique<tag<ByMD5>,	const_mem_fun<Resource, std::string,	&Resource::MD5> >,
 			hashed_unique<tag<ByIdentity>,	identity<Resource*> >
 		>
 	> Folders ;
 	
-	typedef Folders::index<ByID>::type			IDMap ;
+	typedef Folders::index<ByMD5>::type			MD5Map ;
 	typedef Folders::index<ByHref>::type		HrefMap ;
 	typedef Folders::index<ByIdentity>::type	Set ;
+	typedef std::pair<MD5Map::iterator, MD5Map::iterator> MD5Range ;
 }
 
 /*!	\brief	A simple container for storing folders
@@ -68,9 +69,8 @@ public :
 	
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
+	details::MD5Range FindByMD5( const std::string& md5 ) ;
 
-	Resource* FindByID( const std::string& id ) ;
-	
 	bool ReInsert( Resource *coll ) ;
 	
 	void Insert( Resource *coll ) ;

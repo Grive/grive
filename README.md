@@ -1,6 +1,6 @@
 # Grive2 0.5-dev
 
-02 Jan 2016, Vitaliy Filippov
+3 Jan 2016, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -73,6 +73,7 @@ Enjoy!
 ### Grive2 v0.5 (unreleased)
 
 - Much faster and more correct synchronisation using local modification time and checksum cache (similar to git index)
+- Automatic move/rename detection, -m option removed
 - force option works again
 
 ### Grive2 v0.4.2

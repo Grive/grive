@@ -121,11 +121,15 @@ bool Syncer2::Move( Resource* res, Resource* newParentRes, std::string newFilena
 		http::Header hdr2 ;
 		hdr2.Add( "Content-Type: application/json" );
 		http::ValResponse vrsp ;
-		//Don't change modified date because we're only moving
-		long http_code = m_http->Put( feeds::files + "/" + res->ResourceID() + "?modifiedDateBehavior=noChange" + addRemoveParents, json_meta, &vrsp, hdr2 ) ;
+		// Don't change modified date because we're only moving
+		long http_code = m_http->Put(
+			feeds::files + "/" + res->ResourceID() + "?modifiedDateBehavior=noChange" + addRemoveParents,
+			json_meta, &vrsp, hdr2
+		) ;
 		valr = vrsp.Response();
 		assert( http_code == 200 && !( valr["id"].Str().empty() ) );
 	}
+
 	return true;
 }
 

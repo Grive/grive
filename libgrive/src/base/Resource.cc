@@ -18,6 +18,7 @@
 */
 
 #include "Resource.hh"
+#include "ResourceTree.hh"
 #include "Entry.hh"
 #include "Syncer.hh"
 
@@ -269,7 +270,7 @@ void Resource::FromLocal( Val& state )
 				is_changed = true;
 			state.Set( "ctime", Val( m_ctime.Sec() ) );
 		}
-		if ( state.Has( "srv_time" ) && m_mtime != DateTime() )
+		if ( state.Has( "srv_time" ) )
 			m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
 		if ( is_dir )
 			state.Del( "md5" );
@@ -397,14 +398,14 @@ Resource* Resource::FindChild( const std::string& name )
 }
 
 // try to change the state to "sync"
-void Resource::Sync( Syncer *syncer, const Val& options )
+void Resource::Sync( Syncer *syncer, ResourceTree *res_tree, const Val& options )
 {
 	assert( m_state != unknown ) ;
 	assert( !IsRoot() || m_state == sync ) ;	// root folder is already synced
 	
 	try
 	{
-		SyncSelf( syncer, options ) ;
+		SyncSelf( syncer, res_tree, options ) ;
 	}
 	catch ( File::Error &e )
 	{
@@ -422,11 +423,11 @@ void Resource::Sync( Syncer *syncer, const Val& options )
 	if ( m_state != local_deleted && m_state != remote_deleted )
 	{
 		std::for_each( m_child.begin(), m_child.end(),
-			boost::bind( &Resource::Sync, _1, syncer, options ) ) ;
+			boost::bind( &Resource::Sync, _1, syncer, res_tree, options ) ) ;
 	}
 }
 
-void Resource::SyncSelf( Syncer* syncer, const Val& options )
+void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options )
 {
 	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
 	assert( IsRoot() || !syncer || m_parent->IsFolder() ) ;
@@ -434,6 +435,50 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
 
 	const fs::path path = Path() ;
+
+	// Detect renames
+	if ( !IsFolder() && ( m_state == local_new || m_state == local_deleted ||
+		m_state == remote_new || m_state == remote_deleted ) )
+	{
+		details::MD5Range moved = res_tree->FindByMD5( m_md5 );
+		bool is_local = m_state == local_new || m_state == local_deleted;
+		State other;
+		if ( m_state == local_new )
+			other = local_deleted;
+		else if ( m_state == local_deleted )
+			other = local_new;
+		else if ( m_state == remote_new )
+			other = remote_deleted;
+		else
+			other = remote_new;
+		for ( details::MD5Map::iterator i = moved.first ; i != moved.second; i++ )
+		{
+			Resource *m = *i;
+			if ( m->m_state == other )
+			{
+				Resource* from = m_state == local_new || m_state == remote_new ? m : this;
+				Resource* to = m_state == local_new || m_state == remote_new ? this : m;
+				Log( "sync %1% moved to %2%. moving %3%", from->Path(), to->Path(),
+					is_local ? "remote" : "local", log::info );
+				if ( syncer )
+				{
+					if ( is_local )
+						syncer->Move( from, to->Parent(), to->Name() );
+					else
+					{
+						fs::rename( from->Path(), to->Path() );
+						to->SetIndex();
+					}
+					to->m_mtime = from->m_mtime;
+					to->m_json->Set( "srv_time", Val( from->m_mtime.Sec() ) );
+					from->DeleteIndex();
+				}
+				from->m_state = both_deleted;
+				to->m_state = sync;
+				return;
+			}
+		}
+	}
 
 	switch ( m_state )
 	{

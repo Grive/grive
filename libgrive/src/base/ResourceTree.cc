@@ -97,6 +97,14 @@ const Resource* ResourceTree::FindByHref( const std::string& href ) const
 	return i != map.end() ? *i : 0 ;
 }
 
+MD5Range ResourceTree::FindByMD5( const std::string& md5 )
+{
+	MD5Map& map = m_set.get<ByMD5>() ;
+	if ( !md5.empty() )
+		return map.equal_range( md5 );
+	return MD5Range( map.end(), map.end() ) ;
+}
+
 ///	Reinsert should be called when the ID/HREF were updated
 bool ResourceTree::ReInsert( Resource *coll )
 {
