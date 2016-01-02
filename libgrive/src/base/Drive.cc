@@ -58,19 +58,7 @@ Drive::Drive( Syncer *syncer, const Val& options ) :
 
 void Drive::FromRemote( const Entry& entry )
 {
-	// entries from change feed does not have the parent HREF,
-	// so these checkings are done in normal entries only
-	Resource *parent = m_state.FindByHref( entry.ParentHref() ) ;
-	
-	if ( parent && !parent->IsFolder() )
-		Log( "warning: entry %1% has parent %2% which is not a folder, ignored",
-			entry.Title(), parent->Name(), log::verbose ) ;
-	
-	else if ( !parent || !parent->IsInRootTree() )
-		Log( "file \"%1%\" parent doesn't exist, ignored", entry.Title(), log::verbose ) ;
-		
-	else
-		m_state.FromRemote( entry ) ;
+	m_state.FromRemote( entry ) ;
 }
 
 void Drive::FromChange( const Entry& entry )
@@ -88,43 +76,10 @@ void Drive::SaveState()
 	m_state.Write( m_root / state_file ) ;
 }
 
-void Drive::SyncFolders( )
-{
-	Log( "Synchronizing folders", log::info ) ;
-
-	std::auto_ptr<Feed> feed = m_syncer->GetFolders() ;
-	while ( feed->GetNext( m_syncer->Agent() ) )
-	{
-		// first, get all collections from the query result
-		for ( Feed::iterator i = feed->begin() ; i != feed->end() ; ++i )
-		{
-			const Entry &e = *i ;
-			if ( e.IsDir() )
-			{
-				if ( e.ParentHrefs().size() != 1 )
-					Log( "folder \"%1%\" has multiple parents, ignored", e.Title(), log::verbose ) ;
-				
-				else if ( e.Title().find('/') != std::string::npos )
-					Log( "folder \"%1%\" contains a slash in its name, ignored", e.Title(), log::verbose ) ;
-				
-				else
-					m_state.FromRemote( e ) ;
-			}
-		}
-	}
-
-	m_state.ResolveEntry() ;
-}
-
 void Drive::DetectChanges()
 {
 	Log( "Reading local directories", log::info ) ;
 	m_state.FromLocal( m_root ) ;
-	
-	long prev_stamp = m_state.ChangeStamp() ;
-	Trace( "previous change stamp is %1%", prev_stamp ) ;
-	
-	SyncFolders( ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
 	std::auto_ptr<Feed> feed = m_syncer->GetAll() ;
@@ -135,12 +90,19 @@ void Drive::DetectChanges()
 			feed->begin(), feed->end(),
 			boost::bind( &Drive::FromRemote, this, _1 ) ) ;
 	}
-	
-	// pull the changes feed
+	m_state.ResolveEntry() ;
+}
+
+// pull the changes feed
+// FIXME: unused until Grive will use the feed-based sync instead of reading full tree
+void Drive::ReadChanges()
+{
+	long prev_stamp = m_state.ChangeStamp() ;
 	if ( prev_stamp != -1 )
 	{
+		Trace( "previous change stamp is %1%", prev_stamp ) ;
 		Log( "Detecting changes from last sync", log::info ) ;
-		feed = m_syncer->GetChanges( prev_stamp+1 ) ;
+		std::auto_ptr<Feed> feed = m_syncer->GetChanges( prev_stamp+1 ) ;
 		while ( feed->GetNext( m_syncer->Agent() ) )
 		{
 			std::for_each(

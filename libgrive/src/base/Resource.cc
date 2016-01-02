@@ -90,23 +90,18 @@ void Resource::FromRemoteFolder( const Entry& remote )
 		Log( "folder %1% is in sync", path, log::verbose ) ;
 		m_state = sync ;
 	}
-	
 	else if ( fs::exists( path ) )
 	{
 		// TODO: handle type change
 		Log( "%1% changed from folder to file", path, log::verbose ) ;
 		m_state = sync ;
 	}
-	
-	// remote file created after last sync, so remote is newer
-	// TODO: Check local index instead of last_sync time
-	else if ( remote.MTime() > last_sync )
+	else if ( remote.MTime().Sec() > m_mtime.Sec() ) // FIXME only seconds are stored in local index
 	{
-		// make all children as remote_new, if any
+		// remote folder created after last sync, so remote is newer
 		Log( "folder %1% is created in remote", path, log::verbose ) ;
 		SetState( remote_new ) ;
 	}
-	
 	else
 	{
 		Log( "folder %1% is deleted in local", path, log::verbose ) ;
@@ -131,6 +126,7 @@ void Resource::FromRemote( const Entry& remote )
 	
 	if ( m_state == remote_new || m_state == remote_changed )
 		m_md5 = remote.MD5() ;
+	
 	m_mtime = remote.MTime() ;
 }
 
@@ -170,8 +166,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
 		
-		// TODO: Check local index instead of last_sync time
-		if ( remote.MTime() > last_sync || remote.ChangeStamp() > 0 )
+		if ( remote.MTime().Sec() > m_mtime.Sec() || remote.MD5() != m_md5 || remote.ChangeStamp() > 0 )
 		{
 			Log( "file %1% is created in remote (change %2%)", path,
 				remote.ChangeStamp(), log::verbose ) ;
@@ -223,6 +218,19 @@ void Resource::FromRemoteFile( const Entry& remote )
 	}
 }
 
+void Resource::FromDeleted( Val& state )
+{
+	assert( !m_json );
+	m_json = &state;
+	if ( state.Has( "ctime" ) )
+		m_ctime.Assign( state["ctime"].U64(), 0 );
+	if ( state.Has( "md5" ) )
+		m_md5 = state["md5"];
+	if ( state.Has( "srv_time" ) )
+		m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
+	m_state = both_deleted;
+}
+
 /// Update the resource with the attributes of local file or directory. This
 /// function will propulate the fields in m_entry.
 void Resource::FromLocal( Val& state )
@@ -235,7 +243,7 @@ void Resource::FromLocal( Val& state )
 	{
 		fs::path path = Path() ;
 		bool is_dir;
-		os::Stat( path, &m_ctime, &m_size, &is_dir ) ;
+		os::Stat( path, &m_ctime, NULL, &is_dir ) ;
 
 		m_name = path.filename().string() ;
 		m_kind = is_dir ? "folder" : "file";
@@ -254,7 +262,7 @@ void Resource::FromLocal( Val& state )
 			{
 				m_md5 = crypt::MD5::Get( path );
 				// File is changed locally. TODO: Detect conflicts
-				is_changed = state.Has( "md5" ) && m_md5 != state["md5"].Str();
+				is_changed = !state.Has( "md5" ) || m_md5 != state["md5"].Str();
 				state.Set( "md5", Val( m_md5 ) );
 			}
 			else
@@ -265,9 +273,11 @@ void Resource::FromLocal( Val& state )
 			m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
 		if ( is_dir )
 			state.Del( "md5" );
+		else
+			state.Del( "tree" );
 
 		// follow parent recursively
-		if ( m_parent->m_state == local_new || m_parent->m_state == local_deleted )
+		if ( m_parent->m_state == local_new || m_parent->m_state == remote_deleted )
 			m_state = m_parent->m_state ;
 		else
 		{
@@ -413,22 +423,6 @@ void Resource::Sync( Syncer *syncer, const Val& options )
 	{
 		std::for_each( m_child.begin(), m_child.end(),
 			boost::bind( &Resource::Sync, _1, syncer, options ) ) ;
-		if ( IsFolder() )
-		{
-			// delete state of removed files
-			Val& tree = (*m_json)["tree"];
-			Val::Object leftover = tree.AsObject();
-			for( iterator i = m_child.begin(); i != m_child.end(); i++ )
-			{
-				Resource *r = *i;
-				if ( r->m_state != local_deleted && r->m_state != remote_deleted )
-					leftover.erase( r->Name() );
-				else
-					r->m_json = NULL;
-			}
-			for( Val::Object::iterator i = leftover.begin(); i != leftover.end(); i++ )
-				tree.Del( i->first );
-		}
 	}
 }
 
@@ -454,7 +448,10 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	case local_deleted :
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
 		if ( syncer )
+		{
 			syncer->DeleteRemote( this ) ;
+			DeleteIndex() ;
+		}
 		break ;
 	
 	case local_changed :
@@ -490,7 +487,15 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 	case remote_deleted :
 		Log( "sync %1% deleted in remote. deleting local", path, log::info ) ;
 		if ( syncer )
+		{
 			DeleteLocal() ;
+			DeleteIndex() ;
+		}
+		break ;
+	
+	case both_deleted :
+		if ( syncer )
+			DeleteIndex() ;
 		break ;
 	
 	case sync :
@@ -506,7 +511,7 @@ void Resource::SyncSelf( Syncer* syncer, const Val& options )
 		break ;
 	}
 	
-	if ( m_state != local_deleted && m_state != remote_deleted )
+	if ( syncer && m_json )
 	{
 		// Update server time of this file
 		m_json->Set( "srv_time", Val( m_mtime.Sec() ) );
@@ -548,18 +553,27 @@ void Resource::DeleteLocal()
 	}
 }
 
+void Resource::DeleteIndex()
+{
+	(*m_parent->m_json)["tree"].Del( Name() );
+	m_json = NULL;
+}
+
 void Resource::SetIndex()
 {
 	assert( m_parent->m_json != NULL );
 	if ( !m_json )
 		m_json = &((*m_parent->m_json)["tree"]).Item( Name() );
 	bool is_dir;
-	os::Stat( Path(), &m_ctime, &m_size, &is_dir );
+	os::Stat( Path(), &m_ctime, NULL, &is_dir );
 	if ( !is_dir )
 	{
 		m_json->Set( "ctime", Val( m_ctime.Sec() ) );
 		m_json->Set( "md5", Val( m_md5 ) );
+		m_json->Del( "tree" );
 	}
+	else // check if tree item exists
+		m_json->Item( "tree" );
 }
 
 Resource::iterator Resource::begin() const
@@ -582,7 +596,7 @@ std::ostream& operator<<( std::ostream& os, Resource::State s )
 	static const char *state[] =
 	{
 		"sync",	"local_new", "local_changed", "local_deleted", "remote_new",
-		"remote_changed", "remote_deleted"
+		"remote_changed", "remote_deleted", "both_deleted"
 	} ;
 	assert( s >= 0 && s < Count(state) ) ;
 	return os << state[s] ;

@@ -49,7 +49,7 @@ public :
 	struct Error : virtual Exception {} ;
 	
 private :
-	void SyncFolders( ) ;
+	void ReadChanges() ;
 	void FromRemote( const Entry& entry ) ;
 	void FromChange( const Entry& entry ) ;
 	void UpdateChangeStamp( ) ;

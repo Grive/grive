@@ -65,7 +65,7 @@ State::State( const fs::path& filename, const Val& options  ) :
 	
 	// the "-f" option will make grive always think remote is newer
 	if ( force )
-		m_last_sync = new DateTime() ;
+		m_last_sync = DateTime() ;
 	
 	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
 	
@@ -80,12 +80,10 @@ State::~State()
 /// of local directory.
 void State::FromLocal( const fs::path& p )
 {
-	if ( !m_st.Has( "tree" ) )
-		m_st.Add( "tree", Val() );
 	// Remember m_update_sync just before reading local file tree
 	m_update_sync = DateTime::Now() ;
 	m_res.Root()->FromLocal( m_st ) ;
-	FromLocal( p, m_res.Root(), m_st["tree"] ) ;
+	FromLocal( p, m_res.Root(), m_st.Item( "tree" ) ) ;
 }
 
 bool State::IsIgnore( const std::string& filename )
@@ -97,6 +95,8 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 {
 	assert( folder != 0 ) ;
 	assert( folder->IsFolder() ) ;
+
+	Val::Object leftover = tree.AsObject();
 
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
@@ -116,17 +116,25 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 				folder->AddChild( c ) ;
 				m_res.Insert( c ) ;
 			}
-			if ( !tree.Has( fname ) )
-				tree.Add( fname, Val() );
-			Val& rec = tree[fname];
+			leftover.erase( fname );
+			Val& rec = tree.Item( fname );
 			c->FromLocal( rec ) ;
 			if ( c->IsFolder() )
-			{
-				if ( !rec.Has("tree") )
-					rec.Add( "tree", Val() );
-				FromLocal( *i, c, rec["tree"] ) ;
-			}
+				FromLocal( *i, c, rec.Item( "tree" ) ) ;
 		}
+	}
+
+	for( Val::Object::iterator i = leftover.begin(); i != leftover.end(); i++ )
+	{
+		// Restore state of locally deleted files
+		Resource *c = folder->FindChild( i->first ) ;
+		if ( !c )
+		{
+			c = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
+			folder->AddChild( c ) ;
+			m_res.Insert( c ) ;
+		}
+		c->FromDeleted( tree.Item( i->first ) );
 	}
 }
 

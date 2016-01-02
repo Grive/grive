@@ -67,12 +67,14 @@ public :
 		/// We should download the file.
 		remote_new,
 		
-		/// Resource exists in both local & remote, but remote is newer.		
+		/// Resource exists in both local & remote, but remote is newer.
 		remote_changed,
 		
 		/// Resource delete in remote, need to delete in local
 		remote_deleted,
 		
+		/// Both deleted. State is used to remove leftover files from the index after sync.
+		both_deleted,
 		
 		/// invalid value
 		unknown
@@ -107,6 +109,7 @@ public :
 	std::string MD5() const ;
 
 	void FromRemote( const Entry& remote ) ;
+	void FromDeleted( Val& state ) ;
 	void FromLocal( Val& state ) ;
 	
 	void Sync( Syncer* syncer, const Val& options ) ;
@@ -133,6 +136,7 @@ private :
 	void FromRemoteFile( const Entry& remote ) ;
 	
 	void DeleteLocal() ;
+	void DeleteIndex() ;
 	void SetIndex() ;
 	
 	void SyncSelf( Syncer* syncer, const Val& options ) ;
@@ -143,7 +147,6 @@ private :
 	std::string				m_md5 ;
 	DateTime				m_mtime ;
 	DateTime				m_ctime ;
-	off_t					m_size ;
 
 	std::string				m_id ;
 	std::string				m_href ;
