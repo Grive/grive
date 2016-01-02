@@ -1,6 +1,6 @@
-# Grive2 0.4.2
+# Grive2 0.5-dev
 
-28 Dec 2015, Vitaliy Filippov
+02 Jan 2016, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -69,6 +69,11 @@ your current directory.
 Enjoy!
 
 ## Version History
+
+### Grive2 v0.5 (unreleased)
+
+- Much faster and more correct synchronisation using local modification time and checksum cache (similar to git index)
+- force option works again
 
 ### Grive2 v0.4.2
 

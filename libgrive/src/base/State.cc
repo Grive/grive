@@ -38,14 +38,15 @@ State::State( const fs::path& filename, const Val& options  ) :
 {
 	Read( filename ) ;
 	
-	bool force = options.Has( "force" ) ? options["force"].Bool() : false ;
+	// the "-f" option will make grive always think remote is newer
+	m_force = options.Has( "force" ) ? options["force"].Bool() : false ;
 	
 	if ( options.Has( "ignore" ) && options["ignore"].Str() != m_ign )
 	{
 		// also "-f" is implicitly turned on when ignore regexp is changed
 		// because without it grive would think that previously ignored files are deleted locally
 		if ( !m_ign.empty() )
-			force = true;
+			m_force = true;
 		m_ign = options["ignore"].Str();
 	}
 	else if ( options.Has( "dir" ) )
@@ -58,18 +59,12 @@ State::State( const fs::path& filename, const Val& options  ) :
 			const boost::regex esc( "[.^$|()\\[\\]{}*+?\\\\]" );
 			std::string ign = "^(?!"+regex_replace( m_dir, esc, "\\\\&", boost::format_sed )+"(/|$))";
 			if ( !m_ign.empty() && ign != m_ign )
-				force = true;
+				m_force = true;
 			m_ign = ign;
 		}
 	}
 	
-	// the "-f" option will make grive always think remote is newer
-	if ( force )
-		m_last_sync = DateTime() ;
-	
 	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
-	
-	Log( "last sync time: %2%", m_last_sync, log::verbose ) ;
 }
 
 State::~State()
@@ -80,8 +75,6 @@ State::~State()
 /// of local directory.
 void State::FromLocal( const fs::path& p )
 {
-	// Remember m_update_sync just before reading local file tree
-	m_update_sync = DateTime::Now() ;
 	m_res.Root()->FromLocal( m_st ) ;
 	FromLocal( p, m_res.Root(), m_st.Item( "tree" ) ) ;
 }
@@ -118,6 +111,8 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 			}
 			leftover.erase( fname );
 			Val& rec = tree.Item( fname );
+			if ( m_force )
+				rec.Del( "srv_time" );
 			c->FromLocal( rec ) ;
 			if ( c->IsFolder() )
 				FromLocal( *i, c, rec.Item( "tree" ) ) ;
@@ -134,7 +129,10 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 			folder->AddChild( c ) ;
 			m_res.Insert( c ) ;
 		}
-		c->FromDeleted( tree.Item( i->first ) );
+		Val& rec = tree.Item( i->first );
+		if ( m_force )
+			rec.Del( "srv_time" );
+		c->FromDeleted( rec );
 	}
 }
 
@@ -271,14 +269,11 @@ State::iterator State::end()
 
 void State::Read( const fs::path& filename )
 {
-	m_last_sync.Assign( 0 ) ;
 	try
 	{
 		File file( filename ) ;
 
 		m_st = ParseJson( file );
-		Val last_sync = m_st["last_sync"] ;
-		m_last_sync.Assign( last_sync["sec"].Int(), last_sync["nsec"].Int() ) ;
 		m_ign = m_st.Has( "ignore_regexp" ) ? m_st["ignore_regexp"].Str() : std::string();
 
 		m_cstamp = m_st["change_stamp"].Int() ;
@@ -290,11 +285,6 @@ void State::Read( const fs::path& filename )
 
 void State::Write( const fs::path& filename )
 {
-	Val last_sync ;
-	last_sync.Add( "sec",	Val( (int)m_last_sync.Sec() ) );
-	last_sync.Add( "nsec",	Val( (unsigned)m_last_sync.NanoSec() ) );
-	
-	m_st.Set( "last_sync", last_sync ) ;
 	m_st.Set( "change_stamp", Val( m_cstamp ) ) ;
 	m_st.Set( "ignore_regexp", Val( m_ign ) ) ;
 	
@@ -306,7 +296,6 @@ void State::Sync( Syncer *syncer, const Val& options )
 {
 	// set the last sync time to the time on the client
 	m_res.Root()->Sync( syncer, options ) ;
-	m_last_sync = m_update_sync;
 }
 
 long State::ChangeStamp() const

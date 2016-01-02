@@ -74,12 +74,11 @@ private :
 	
 private :
 	ResourceTree		m_res ;
-	DateTime			m_last_sync ;
-	DateTime			m_update_sync ;
 	int					m_cstamp ;
 	std::string			m_ign ;
 	boost::regex		m_ign_re ;
 	Val					m_st ;
+	bool				m_force ;
 	
 	std::vector<Entry>	m_unresolved ;
 } ;
