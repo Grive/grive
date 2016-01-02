@@ -1,6 +1,6 @@
-# Grive2 0.4.2-dev
+# Grive2 0.4.2
 
-12 Dec 2015, Vitaliy Filippov
+28 Dec 2015, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -70,13 +70,16 @@ Enjoy!
 
 ## Version History
 
-### Grive2 v0.4.2 (unreleased)
+### Grive2 v0.4.2
 
 - Option to exclude files by perl regexp
 - Reimplemented HTTP response logging for debug purposes
 - Use multipart uploads (update metadata and contents at the same time) for improved perfomance & stability
 - Bug fixes
 - Simple option to move/rename files and directories, via `grive -m oldpath newpath` (by Dylan Wulf, wulfd1@tcnj.edu)
+
+Known issues:
+- force option does not work as documented #51
 
 ### Grive2 v0.4.1
 
