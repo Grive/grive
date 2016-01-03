@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH "GRIVE" 1 "June 19, 2012"
+.TH "GRIVE" 1 "January 3, 2016"
 .SH NAME
 grive \- Google Drive client for GNU/Linux
 
@@ -26,7 +26,7 @@ Requests authorization token from Google
 Enable debug level messages. Implies \-V
 .TP
 \fB\-\-dry-run\fR
-Only detects which files are needed for download or upload without doing it
+Only detect which files need to be uploaded/downloaded, without actually performing changes
 .TP
 \fB\-f, \-\-force\fR
 Forces
@@ -36,9 +36,30 @@ to always download a file from Google Drive instead uploading it
 \fB\-h\fR, \fB\-\-help\fR
 Produces help message
 .TP
-\fB\-l\fR filename, \fB\-\-log\fR filename
-Set log output to
-.I filename
+\fB\-\-ignore\fR <perl_regexp>
+Ignore files with relative paths matching this Perl Regular Expression.
+Value is remembered for next runs.
+.TP
+\fB\-l\fR <filename>, \fB\-\-log\fR <filename>
+Write log output to
+.I <filename>
+.TP
+\fB\-\-log\-http\fR <filename_prefix>
+Log all HTTP responses in files named
+.I <filename_prefix>YYYY-MM-DD.HHMMSS.txt
+for debugging
+.TP
+\fB\-\-new\-rev\fR
+Create new revisions in server for updated files
+.TP
+\fB\-p\fR <root_path>, \fB\-\-path\fR <root_path>
+Set root sync directory to
+.I <root_path>
+.TP
+\fB\-s\fR <subdir>, \fB\-\-dir\fR <subdir>
+Sync a single
+.I <subdir>
+subdirectory. Internally converted to an ignore regexp, remembered for next runs.
 .TP
 \fB\-v\fR, \fB\-\-version\fR
 Displays program version
@@ -46,13 +67,17 @@ Displays program version
 \fB\-V\fR, \fB\-\-verbose\fR
 Verbose mode. Enables more messages than usual.
 
-.SH AUTHOR
+.SH AUTHORS
 .PP
-The software was developed by Nestal Wan.
+Current maintainer is Vitaliy Filippov.
 .PP
+Original author was Nestal Wan.
 This manpage was written by José Luis Segura Lucas (josel.segura@gmx.es)
+.PP
+The full list of contributors may be found here
+.I http://yourcmc.ru/wiki/Grive2#Full_list_of_contributors
 
 .SH REPORT BUGS
 .PP
-.I https://github.com/Grive/grive
+.I https://github.com/vitalif/grive2/issues
 .I https://groups.google.com/forum/?fromgroups#!forum/grive-devel
