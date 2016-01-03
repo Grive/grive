@@ -46,7 +46,7 @@ public :
 
 private :
 
-	bool Upload( Resource *res );
+	bool Upload( Resource *res, bool new_rev );
 
 } ;
 

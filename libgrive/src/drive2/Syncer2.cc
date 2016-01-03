@@ -70,7 +70,7 @@ bool Syncer2::EditContent( Resource *res, bool new_rev )
 		return false ;
 	}
 
-	return Upload( res ) ;
+	return Upload( res, new_rev ) ;
 }
 
 bool Syncer2::Create( Resource *res )
@@ -86,7 +86,7 @@ bool Syncer2::Create( Resource *res )
 		return false ;
 	}
 	
-	return Upload( res );
+	return Upload( res, false );
 }
 
 bool Syncer2::Move( Resource* res, Resource* newParentRes, std::string newFilename )
@@ -140,7 +140,7 @@ std::string to_string( uint64_t n )
 	return s.str();
 }
 
-bool Syncer2::Upload( Resource *res )
+bool Syncer2::Upload( Resource *res, bool new_rev )
 {
 	Val meta;
 	meta.Add( "title", Val( res->Name() ) );
@@ -196,7 +196,8 @@ bool Syncer2::Upload( Resource *res )
 		http::ValResponse vrsp;
 		m_http->Request(
 			res->ResourceID().empty() ? "POST" : "PUT",
-			upload_base + ( res->ResourceID().empty() ? "" : "/" + res->ResourceID() ) + "?uploadType=multipart",
+			upload_base + ( res->ResourceID().empty() ? "" : "/" + res->ResourceID() ) +
+			"?uploadType=multipart&newRevision=" + ( new_rev ? "true" : "false" ),
 			&multipart, &vrsp, hdr
 		) ;
 		valr = vrsp.Response() ;
