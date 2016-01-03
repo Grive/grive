@@ -42,13 +42,7 @@ State::State( const fs::path& filename, const Val& options  ) :
 	m_force = options.Has( "force" ) ? options["force"].Bool() : false ;
 	
 	if ( options.Has( "ignore" ) && options["ignore"].Str() != m_ign )
-	{
-		// also "-f" is implicitly turned on when ignore regexp is changed
-		// because without it grive would think that previously ignored files are deleted locally
-		if ( !m_ign.empty() )
-			m_force = true;
 		m_ign = options["ignore"].Str();
-	}
 	else if ( options.Has( "dir" ) )
 	{
 		const boost::regex trim_path( "^/+|/+$" );
@@ -58,8 +52,6 @@ State::State( const fs::path& filename, const Val& options  ) :
 			// "-s" is internally converted to an ignore regexp
 			const boost::regex esc( "[.^$|()\\[\\]{}*+?\\\\]" );
 			std::string ign = "^(?!"+regex_replace( m_dir, esc, "\\\\&", boost::format_sed )+"(/|$))";
-			if ( !m_ign.empty() && ign != m_ign )
-				m_force = true;
 			m_ign = ign;
 		}
 	}
