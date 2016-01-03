@@ -164,9 +164,9 @@ std::size_t State::TryResolveEntry()
 	assert( !m_unresolved.empty() ) ;
 
 	std::size_t count = 0 ;
-	std::vector<Entry>& en = m_unresolved ;
-	
-	for ( std::vector<Entry>::iterator i = en.begin() ; i != en.end() ; )
+	std::list<Entry>& en = m_unresolved ;
+
+	for ( std::list<Entry>::iterator i = en.begin() ; i != en.end() ; )
 	{
 		if ( Update( *i ) )
 		{

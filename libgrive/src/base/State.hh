@@ -79,7 +79,7 @@ private :
 	Val					m_st ;
 	bool				m_force ;
 	
-	std::vector<Entry>	m_unresolved ;
+	std::list<Entry>	m_unresolved ;
 } ;
 
 } // end of namespace gr
