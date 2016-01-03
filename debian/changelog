@@ -1,3 +1,9 @@
+grive2 (0.5+git20160103) unstable; urgency=medium
+
+  * Newer release, with support for faster sync and rename detection
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Sun, 03 Jan 2016 12:51:55 +0300
+
 grive2 (0.4.1+git20151011) unstable; urgency=medium
 
   * Add Debian packaging scripts to the official repository
