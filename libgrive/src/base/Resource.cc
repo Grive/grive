@@ -272,14 +272,20 @@ void Resource::FromLocal( Val& state )
 		if ( state.Has( "srv_time" ) )
 			m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
 
-		// follow parent recursively
-		if ( m_parent->m_state == local_new || m_parent->m_state == remote_deleted )
-			m_state = m_parent->m_state ;
-		else
+		// Upload file if it is changed and remove if not.
+		// State will be updated to sync/remote_changed in FromRemote()
+		m_state = is_changed ? local_new : remote_deleted;
+		if ( m_state == local_new )
 		{
-			// Upload file if it is changed and remove if not.
-			// State will be updated to sync/remote_changed in FromRemote()
-			m_state = is_changed ? local_new : remote_deleted;
+			// local_new means this file is changed in local.
+			// this means we can't delete any of its parents.
+			// make sure their state is also set to local_new.
+			Resource *p = m_parent;
+			while ( p && p->m_state == remote_deleted )
+			{
+				p->m_state = local_new;
+				p = p->m_parent;
+			}
 		}
 	}
 	
