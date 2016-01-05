@@ -76,6 +76,7 @@ Enjoy!
 - Automatic move/rename detection, -m option removed
 - force option works again
 - Instead of crashing on sync exceptions Grive will give a warning and attempt to sync failed files again during the next run.
+- Revision support works again. Grive 0.4.x always created new revisions for all files during sync, regardless of the absence of the --new-rev option.
 
 ### Grive2 v0.4.2
 
@@ -96,7 +97,7 @@ Known issues:
 
 First fork release, by Vitaliy Filippov / vitalif at mail*ru
 - Support for the new Google Drive REST API (old "Document List" API is shut down by Google 20 April 2015)
-- REAL support for partial sync: syncs only one subdirectory with `grive -d subdir`
+- REAL support for partial sync: syncs only one subdirectory with `grive -s subdir`
 - Major refactoring - a lot of dead code removed, JSON-C is not used anymore, API-specific code is split from non-API-specific
 - Some stability fixes from Visa Putkinen https://github.com/visap/grive/commits/visa
 - Slightly reduce number of syscalls when reading local files.
