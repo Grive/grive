@@ -574,14 +574,14 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 	
 	case sync :
 		Log( "sync %1% already in sync", path, log::verbose ) ;
+		if ( !IsRoot() )
+			SetIndex( false ) ;
 		break ;
 	
 	// shouldn't go here
 	case unknown :
-		assert( false ) ;
-		break ;
-		
 	default :
+		assert( false ) ;
 		break ;
 	}
 	
@@ -635,15 +635,17 @@ void Resource::DeleteIndex()
 
 void Resource::SetIndex( bool re_stat )
 {
-	assert( m_parent->m_json != NULL );
+	assert( m_parent && m_parent->m_json != NULL );
 	if ( !m_json )
 		m_json = &((*m_parent->m_json)["tree"]).Item( Name() );
 	bool is_dir;
 	if ( re_stat )
 		os::Stat( Path(), &m_ctime, NULL, &is_dir );
+	else
+		is_dir = IsFolder();
+	m_json->Set( "ctime", Val( m_ctime.Sec() ) );
 	if ( !is_dir )
 	{
-		m_json->Set( "ctime", Val( m_ctime.Sec() ) );
 		m_json->Set( "md5", Val( m_md5 ) );
 		m_json->Del( "tree" );
 	}
