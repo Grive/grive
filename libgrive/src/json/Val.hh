@@ -194,35 +194,29 @@ Val& Val::Assign( const T& t )
 template <typename T>
 const T& Val::As() const
 {
-	try
-	{
-		const Impl<T> *impl = dynamic_cast<const Impl<T> *>( m_base.get() ) ;
-		return impl->val ;
-	}
-	catch ( std::exception& e )
+	const Impl<T> *impl = dynamic_cast<const Impl<T> *>( m_base.get() ) ;
+	if ( !impl )
 	{
 		TypeEnum dest = Type2Enum<T>::type ;
 		BOOST_THROW_EXCEPTION(
-			Error() << SrcType_(Type()) << DestType_(dest)
+			Error() << SrcType_( Type() ) << DestType_( dest )
 		) ;
 	}
+	return impl->val ;
 }
 
 template <typename T>
 T& Val::As()
 {
-	try
-	{
-		Impl<T> *impl = dynamic_cast<Impl<T> *>( m_base.get() ) ;
-		return impl->val ;
-	}
-	catch ( std::exception& e )
+	Impl<T> *impl = dynamic_cast<Impl<T> *>( m_base.get() ) ;
+	if ( !impl )
 	{
 		TypeEnum dest = Type2Enum<T>::type ;
 		BOOST_THROW_EXCEPTION(
-			Error() << SrcType_(Type()) << DestType_(dest)
+			Error() << SrcType_( Type() ) << DestType_( dest )
 		) ;
 	}
+	return impl->val ;
 }
 
 template <typename T>

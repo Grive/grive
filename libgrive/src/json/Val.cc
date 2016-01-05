@@ -123,7 +123,7 @@ std::string Val::Str() const
 
 Val::operator std::string() const
 {
-	return As<std::string>() ;
+	return Str();
 }
 
 int Val::Int() const

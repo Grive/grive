@@ -19,6 +19,7 @@
 
 #include "json/Val.hh"
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 
 using namespace gr ;
 
@@ -33,11 +34,11 @@ BOOST_FIXTURE_TEST_SUITE( ValTest, Fixture )
 
 BOOST_AUTO_TEST_CASE( TestSimpleTypes )
 {
-	Val null ;
-	BOOST_CHECK_EQUAL( null.Type(), Val::null_type ) ;
-	BOOST_CHECK( null.Is<void>() ) ;
+	BOOST_CHECK_EQUAL( Val::Null().Type(), Val::null_type ) ;
+	BOOST_CHECK( Val::Null().Is<void>() ) ;
 	
 	Val i( 100 ) ;
+	BOOST_CHECK_EQUAL( i.Str(), "100" );
 	BOOST_CHECK_EQUAL( i.As<long long>(), 100 ) ;
 	BOOST_CHECK_EQUAL( i.Type(), Val::int_type ) ;
 }
