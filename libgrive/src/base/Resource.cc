@@ -28,6 +28,7 @@
 #include "util/log/Log.hh"
 #include "util/OS.hh"
 #include "util/File.hh"
+#include "http/Error.hh"
 
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
@@ -264,18 +265,12 @@ void Resource::FromLocal( Val& state )
 				m_md5 = crypt::MD5::Get( path );
 				// File is changed locally. TODO: Detect conflicts
 				is_changed = !state.Has( "md5" ) || m_md5 != state["md5"].Str();
-				state.Set( "md5", Val( m_md5 ) );
 			}
 			else
 				is_changed = true;
-			state.Set( "ctime", Val( m_ctime.Sec() ) );
 		}
 		if ( state.Has( "srv_time" ) )
 			m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
-		if ( is_dir )
-			state.Del( "md5" );
-		else
-			state.Del( "tree" );
 
 		// follow parent recursively
 		if ( m_parent->m_state == local_new || m_parent->m_state == remote_deleted )
@@ -418,6 +413,32 @@ void Resource::Sync( Syncer *syncer, ResourceTree *res_tree, const Val& options 
 		Log( "Error syncing %1%: %2%", Path(), e.what(), log::error );
 		return;
 	}
+	catch ( http::Error &e )
+	{
+		int *curlcode = boost::get_error_info< http::CurlCode > ( e ) ;
+		int *httpcode = boost::get_error_info< http::HttpResponseCode > ( e ) ;
+		std::string msg;
+		if ( curlcode )
+			msg = *( boost::get_error_info< http::CurlErrMsg > ( e ) );
+		else if ( httpcode )
+			msg = "HTTP " + boost::to_string( *httpcode );
+		else
+			msg = e.what();
+		Log( "Error syncing %1%: %2%", Path(), msg, log::error );
+		std::string *url = boost::get_error_info< http::Url > ( e );
+		std::string *resp_hdr = boost::get_error_info< http::HttpResponseHeaders > ( e );
+		std::string *resp_txt = boost::get_error_info< http::HttpResponseText > ( e );
+		http::Header *req_hdr = boost::get_error_info< http::HttpRequestHeaders > ( e );
+		if ( url )
+			Log( "Request URL: %1%", *url, log::verbose );
+		if ( req_hdr )
+			Log( "Request headers: %1%", req_hdr->Str(), log::verbose );
+		if ( resp_hdr )
+			Log( "Response headers: %1%", *resp_hdr, log::verbose );
+		if ( resp_txt )
+			Log( "Response text: %1%", *resp_txt, log::verbose );
+		return;
+	}
 	
 	// if myself is deleted, no need to do the childrens
 	if ( m_state != local_deleted && m_state != remote_deleted )
@@ -463,11 +484,14 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 				if ( syncer )
 				{
 					if ( is_local )
+					{
 						syncer->Move( from, to->Parent(), to->Name() );
+						to->SetIndex( false );
+					}
 					else
 					{
 						fs::rename( from->Path(), to->Path() );
-						to->SetIndex();
+						to->SetIndex( true );
 					}
 					to->m_mtime = from->m_mtime;
 					to->m_json->Set( "srv_time", Val( from->m_mtime.Sec() ) );
@@ -485,9 +509,11 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 	case local_new :
 		Log( "sync %1% doesn't exist in server, uploading", path, log::info ) ;
 		
-		// FIXME: (?) do not write new timestamp on failed upload
 		if ( syncer && syncer->Create( this ) )
+		{
 			m_state = sync ;
+			SetIndex( false );
+		}
 		break ;
 	
 	case local_deleted :
@@ -502,7 +528,10 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 	case local_changed :
 		Log( "sync %1% changed in local. uploading", path, log::info ) ;
 		if ( syncer && syncer->EditContent( this, options["new-rev"].Bool() ) )
+		{
 			m_state = sync ;
+			SetIndex( false );
+		}
 		break ;
 	
 	case remote_new :
@@ -513,7 +542,7 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 				fs::create_directories( path ) ;
 			else
 				syncer->Download( this, path ) ;
-			SetIndex() ;
+			SetIndex( true ) ;
 			m_state = sync ;
 		}
 		break ;
@@ -524,7 +553,7 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 		if ( syncer )
 		{
 			syncer->Download( this, path ) ;
-			SetIndex() ;
+			SetIndex( true ) ;
 			m_state = sync ;
 		}
 		break ;
@@ -604,21 +633,26 @@ void Resource::DeleteIndex()
 	m_json = NULL;
 }
 
-void Resource::SetIndex()
+void Resource::SetIndex( bool re_stat )
 {
 	assert( m_parent->m_json != NULL );
 	if ( !m_json )
 		m_json = &((*m_parent->m_json)["tree"]).Item( Name() );
 	bool is_dir;
-	os::Stat( Path(), &m_ctime, NULL, &is_dir );
+	if ( re_stat )
+		os::Stat( Path(), &m_ctime, NULL, &is_dir );
 	if ( !is_dir )
 	{
 		m_json->Set( "ctime", Val( m_ctime.Sec() ) );
 		m_json->Set( "md5", Val( m_md5 ) );
 		m_json->Del( "tree" );
 	}
-	else // check if tree item exists
+	else
+	{
+		// add tree item if it does not exist
 		m_json->Item( "tree" );
+		m_json->Del( "md5" );
+	}
 }
 
 Resource::iterator Resource::begin() const

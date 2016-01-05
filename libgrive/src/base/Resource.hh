@@ -139,7 +139,7 @@ private :
 	
 	void DeleteLocal() ;
 	void DeleteIndex() ;
-	void SetIndex() ;
+	void SetIndex( bool ) ;
 	
 	void SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options ) ;
 

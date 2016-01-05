@@ -75,6 +75,7 @@ Enjoy!
 - Much faster and more correct synchronisation using local modification time and checksum cache (similar to git index)
 - Automatic move/rename detection, -m option removed
 - force option works again
+- Instead of crashing on sync exceptions Grive will give a warning and attempt to sync failed files again during the next run.
 
 ### Grive2 v0.4.2
 

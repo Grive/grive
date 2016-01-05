@@ -35,7 +35,6 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
-#include <sstream>
 #include <streambuf>
 #include <iostream>
 

@@ -24,7 +24,6 @@
 #include "MemMap.hh"
 
 #include <iomanip>
-#include <sstream>
 
 // dependent libraries
 #include <gcrypt.h>

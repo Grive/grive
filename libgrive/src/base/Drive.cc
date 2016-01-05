@@ -35,7 +35,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <map>
-#include <sstream>
 
 // for debugging only
 #include <iostream>

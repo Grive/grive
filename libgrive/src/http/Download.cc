@@ -20,7 +20,6 @@
 #include "Download.hh"
 // #include "util/SignalHandler.hh"
 
-#include "Error.hh"
 #include "util/Crypt.hh"
 
 // boost headers

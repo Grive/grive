@@ -26,7 +26,6 @@
 
 #include <cstdlib>
 #include <iterator>
-#include <sstream>
 
 namespace gr {
 
