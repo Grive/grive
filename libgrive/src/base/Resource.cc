@@ -164,6 +164,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 	}
 
 	// local not exists
+	// FIXME: Remove additional stat() call here
 	else if ( !fs::exists( path ) )
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
@@ -704,7 +705,7 @@ std::string Resource::MD5() const
 bool Resource::IsRoot() const
 {
 	// Root entry does not show up in file feeds, so we check for empty parent (and self-href)
-	return m_parent == 0 ;
+	return !m_parent ;
 }
 
 bool Resource::HasID() const

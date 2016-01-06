@@ -40,8 +40,8 @@ ResourceTest::ResourceTest( )
 
 void ResourceTest::TestRootPath()
 {
-  std::string rootFolder = "/home/usr/grive/grive";
-	Resource root(rootFolder) ;
+	std::string rootFolder = "/home/usr/grive/grive";
+	Resource root( rootFolder ) ;
 	CPPUNIT_ASSERT( root.IsRoot() ) ;
 	GRUT_ASSERT_EQUAL( root.Path(), fs::path( rootFolder ) ) ;
 }
@@ -52,20 +52,23 @@ void ResourceTest::TestNormal( )
 	Resource subject( "entry.xml", "file" ) ;
 	root.AddChild( &subject ) ;
 	
+	GRUT_ASSERT_EQUAL( subject.IsRoot(), false ) ;
 	GRUT_ASSERT_EQUAL( subject.Path(), fs::path( TEST_DATA ) / "entry.xml" ) ;
 	
 	Val st;
+	st.Add( "srv_time", Val( DateTime( "2012-05-09T16:13:22.401Z" ).Sec() ) );
 	subject.FromLocal( st ) ;
 	GRUT_ASSERT_EQUAL( subject.MD5(), "c0742c0a32b2c909b6f176d17a6992d0" ) ;
 	GRUT_ASSERT_EQUAL( subject.StateStr(), "local_new" ) ;
 	
 	xml::Node entry = xml::Node::Element( "entry" ) ;
 	entry.AddElement( "updated" ).AddText( "2012-05-09T16:13:22.401Z" ) ;
+	entry.AddElement( "docs:md5Checksum" ).AddText( "DIFFERENT" ) ;
 	
 	Entry1 remote( entry ) ;
+	GRUT_ASSERT_EQUAL( "different", remote.MD5() ) ;
 	subject.FromRemote( remote ) ;
 	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;
 }
-
 
 } // end of namespace grut
