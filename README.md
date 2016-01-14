@@ -1,6 +1,6 @@
-# Grive2 0.5-dev
+# Grive2 0.5
 
-3 Jan 2016, Vitaliy Filippov
+14 Jan 2016, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -16,7 +16,7 @@ directory named .trash or put them in the Google Drive trash. You can always rec
 
 There are a few things that Grive does not do at the moment:
 - continously wait for changes in file system or in Google Drive to occur and upload.
-  A sync is only performed when you run Grive, and it calculates checksums for all files every time.
+  A sync is only performed when you run Grive.
 - symbolic links support.
 - support for Google documents.
 
@@ -70,13 +70,14 @@ Enjoy!
 
 ## Version History
 
-### Grive2 v0.5 (unreleased)
+### Grive2 v0.5
 
 - Much faster and more correct synchronisation using local modification time and checksum cache (similar to git index)
 - Automatic move/rename detection, -m option removed
 - force option works again
 - Instead of crashing on sync exceptions Grive will give a warning and attempt to sync failed files again during the next run.
 - Revision support works again. Grive 0.4.x always created new revisions for all files during sync, regardless of the absence of the --new-rev option.
+- Shared files now sync correctly
 
 ### Grive2 v0.4.2
 
