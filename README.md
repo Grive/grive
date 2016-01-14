@@ -1,4 +1,4 @@
-# Grive2 0.5
+# Grive2 0.5.1-dev
 
 14 Jan 2016, Vitaliy Filippov
 
