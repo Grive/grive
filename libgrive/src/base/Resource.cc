@@ -542,26 +542,36 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 		break ;
 	
 	case remote_new :
-		Log( "sync %1% created in remote. creating local", path, log::info ) ;
-		if ( syncer )
+		if ( options["no-remote-new"].Bool() )
+			Log( "sync %1% created in remote. skipping", path, log::info ) ;
+		else
 		{
-			if ( IsFolder() )
-				fs::create_directories( path ) ;
-			else
-				syncer->Download( this, path ) ;
-			SetIndex( true ) ;
-			m_state = sync ;
+			Log( "sync %1% created in remote. creating local", path, log::info ) ;
+			if ( syncer )
+			{
+				if ( IsFolder() )
+					fs::create_directories( path ) ;
+				else
+					syncer->Download( this, path ) ;
+				SetIndex( true ) ;
+				m_state = sync ;
+			}
 		}
 		break ;
 	
 	case remote_changed :
 		assert( !IsFolder() ) ;
-		Log( "sync %1% changed in remote. downloading", path, log::info ) ;
-		if ( syncer )
+		if ( options["upload-only"].Bool() )
+			Log( "sync %1% changed in remote. skipping", path, log::info ) ;
+		else
 		{
-			syncer->Download( this, path ) ;
-			SetIndex( true ) ;
-			m_state = sync ;
+			Log( "sync %1% changed in remote. downloading", path, log::info ) ;
+			if ( syncer )
+			{
+				syncer->Download( this, path ) ;
+				SetIndex( true ) ;
+				m_state = sync ;
+			}
 		}
 		break ;
 	

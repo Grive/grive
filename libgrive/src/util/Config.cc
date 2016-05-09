@@ -46,8 +46,10 @@ Config::Config( const po::variables_map& vm )
 	m_cmd.Add( "dir",		Val(vm.count("dir") > 0
 		? vm["dir"].as<std::string>()
 		: "" ) ) ;
-	if ( vm.count("ignore") > 0 )
+	if ( vm.count( "ignore" ) > 0 )
 		m_cmd.Add( "ignore",	Val( vm["ignore"].as<std::string>() ) );
+	m_cmd.Add( "no-remote-new", Val( vm.count( "no-remote-new" ) > 0 || vm.count( "upload-only" ) > 0 ) );
+	m_cmd.Add( "upload-only", Val( vm.count( "upload-only" ) > 0 ) );
 	
 	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
 	m_file	= Read( ) ;

@@ -118,6 +118,8 @@ int Main( int argc, char **argv )
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
+		( "upload-only,u", "Do not download anything from Google Drive, only upload local changes" )
+		( "no-remote-new,n", "Download only files that are changed in Google Drive and already exist locally" )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
 		( "ignore",		po::value<std::string>(), "Perl RegExp to ignore files (matched against relative paths, remembered for next runs)." )

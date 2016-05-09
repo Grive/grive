@@ -70,6 +70,10 @@ Enjoy!
 
 ## Version History
 
+### Grive2 v0.5.1-dev
+
+- no-remote-new and upload-only modes
+
 ### Grive2 v0.5
 
 - Much faster and more correct synchronisation using local modification time and checksum cache (similar to git index)
