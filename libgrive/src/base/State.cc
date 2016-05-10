@@ -51,7 +51,14 @@ State::State( const fs::path& filename, const Val& options  ) :
 		{
 			// "-s" is internally converted to an ignore regexp
 			const boost::regex esc( "[.^$|()\\[\\]{}*+?\\\\]" );
-			std::string ign = "^(?!"+regex_replace( m_dir, esc, "\\\\&", boost::format_sed )+"(/|$))";
+			m_dir = regex_replace( m_dir, esc, "\\\\&", boost::format_sed );
+			size_t pos = 0;
+			while ( ( pos = m_dir.find( '/', pos ) ) != std::string::npos )
+			{
+				m_dir = m_dir.substr( 0, pos ) + "$|" + m_dir;
+				pos = pos*2 + 3;
+			}
+			std::string ign = "^(?!"+m_dir+"(/|$))";
 			m_ign = ign;
 		}
 	}
