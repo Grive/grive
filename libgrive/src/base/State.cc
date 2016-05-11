@@ -41,6 +41,8 @@ State::State( const fs::path& filename, const Val& options  ) :
 	// the "-f" option will make grive always think remote is newer
 	m_force = options.Has( "force" ) ? options["force"].Bool() : false ;
 	
+	std::string m_orig_ign = m_ign;
+	m_ign = "";
 	if ( options.Has( "ignore" ) && options["ignore"].Str() != m_ign )
 		m_ign = options["ignore"].Str();
 	else if ( options.Has( "dir" ) )
@@ -62,7 +64,8 @@ State::State( const fs::path& filename, const Val& options  ) :
 			m_ign = ign;
 		}
 	}
-	
+
+	m_ign_changed = m_orig_ign != "" && m_orig_ign != m_ign;
 	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
 }
 
@@ -120,18 +123,24 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 
 	for( Val::Object::iterator i = leftover.begin(); i != leftover.end(); i++ )
 	{
-		// Restore state of locally deleted files
-		Resource *c = folder->FindChild( i->first ) ;
-		if ( !c )
+		std::string path = folder->IsRoot() ? i->first : ( folder->RelPath() / i->first ).string();
+		if ( IsIgnore( path ) )
+			Log( "file %1% is ignored by grive", path, log::verbose ) ;
+		else
 		{
-			c = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
-			folder->AddChild( c ) ;
-			m_res.Insert( c ) ;
+			// Restore state of locally deleted files
+			Resource *c = folder->FindChild( i->first ) ;
+			if ( !c )
+			{
+				c = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
+				folder->AddChild( c ) ;
+				m_res.Insert( c ) ;
+			}
+			Val& rec = tree.Item( i->first );
+			if ( m_force || m_ign_changed )
+				rec.Del( "srv_time" );
+			c->FromDeleted( rec );
 		}
-		Val& rec = tree.Item( i->first );
-		if ( m_force )
-			rec.Del( "srv_time" );
-		c->FromDeleted( rec );
 	}
 }
 

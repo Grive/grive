@@ -73,6 +73,8 @@ Enjoy!
 ### Grive2 v0.5.1-dev
 
 - no-remote-new and upload-only modes
+- ignore regexp does not persist anymore (note that Grive will still track it to not
+  accidentally delete remote files when changing ignore regexp)
 
 ### Grive2 v0.5
 

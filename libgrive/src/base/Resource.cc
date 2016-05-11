@@ -525,7 +525,7 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 	
 	case local_deleted :
 		Log( "sync %1% deleted in local. deleting remote", path, log::info ) ;
-		if ( syncer )
+		if ( syncer && !options["no-delete-remote"].Bool() )
 		{
 			syncer->DeleteRemote( this ) ;
 			DeleteIndex() ;

@@ -78,6 +78,7 @@ private :
 	boost::regex		m_ign_re ;
 	Val					m_st ;
 	bool				m_force ;
+	bool				m_ign_changed ;
 	
 	std::list<Entry>	m_unresolved ;
 } ;
