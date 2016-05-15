@@ -123,6 +123,8 @@ int Main( int argc, char **argv )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
 		( "ignore",		po::value<std::string>(), "Perl RegExp to ignore files (matched against relative paths, remembered for next runs)." )
+		( "upload-speed,U", po::value<unsigned>(), "Limit upload speed in kbytes per second" )
+		( "download-speed,D", po::value<unsigned>(), "Limit download speed in kbytes per second" )
 	;
 	
 	po::variables_map vm;
@@ -194,6 +196,11 @@ int Main( int argc, char **argv )
 	OAuth2 token( http.get(), refresh_token, client_id, client_secret ) ;
 	AuthAgent agent( token, http.get() ) ;
 	v2::Syncer2 syncer( &agent );
+
+	if ( vm.count( "upload-speed" ) > 0 )
+		agent.SetUploadSpeed( vm["upload-speed"].as<unsigned>() * 1000 );
+	if ( vm.count( "download-speed" ) > 0 )
+		agent.SetDownloadSpeed( vm["download-speed"].as<unsigned>() * 1000 );
 
 	Drive drive( &syncer, config.GetAll() ) ;
 	drive.DetectChanges() ;

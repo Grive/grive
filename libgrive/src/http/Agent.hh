@@ -34,6 +34,9 @@ class Header ;
 
 class Agent
 {
+protected:
+	unsigned mMaxUpload, mMaxDownload ;
+
 public :
 	virtual ~Agent() {}
 
@@ -69,6 +72,9 @@ public :
 		SeekStream			*in,
 		DataStream			*dest,
 		const Header&		hdr ) = 0 ;
+	
+	virtual void SetUploadSpeed( unsigned kbytes ) ;
+	virtual void SetDownloadSpeed( unsigned kbytes ) ;
 	
 	virtual std::string LastError() const = 0 ;
 	virtual std::string LastErrorHeaders() const = 0 ;

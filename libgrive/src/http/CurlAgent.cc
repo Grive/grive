@@ -86,6 +86,10 @@ void CurlAgent::Init()
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERFUNCTION,	&CurlAgent::HeaderCallback ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADERDATA,		this ) ;
 	::curl_easy_setopt( m_pimpl->curl, CURLOPT_HEADER,			0L ) ;
+	if ( mMaxUpload > 0 )
+		::curl_easy_setopt( m_pimpl->curl, CURLOPT_MAX_SEND_SPEED_LARGE, mMaxUpload ) ;
+	if ( mMaxDownload > 0 )
+		::curl_easy_setopt( m_pimpl->curl, CURLOPT_MAX_RECV_SPEED_LARGE, mMaxDownload ) ;
 	m_pimpl->error = false;
 	m_pimpl->error_headers = "";
 	m_pimpl->error_data = "";

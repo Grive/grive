@@ -54,6 +54,9 @@ public :
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 
+	void SetUploadSpeed( unsigned kbytes ) ;
+	void SetDownloadSpeed( unsigned kbytes ) ;
+
 private :
 	http::Header AppendHeader( const http::Header& hdr ) const ;
 	bool CheckRetry( long response ) ;

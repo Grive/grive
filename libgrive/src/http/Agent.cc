@@ -64,4 +64,14 @@ long Agent::Post(
 	return Request( "POST", url, &s, dest, h );
 }
 
+void Agent::SetUploadSpeed( unsigned kbytes )
+{
+	mMaxUpload = kbytes;
+}
+
+void Agent::SetDownloadSpeed( unsigned kbytes )
+{
+	mMaxDownload = kbytes;
+}
+
 } } // end of namespace

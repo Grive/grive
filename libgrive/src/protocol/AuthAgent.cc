@@ -47,6 +47,16 @@ void AuthAgent::SetLog( http::ResponseLog *log )
 	return m_agent->SetLog( log );
 }
 
+void AuthAgent::SetUploadSpeed( unsigned kbytes )
+{
+	m_agent->SetUploadSpeed( kbytes );
+}
+
+void AuthAgent::SetDownloadSpeed( unsigned kbytes )
+{
+	m_agent->SetDownloadSpeed( kbytes );
+}
+
 http::Header AuthAgent::AppendHeader( const http::Header& hdr ) const
 {
 	http::Header h(hdr) ;
