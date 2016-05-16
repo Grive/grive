@@ -186,7 +186,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 	// remote checksum unknown, assume the file is not changed in remote
 	else if ( remote.MD5().empty() )
 	{
-		Log( "file %1% has unknown checksum in remote. assuned in sync",
+		Log( "file %1% has unknown checksum in remote. assumed in sync",
 			Path(), log::verbose ) ;
 		m_state = sync ;
 	}
