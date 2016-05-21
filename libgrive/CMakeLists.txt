@@ -44,6 +44,7 @@ endif ( ZLIB_FOUND )
 include_directories(
 	${libgrive_SOURCE_DIR}/src
 	${libgrive_SOURCE_DIR}/test
+	${Boost_INCLUDE_DIRS}
 	${OPT_INCS}
 	${YAJL_INCLUDE_DIRS}
 )
