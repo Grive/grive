@@ -32,6 +32,7 @@ namespace gr {
 using namespace http ;
 
 AuthAgent::AuthAgent( OAuth2& auth, Agent *real_agent ) :
+	Agent(),
 	m_auth	( auth ),
 	m_agent	( real_agent )
 {

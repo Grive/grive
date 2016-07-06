@@ -38,6 +38,7 @@ protected:
 	unsigned mMaxUpload, mMaxDownload ;
 
 public :
+	Agent() ;
 	virtual ~Agent() {}
 
 	virtual ResponseLog* GetLog() const = 0 ;

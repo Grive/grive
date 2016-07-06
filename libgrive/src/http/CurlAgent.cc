@@ -72,7 +72,7 @@ struct CurlAgent::Impl
 
 static struct curl_slist* SetHeader( CURL* handle, const Header& hdr );
 
-CurlAgent::CurlAgent() :
+CurlAgent::CurlAgent() : Agent(),
 	m_pimpl( new Impl )
 {
 	m_pimpl->curl = ::curl_easy_init();

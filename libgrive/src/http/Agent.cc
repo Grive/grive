@@ -25,6 +25,11 @@ namespace gr {
 
 namespace http {
 
+Agent::Agent()
+{
+	mMaxUpload = mMaxDownload = 0;
+}
+
 long Agent::Put(
 	const std::string&	url,
 	const std::string&	data,
