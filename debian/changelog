@@ -1,3 +1,9 @@
+grive2 (0.5.1+git20160706) unstable; urgency=medium
+
+  * Newer dev version
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Wed, 13 Jul 2016 21:12:55 +0300
+
 grive2 (0.5+git20160114) unstable; urgency=medium
 
   * Newer release, with support for faster sync and rename detection
