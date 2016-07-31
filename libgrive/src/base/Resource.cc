@@ -52,7 +52,8 @@ Resource::Resource( const fs::path& root_folder ) :
 	m_is_editable( true ),
 	m_parent	( 0 ),
 	m_state		( sync ),
-	m_json		( NULL )
+	m_json		( NULL ),
+	m_local_exists( true )
 {
 }
 
@@ -62,7 +63,8 @@ Resource::Resource( const std::string& name, const std::string& kind ) :
 	m_is_editable( true ),
 	m_parent	( 0 ),
 	m_state		( unknown ),
-	m_json		( NULL )
+	m_json		( NULL ),
+	m_local_exists( false )
 {
 }
 
@@ -87,15 +89,20 @@ void Resource::FromRemoteFolder( const Entry& remote )
 		Log( "folder %1% is read-only", path, log::verbose ) ;
 	
 	// already sync
-	if ( fs::is_directory( path ) )
+	if ( m_local_exists && m_kind == "folder" )
 	{
 		Log( "folder %1% is in sync", path, log::verbose ) ;
 		m_state = sync ;
 	}
-	else if ( fs::exists( path ) )
+	else if ( m_local_exists && m_kind == "file" )
 	{
 		// TODO: handle type change
 		Log( "%1% changed from folder to file", path, log::verbose ) ;
+		m_state = sync ;
+	}
+	else if ( m_local_exists && m_kind == "bad" )
+	{
+		Log( "%1% inaccessible", path, log::verbose ) ;
 		m_state = sync ;
 	}
 	else if ( remote.MTime().Sec() > m_mtime.Sec() ) // FIXME only seconds are stored in local index
@@ -163,9 +170,13 @@ void Resource::FromRemoteFile( const Entry& remote )
 		m_state = m_parent->m_state ;
 	}
 
+	else if ( m_kind == "bad" )
+	{
+		m_state = sync;
+	}
+
 	// local not exists
-	// FIXME: Remove additional stat() call here
-	else if ( !fs::exists( path ) )
+	else if ( !m_local_exists )
 	{
 		Trace( "file %1% change stamp = %2%", Path(), remote.ChangeStamp() ) ;
 		
@@ -246,10 +257,23 @@ void Resource::FromLocal( Val& state )
 	{
 		fs::path path = Path() ;
 		bool is_dir;
-		os::Stat( path, &m_ctime, NULL, &is_dir ) ;
+		try
+		{
+			os::Stat( path, &m_ctime, NULL, &is_dir ) ;
+		}
+		catch ( os::Error &e )
+		{
+			// invalid symlink, unreadable file or something else
+			int const* eno = boost::get_error_info< boost::errinfo_errno >(e);
+			Log( "Error accessing %1%: %2%; skipping file", path.string(), strerror( *eno ), log::warning );
+			m_state = sync;
+			m_kind = "bad";
+			return;
+		}
 
 		m_name = path.filename().string() ;
 		m_kind = is_dir ? "folder" : "file";
+		m_local_exists = true;
 
 		bool is_changed;
 		if ( state.Has( "ctime" ) && (u64_t) m_ctime.Sec() <= state["ctime"].U64() &&

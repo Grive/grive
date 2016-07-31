@@ -162,6 +162,7 @@ private :
 
 	State					m_state ;
 	Val*					m_json ;
+	bool					m_local_exists ;
 } ;
 
 } // end of namespace gr::v1
