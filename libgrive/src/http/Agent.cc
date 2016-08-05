@@ -52,9 +52,10 @@ long Agent::Put(
 long Agent::Get(
 	const std::string& 	url,
 	DataStream			*dest,
-	const Header&		hdr )
+	const Header&		hdr,
+	u64_t			downloadFileBytes )
 {
-	return Request( "GET", url, NULL, dest, hdr );
+	return Request( "GET", url, NULL, dest, hdr, downloadFileBytes );
 }
 
 long Agent::Post(

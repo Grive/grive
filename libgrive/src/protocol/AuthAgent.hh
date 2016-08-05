@@ -44,7 +44,8 @@ public :
 		const std::string&	url,
 		SeekStream			*in,
 		DataStream			*dest,
-		const http::Header&	hdr ) ;
+		const http::Header&	hdr,
+		u64_t			downloadFileBytes = 0 ) ;
 	
 	std::string LastError() const ;
 	std::string LastErrorHeaders() const ;
@@ -56,6 +57,8 @@ public :
 
 	void SetUploadSpeed( unsigned kbytes ) ;
 	void SetDownloadSpeed( unsigned kbytes ) ;
+
+	void SetProgressReporter( Progress *progress ) ;
 
 private :
 	http::Header AppendHeader( const http::Header& hdr ) const ;

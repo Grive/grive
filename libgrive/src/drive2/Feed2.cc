@@ -42,7 +42,7 @@ bool Feed2::GetNext( http::Agent *http )
 		return false ;
 	
 	http::ValResponse out ;
-	http->Get( m_next, &out, http::Header() ) ;
+	http->Get( m_next, &out, http::Header(), 0 ) ;
 	Val m_content = out.Response() ;
 	
 	Val::Array items = m_content["items"].AsArray() ;

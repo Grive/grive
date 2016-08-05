@@ -187,7 +187,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 		{
 			Log( "file %1% is created in remote (change %2%)", path,
 				remote.ChangeStamp(), log::verbose ) ;
-			
+			m_size = remote.Size();
 			m_state = remote_new ;
 		}
 		else
@@ -214,6 +214,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 		if ( remote.MTime().Sec() > m_mtime.Sec() )
 		{
 			Log( "file %1% is changed in remote", path, log::verbose ) ;
+			m_size = remote.Size();
 			m_state = remote_changed ;
 		}
 		

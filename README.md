@@ -1,6 +1,6 @@
 # Grive2 0.5.1-dev
 
-14 Jan 2016, Vitaliy Filippov
+28 Sep 2016, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -91,6 +91,7 @@ Grive uses cmake to build. Basic install sequence is
 - added options to limit upload and download speed
 - faster upload of new and changed files. now Grive uploads files without first calculating
   md5 checksum when file is created locally or when its size changes.
+- added -P/--progress-bar option to print ASCII progress bar for each processed file (pull request by @svartkanin)
 
 ### Grive2 v0.5
 

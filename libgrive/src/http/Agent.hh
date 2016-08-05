@@ -22,6 +22,7 @@
 #include <string>
 #include "ResponseLog.hh"
 #include "util/Types.hh"
+#include "util/Progress.hh"
 
 namespace gr {
 
@@ -59,7 +60,8 @@ public :
 	virtual long Get(
 		const std::string& 	url,
 		DataStream			*dest,
-		const Header&		hdr ) ;
+		const Header&		hdr,
+		u64_t			downloadFileBytes = 0 ) ;
 	
 	virtual long Post(
 		const std::string& 	url,
@@ -72,7 +74,8 @@ public :
 		const std::string&	url,
 		SeekStream			*in,
 		DataStream			*dest,
-		const Header&		hdr ) = 0 ;
+		const Header&		hdr,
+		u64_t			downloadFileBytes = 0 ) = 0 ;
 	
 	virtual void SetUploadSpeed( unsigned kbytes ) ;
 	virtual void SetDownloadSpeed( unsigned kbytes ) ;
@@ -84,6 +87,8 @@ public :
 	
 	virtual std::string Escape( const std::string& str ) = 0 ;
 	virtual std::string Unescape( const std::string& str ) = 0 ;
+
+	virtual void SetProgressReporter( Progress* ) = 0;
 } ;
 
 } } // end of namespace

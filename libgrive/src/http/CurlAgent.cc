@@ -28,9 +28,6 @@
 
 #include <boost/throw_exception.hpp>
 
-// dependent libraries
-#include <curl/curl.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -68,6 +65,7 @@ struct CurlAgent::Impl
 	std::string		error_headers ;
 	std::string		error_data ;
 	DataStream		*dest ;
+	u64_t			total_download, total_upload ;
 } ;
 
 static struct curl_slist* SetHeader( CURL* handle, const Header& hdr );
@@ -94,6 +92,7 @@ void CurlAgent::Init()
 	m_pimpl->error_headers = "";
 	m_pimpl->error_data = "";
 	m_pimpl->dest = NULL;
+	m_pimpl->total_download = m_pimpl->total_upload = 0;
 }
 
 CurlAgent::~CurlAgent()
@@ -109,6 +108,11 @@ ResponseLog* CurlAgent::GetLog() const
 void CurlAgent::SetLog(ResponseLog *log)
 {
 	m_log.reset( log );
+}
+
+void CurlAgent::SetProgressReporter(Progress *progress)
+{
+	m_pb = progress;
 }
 
 std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis )
@@ -131,7 +135,7 @@ std::size_t CurlAgent::HeaderCallback( void *ptr, size_t size, size_t nmemb, Cur
 	if ( pos != line.npos )
 	{
 		std::size_t end_pos = line.find( "\r\n", pos ) ;
-		pthis->m_pimpl->location = line.substr( loc.size(), end_pos - loc.size() ) ;
+		pthis->m_pimpl->location = line.substr( pos+loc.size(), end_pos - loc.size() ) ;
 	}
 	
 	return size*nmemb ;
@@ -142,6 +146,7 @@ std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, CurlAgent 
 	assert( pthis != 0 ) ;
 	if ( pthis->m_log.get() )
 		pthis->m_log->Write( (const char*)ptr, size*nmemb );
+
 	if ( pthis->m_pimpl->error && pthis->m_pimpl->error_data.size() < 65536 )
 	{
 		// Do not feed error responses to destination stream
@@ -149,6 +154,19 @@ std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, CurlAgent 
 		return size * nmemb ;
 	}
 	return pthis->m_pimpl->dest->Write( static_cast<char*>(ptr), size * nmemb ) ;
+}
+
+int CurlAgent::progress_callback( CurlAgent *pthis, curl_off_t totalDownload, curl_off_t finishedDownload, curl_off_t totalUpload, curl_off_t finishedUpload )
+{
+	// Only report download progress when set explicitly
+	totalDownload = pthis->m_pimpl->total_download;
+	if ( !totalUpload )
+		totalUpload = pthis->m_pimpl->total_upload;
+	pthis->m_pb->reportProgress(
+		totalDownload > 0 ? totalDownload : totalUpload,
+		totalDownload > 0 ? finishedDownload : finishedUpload
+	);
+	return 0;
 }
 
 long CurlAgent::ExecCurl(
@@ -167,6 +185,10 @@ long CurlAgent::ExecCurl(
 	m_pimpl->dest = dest ;
 
 	struct curl_slist *slist = SetHeader( m_pimpl->curl, hdr ) ;
+
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
 
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
@@ -202,11 +224,13 @@ long CurlAgent::Request(
 	const std::string&	url,
 	SeekStream			*in,
 	DataStream			*dest,
-	const Header&		hdr )
+	const Header&		hdr,
+	u64_t			downloadFileBytes )
 {
 	Trace("HTTP %1% \"%2%\"", method, url ) ;
 
 	Init() ;
+	m_pimpl->total_download = downloadFileBytes ;
 	CURL *curl = m_pimpl->curl ;
 
 	// set common options

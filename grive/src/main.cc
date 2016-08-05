@@ -18,6 +18,7 @@
 */
 
 #include "util/Config.hh"
+#include "util/ProgressBar.hh"
 
 #include "base/Drive.hh"
 #include "drive2/Syncer2.hh"
@@ -126,6 +127,7 @@ int Main( int argc, char **argv )
 		( "ignore",		po::value<std::string>(), "Perl RegExp to ignore files (matched against relative paths)." )
 		( "upload-speed,U", po::value<unsigned>(), "Limit upload speed in kbytes per second" )
 		( "download-speed,D", po::value<unsigned>(), "Limit download speed in kbytes per second" )
+		( "progress-bar,P", "Enable progress bar for upload/download of files")
 	;
 	
 	po::variables_map vm;
@@ -155,6 +157,13 @@ int Main( int argc, char **argv )
 	std::unique_ptr<http::Agent> http( new http::CurlAgent );
 	if ( vm.count( "log-http" ) )
 		http->SetLog( new http::ResponseLog( vm["log-http"].as<std::string>(), ".txt" ) );
+
+	std::unique_ptr<ProgressBar> pb;
+	if ( vm.count( "progress-bar" ) )
+	{
+		pb.reset( new ProgressBar() );
+		http->SetProgressReporter( pb.get() );
+	}
 
 	if ( vm.count( "auth" ) )
 	{
@@ -208,7 +217,13 @@ int Main( int argc, char **argv )
 
 	if ( vm.count( "dry-run" ) == 0 )
 	{
+		// The progress bar should just be enabled when actual file transfers take place
+		if ( pb )
+			pb->setShowProgressBar( true ) ;
 		drive.Update() ;
+		if ( pb )
+			pb->setShowProgressBar( false ) ;
+
 		drive.SaveState() ;
 	}
 	else

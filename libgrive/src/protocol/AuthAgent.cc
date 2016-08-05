@@ -48,6 +48,11 @@ void AuthAgent::SetLog( http::ResponseLog *log )
 	return m_agent->SetLog( log );
 }
 
+void AuthAgent::SetProgressReporter( Progress *progress )
+{
+	m_agent->SetProgressReporter( progress );
+}
+
 void AuthAgent::SetUploadSpeed( unsigned kbytes )
 {
 	m_agent->SetUploadSpeed( kbytes );
@@ -71,7 +76,8 @@ long AuthAgent::Request(
 	const std::string&	url,
 	SeekStream			*in,
 	DataStream			*dest,
-	const http::Header&	hdr )
+	const http::Header&	hdr,
+	u64_t			downloadFileBytes )
 {
 	long response;
 	Header auth;
@@ -80,7 +86,7 @@ long AuthAgent::Request(
 		auth = AppendHeader( hdr );
 		if ( in )
 			in->Seek( 0, 0 );
-		response = m_agent->Request( method, url, in, dest, auth );
+		response = m_agent->Request( method, url, in, dest, auth, downloadFileBytes );
 	} while ( CheckRetry( response ) );
 	return CheckHttpResponse( response, url, auth );
 }

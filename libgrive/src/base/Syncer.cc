@@ -41,7 +41,7 @@ http::Agent* Syncer::Agent() const
 void Syncer::Download( Resource *res, const fs::path& file )
 {
 	http::Download dl( file.string(), http::Download::NoChecksum() ) ;
-	long r = m_http->Get( res->ContentSrc(), &dl, http::Header() ) ;
+	long r = m_http->Get( res->ContentSrc(), &dl, http::Header(), res->Size() ) ;
 	if ( r <= 400 )
 	{
 		if ( res->ServerTime() != DateTime() )
