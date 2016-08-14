@@ -11,6 +11,7 @@ find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
 find_package(ZLIB)
+find_package(INotifyTools REQUIRED)
 
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
@@ -88,6 +89,7 @@ target_link_libraries( grive
 	${Boost_LIBRARIES}
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
+	${INOTIFYTOOLS_LIBRARY}
 	${OPT_LIBS}
 )
 

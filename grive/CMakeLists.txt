@@ -17,6 +17,7 @@ add_executable( grive_executable
 
 target_link_libraries( grive_executable
 	${Boost_LIBRARIES}
+	${INotifyTools_LIBRARY}
     grive
 )
 
