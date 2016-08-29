@@ -22,6 +22,24 @@ There are a few things that Grive does not do at the moment:
 
 These may be added in the future, possibly the next release.
 
+When Grive is run for the first time, you should use the "-a" argument to grant
+permission to Grive to access to your Google Drive. A URL should be printed.
+Go to the link. You will need to login to your Google account if you haven't
+done so. After granting the permission to Grive, the browser will show you
+an authenication code. Copy-and-paste that to the standard input of Grive.
+
+If everything works fine, Grive will create .grive and .grive_state files in your
+current directory. It will also start downloading files from your Google Drive to
+your current directory.
+
+Enjoy!
+
+## Installation
+
+For the detailed instructions, see http://yourcmc.ru/wiki/Grive2#Installation
+
+### Install dependencies
+
 You need the following libraries:
 
 - yajl 2.x
@@ -46,6 +64,15 @@ FreeBSD:
 
     pkg install git cmake boost-libs yajl libgcrypt pkgconf cppunit libbfd
 
+### Build Debian packages
+
+On a Debian/Ubuntu/Linux Mint you can use `dpkg-buildpackage` utility from `dpkg-dev` package
+to build grive. Just clone the repository, `cd` into it and run
+
+    dpkg-buildpackage -j4
+
+### Manual build
+
 Grive uses cmake to build. Basic install sequence is
 
     mkdir build
@@ -53,20 +80,6 @@ Grive uses cmake to build. Basic install sequence is
     cmake ..
     make -j4
     sudo make install
-
-For the detailed instructions, see http://yourcmc.ru/wiki/Grive2#Installation
-
-When Grive is run for the first time, you should use the "-a" argument to grant
-permission to Grive to access to your Google Drive. A URL should be printed.
-Go to the link. You will need to login to your Google account if you haven't
-done so. After granting the permission to Grive, the browser will show you
-an authenication code. Copy-and-paste that to the standard input of Grive.
-
-If everything works fine, Grive will create .grive and .grive_state files in your
-current directory. It will also start downloading files from your Google Drive to
-your current directory.
-
-Enjoy!
 
 ## Version History
 
