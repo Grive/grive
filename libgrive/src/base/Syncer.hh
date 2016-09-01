@@ -55,9 +55,9 @@ public :
 	virtual bool Create( Resource *res ) = 0;
 	virtual bool Move( Resource* res, Resource* newParent, std::string newFilename ) = 0;
 
-	virtual std::auto_ptr<Feed> GetFolders() = 0;
-	virtual std::auto_ptr<Feed> GetAll() = 0;
-	virtual std::auto_ptr<Feed> GetChanges( long min_cstamp ) = 0;
+	virtual std::unique_ptr<Feed> GetFolders() = 0;
+	virtual std::unique_ptr<Feed> GetAll() = 0;
+	virtual std::unique_ptr<Feed> GetChanges( long min_cstamp ) = 0;
 	virtual long GetChangeStamp( long min_cstamp ) = 0;
 
 protected:

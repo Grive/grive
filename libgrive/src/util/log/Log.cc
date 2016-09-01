@@ -40,12 +40,12 @@ public :
 	}
 } ;
 
-LogBase* LogBase::Inst( std::auto_ptr<LogBase> log )
+LogBase* LogBase::Inst( LogBase *log )
 {
-	static std::auto_ptr<LogBase> inst( new MockLog ) ;
+	static std::unique_ptr<LogBase> inst( new MockLog ) ;
 	
-	if ( log.get() != 0 )
-		inst = log ;
+	if ( log != 0 )
+		inst.reset( log ) ;
 		
 	assert( inst.get() != 0 ) ;
 	return inst.get() ;

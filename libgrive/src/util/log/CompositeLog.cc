@@ -39,7 +39,7 @@ CompositeLog::~CompositeLog()
 	std::for_each( m_logs.begin(), m_logs.end(), Destroy() ) ;
 }
 	
-LogBase* CompositeLog::Add( std::auto_ptr<LogBase> log )
+LogBase* CompositeLog::Add( std::unique_ptr<LogBase>& log )
 {
 	m_logs.push_back( log.get() ) ;
 	return log.release() ;

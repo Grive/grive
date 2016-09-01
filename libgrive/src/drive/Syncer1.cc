@@ -239,14 +239,14 @@ bool Syncer1::Upload( Resource *res,
 	return true ;
 }
 
-std::auto_ptr<Feed> Syncer1::GetFolders()
+std::unique_ptr<Feed> Syncer1::GetFolders()
 {
-	return std::auto_ptr<Feed>( new Feed1( feed_base + "/-/folder?max-results=50&showroot=true" ) );
+	return std::unique_ptr<Feed>( new Feed1( feed_base + "/-/folder?max-results=50&showroot=true" ) );
 }
 
-std::auto_ptr<Feed> Syncer1::GetAll()
+std::unique_ptr<Feed> Syncer1::GetAll()
 {
-	return std::auto_ptr<Feed>( new Feed1( feed_base + "?showfolders=true&showroot=true" ) );
+	return std::unique_ptr<Feed>( new Feed1( feed_base + "?showfolders=true&showroot=true" ) );
 }
 
 std::string ChangesFeed( int changestamp )
@@ -255,9 +255,9 @@ std::string ChangesFeed( int changestamp )
 	return changestamp > 0 ? ( feed % changestamp ).str() : feed_changes ;
 }
 
-std::auto_ptr<Feed> Syncer1::GetChanges( long min_cstamp )
+std::unique_ptr<Feed> Syncer1::GetChanges( long min_cstamp )
 {
-	return std::auto_ptr<Feed>( new Feed1( ChangesFeed( min_cstamp ) ) );
+	return std::unique_ptr<Feed>( new Feed1( ChangesFeed( min_cstamp ) ) );
 }
 
 long Syncer1::GetChangeStamp( long min_cstamp )

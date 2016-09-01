@@ -66,12 +66,13 @@ void InitGCrypt()
 
 void InitLog( const po::variables_map& vm )
 {
-	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
-	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
+	std::unique_ptr<log::CompositeLog> comp_log( new log::CompositeLog ) ;
+	std::unique_ptr<LogBase> def_log( new log::DefaultLog );
+	LogBase* console_log = comp_log->Add( def_log ) ;
 
 	if ( vm.count( "log" ) )
 	{
-		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
+		std::unique_ptr<LogBase> file_log( new log::DefaultLog( vm["log"].as<std::string>() ) ) ;
 		file_log->Enable( log::debug ) ;
 		file_log->Enable( log::verbose ) ;
 		file_log->Enable( log::info ) ;
@@ -96,7 +97,7 @@ void InitLog( const po::variables_map& vm )
 		console_log->Enable( log::verbose ) ;
 		console_log->Enable( log::debug ) ;
 	}
-	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
+	LogBase::Inst( comp_log.release() ) ;
 }
 
 int Main( int argc, char **argv )
@@ -151,7 +152,7 @@ int Main( int argc, char **argv )
 	
 	Log( "config file name %1%", config.Filename(), log::verbose );
 
-	std::auto_ptr<http::Agent> http( new http::CurlAgent );
+	std::unique_ptr<http::Agent> http( new http::CurlAgent );
 	if ( vm.count( "log-http" ) )
 		http->SetLog( new http::ResponseLog( vm["log-http"].as<std::string>(), ".txt" ) );
 

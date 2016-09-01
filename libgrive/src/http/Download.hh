@@ -48,7 +48,7 @@ public :
 	
 private :
 	File						m_file ;
-	std::auto_ptr<crypt::MD5>	m_crypt ;
+	std::unique_ptr<crypt::MD5>	m_crypt ;
 } ;
 
 } } // end of namespace

@@ -72,8 +72,8 @@ private :
 
 private :
 	struct Impl ;
-	std::auto_ptr<Impl>	m_pimpl ;
-	std::auto_ptr<ResponseLog>	m_log ;
+	std::unique_ptr<Impl>	m_pimpl ;
+	std::unique_ptr<ResponseLog>	m_log ;
 } ;
 
 } } // end of namespace

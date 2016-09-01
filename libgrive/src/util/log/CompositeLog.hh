@@ -32,7 +32,7 @@ public :
 	CompositeLog() ;
 	~CompositeLog() ;
 	
-	LogBase* Add( std::auto_ptr<LogBase> log ) ;
+	LogBase* Add( std::unique_ptr<LogBase>& log ) ;
 
 	void Log( const log::Fmt& msg, log::Serverity s ) ;
 

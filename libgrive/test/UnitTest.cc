@@ -35,7 +35,7 @@ int main( int argc, char **argv )
 {
 	using namespace grut ;
 	
-	gr::LogBase::Inst( std::auto_ptr<gr::LogBase>(new gr::log::DefaultLog) ) ;
+	gr::LogBase::Inst( new gr::log::DefaultLog ) ;
 	
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest( Entry1Test::suite( ) ) ;

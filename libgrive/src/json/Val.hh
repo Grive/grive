@@ -130,7 +130,7 @@ private :
 	template <typename T>
 	struct Impl ;
 	
-	std::auto_ptr<Base>	m_base ;
+	std::unique_ptr<Base>	m_base ;
 
 private :
 	void Select( const Object& obj, const std::string& key, std::vector<Val>& result ) const ;

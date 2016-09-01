@@ -81,7 +81,7 @@ void Drive::DetectChanges()
 	m_state.FromLocal( m_root ) ;
 
 	Log( "Reading remote server file list", log::info ) ;
-	std::auto_ptr<Feed> feed = m_syncer->GetAll() ;
+	std::unique_ptr<Feed> feed = m_syncer->GetAll() ;
 
 	while ( feed->GetNext( m_syncer->Agent() ) )
 	{
@@ -101,7 +101,7 @@ void Drive::ReadChanges()
 	{
 		Trace( "previous change stamp is %1%", prev_stamp ) ;
 		Log( "Detecting changes from last sync", log::info ) ;
-		std::auto_ptr<Feed> feed = m_syncer->GetChanges( prev_stamp+1 ) ;
+		std::unique_ptr<Feed> feed = m_syncer->GetChanges( prev_stamp+1 ) ;
 		while ( feed->GetNext( m_syncer->Agent() ) )
 		{
 			std::for_each(

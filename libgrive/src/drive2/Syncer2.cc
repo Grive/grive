@@ -211,14 +211,14 @@ bool Syncer2::Upload( Resource *res, bool new_rev )
 	return true ;
 }
 
-std::auto_ptr<Feed> Syncer2::GetFolders()
+std::unique_ptr<Feed> Syncer2::GetFolders()
 {
-	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
+	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
 }
 
-std::auto_ptr<Feed> Syncer2::GetAll()
+std::unique_ptr<Feed> Syncer2::GetAll()
 {
-	return std::auto_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse" ) );
+	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse" ) );
 }
 
 std::string ChangesFeed( long changestamp, int maxResults = 1000 )
@@ -227,9 +227,9 @@ std::string ChangesFeed( long changestamp, int maxResults = 1000 )
 	return ( changestamp > 0 ? feed % maxResults % changestamp : feed % maxResults ).str() ;
 }
 
-std::auto_ptr<Feed> Syncer2::GetChanges( long min_cstamp )
+std::unique_ptr<Feed> Syncer2::GetChanges( long min_cstamp )
 {
-	return std::auto_ptr<Feed>( new Feed2( ChangesFeed( min_cstamp ) ) );
+	return std::unique_ptr<Feed>( new Feed2( ChangesFeed( min_cstamp ) ) );
 }
 
 long Syncer2::GetChangeStamp( long min_cstamp )

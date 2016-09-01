@@ -39,9 +39,9 @@ public :
 	bool Create( Resource *res );
 	bool Move( Resource* res, Resource* newParent, std::string newFilename );
 
-	std::auto_ptr<Feed> GetFolders();
-	std::auto_ptr<Feed> GetAll();
-	std::auto_ptr<Feed> GetChanges( long min_cstamp );
+	std::unique_ptr<Feed> GetFolders();
+	std::unique_ptr<Feed> GetAll();
+	std::unique_ptr<Feed> GetChanges( long min_cstamp );
 	long GetChangeStamp( long min_cstamp );
 
 private :
