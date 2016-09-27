@@ -44,6 +44,7 @@ void Entry2::Update( const Val& item )
 	// changestamp only appears in change feed entries
 	m_change_stamp	= is_chg ? item["id"].Int() : -1 ;
 	m_is_removed	= is_chg && item["deleted"].Bool() ;
+	m_size			= 0 ;
 
 	const Val& file = is_chg && !m_is_removed ? item["file"] : item;
 
@@ -75,6 +76,7 @@ void Entry2::Update( const Val& item )
 			else
 			{
 				m_md5			= file["md5Checksum"] ;
+				m_size			= file["fileSize"].U64() ;
 				m_content_src	= file["downloadUrl"] ;
 				// convert to lower case for easy comparison
 				std::transform( m_md5.begin(), m_md5.end(), m_md5.begin(), tolower ) ;

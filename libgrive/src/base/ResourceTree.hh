@@ -36,19 +36,23 @@ namespace details
 	struct ByMD5 {} ;
 	struct ByHref {} ;
 	struct ByIdentity {} ;
+	struct BySize {} ;
 
 	typedef multi_index_container<
 		Resource*,
 		indexed_by<
 			hashed_non_unique<tag<ByHref>,	const_mem_fun<Resource, std::string,	&Resource::SelfHref> >,
 			hashed_non_unique<tag<ByMD5>,	const_mem_fun<Resource, std::string,	&Resource::MD5> >,
+			hashed_non_unique<tag<BySize>,	const_mem_fun<Resource, u64_t,			&Resource::Size> >,
 			hashed_unique<tag<ByIdentity>,	identity<Resource*> >
 		>
 	> Folders ;
 	
 	typedef Folders::index<ByMD5>::type			MD5Map ;
 	typedef Folders::index<ByHref>::type		HrefMap ;
+	typedef Folders::index<BySize>::type		SizeMap ;
 	typedef Folders::index<ByIdentity>::type	Set ;
+	typedef std::pair<SizeMap::iterator, SizeMap::iterator> SizeRange ;
 	typedef std::pair<MD5Map::iterator, MD5Map::iterator> MD5Range ;
 }
 
@@ -70,6 +74,7 @@ public :
 	Resource* FindByHref( const std::string& href ) ;
 	const Resource* FindByHref( const std::string& href ) const ;
 	details::MD5Range FindByMD5( const std::string& md5 ) ;
+	details::SizeRange FindBySize( u64_t size ) ;
 
 	bool ReInsert( Resource *coll ) ;
 	

@@ -36,7 +36,8 @@ Entry::Entry( ) :
 	m_is_dir		( true ),
 	m_resource_id	( "folder:root" ),
 	m_change_stamp	( -1 ),
-	m_is_removed	( false )
+	m_is_removed	( false ),
+	m_size			( 0 )
 {
 }
 
@@ -63,6 +64,11 @@ bool Entry::IsDir() const
 std::string Entry::MD5() const
 {
 	return m_md5 ;
+}
+
+u64_t Entry::Size() const
+{
+	return m_size ;
 }
 
 DateTime Entry::MTime() const

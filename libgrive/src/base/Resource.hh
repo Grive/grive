@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "util/Types.hh"
 #include "util/DateTime.hh"
 #include "util/Exception.hh"
 #include "util/FileSystem.hh"
@@ -108,7 +109,9 @@ public :
 	bool IsInRootTree() const ;
 	bool IsRoot() const ;
 	bool HasID() const ;
+	u64_t Size() const;
 	std::string MD5() const ;
+	std::string GetMD5() ;
 
 	void FromRemote( const Entry& remote ) ;
 	void FromDeleted( Val& state ) ;
@@ -141,6 +144,7 @@ private :
 	void DeleteIndex() ;
 	void SetIndex( bool ) ;
 	
+	bool CheckRename( Syncer* syncer, ResourceTree *res_tree ) ;
 	void SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options ) ;
 
 private :
@@ -149,6 +153,7 @@ private :
 	std::string				m_md5 ;
 	DateTime				m_mtime ;
 	DateTime				m_ctime ;
+	u64_t					m_size ;
 
 	std::string				m_id ;
 	std::string				m_href ;

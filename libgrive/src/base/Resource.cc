@@ -47,6 +47,7 @@ namespace gr {
 Resource::Resource( const fs::path& root_folder ) :
 	m_name		( root_folder.string() ),
 	m_kind		( "folder" ),
+	m_size		( 0 ),
 	m_id		( "folder:root" ),
 	m_href		( "root" ),
 	m_is_editable( true ),
@@ -60,6 +61,7 @@ Resource::Resource( const fs::path& root_folder ) :
 Resource::Resource( const std::string& name, const std::string& kind ) :
 	m_name		( name ),
 	m_kind		( kind ),
+	m_size		( 0 ),
 	m_is_editable( true ),
 	m_parent	( 0 ),
 	m_state		( unknown ),
@@ -149,6 +151,7 @@ void Resource::AssignIDs( const Entry& remote )
 		m_content	= remote.ContentSrc() ;
 		m_is_editable = remote.IsEditable() ;
 		m_etag		= remote.ETag() ;
+		m_md5		= remote.MD5() ;
 	}
 }
 
@@ -193,7 +196,7 @@ void Resource::FromRemoteFile( const Entry& remote )
 			m_state = local_deleted ;
 		}
 	}
-	
+
 	// remote checksum unknown, assume the file is not changed in remote
 	else if ( remote.MD5().empty() )
 	{
@@ -201,16 +204,9 @@ void Resource::FromRemoteFile( const Entry& remote )
 			Path(), log::verbose ) ;
 		m_state = sync ;
 	}
-	
-	// if checksum is equal, no need to compare the mtime
-	else if ( remote.MD5() == m_md5 )
-	{
-		Log( "file %1% is already in sync", Path(), log::verbose ) ;
-		m_state = sync ;
-	}
 
 	// use mtime to check which one is more recent
-	else
+	else if ( remote.Size() != m_size || remote.MD5() != GetMD5() )
 	{
 		assert( m_state != unknown ) ;
 
@@ -230,6 +226,13 @@ void Resource::FromRemoteFile( const Entry& remote )
 		else
 			Trace( "file %1% state is %2%", m_name, m_state ) ;
 	}
+
+	// if checksum is equal, no need to compare the mtime
+	else
+	{
+		Log( "file %1% is already in sync", Path(), log::verbose ) ;
+		m_state = sync ;
+	}
 }
 
 void Resource::FromDeleted( Val& state )
@@ -242,6 +245,8 @@ void Resource::FromDeleted( Val& state )
 		m_md5 = state["md5"];
 	if ( state.Has( "srv_time" ) )
 		m_mtime.Assign( state[ "srv_time" ].U64(), 0 ) ;
+	if ( state.Has( "size" ) )
+		m_size = state[ "size" ].U64();
 	m_state = both_deleted;
 }
 
@@ -259,7 +264,7 @@ void Resource::FromLocal( Val& state )
 		bool is_dir;
 		try
 		{
-			os::Stat( path, &m_ctime, NULL, &is_dir ) ;
+			os::Stat( path, &m_ctime, (off64_t*)&m_size, &is_dir ) ;
 		}
 		catch ( os::Error &e )
 		{
@@ -287,9 +292,9 @@ void Resource::FromLocal( Val& state )
 		{
 			if ( !is_dir )
 			{
-				m_md5 = crypt::MD5::Get( path );
 				// File is changed locally. TODO: Detect conflicts
-				is_changed = !state.Has( "md5" ) || m_md5 != state["md5"].Str();
+				is_changed = ( state.Has( "size" ) && m_size != state["size"].U64() ) ||
+					!state.Has( "md5" ) || GetMD5() != state["md5"].Str();
 			}
 			else
 				is_changed = true;
@@ -479,30 +484,33 @@ void Resource::Sync( Syncer *syncer, ResourceTree *res_tree, const Val& options 
 	}
 }
 
-void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options )
+bool Resource::CheckRename( Syncer* syncer, ResourceTree *res_tree )
 {
-	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
-	assert( IsRoot() || !syncer || m_parent->IsFolder() ) ;
-	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
-	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
-
-	const fs::path path = Path() ;
-
-	// Detect renames
-	if ( !IsFolder() && ( m_state == local_new || m_state == local_deleted ||
-		m_state == remote_new || m_state == remote_deleted ) )
+	if ( !IsFolder() && ( m_state == local_new || m_state == remote_new ) )
 	{
-		details::MD5Range moved = res_tree->FindByMD5( m_md5 );
-		bool is_local = m_state == local_new || m_state == local_deleted;
-		State other;
-		if ( m_state == local_new )
-			other = local_deleted;
-		else if ( m_state == local_deleted )
-			other = local_new;
-		else if ( m_state == remote_new )
-			other = remote_deleted;
-		else
-			other = remote_new;
+		bool is_local = m_state == local_new;
+		State other = is_local ? local_deleted : remote_deleted;
+		if ( is_local )
+		{
+			// First check size index for locally added files
+			details::SizeRange moved = res_tree->FindBySize( m_size );
+			bool found = false;
+			for ( details::SizeMap::iterator i = moved.first ; i != moved.second; i++ )
+			{
+				Resource *m = *i;
+				if ( m->m_state == other )
+				{
+					found = true;
+					break;
+				}
+			}
+			if ( !found )
+			{
+				// Don't check md5 sums if there are no deleted files with same size
+				return false;
+			}
+		}
+		details::MD5Range moved = res_tree->FindByMD5( GetMD5() );
 		for ( details::MD5Map::iterator i = moved.first ; i != moved.second; i++ )
 		{
 			Resource *m = *i;
@@ -530,10 +538,25 @@ void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& opti
 				}
 				from->m_state = both_deleted;
 				to->m_state = sync;
-				return;
+				return true;
 			}
 		}
 	}
+	return false;
+}
+
+void Resource::SyncSelf( Syncer* syncer, ResourceTree *res_tree, const Val& options )
+{
+	assert( !IsRoot() || m_state == sync ) ;	// root is always sync
+	assert( IsRoot() || !syncer || m_parent->IsFolder() ) ;
+	assert( IsRoot() || m_parent->m_state != remote_deleted ) ;
+	assert( IsRoot() || m_parent->m_state != local_deleted ) ;
+
+	const fs::path path = Path() ;
+
+	// Detect renames
+	if ( CheckRename( syncer, res_tree ) )
+		return;
 
 	switch ( m_state )
 	{
@@ -688,6 +711,7 @@ void Resource::SetIndex( bool re_stat )
 	if ( !is_dir )
 	{
 		m_json->Set( "md5", Val( m_md5 ) );
+		m_json->Set( "size", Val( m_size ) );
 		m_json->Del( "tree" );
 	}
 	else
@@ -695,6 +719,7 @@ void Resource::SetIndex( bool re_stat )
 		// add tree item if it does not exist
 		m_json->Item( "tree" );
 		m_json->Del( "md5" );
+		m_json->Del( "size" );
 	}
 }
 
@@ -731,8 +756,25 @@ std::string Resource::StateStr() const
 	return ss.str() ;
 }
 
+u64_t Resource::Size() const
+{
+	return m_size ;
+}
+
 std::string Resource::MD5() const
 {
+	return m_md5 ;
+}
+
+std::string Resource::GetMD5()
+{
+	if ( m_md5.empty() && !IsFolder() && m_local_exists )
+	{
+		// MD5 checksum is calculated lazily and only when really needed:
+		// 1) when a local rename is supposed (when there are a new file and a deleted file of the same size)
+		// 2) when local ctime is changed, but file size isn't
+		m_md5 = crypt::MD5::Get( Path() );
+	}
 	return m_md5 ;
 }
 

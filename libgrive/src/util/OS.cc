@@ -44,7 +44,7 @@ void Stat( const fs::path& filename, DateTime *t, off_t *size, bool *is_dir )
 	Stat( filename.string(), t, size, is_dir ) ;
 }
 
-void Stat( const std::string& filename, DateTime *t, off_t *size, bool *is_dir )
+void Stat( const std::string& filename, DateTime *t, off64_t *size, bool *is_dir )
 {
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
@@ -65,10 +65,10 @@ void Stat( const std::string& filename, DateTime *t, off_t *size, bool *is_dir )
 		*t = DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
 #endif
 	}
-	if (size)
+	if ( size )
 		*size = s.st_size;
-	if (is_dir)
-		*is_dir = S_ISDIR(s.st_mode) ? true : false;
+	if ( is_dir )
+		*is_dir = S_ISDIR( s.st_mode ) ? true : false;
 }
 
 void SetFileTime( const fs::path& filename, const DateTime& t )

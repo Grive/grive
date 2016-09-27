@@ -104,20 +104,21 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 		{
 			// if the Resource object of the child already exists, it should
 			// have been so no need to do anything here
-			Resource *c = folder->FindChild( fname ) ;
+			Resource *c = folder->FindChild( fname ), *c2 = c ;
 			if ( !c )
 			{
-				c = new Resource( fname, "" ) ;
-				folder->AddChild( c ) ;
-				m_res.Insert( c ) ;
+				c2 = new Resource( fname, "" ) ;
+				folder->AddChild( c2 ) ;
 			}
 			leftover.erase( fname );
 			Val& rec = tree.Item( fname );
 			if ( m_force )
 				rec.Del( "srv_time" );
-			c->FromLocal( rec ) ;
-			if ( c->IsFolder() )
-				FromLocal( *i, c, rec.Item( "tree" ) ) ;
+			c2->FromLocal( rec ) ;
+			if ( !c )
+				m_res.Insert( c2 ) ;
+			if ( c2->IsFolder() )
+				FromLocal( *i, c2, rec.Item( "tree" ) ) ;
 		}
 	}
 
@@ -129,17 +130,18 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 		else
 		{
 			// Restore state of locally deleted files
-			Resource *c = folder->FindChild( i->first ) ;
+			Resource *c = folder->FindChild( i->first ), *c2 ;
 			if ( !c )
 			{
-				c = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
-				folder->AddChild( c ) ;
-				m_res.Insert( c ) ;
+				c2 = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
+				folder->AddChild( c2 ) ;
 			}
 			Val& rec = tree.Item( i->first );
 			if ( m_force || m_ign_changed )
 				rec.Del( "srv_time" );
-			c->FromDeleted( rec );
+			c2->FromDeleted( rec );
+			if ( !c )
+				m_res.Insert( c2 ) ;
 		}
 	}
 }

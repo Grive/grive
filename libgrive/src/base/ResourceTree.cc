@@ -105,7 +105,13 @@ MD5Range ResourceTree::FindByMD5( const std::string& md5 )
 	return MD5Range( map.end(), map.end() ) ;
 }
 
-///	Reinsert should be called when the ID/HREF were updated
+SizeRange ResourceTree::FindBySize( u64_t size )
+{
+	SizeMap& map = m_set.get<BySize>() ;
+	return map.equal_range( size );
+}
+
+///	Reinsert should be called when the ID/HREF/MD5 were updated
 bool ResourceTree::ReInsert( Resource *coll )
 {
 	Set& s = m_set.get<ByIdentity>() ;

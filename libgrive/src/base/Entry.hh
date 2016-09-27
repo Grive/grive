@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "util/Types.hh"
 #include "util/DateTime.hh"
 #include "util/FileSystem.hh"
 
@@ -44,6 +45,7 @@ public :
 	bool IsDir() const ;
 	std::string MD5() const ;
 	DateTime MTime() const ;
+	u64_t Size() const ;
 	
 	std::string Name() const ;
 	
@@ -80,6 +82,7 @@ protected :
 
 	DateTime		m_mtime ;
 	bool			m_is_removed ;
+	u64_t			m_size ;
 } ;
 
 } // end of namespace gr

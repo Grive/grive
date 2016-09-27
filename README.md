@@ -89,6 +89,8 @@ Grive uses cmake to build. Basic install sequence is
 - ignore regexp does not persist anymore (note that Grive will still track it to not
   accidentally delete remote files when changing ignore regexp)
 - added options to limit upload and download speed
+- faster upload of new and changed files. now Grive uploads files without first calculating
+  md5 checksum when file is created locally or when its size changes.
 
 ### Grive2 v0.5
 
