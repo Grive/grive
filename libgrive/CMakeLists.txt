@@ -49,10 +49,6 @@ include_directories(
 	${YAJL_INCLUDE_DIRS}
 )
 
-file(GLOB DRIVE_HEADERS
-	${libgrive_SOURCE_DIR}/src/drive/*.hh
-)
-
 file (GLOB PROTOCOL_HEADERS
     ${libgrive_SOURCE_DIR}/src/protocol/*.hh
 )
@@ -67,14 +63,12 @@ file (GLOB XML_HEADERS
 
 file (GLOB LIBGRIVE_SRC
 	src/base/*.cc
-	src/drive/*.cc
 	src/drive2/*.cc
 	src/http/*.cc
 	src/protocol/*.cc
 	src/json/*.cc
 	src/util/*.cc
 	src/util/log/*.cc
-	src/xml/*.cc
 )
 
 add_definitions(
@@ -121,9 +115,7 @@ IF ( CPPUNIT_FOUND )
     # list of test source files here
 	file(GLOB TEST_SRC
 		test/base/*.cc
-		test/drive/*.cc
 		test/util/*.cc
-		test/xml/*.cc
 	)
 
 	add_executable( unittest
