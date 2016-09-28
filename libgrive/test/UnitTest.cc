@@ -21,7 +21,6 @@
 
 #include "util/log/DefaultLog.hh"
 
-#include "drive/EntryTest.hh"
 #include "base/ResourceTest.hh"
 #include "base/ResourceTreeTest.hh"
 #include "base/StateTest.hh"
@@ -29,7 +28,7 @@
 #include "util/FunctionTest.hh"
 #include "util/ConfigTest.hh"
 #include "util/SignalHandlerTest.hh"
-#include "xml/NodeTest.hh"
+//#include "xml/NodeTest.hh"
 
 int main( int argc, char **argv )
 {
@@ -38,7 +37,6 @@ int main( int argc, char **argv )
 	gr::LogBase::Inst( new gr::log::DefaultLog ) ;
 	
 	CppUnit::TextUi::TestRunner runner;
-	runner.addTest( Entry1Test::suite( ) ) ;
 	runner.addTest( StateTest::suite( ) ) ;
 	runner.addTest( ResourceTest::suite( ) ) ;
 	runner.addTest( ResourceTreeTest::suite( ) ) ;
@@ -46,7 +44,7 @@ int main( int argc, char **argv )
 	runner.addTest( FunctionTest::suite( ) ) ;
 	runner.addTest( ConfigTest::suite( ) ) ;
 	runner.addTest( SignalHandlerTest::suite( ) ) ;
-	runner.addTest( NodeTest::suite( ) ) ;
+	//runner.addTest( NodeTest::suite( ) ) ;
 	runner.run();
   
 	return 0 ;

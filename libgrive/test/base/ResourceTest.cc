@@ -23,8 +23,7 @@
 
 #include "base/Resource.hh"
 
-#include "drive/Entry1.hh"
-#include "xml/Node.hh"
+#include "drive2/Entry2.hh"
 #include "json/Val.hh"
 
 #include <iostream>
@@ -32,7 +31,7 @@
 namespace grut {
 
 using namespace gr ;
-using namespace gr::v1 ;
+using namespace gr::v2 ;
 
 ResourceTest::ResourceTest( )
 {
@@ -61,11 +60,11 @@ void ResourceTest::TestNormal( )
 	GRUT_ASSERT_EQUAL( subject.MD5(), "c0742c0a32b2c909b6f176d17a6992d0" ) ;
 	GRUT_ASSERT_EQUAL( subject.StateStr(), "local_new" ) ;
 	
-	xml::Node entry = xml::Node::Element( "entry" ) ;
-	entry.AddElement( "updated" ).AddText( "2012-05-09T16:13:22.401Z" ) ;
-	entry.AddElement( "docs:md5Checksum" ).AddText( "DIFFERENT" ) ;
+	Val entry;
+	entry.Set( "modifiedDate", Val( std::string( "2012-05-09T16:13:22.401Z" ) ) );
+	entry.Set( "md5Checksum", Val( std::string( "DIFFERENT" ) ) );
 	
-	Entry1 remote( entry ) ;
+	Entry2 remote( entry ) ;
 	GRUT_ASSERT_EQUAL( "different", remote.MD5() ) ;
 	subject.FromRemote( remote ) ;
 	GRUT_ASSERT_EQUAL( "local_changed", subject.StateStr() ) ;
