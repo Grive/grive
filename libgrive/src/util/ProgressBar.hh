@@ -18,7 +18,6 @@ private:
 	static unsigned short int determineTerminalSize();
 
 	bool showProgressBar;
-	int last;
 };
 
 }

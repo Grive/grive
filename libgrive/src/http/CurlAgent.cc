@@ -159,13 +159,16 @@ std::size_t CurlAgent::Receive( void* ptr, size_t size, size_t nmemb, CurlAgent 
 int CurlAgent::progress_callback( CurlAgent *pthis, curl_off_t totalDownload, curl_off_t finishedDownload, curl_off_t totalUpload, curl_off_t finishedUpload )
 {
 	// Only report download progress when set explicitly
-	totalDownload = pthis->m_pimpl->total_download;
-	if ( !totalUpload )
-		totalUpload = pthis->m_pimpl->total_upload;
-	pthis->m_pb->reportProgress(
-		totalDownload > 0 ? totalDownload : totalUpload,
-		totalDownload > 0 ? finishedDownload : finishedUpload
-	);
+	if ( pthis->m_pb )
+	{
+		totalDownload = pthis->m_pimpl->total_download;
+		if ( !totalUpload )
+			totalUpload = pthis->m_pimpl->total_upload;
+		pthis->m_pb->reportProgress(
+			totalDownload > 0 ? totalDownload : totalUpload,
+			totalDownload > 0 ? finishedDownload : finishedUpload
+		);
+	}
 	return 0;
 }
 
