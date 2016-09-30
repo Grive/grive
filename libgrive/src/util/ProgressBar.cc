@@ -66,7 +66,7 @@ void ProgressBar::reportProgress(u64_t total, u64_t processed)
 			int dotz = round(fraction * totalDots);
 			int count = 0;
 			// delete previous output line
-			printf("\r\33[2K  [%3.0f%%] [", fraction * 100);
+			printf("\r  [%3.0f%%] [", fraction * 100);
 			for (; count < dotz - 1; count++)
 				putchar('=');
 			putchar('>');
@@ -76,6 +76,7 @@ void ProgressBar::reportProgress(u64_t total, u64_t processed)
 			printBytes(processed);
 			putchar('/');
 			printBytes(total);
+			printf("\33[K\r");
 			if (point == 1000)
 				putchar('\n');
 			fflush(stdout);
