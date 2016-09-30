@@ -8,7 +8,7 @@
 namespace gr
 {
 
-ProgressBar::ProgressBar(): showProgressBar(false)
+ProgressBar::ProgressBar(): showProgressBar(false), last(1000)
 {
 }
 
@@ -48,33 +48,38 @@ void ProgressBar::reportProgress(u64_t total, u64_t processed)
 		double fraction = (double)processed/total;
 
 		int point = round(fraction*1000);
+		if (this->last < 1000 || point != this->last)
+		{
+			// only print progress after >= 0.1% change
+			this->last = point;
 
-		// 10 for prefix of percent and 22 for suffix of file size
-		int availableSize = determineTerminalSize() - 32;
-		int totalDots;
-		if (availableSize > 100)
-			totalDots = 100;
-		else if (availableSize < 0)
-			totalDots = 10;
-		else
-			totalDots = availableSize;
+			// 10 for prefix of percent and 22 for suffix of file size
+			int availableSize = determineTerminalSize() - 32;
+			int totalDots;
+			if (availableSize > 100)
+				totalDots = 100;
+			else if (availableSize < 0)
+				totalDots = 10;
+			else
+				totalDots = availableSize;
 
-		int dotz = round(fraction * totalDots);
-		int count = 0;
-		// delete previous output line
-		printf("\r\33[2K  [%3.0f%%] [", fraction * 100);
-		for (; count < dotz - 1; count++)
-			putchar('=');
-		putchar('>');
-		for (; count < totalDots - 1; count++)
-			putchar(' ');
-		printf("] ");
-		printBytes(processed);
-		putchar('/');
-		printBytes(total);
-		if (point == 1000)
-			putchar('\n');
-		fflush(stdout);
+			int dotz = round(fraction * totalDots);
+			int count = 0;
+			// delete previous output line
+			printf("\r\33[2K  [%3.0f%%] [", fraction * 100);
+			for (; count < dotz - 1; count++)
+				putchar('=');
+			putchar('>');
+			for (; count < totalDots - 1; count++)
+				putchar(' ');
+			printf("] ");
+			printBytes(processed);
+			putchar('/');
+			printBytes(total);
+			if (point == 1000)
+				putchar('\n');
+			fflush(stdout);
+		}
 	}
 }
 
