@@ -53,8 +53,8 @@ void ProgressBar::reportProgress(u64_t total, u64_t processed)
 			// only print progress after >= 0.1% change
 			this->last = point;
 
-			// 10 for prefix of percent and 22 for suffix of file size
-			int availableSize = determineTerminalSize() - 32;
+			// 10 for prefix of percent and 23 for suffix of file size
+			int availableSize = determineTerminalSize() - 33;
 			int totalDots;
 			if (availableSize > 100)
 				totalDots = 100;
