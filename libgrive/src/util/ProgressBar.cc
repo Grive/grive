@@ -47,10 +47,10 @@ void ProgressBar::reportProgress(u64_t total, u64_t processed)
 			processed = total;
 		double fraction = (double)processed/total;
 
-		int point = round(fraction*1000);
+		int point = fraction*1000;
 		if (this->last < 1000 || point != this->last)
 		{
-			// only print progress after >= 0.1% change
+			// do not print 100% progress multiple times (it will duplicate the progressbar)
 			this->last = point;
 
 			// 10 for prefix of percent and 26 for suffix of file size
