@@ -26,4 +26,9 @@ set_target_properties( grive_executable
 )
 
 install(TARGETS grive_executable RUNTIME DESTINATION bin)
-install(FILES doc/grive.1 DESTINATION share/man/man1 )
+
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" )
+    install(FILES doc/grive.1 DESTINATION man/man1 )
+else ( ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" )
+    install(FILES doc/grive.1 DESTINATION share/man/man1 )
+endif( ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" )
