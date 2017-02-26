@@ -34,41 +34,31 @@ namespace gr {
 class AuthAgent : public http::Agent
 {
 public :
-	AuthAgent( const OAuth2& auth, std::auto_ptr<http::Agent> real_agent ) ;
+	AuthAgent( OAuth2& auth, http::Agent* real_agent ) ;
 
-	long Put(
-		const std::string&	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Put(
-		const std::string&	url,
-		File*				file,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
+	http::ResponseLog* GetLog() const ;
+	void SetLog( http::ResponseLog *log ) ;
 
-	long Get(
-		const std::string& 	url,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Post(
-		const std::string& 	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const http::Header&	hdr ) ;
-	
-	long Custom(
+	long Request(
 		const std::string&	method,
 		const std::string&	url,
+		SeekStream			*in,
 		DataStream			*dest,
-		const http::Header&	hdr ) ;
+		const http::Header&	hdr,
+		u64_t			downloadFileBytes = 0 ) ;
+	
+	std::string LastError() const ;
+	std::string LastErrorHeaders() const ;
 	
 	std::string RedirLocation() const ;
 	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
+
+	void SetUploadSpeed( unsigned kbytes ) ;
+	void SetDownloadSpeed( unsigned kbytes ) ;
+
+	void SetProgressReporter( Progress *progress ) ;
 
 private :
 	http::Header AppendHeader( const http::Header& hdr ) const ;
@@ -79,8 +69,8 @@ private :
 		const http::Header&	hdr  ) ;
 	
 private :
-	OAuth2								m_auth ;
-	const std::auto_ptr<http::Agent>	m_agent ;
+	OAuth2&		m_auth ;
+	http::Agent*	m_agent ;
 } ;
 
 } // end of namespace

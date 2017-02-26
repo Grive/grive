@@ -28,19 +28,9 @@ namespace gr { namespace http {
 
 ResponseLog::ResponseLog(
 	const std::string&	prefix,
-	const std::string&	suffix,
-	DataStream			*next ) :
-	m_enabled	( true ),
-	m_next		( next )
+	const std::string&	suffix )
 {
-	Reset( prefix, suffix, next ) ;
-}
-
-ResponseLog::ResponseLog( DataStream *next ) :
-	m_enabled	( false ),
-	m_next		( next )
-{
-	assert( m_next != 0 ) ;
+	Reset( prefix, suffix ) ;
 }
 
 std::size_t ResponseLog::Write( const char *data, std::size_t count )
@@ -49,15 +39,14 @@ std::size_t ResponseLog::Write( const char *data, std::size_t count )
 	{
 		assert( m_log.rdbuf() != 0 ) ;
 		m_log.rdbuf()->sputn( data, count ) ;
+		m_log.flush();
 	}
-	
-	return m_next->Write( data, count ) ;
+	return count;
 }
 
 std::size_t ResponseLog::Read( char *data, std::size_t count )
 {
-	assert( m_next != 0 ) ;
-	return m_next->Read( data, count ) ;
+	return 0 ;
 }
 
 std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
@@ -65,19 +54,12 @@ std::string ResponseLog::Filename( const std::string& prefix, const std::string&
 	return prefix + DateTime::Now().Format( "%F.%H%M%S" ) + suffix ;
 }
 
-void ResponseLog::Enable( bool enable )
+void ResponseLog::Reset( const std::string& prefix, const std::string& suffix )
 {
-	m_enabled = enable ;
-}
-
-void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, DataStream *next )
-{
-	assert( next != 0 ) ;
-	
 	if ( m_log.is_open() )
 		m_log.close() ;
 	
-	const std::string fname = Filename(prefix, suffix) ;
+	const std::string fname = Filename( prefix, suffix ) ;
 	
 	// reset previous stream state. don't care if file can be opened
 	// successfully previously
@@ -88,12 +70,13 @@ void ResponseLog::Reset( const std::string& prefix, const std::string& suffix, D
 	if ( m_log )
 	{
 		Trace( "logging HTTP response: %1%", fname ) ;
-		m_enabled	= true ;
+		m_enabled = true ;
 	}
 	else
+	{
 		Trace( "cannot open log file %1%", fname ) ;
-	
-	m_next		= next ;
+		m_enabled = false ;
+	}
 }
 
 }} // end of namespace

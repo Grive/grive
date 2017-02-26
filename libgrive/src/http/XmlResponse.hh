@@ -20,14 +20,9 @@
 #pragma once
 
 #include "util/DataStream.hh"
+#include "xml/TreeBuilder.hh"
 
 #include <memory>
-
-namespace gr { namespace xml
-{
-	class Node ;
-	class TreeBuilder ;
-} }
 
 namespace gr { namespace http {
 
@@ -44,7 +39,7 @@ public :
 	xml::Node Response() const ;
 	
 private :
-	std::auto_ptr<xml::TreeBuilder>	m_tb ;
+	std::unique_ptr<xml::TreeBuilder>	m_tb ;
 } ;
 
 } } // end of namespace

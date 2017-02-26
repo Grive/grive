@@ -1,6 +1,6 @@
 /*
-	grive: an GPL program to sync a local directory with Google Drive
-	Copyright (C) 2012  Wan Wai Ho
+	Common URIs for REST API
+	Copyright (C) 2015  Vitaliy Filippov
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -23,19 +23,17 @@
 
 namespace gr { namespace v2 {
 
+const std::string upload_base = "https://www.googleapis.com/upload/drive/v2/files" ;
+
 namespace feeds
 {
 	const std::string files		= "https://www.googleapis.com/drive/v2/files" ;
+	const std::string changes	= "https://www.googleapis.com/drive/v2/changes" ;
 }
 
 namespace mime_types
 {
 	const std::string folder	= "application/vnd.google-apps.folder" ;
-}
-
-namespace kinds
-{
-	const std::string parent	= "drive#parentReference" ;
 }
 
 } } // end of namespace gr::v2

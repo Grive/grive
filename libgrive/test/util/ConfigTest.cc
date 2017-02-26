@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Assert.hh"
 
 #include "util/Config.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 #include "util/log/Log.hh"
 
 #include <boost/program_options.hpp>

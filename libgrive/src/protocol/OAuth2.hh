@@ -19,42 +19,49 @@
 
 #pragma once
 
+#include "http/Agent.hh"
+#include "util/Exception.hh"
 #include <string>
+#include <memory>
 
 namespace gr {
 
 class OAuth2
 {
 public :
+	struct AuthFailed : virtual Exception {} ;
+
+public :
 	OAuth2(
+		http::Agent* agent,
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
 	OAuth2(
+		http::Agent* agent,
 		const std::string&	refresh_code,
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
 
 	std::string Str() const ;
-	
-	static std::string MakeAuthURL(
-		const std::string&	client_id,
-		const std::string&	state = std::string() ) ;
+
+	std::string MakeAuthURL() ;
 
 	void Auth( const std::string& auth_code ) ;
 	void Refresh( ) ;
-		
+
 	std::string RefreshToken( ) const ;
 	std::string AccessToken( ) const ;
-	
+
 	// adding HTTP auth header
 	std::string HttpHeader( ) const ;
-	
+
 private :
 	std::string m_access ;
 	std::string m_refresh ;
+	http::Agent* m_agent ;
 	
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;
 } ;
-	
+
 } // end of namespace

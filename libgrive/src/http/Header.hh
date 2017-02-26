@@ -37,6 +37,7 @@ public :
 	Header() ;
 	
 	void Add( const std::string& str ) ;
+	std::string Str() const ;
 	
 	iterator begin() const ;
 	iterator end() const ;

@@ -81,6 +81,8 @@ public :
 		return Assign(t) ;
 	}
 
+	operator std::string() const ;
+
 	template <typename T>
 	const T& As() const ;
 
@@ -92,27 +94,30 @@ public :
 
 	TypeEnum Type() const ;
 
-	const Val& operator[]( const std::string& key ) const ;
-	const Val& operator[]( std::size_t index ) const ;
-
 	// shortcuts for As<>()
 	std::string Str() const ;
 	int		Int() const ;
-	long	Long() const ;
+	unsigned long long U64() const ;
 	double	Double() const ;
 	bool	Bool() const ;
 	const Array&	AsArray() const ;
+	Array&	AsArray() ;
 	const Object&	AsObject() const ;
+	Object&	AsObject() ;
 
 	// shortcuts for objects
-	bool Has( const std::string& key ) const ;
-	bool Get( const std::string& key, Val& val ) const ;
-	void Add( const std::string& key, const Val& val ) ;
+	Val& operator[]( const std::string& key ) ; // get updatable ref or throw
+	const Val& operator[]( const std::string& key ) const ; // get const ref or throw
+	Val& Item( const std::string& key ) ; // insert if not exists and get
+	bool Has( const std::string& key ) const ; // check if exists
+	bool Get( const std::string& key, Val& val ) const ; // get or return false
+	void Add( const std::string& key, const Val& val ) ; // insert or do nothing
+	void Set( const std::string& key, const Val& val ) ; // insert or update
+	bool Del( const std::string& key ); // delete or do nothing
 	
 	// shortcuts for array (and array of objects)
+	const Val& operator[]( std::size_t index ) const ;
 	void Add( const Val& json ) ;
-	Val  FindInArray( const std::string& key, const std::string& value ) const ;
-	bool FindInArray( const std::string& key, const std::string& value, Val& result ) const ;
 	
 	std::vector<Val> Select( const std::string& key ) const ;
 	
@@ -125,7 +130,7 @@ private :
 	template <typename T>
 	struct Impl ;
 	
-	std::auto_ptr<Base>	m_base ;
+	std::unique_ptr<Base>	m_base ;
 
 private :
 	void Select( const Object& obj, const std::string& key, std::vector<Val>& result ) const ;
@@ -189,35 +194,29 @@ Val& Val::Assign( const T& t )
 template <typename T>
 const T& Val::As() const
 {
-	try
-	{
-		const Impl<T> *impl = &dynamic_cast<const Impl<T>&>( *m_base ) ;
-		return impl->val ;
-	}
-	catch ( std::exception& e )
+	const Impl<T> *impl = dynamic_cast<const Impl<T> *>( m_base.get() ) ;
+	if ( !impl )
 	{
 		TypeEnum dest = Type2Enum<T>::type ;
 		BOOST_THROW_EXCEPTION(
-			Error() << SrcType_(Type()) << DestType_(dest)
+			Error() << SrcType_( Type() ) << DestType_( dest )
 		) ;
 	}
+	return impl->val ;
 }
 
 template <typename T>
 T& Val::As()
 {
-	try
-	{
-		Impl<T> *impl = &dynamic_cast<Impl<T>&>( *m_base ) ;
-		return impl->val ;
-	}
-	catch ( std::exception& e )
+	Impl<T> *impl = dynamic_cast<Impl<T> *>( m_base.get() ) ;
+	if ( !impl )
 	{
 		TypeEnum dest = Type2Enum<T>::type ;
 		BOOST_THROW_EXCEPTION(
-			Error() << SrcType_(Type()) << DestType_(dest)
+			Error() << SrcType_( Type() ) << DestType_( dest )
 		) ;
 	}
+	return impl->val ;
 }
 
 template <typename T>

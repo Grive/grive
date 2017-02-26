@@ -24,6 +24,8 @@
 #include <memory>
 #include <string>
 
+#include <curl/curl.h>
+
 namespace gr {
 
 class DataStream ;
@@ -40,56 +42,45 @@ class CurlAgent : public Agent
 public :
 	CurlAgent() ;
 	~CurlAgent() ;
-	
-	long Put(
-		const std::string&	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Put(
-		const std::string&	url,
-		File				*file,
-		DataStream			*dest,
-		const Header&		hdr ) ;
 
-	long Get(
-		const std::string& 	url,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Post(
-		const std::string& 	url,
-		const std::string&	data,
-		DataStream			*dest,
-		const Header&		hdr ) ;
-	
-	long Custom(
+	ResponseLog* GetLog() const ;
+	void SetLog( ResponseLog *log ) ;
+	void SetProgressReporter( Progress *progress ) ;
+
+	long Request(
 		const std::string&	method,
 		const std::string&	url,
+		SeekStream			*in,
 		DataStream			*dest,
-		const Header&		hdr ) ;
+		const Header&		hdr,
+		u64_t			downloadFileBytes = 0 ) ;
+
+	std::string LastError() const ;
+	std::string LastErrorHeaders() const ;
 	
 	std::string RedirLocation() const ;
 	
 	std::string Escape( const std::string& str ) ;
 	std::string Unescape( const std::string& str ) ;
 
+	static int progress_callback( CurlAgent *pthis, curl_off_t totalDownload, curl_off_t finishedDownload, curl_off_t totalUpload, curl_off_t finishedUpload );
+
 private :
 	static std::size_t HeaderCallback( void *ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
-	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, DataStream *recv ) ;
-	
-	void SetHeader( const Header& hdr ) ;
+	static std::size_t Receive( void* ptr, size_t size, size_t nmemb, CurlAgent *pthis ) ;
+
 	long ExecCurl(
 		const std::string&	url,
 		DataStream			*dest,
 		const Header&		hdr ) ;
 
 	void Init() ;
-	
+
 private :
 	struct Impl ;
-	std::auto_ptr<Impl>	m_pimpl ;
+	std::unique_ptr<Impl> m_pimpl ;
+	std::unique_ptr<ResponseLog> m_log ;
+	Progress* m_pb ;
 } ;
 
 } } // end of namespace

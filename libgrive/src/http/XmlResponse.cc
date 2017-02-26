@@ -28,6 +28,11 @@ XmlResponse::XmlResponse() : m_tb( new xml::TreeBuilder )
 {
 }
 
+void XmlResponse::Clear()
+{
+	m_tb.reset(new xml::TreeBuilder);
+}
+
 std::size_t XmlResponse::Write( const char *data, std::size_t count )
 {
 	m_tb->ParseData( data, count ) ;

@@ -20,6 +20,8 @@
 #include "Config.hh"
 
 #include "util/File.hh"
+#include "json/JsonWriter.hh"
+#include "json/JsonParser.hh"
 
 #include <boost/program_options.hpp>
 
@@ -36,12 +38,19 @@ const std::string	default_root_folder = ".";
 
 Config::Config( const po::variables_map& vm )
 {
-	m_cmd.Add( "log-xml",	Json(vm.count("log-xml") > 0) ) ;
-	m_cmd.Add( "new-rev",	Json(vm.count("new-rev") > 0) ) ;
-	m_cmd.Add( "force",		Json(vm.count("force") > 0 ) ) ;
-	m_cmd.Add( "path",		Json(vm.count("path") > 0
+	m_cmd.Add( "new-rev",	Val(vm.count("new-rev") > 0) ) ;
+	m_cmd.Add( "force",		Val(vm.count("force") > 0 ) ) ;
+	m_cmd.Add( "path",		Val(vm.count("path") > 0
 		? vm["path"].as<std::string>()
 		: default_root_folder ) ) ;
+	m_cmd.Add( "dir",		Val(vm.count("dir") > 0
+		? vm["dir"].as<std::string>()
+		: "" ) ) ;
+	if ( vm.count( "ignore" ) > 0 )
+		m_cmd.Add( "ignore",	Val( vm["ignore"].as<std::string>() ) );
+	m_cmd.Add( "no-remote-new", Val( vm.count( "no-remote-new" ) > 0 || vm.count( "upload-only" ) > 0 ) );
+	m_cmd.Add( "upload-only", Val( vm.count( "upload-only" ) > 0 ) );
+	m_cmd.Add( "no-delete-remote", Val( vm.count( "no-delete-remote" ) > 0 ) );
 	
 	m_path	= GetPath( fs::path(m_cmd["path"].Str()) ) ;
 	m_file	= Read( ) ;
@@ -65,40 +74,41 @@ const fs::path Config::Filename() const
 void Config::Save( )
 {
 	gr::File file( m_path.string(), 0600 ) ;
-	m_file.Write( &file ) ;
+	JsonWriter wr( &file ) ;
+	m_file.Visit( &wr ) ;
 }
 
-void Config::Set( const std::string& key, const Json& value )
+void Config::Set( const std::string& key, const Val& value )
 {
 	m_file.Add( key, value ) ;
 }
 
-Json Config::Get( const std::string& key ) const
+Val Config::Get( const std::string& key ) const
 {
 	return m_cmd.Has(key) ? m_cmd[key] : m_file[key] ;
 }
 
-Json Config::GetAll() const
+Val Config::GetAll() const
 {
-	Json::Object obj		= m_file.AsObject() ;
-	Json::Object cmd_obj	= m_cmd.AsObject() ;
+	Val::Object obj		= m_file.AsObject() ;
+	Val::Object cmd_obj	= m_cmd.AsObject() ;
 	
-	for ( Json::Object::iterator i = cmd_obj.begin() ; i != cmd_obj.end() ; ++i )
+	for ( Val::Object::iterator i = cmd_obj.begin() ; i != cmd_obj.end() ; ++i )
 		obj[i->first] = i->second ;
 	
-	return Json( obj ) ;
+	return Val( obj ) ;
 }
 
-Json Config::Read()
+Val Config::Read()
 {
 	try
 	{
 		gr::File file(m_path) ;
-		return Json::Parse( &file ) ;
+		return ParseJson( file ) ;
 	}
 	catch ( Exception& e )
 	{
-		return Json() ;
+		return Val() ;
 	}
 }
 

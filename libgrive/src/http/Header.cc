@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iterator>
 #include <ostream>
+#include <sstream>
 
 namespace gr { namespace http {
 
@@ -32,6 +33,13 @@ Header::Header()
 void Header::Add( const std::string& str )
 {
 	m_vec.push_back( str ) ;
+}
+
+std::string Header::Str() const
+{
+	std::ostringstream s ;
+	s << *this ;
+	return s.str() ;
 }
 
 Header::iterator Header::begin() const

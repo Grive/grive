@@ -23,6 +23,7 @@
 #include "http/Header.hh"
 #include "util/log/Log.hh"
 #include "util/OS.hh"
+#include "util/File.hh"
 
 #include <cassert>
 
@@ -30,93 +31,74 @@ namespace gr {
 
 using namespace http ;
 
-AuthAgent::AuthAgent( const OAuth2& auth, std::auto_ptr<Agent> real_agent ) :
+AuthAgent::AuthAgent( OAuth2& auth, Agent *real_agent ) :
+	Agent(),
 	m_auth	( auth ),
 	m_agent	( real_agent )
 {
-	assert( m_agent.get() != 0 ) ;
 }
 
-Header AuthAgent::AppendHeader( const Header& hdr ) const
+http::ResponseLog* AuthAgent::GetLog() const
 {
-	Header h(hdr) ;
+	return m_agent->GetLog();
+}
+
+void AuthAgent::SetLog( http::ResponseLog *log )
+{
+	return m_agent->SetLog( log );
+}
+
+void AuthAgent::SetProgressReporter( Progress *progress )
+{
+	m_agent->SetProgressReporter( progress );
+}
+
+void AuthAgent::SetUploadSpeed( unsigned kbytes )
+{
+	m_agent->SetUploadSpeed( kbytes );
+}
+
+void AuthAgent::SetDownloadSpeed( unsigned kbytes )
+{
+	m_agent->SetDownloadSpeed( kbytes );
+}
+
+http::Header AuthAgent::AppendHeader( const http::Header& hdr ) const
+{
+	http::Header h(hdr) ;
 	h.Add( "Authorization: Bearer " + m_auth.AccessToken() ) ;
 	h.Add( "GData-Version: 3.0" ) ;
 	return h ;
 }
 
-long AuthAgent::Put(
-	const std::string&	url,
-	const std::string&	data,
-	DataStream			*dest,
-	const Header&		hdr )
-{
-	Header auth = AppendHeader(hdr) ;
-
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Put(url, data, dest, auth) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
-}
-
-long AuthAgent::Put(
-	const std::string&	url,
-	File				*file,
-	DataStream			*dest,
-	const Header&		hdr )
-{
-	Header auth = AppendHeader(hdr) ;
-	
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Put( url, file, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
-}
-
-long AuthAgent::Get(
-	const std::string& 	url,
-	DataStream			*dest,
-	const Header&		hdr )
-{
-	Header auth = AppendHeader(hdr) ;
-
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Get( url, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
-}
-
-long AuthAgent::Post(
-	const std::string& 	url,
-	const std::string&	data,
-	DataStream			*dest,
-	const Header&		hdr )
-{
-	Header auth = AppendHeader(hdr) ;
-	
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Post( url, data, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
-}
-
-long AuthAgent::Custom(
+long AuthAgent::Request(
 	const std::string&	method,
 	const std::string&	url,
+	SeekStream			*in,
 	DataStream			*dest,
-	const Header&		hdr )
+	const http::Header&	hdr,
+	u64_t			downloadFileBytes )
 {
-	Header auth = AppendHeader(hdr) ;
+	long response;
+	Header auth;
+	do
+	{
+		auth = AppendHeader( hdr );
+		if ( in )
+			in->Seek( 0, 0 );
+		response = m_agent->Request( method, url, in, dest, auth, downloadFileBytes );
+	} while ( CheckRetry( response ) );
+	return CheckHttpResponse( response, url, auth );
+}
 
-	long response ;
-	while ( CheckRetry(
-		response = m_agent->Custom( method, url, dest, AppendHeader(hdr) ) ) ) ;
-	
-	return CheckHttpResponse(response, url, auth) ;
+std::string AuthAgent::LastError() const
+{
+	return m_agent->LastError() ;
+}
+
+std::string AuthAgent::LastErrorHeaders() const
+{
+	return m_agent->LastErrorHeaders() ;
 }
 
 std::string AuthAgent::RedirLocation() const
@@ -136,11 +118,11 @@ std::string AuthAgent::Unescape( const std::string& str )
 
 bool AuthAgent::CheckRetry( long response )
 {
-	// HTTP 500 and 503 should be temperory. just wait a bit and retry
+	// HTTP 500 and 503 should be temporary. just wait a bit and retry
 	if ( response == 500 || response == 503 )
 	{
-		Log( "resquest failed due to temperory error: %1%. retrying in 5 seconds",
-			response, log::warning ) ;
+		Log( "request failed due to temporary error: %1% (body: %2%). retrying in 5 seconds",
+			response, m_agent->LastError(), log::warning ) ;
 			
 		os::Sleep( 5 ) ;
 		return true ;
@@ -149,9 +131,10 @@ bool AuthAgent::CheckRetry( long response )
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
-		Log( "resquest failed due to auth token expired: %1%. refreshing token",
-			response, log::warning ) ;
+		Log( "request failed due to auth token expired: %1% (body: %2%). refreshing token",
+			response, m_agent->LastError(), log::warning ) ;
 			
+		os::Sleep( 5 ) ;
 		m_auth.Refresh() ;
 		return true ;
 	}
@@ -165,13 +148,15 @@ long AuthAgent::CheckHttpResponse(
 		const http::Header&	hdr  )
 {
 	// throw for other HTTP errors
-	if ( response >= 400 && response < 500 )
+	if ( response >= 400 )
 	{
- 		BOOST_THROW_EXCEPTION(
- 			Error()
-				<< HttpResponse( response )
- 				<< Url( url )
- 				<< HttpHeader( hdr ) ) ;
+		BOOST_THROW_EXCEPTION(
+			Error()
+				<< HttpResponseCode( response )
+				<< HttpResponseHeaders( m_agent->LastErrorHeaders() )
+				<< HttpResponseText( m_agent->LastError() )
+				<< Url( url )
+				<< HttpRequestHeaders( hdr ) ) ;
 	}
 	
 	return response ;

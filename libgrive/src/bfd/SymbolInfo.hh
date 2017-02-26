@@ -54,7 +54,7 @@ public :
 	
 private :
 	struct Impl ;
-	const std::auto_ptr<Impl> m_impl ;
+	const std::unique_ptr<Impl> m_impl ;
 	
 	struct BacktraceInfo ;
 	friend struct BacktraceInfo ;

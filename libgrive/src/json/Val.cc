@@ -91,6 +91,18 @@ const Val& Val::operator[]( const std::string& key ) const
 	throw ;
 }
 
+Val& Val::operator[]( const std::string& key )
+{
+	Object& obj = As<Object>() ;
+	Object::iterator i = obj.find(key) ;
+	if ( i != obj.end() )
+		return i->second ;
+	
+	// shut off compiler warning
+	BOOST_THROW_EXCEPTION(Error() << NoKey_(key)) ;
+	throw ;
+}
+
 const Val& Val::operator[]( std::size_t index ) const
 {
 	const Array& ar = As<Array>() ;
@@ -104,20 +116,38 @@ const Val& Val::operator[]( std::size_t index ) const
 
 std::string Val::Str() const
 {
+	if ( Type() == int_type )
+		return boost::to_string( As<long long>() );
 	return As<std::string>() ;
 }
 
-int     Val::Int() const
+Val::operator std::string() const
 {
+	return Str();
+}
+
+int Val::Int() const
+{
+	if ( Type() == string_type )
+		return std::atoi( As<std::string>().c_str() );
 	return static_cast<int>(As<long long>()) ;
 }
 
-double	Val::Double() const
+unsigned long long Val::U64() const
 {
+	if ( Type() == string_type )
+		return strtoull( As<std::string>().c_str(), NULL, 10 );
+	return static_cast<unsigned long long>(As<long long>()) ;
+}
+
+double Val::Double() const
+{
+	if ( Type() == string_type )
+		return std::atof( As<std::string>().c_str() );
 	return As<double>() ;
 }
 
-bool	Val::Bool() const
+bool Val::Bool() const
 {
 	return As<bool>() ;
 }
@@ -127,7 +157,17 @@ const Val::Array& Val::AsArray() const
 	return As<Array>() ;
 }
 
+Val::Array& Val::AsArray()
+{
+	return As<Array>() ;
+}
+
 const Val::Object& Val::AsObject() const
+{
+	return As<Object>() ;
+}
+
+Val::Object& Val::AsObject()
 {
 	return As<Object>() ;
 }
@@ -136,6 +176,17 @@ bool Val::Has( const std::string& key ) const
 {
 	const Object& obj = As<Object>() ;
 	return obj.find(key) != obj.end() ;
+}
+
+bool Val::Del( const std::string& key )
+{
+	Object& obj = As<Object>() ;
+	return obj.erase(key) > 0 ;
+}
+
+Val& Val::Item( const std::string& key )
+{
+	return As<Object>()[key];
 }
 
 bool Val::Get( const std::string& key, Val& val ) const
@@ -154,6 +205,21 @@ bool Val::Get( const std::string& key, Val& val ) const
 void Val::Add( const std::string& key, const Val& value )
 {
 	As<Object>().insert( std::make_pair(key, value) ) ;
+}
+
+void Val::Set( const std::string& key, const Val& value )
+{
+	Object& obj = As<Object>();
+	Object::iterator i = obj.find(key);
+	if (i == obj.end())
+		obj.insert(std::make_pair(key, value));
+	else
+		i->second = value;
+}
+
+void Val::Add( const Val& json )
+{
+	As<Array>().push_back( json ) ;
 }
 
 void Val::Visit( ValVisitor *visitor ) const

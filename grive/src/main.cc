@@ -18,13 +18,15 @@
 */
 
 #include "util/Config.hh"
+#include "util/ProgressBar.hh"
 
-#include "drive/Drive.hh"
+#include "base/Drive.hh"
+#include "drive2/Syncer2.hh"
 
 #include "http/CurlAgent.hh"
 #include "protocol/AuthAgent.hh"
 #include "protocol/OAuth2.hh"
-#include "protocol/Json.hh"
+#include "json/Val.hh"
 
 #include "bfd/Backtrace.hh"
 #include "util/Exception.hh"
@@ -48,7 +50,6 @@ const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
 const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
 
 using namespace gr ;
-using namespace gr::v1 ;
 namespace po = boost::program_options;
 
 // libgcrypt insist this to be done in application, not library
@@ -66,12 +67,13 @@ void InitGCrypt()
 
 void InitLog( const po::variables_map& vm )
 {
-	std::auto_ptr<log::CompositeLog> comp_log(new log::CompositeLog) ;
-	LogBase* console_log = comp_log->Add( std::auto_ptr<LogBase>( new log::DefaultLog ) ) ;
+	std::unique_ptr<log::CompositeLog> comp_log( new log::CompositeLog ) ;
+	std::unique_ptr<LogBase> def_log( new log::DefaultLog );
+	LogBase* console_log = comp_log->Add( def_log ) ;
 
 	if ( vm.count( "log" ) )
 	{
-		std::auto_ptr<LogBase> file_log(new log::DefaultLog( vm["log"].as<std::string>() )) ;
+		std::unique_ptr<LogBase> file_log( new log::DefaultLog( vm["log"].as<std::string>() ) ) ;
 		file_log->Enable( log::debug ) ;
 		file_log->Enable( log::verbose ) ;
 		file_log->Enable( log::info ) ;
@@ -96,7 +98,7 @@ void InitLog( const po::variables_map& vm )
 		console_log->Enable( log::verbose ) ;
 		console_log->Enable( log::debug ) ;
 	}
-	LogBase::Inst( std::auto_ptr<LogBase>(comp_log.release()) ) ;
+	LogBase::Inst( comp_log.release() ) ;
 }
 
 int Main( int argc, char **argv )
@@ -109,16 +111,23 @@ int Main( int argc, char **argv )
 		( "help,h",		"Produce help message" )
 		( "version,v",	"Display Grive version" )
 		( "auth,a",		"Request authorization token" )
-		( "path,p",		po::value<std::string>(), "Path to sync")
+		( "path,p",		po::value<std::string>(), "Path to working copy root")
+		( "dir,s",		po::value<std::string>(), "Single subdirectory to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
-		( "log-xml",	"Log more HTTP responses as XML for debugging.")
+		( "log-http",	po::value<std::string>(), "Log all HTTP responses in this file for debugging.")
 		( "new-rev",	"Create new revisions in server for updated files.")
 		( "debug,d",	"Enable debug level messages. Implies -v.")
 		( "log,l",		po::value<std::string>(), "Set log output filename." )
 		( "force,f",	"Force grive to always download a file from Google Drive "
 						"instead of uploading it." )
+		( "upload-only,u", "Do not download anything from Google Drive, only upload local changes" )
+		( "no-remote-new,n", "Download only files that are changed in Google Drive and already exist locally" )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
+		( "ignore",		po::value<std::string>(), "Perl RegExp to ignore files (matched against relative paths)." )
+		( "upload-speed,U", po::value<unsigned>(), "Limit upload speed in kbytes per second" )
+		( "download-speed,D", po::value<unsigned>(), "Limit download speed in kbytes per second" )
+		( "progress-bar,P", "Enable progress bar for upload/download of files")
 	;
 	
 	po::variables_map vm;
@@ -145,12 +154,25 @@ int Main( int argc, char **argv )
 	
 	Log( "config file name %1%", config.Filename(), log::verbose );
 
+	std::unique_ptr<http::Agent> http( new http::CurlAgent );
+	if ( vm.count( "log-http" ) )
+		http->SetLog( new http::ResponseLog( vm["log-http"].as<std::string>(), ".txt" ) );
+
+	std::unique_ptr<ProgressBar> pb;
+	if ( vm.count( "progress-bar" ) )
+	{
+		pb.reset( new ProgressBar() );
+		http->SetProgressReporter( pb.get() );
+	}
+
 	if ( vm.count( "auth" ) )
 	{
+		OAuth2 token( http.get(), client_id, client_secret ) ;
+		
 		std::cout
 			<< "-----------------------\n"
 			<< "Please go to this URL and get an authentication code:\n\n"
-			<< OAuth2::MakeAuthURL( client_id )
+			<< token.MakeAuthURL()
 			<< std::endl ;
 		
 		std::cout
@@ -159,11 +181,10 @@ int Main( int argc, char **argv )
 		std::string code ;
 		std::cin >> code ;
 		
-		OAuth2 token( client_id, client_secret ) ;
 		token.Auth( code ) ;
 		
 		// save to config
-		config.Set( "refresh_token", Json( token.RefreshToken() ) ) ;
+		config.Set( "refresh_token", Val( token.RefreshToken() ) ) ;
 		config.Save() ;
 	}
 	
@@ -182,20 +203,32 @@ int Main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( refresh_token, client_id, client_secret ) ;
-	AuthAgent agent( token, std::auto_ptr<http::Agent>( new http::CurlAgent ) ) ;
+	OAuth2 token( http.get(), refresh_token, client_id, client_secret ) ;
+	AuthAgent agent( token, http.get() ) ;
+	v2::Syncer2 syncer( &agent );
 
-	Drive drive( &agent, config.GetAll() ) ;
+	if ( vm.count( "upload-speed" ) > 0 )
+		agent.SetUploadSpeed( vm["upload-speed"].as<unsigned>() * 1000 );
+	if ( vm.count( "download-speed" ) > 0 )
+		agent.SetDownloadSpeed( vm["download-speed"].as<unsigned>() * 1000 );
+
+	Drive drive( &syncer, config.GetAll() ) ;
 	drive.DetectChanges() ;
 
 	if ( vm.count( "dry-run" ) == 0 )
 	{
+		// The progress bar should just be enabled when actual file transfers take place
+		if ( pb )
+			pb->setShowProgressBar( true ) ;
 		drive.Update() ;
+		if ( pb )
+			pb->setShowProgressBar( false ) ;
+
 		drive.SaveState() ;
 	}
 	else
 		drive.DryRun() ;
-	
+		
 	config.Save() ;
 	Log( "Finished!", log::info ) ;
 	return 0 ;

@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH "GRIVE" 1 "June 19, 2012"
+.TH "GRIVE" 1 "January 3, 2016"
 .SH NAME
 grive \- Google Drive client for GNU/Linux
 
@@ -26,33 +26,72 @@ Requests authorization token from Google
 Enable debug level messages. Implies \-V
 .TP
 \fB\-\-dry-run\fR
-Only detects which files are needed for download or upload without doing it
+Only detect which files need to be uploaded/downloaded, without actually performing changes
 .TP
 \fB\-f, \-\-force\fR
 Forces
 .I grive
 to always download a file from Google Drive instead uploading it
 .TP
+\fB\-u, \-\-upload\-only\fR
+Forces
+.I grive
+to not download anything from Google Drive and only upload local changes to server instead
+.TP
+\fB\-n, \-\-no\-remote\-new\fR
+Forces
+.I grive
+to download only files that are changed in Google Drive and already exist locally
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Produces help message
 .TP
-\fB\-l\fR filename, \fB\-\-log\fR filename
-Set log output to
-.I filename
+\fB\-\-ignore\fR <perl_regexp>
+Ignore files with relative paths matching this Perl Regular Expression.
+Value is remembered for next runs.
+.TP
+\fB\-l\fR <filename>, \fB\-\-log\fR <filename>
+Write log output to
+.I <filename>
+.TP
+\fB\-\-log\-http\fR <filename_prefix>
+Log all HTTP responses in files named
+.I <filename_prefix>YYYY-MM-DD.HHMMSS.txt
+for debugging
+.TP
+\fB\-\-new\-rev\fR
+Create new revisions in server for updated files
+.TP
+\fB\-p\fR <wc_path>, \fB\-\-path\fR <wc_path>
+Use
+.I <wc_path>
+as the working copy root directory
+.TP
+\fB\-s\fR <subdir>, \fB\-\-dir\fR <subdir>
+Sync a single
+.I <subdir>
+subdirectory. Internally converted to an ignore regexp, remembered for next runs.
 .TP
 \fB\-v\fR, \fB\-\-version\fR
 Displays program version
 .TP
+\fB\-P\fR, \fB\-\-progress-bar\fR
+Print ASCII progress bar for each downloaded/uploaded file.
+.TP
 \fB\-V\fR, \fB\-\-verbose\fR
 Verbose mode. Enables more messages than usual.
 
-.SH AUTHOR
+.SH AUTHORS
 .PP
-The software was developed by Nestal Wan.
+Current maintainer is Vitaliy Filippov.
 .PP
+Original author was Nestal Wan.
 This manpage was written by José Luis Segura Lucas (josel.segura@gmx.es)
+.PP
+The full list of contributors may be found here
+.I http://yourcmc.ru/wiki/Grive2#Full_list_of_contributors
 
 .SH REPORT BUGS
 .PP
-.I https://github.com/Grive/grive
+.I https://github.com/vitalif/grive2/issues
 .I https://groups.google.com/forum/?fromgroups#!forum/grive-devel
