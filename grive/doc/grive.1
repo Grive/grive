@@ -46,10 +46,6 @@ to download only files that are changed in Google Drive and already exist locall
 \fB\-h\fR, \fB\-\-help\fR
 Produces help message
 .TP
-\fB\-\-ignore\fR <perl_regexp>
-Ignore files with relative paths matching this Perl Regular Expression.
-Value is remembered for next runs.
-.TP
 \fB\-l\fR <filename>, \fB\-\-log\fR <filename>
 Write log output to
 .I <filename>
@@ -80,6 +76,37 @@ Print ASCII progress bar for each downloaded/uploaded file.
 .TP
 \fB\-V\fR, \fB\-\-verbose\fR
 Verbose mode. Enables more messages than usual.
+
+.SH .griveignore
+.PP
+You may create .griveignore in your Grive root and use it to setup
+exclusion/inclusion rules.
+.PP
+Rules are similar to Git's .gitignore, but may differ slightly due to the different
+implementation.
+.IP \[bu]
+lines that start with # are comments
+.IP \[bu]
+leading and trailing spaces ignored unless escaped with \\
+.IP \[bu]
+non-empty lines without ! in front are treated as "exclude" patterns
+.IP \[bu]
+non-empty lines with ! in front are treated as "include" patterns
+and have a priority over all "exclude" ones
+.IP \[bu]
+patterns are matched against the filenames relative to the grive root
+.IP \[bu]
+a/**/b matches any number of subpaths between a and b, including 0
+.IP \[bu]
+**/a matches `a` inside any directory
+.IP \[bu]
+b/** matches everything inside `b`, but not b itself
+.IP \[bu]
+* matches any number of any characters except /
+.IP \[bu]
+? matches any character except /
+.IP \[bu]
+\[char46]griveignore itself isn't ignored by default, but you can include it in itself to ignore
 
 .SH AUTHORS
 .PP

@@ -85,6 +85,7 @@ Grive uses cmake to build. Basic install sequence is
 
 ### Grive2 v0.5.1-dev
 
+- support for .griveignore
 - no-remote-new and upload-only modes
 - ignore regexp does not persist anymore (note that Grive will still track it to not
   accidentally delete remote files when changing ignore regexp)
@@ -137,3 +138,21 @@ New features:
 - #87: support for revisions
 - #86: ~~partial sync (contributed by justin at tierramedia.com)~~ that's not partial sync,
   that's only support for specifying local path on command line
+
+## .griveignore
+
+Rules are similar to Git's .gitignore, but may differ slightly due to the different
+implementation.
+
+- lines that start with # are comments
+- leading and trailing spaces ignored unless escaped with \
+- non-empty lines without ! in front are treated as "exclude" patterns
+- non-empty lines with ! in front are treated as "include" patterns
+  and have a priority over all "exclude" ones
+- patterns are matched against the filenames relative to the grive root
+- a/**/b matches any number of subpaths between a and b, including 0
+- **/a matches `a` inside any directory
+- b/** matches everything inside `b`, but not b itself
+- \* matches any number of any characters except /
+- ? matches any character except /
+- .griveignore itself isn't ignored by default, but you can include it in itself to ignore

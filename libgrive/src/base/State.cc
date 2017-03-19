@@ -32,17 +32,28 @@
 
 namespace gr {
 
-State::State( const fs::path& filename, const Val& options  ) :
+const std::string state_file = ".grive_state" ;
+const std::string ignore_file = ".griveignore" ;
+const int MAX_IGN = 65536 ;
+const char* regex_escape_chars = ".^$|()[]{}*+?\\";
+const boost::regex regex_escape_re( "[.^$|()\\[\\]{}*+?\\\\]" );
+
+inline std::string regex_escape( std::string s )
+{
+	return regex_replace( s, regex_escape_re, "\\\\&", boost::format_sed );
+}
+
+State::State( const fs::path& root, const Val& options  ) :
+	m_root		( root ),
 	m_res		( options["path"].Str() ),
 	m_cstamp	( -1 )
 {
-	Read( filename ) ;
-	
+	Read() ;
+
 	// the "-f" option will make grive always think remote is newer
 	m_force = options.Has( "force" ) ? options["force"].Bool() : false ;
-	
+
 	std::string m_orig_ign = m_ign;
-	m_ign = "";
 	if ( options.Has( "ignore" ) && options["ignore"].Str() != m_ign )
 		m_ign = options["ignore"].Str();
 	else if ( options.Has( "dir" ) )
@@ -52,8 +63,7 @@ State::State( const fs::path& filename, const Val& options  ) :
 		if ( !m_dir.empty() )
 		{
 			// "-s" is internally converted to an ignore regexp
-			const boost::regex esc( "[.^$|()\\[\\]{}*+?\\\\]" );
-			m_dir = regex_replace( m_dir, esc, "\\\\&", boost::format_sed );
+			m_dir = regex_escape( m_dir );
 			size_t pos = 0;
 			while ( ( pos = m_dir.find( '/', pos ) ) != std::string::npos )
 			{
@@ -66,7 +76,7 @@ State::State( const fs::path& filename, const Val& options  ) :
 	}
 
 	m_ign_changed = m_orig_ign != "" && m_orig_ign != m_ign;
-	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive|grive_state|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
+	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive$|grive_state$|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
 }
 
 State::~State()
@@ -277,27 +287,92 @@ State::iterator State::end()
 	return m_res.end() ;
 }
 
-void State::Read( const fs::path& filename )
+void State::Read()
 {
 	try
 	{
-		File file( filename ) ;
-
-		m_st = ParseJson( file );
-		m_ign = m_st.Has( "ignore_regexp" ) ? m_st["ignore_regexp"].Str() : std::string();
-
+		File st_file( m_root / state_file ) ;
+		m_st = ParseJson( st_file );
 		m_cstamp = m_st["change_stamp"].Int() ;
 	}
 	catch ( Exception& )
 	{
 	}
+
+	try
+	{
+		File ign_file( m_root / ignore_file ) ;
+		char ign[MAX_IGN] = { 0 };
+		int s = ign_file.Read( ign, MAX_IGN-1 ) ;
+		ParseIgnoreFile( ign, s );
+	}
+	catch ( Exception& e )
+	{
+	throw e;
+	}
 }
 
-void State::Write( const fs::path& filename )
+bool State::ParseIgnoreFile( const char* buffer, int size )
+{
+	const boost::regex re1( "/\\\\\\*\\\\\\*$" );
+	const boost::regex re2( "^\\\\\\*\\\\\\*/" );
+	const boost::regex re3( "([^\\\\](\\\\\\\\)*)/\\\\\\*\\\\\\*/" );
+	const boost::regex re4( "([^\\\\](\\\\\\\\)*|^)\\\\\\*" );
+	const boost::regex re5( "([^\\\\](\\\\\\\\)*|^)\\\\\\?" );
+	std::string exclude_re, include_re;
+	int prev = 0;
+	for ( int i = 0; i <= size; i++ )
+	{
+		if ( buffer[i] == '\n' || ( i == size && i > prev ) )
+		{
+			while ( prev < i && ( buffer[prev] == ' ' || buffer[prev] == '\t' || buffer[prev] == '\r' ) )
+				prev++;
+			if ( buffer[prev] != '#' )
+			{
+				int j;
+				for ( j = i-1; j > prev; j-- )
+					if ( buffer[j-1] == '\\' || ( buffer[j] != ' ' && buffer[j] != '\t' && buffer[j] != '\r' ) )
+						break;
+				std::string str( buffer+prev, j+1-prev );
+				bool inc = str[0] == '!';
+				if ( inc )
+					str = str.substr( 1 );
+				str = regex_escape( str );
+				str = regex_replace( str, re1, "/.*", boost::format_perl );
+				str = regex_replace( str, re2, ".*/", boost::format_perl );
+				str = regex_replace( str, re3, "$1/(.*/)*", boost::format_perl );
+				str = regex_replace( str, re4, "$1[^/]*", boost::format_perl );
+				std::string str1;
+				while (1)
+				{
+					str1 = regex_replace( str, re5, "$1[^/]", boost::format_perl );
+					if ( str1.size() == str.size() )
+						break;
+					str = str1;
+				}
+				if ( !inc )
+					exclude_re = exclude_re + ( exclude_re.size() > 0 ? "|" : "" ) + str;
+				else
+					include_re = include_re + ( include_re.size() > 0 ? "|" : "" ) + str;
+			}
+			prev = i+1;
+		}
+	}
+
+	if ( exclude_re.size() > 0 )
+	{
+		m_ign = "^" + ( include_re.size() > 0 ? "(?!" + include_re + ")" : std::string() ) + "(" + exclude_re + ")$";
+		return true;
+	}
+	return false;
+}
+
+void State::Write()
 {
 	m_st.Set( "change_stamp", Val( m_cstamp ) ) ;
 	m_st.Set( "ignore_regexp", Val( m_ign ) ) ;
 	
+	fs::path filename = m_root / state_file ;
 	std::ofstream fs( filename.string().c_str() ) ;
 	fs << m_st ;
 }

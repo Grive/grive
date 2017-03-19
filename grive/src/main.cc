@@ -124,15 +124,22 @@ int Main( int argc, char **argv )
 		( "no-remote-new,n", "Download only files that are changed in Google Drive and already exist locally" )
 		( "dry-run",	"Only detect which files need to be uploaded/downloaded, "
 						"without actually performing them." )
-		( "ignore",		po::value<std::string>(), "Perl RegExp to ignore files (matched against relative paths)." )
 		( "upload-speed,U", po::value<unsigned>(), "Limit upload speed in kbytes per second" )
 		( "download-speed,D", po::value<unsigned>(), "Limit download speed in kbytes per second" )
 		( "progress-bar,P", "Enable progress bar for upload/download of files")
 	;
 	
 	po::variables_map vm;
-	po::store(po::parse_command_line( argc, argv, desc), vm );
-	po::notify(vm);
+	try
+	{
+		po::store( po::parse_command_line( argc, argv, desc ), vm );
+	}
+	catch( po::error &e )
+	{
+		std::cerr << "Options are incorrect. Use -h for help\n";
+		return -1;
+	}
+	po::notify( vm );
 	
 	// simple commands that doesn't require log or config
 	if ( vm.count("help") )
@@ -148,9 +155,9 @@ int Main( int argc, char **argv )
 	}
 
 	// initialize logging
-	InitLog(vm) ;
+	InitLog( vm ) ;
 	
-	Config config(vm) ;
+	Config config( vm ) ;
 	
 	Log( "config file name %1%", config.Filename(), log::verbose );
 
