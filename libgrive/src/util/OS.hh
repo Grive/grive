@@ -29,12 +29,14 @@ namespace gr {
 class DateTime ;
 class Path ;
 
+enum FileType { FT_FILE = 1, FT_DIR = 2, FT_UNKNOWN = 3 } ;
+
 namespace os
 {
 	struct Error : virtual Exception {} ;
 	
-	void Stat( const std::string& filename, DateTime *t, off64_t *size, bool *is_dir ) ;
-	void Stat( const fs::path& filename, DateTime *t, off64_t *size, bool *is_dir ) ;
+	void Stat( const std::string& filename, DateTime *t, off64_t *size, FileType *ft ) ;
+	void Stat( const fs::path& filename, DateTime *t, off64_t *size, FileType *ft ) ;
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 	void SetFileTime( const fs::path& filename, const DateTime& t ) ;

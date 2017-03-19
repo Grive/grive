@@ -262,10 +262,10 @@ void Resource::FromLocal( Val& state )
 	if ( !IsRoot() )
 	{
 		fs::path path = Path() ;
-		bool is_dir;
+		FileType ft ;
 		try
 		{
-			os::Stat( path, &m_ctime, (off64_t*)&m_size, &is_dir ) ;
+			os::Stat( path, &m_ctime, (off64_t*)&m_size, &ft ) ;
 		}
 		catch ( os::Error &e )
 		{
@@ -276,22 +276,30 @@ void Resource::FromLocal( Val& state )
 			m_kind = "bad";
 			return;
 		}
+		if ( ft == FT_UNKNOWN )
+		{
+			// Skip sockets/FIFOs/etc
+			Log( "File %1% is not a regular file or directory; skipping file", path.string(), log::warning );
+			m_state = sync;
+			m_kind = "bad";
+			return;
+		}
 
 		m_name = path.filename().string() ;
-		m_kind = is_dir ? "folder" : "file";
+		m_kind = ft == FT_DIR ? "folder" : "file";
 		m_local_exists = true;
 
 		bool is_changed;
 		if ( state.Has( "ctime" ) && (u64_t) m_ctime.Sec() <= state["ctime"].U64() &&
-			( is_dir || state.Has( "md5" ) ) )
+			( ft == FT_DIR || state.Has( "md5" ) ) )
 		{
-			if ( !is_dir )
+			if ( ft != FT_DIR )
 				m_md5 = state["md5"];
 			is_changed = false;
 		}
 		else
 		{
-			if ( !is_dir )
+			if ( ft != FT_DIR )
 			{
 				// File is changed locally. TODO: Detect conflicts
 				is_changed = ( state.Has( "size" ) && m_size != state["size"].U64() ) ||
@@ -703,13 +711,13 @@ void Resource::SetIndex( bool re_stat )
 	assert( m_parent && m_parent->m_json != NULL );
 	if ( !m_json )
 		m_json = &((*m_parent->m_json)["tree"]).Item( Name() );
-	bool is_dir;
+	FileType ft;
 	if ( re_stat )
-		os::Stat( Path(), &m_ctime, NULL, &is_dir );
+		os::Stat( Path(), &m_ctime, NULL, &ft );
 	else
-		is_dir = IsFolder();
+		ft = IsFolder() ? FT_DIR : FT_FILE;
 	m_json->Set( "ctime", Val( m_ctime.Sec() ) );
-	if ( !is_dir )
+	if ( ft != FT_DIR )
 	{
 		m_json->Set( "md5", Val( m_md5 ) );
 		m_json->Set( "size", Val( m_size ) );
