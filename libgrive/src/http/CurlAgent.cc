@@ -190,8 +190,10 @@ long CurlAgent::ExecCurl(
 	struct curl_slist *slist = SetHeader( m_pimpl->curl, hdr ) ;
 
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-	curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
-	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    #if LIBCURL_VERSION_NUM >= 0x072000
+  	  curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
+	  curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    #endif
 
 	CURLcode curl_code = ::curl_easy_perform(curl);
 
