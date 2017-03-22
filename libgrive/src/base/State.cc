@@ -308,7 +308,6 @@ void State::Read()
 	}
 	catch ( Exception& e )
 	{
-	throw e;
 	}
 }
 
