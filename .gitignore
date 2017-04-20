@@ -14,3 +14,12 @@ bgrive/bgrive
 grive/grive
 libgrive/btest
 *.cmake
+
+debian/debhelper-build-stamp
+debian/files
+debian/grive.debhelper.log
+debian/grive.substvars
+debian/grive/
+debian/.debhelper
+
+obj-x86_64-linux-gnu/
