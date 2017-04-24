@@ -1,0 +1,11 @@
+[Unit]
+Description=Google drive sync (fixed intervals)
+
+[Timer]
+OnCalendar=*:0/5
+OnBootSec=3min
+OnUnitActiveSec=5min
+Unit=grive-timer@%i.service
+
+[Install]
+WantedBy=timers.target
