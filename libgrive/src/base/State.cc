@@ -235,6 +235,12 @@ bool State::Update( const Entry& e )
 	}
 	else if ( Resource *parent = m_res.FindByHref( e.ParentHref() ) )
 	{
+		if ( !parent->IsFolder() )
+		{
+			// https://github.com/vitalif/grive2/issues/148
+			Log( "%1% is owned by something that's not a directory: href=%2% name=%3%", e.Name(), e.ParentHref(), parent->RelPath(), log::error );
+			return true;
+		}
 		assert( parent->IsFolder() ) ;
 
 		std::string path = parent->IsRoot() ? e.Name() : ( parent->RelPath() / e.Name() ).string();
