@@ -46,8 +46,8 @@
 #include <iostream>
 #include <unistd.h>
 
-const std::string client_id		= "22314510474.apps.googleusercontent.com" ;
-const std::string client_secret	= "bl4ufi89h-9MkFlypcI7R785" ;
+const std::string default_id            = "22314510474.apps.googleusercontent.com" ;
+const std::string default_secret        = "bl4ufi89h-9MkFlypcI7R785" ;
 
 using namespace gr ;
 namespace po = boost::program_options;
@@ -111,6 +111,8 @@ int Main( int argc, char **argv )
 		( "help,h",		"Produce help message" )
 		( "version,v",	"Display Grive version" )
 		( "auth,a",		"Request authorization token" )
+                ( "id,i",               po::value<std::string>(), "Authentication ID")
+                ( "secret,e",           po::value<std::string>(), "Authentication secret")
 		( "path,p",		po::value<std::string>(), "Path to working copy root")
 		( "dir,s",		po::value<std::string>(), "Single subdirectory to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
@@ -172,9 +174,22 @@ int Main( int argc, char **argv )
 		http->SetProgressReporter( pb.get() );
 	}
 
+	std::string id = default_id;
+	std::string secret = default_secret;
+
+	if( vm.count( "id" ) )
+	{
+		id = vm["id"].as<std::string>();
+	}
+
+	if( vm.count( "secret" ) )
+	{
+		secret = vm["secret"].as<std::string>();
+	}
+
 	if ( vm.count( "auth" ) )
 	{
-		OAuth2 token( http.get(), client_id, client_secret ) ;
+		OAuth2 token( http.get(), id, secret ) ;
 		
 		std::cout
 			<< "-----------------------\n"
@@ -210,7 +225,7 @@ int Main( int argc, char **argv )
 		return -1;
 	}
 	
-	OAuth2 token( http.get(), refresh_token, client_id, client_secret ) ;
+	OAuth2 token( http.get(), refresh_token, id, secret ) ;
 	AuthAgent agent( token, http.get() ) ;
 	v2::Syncer2 syncer( &agent );
 
