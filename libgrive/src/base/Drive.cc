@@ -41,15 +41,10 @@
 
 namespace gr {
 
-namespace
-{
-	const std::string state_file = ".grive_state" ;
-}
-
 Drive::Drive( Syncer *syncer, const Val& options ) :
 	m_syncer	( syncer ),
 	m_root		( options["path"].Str() ),
-	m_state		( m_root / state_file, options ),
+	m_state		( m_root, options ),
 	m_options	( options )
 {
 	assert( m_syncer ) ;
@@ -72,7 +67,7 @@ void Drive::FromChange( const Entry& entry )
 
 void Drive::SaveState()
 {
-	m_state.Write( m_root / state_file ) ;
+	m_state.Write() ;
 }
 
 void Drive::DetectChanges()

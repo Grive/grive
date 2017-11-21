@@ -42,15 +42,15 @@ public :
 	typedef ResourceTree::iterator iterator ;
 
 public :
-	explicit State( const fs::path& filename, const Val& options ) ;
+	explicit State( const fs::path& root, const Val& options ) ;
 	~State() ;
 	
 	void FromLocal( const fs::path& p ) ;
 	void FromRemote( const Entry& e ) ;
 	void ResolveEntry() ;
 	
-	void Read( const fs::path& filename ) ;
-	void Write( const fs::path& filename ) ;
+	void Read() ;
+	void Write() ;
 
 	Resource* FindByHref( const std::string& href ) ;
 	Resource* FindByID( const std::string& id ) ;
@@ -64,6 +64,7 @@ public :
 	void ChangeStamp( long cstamp ) ;
 
 private :
+	bool ParseIgnoreFile( const char* buffer, int size ) ;
 	void FromLocal( const fs::path& p, Resource *folder, Val& tree ) ;
 	void FromChange( const Entry& e ) ;
 	bool Update( const Entry& e ) ;
@@ -72,6 +73,7 @@ private :
 	bool IsIgnore( const std::string& filename ) ;
 	
 private :
+	fs::path			m_root ;
 	ResourceTree		m_res ;
 	int					m_cstamp ;
 	std::string			m_ign ;
