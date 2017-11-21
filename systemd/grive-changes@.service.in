@@ -1,0 +1,11 @@
+[Unit]
+Description=Google drive sync (changed files)
+
+[Service]
+ExecStart=@GRIVE_SYNC_SH_BINARY@ listen "%i"
+Type=simple
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target
