@@ -46,6 +46,9 @@ to download only files that are changed in Google Drive and already exist locall
 \fB\-h\fR, \fB\-\-help\fR
 Produces help message
 .TP
+\fB\-\-ignore\fR <perl_regexp>
+Ignore files with relative paths matching this Perl Regular Expression.
+.TP
 \fB\-l\fR <filename>, \fB\-\-log\fR <filename>
 Write log output to
 .I <filename>
@@ -66,7 +69,7 @@ as the working copy root directory
 \fB\-s\fR <subdir>, \fB\-\-dir\fR <subdir>
 Sync a single
 .I <subdir>
-subdirectory. Internally converted to an ignore regexp, remembered for next runs.
+subdirectory. Internally converted to an ignore regexp.
 .TP
 \fB\-v\fR, \fB\-\-version\fR
 Displays program version
