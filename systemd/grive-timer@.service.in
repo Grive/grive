@@ -3,4 +3,4 @@ Description=Google drive sync
 After=network-online.target
 
 [Service]
-ExecStart=@GRIVE_SYNC_SH_BINARY@ sync "%i"
+ExecStart=@GRIVE_SYNC_SH_BINARY@ sync "%I"

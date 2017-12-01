@@ -2,7 +2,7 @@
 Description=Google drive sync (changed files)
 
 [Service]
-ExecStart=@GRIVE_SYNC_SH_BINARY@ listen "%i"
+ExecStart=@GRIVE_SYNC_SH_BINARY@ listen "%I"
 Type=simple
 Restart=always
 RestartSec=30
