@@ -102,7 +102,6 @@ listen_directory() {
 	do 
 		# Use a different call to not need to change exit into return
 		inotifywait -q -r -e modify,attrib,close_write,move,create,delete --exclude ".grive_state|.grive" "${_directory}" > /dev/null 2>&1 && ${SCRIPT} sync "${_directory}"
-		#echo ${SCRIPT} "${_directory}"
 	done
 
 	# always exit ok, so that we never go into a wrong systemd state
