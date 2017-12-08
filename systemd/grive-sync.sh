@@ -15,13 +15,13 @@ cd ~
 
 ### ARGUMENT PARSING ###
 SCRIPT="${0}"
+DIRECTORY=$(systemd-escape --unescape "$2")
 
-if [[ -z "${2}" ]] || [[ ! -d "${2}" ]] ; then
+if [[ -z "$DIRECTORY" ]] || [[ ! -d "$DIRECTORY" ]] ; then
 	echo "Need a directory name in the current users home directory as second argument. Aborting."
 	exit 1
 fi
 
-DIRECTORY="$2"
 
 if [[ -z "${1}" ]] ; then
 	echo "Need a command as first argument. Aborting."
@@ -102,6 +102,7 @@ listen_directory() {
 	do 
 		# Use a different call to not need to change exit into return
 		inotifywait -q -r -e modify,attrib,close_write,move,create,delete --exclude ".grive_state|.grive" "${_directory}" > /dev/null 2>&1 && ${SCRIPT} sync "${_directory}"
+		#echo ${SCRIPT} "${_directory}"
 	done
 
 	# always exit ok, so that we never go into a wrong systemd state
