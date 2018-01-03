@@ -83,7 +83,10 @@ target_link_libraries( grive
 	${YAJL_LIBRARIES}
 	${CURL_LIBRARIES}
 	${LIBGCRYPT_LIBRARIES}
-	${Boost_LIBRARIES}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_PROGRAM_OPTIONS_LIBRARY}
+	${Boost_REGEX_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
 	${OPT_LIBS}
@@ -126,7 +129,6 @@ IF ( CPPUNIT_FOUND )
 	target_link_libraries( unittest
 		grive
 		${CPPUNIT_LIBRARY}
-		${Boost_LIBRARIES}
 	)
         
 ENDIF ( CPPUNIT_FOUND )
@@ -139,7 +141,7 @@ add_executable( btest ${BTEST_SRC} )
 
 target_link_libraries( btest
 	grive
-	${Boost_LIBRARIES}
+	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
 
 if ( WIN32 )
