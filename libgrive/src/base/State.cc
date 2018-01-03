@@ -140,7 +140,7 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 		else
 		{
 			// Restore state of locally deleted files
-			Resource *c = folder->FindChild( i->first ), *c2 ;
+			Resource *c = folder->FindChild( i->first ), *c2 = c ;
 			if ( !c )
 			{
 				c2 = new Resource( i->first, i->second.Has( "tree" ) ? "folder" : "file" ) ;
