@@ -7,6 +7,10 @@ RUN apt-get update && \
   binutils-dev pkg-config zlib1g-dev && \
   rm -rf /var/cache/apt/archives
 
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 /usr/local/bin/dumb-init
+
+RUN chmod +x /usr/local/bin/dumb-init
+
 ADD . /grive2
 
 RUN cd /grive2 && \
@@ -21,7 +25,7 @@ VOLUME /data
 
 WORKDIR /data
 
-ENTRYPOINT ["/usr/local/bin/grive"]
+ENTRYPOINT ["dumb-init", "/usr/local/bin/grive"]
 
 
 # docker build -t grive2 .
