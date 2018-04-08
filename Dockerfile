@@ -7,11 +7,21 @@ RUN apt-get update && \
   binutils-dev pkg-config zlib1g-dev && \
   rm -rf /var/cache/apt/archives
 
-ADD . /data
+ADD . /grive2
+
+RUN cd /grive2 && \
+  mkdir build && \
+  cd build && \
+  cmake .. && \
+  make -j4 && \
+  mv /grive2/build/grive/grive /usr/local/bin/grive && \
+  rm -rf /grive2
+
+VOLUME /data
 
 WORKDIR /data
 
-RUN mkdir build && cd build && cmake .. && make -j4
+ENTRYPOINT ["/usr/local/bin/grive"]
 
 
 # docker build -t grive2 .
