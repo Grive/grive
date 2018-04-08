@@ -7,10 +7,11 @@ RUN apt-get update && \
   binutils-dev pkg-config zlib1g-dev && \
   rm -rf /var/cache/apt/archives
 
-VOLUME /data
+ADD . /data
 
 WORKDIR /data
 
+RUN mkdir build && cd build && cmake .. && make -j4
 
 
 # docker build -t grive2 .
