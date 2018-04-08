@@ -1,11 +1,11 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && \
-  apt-get install --yes git cmake build-essential \
+  apt-get install --yes g++ cmake build-essential \
   libgcrypt11-dev libyajl-dev libboost-all-dev \
   libcurl4-openssl-dev libexpat1-dev libcppunit-dev \
   binutils-dev pkg-config zlib1g-dev && \
-  rm -rf /var/cache/apt/archives
+  rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 /usr/local/bin/dumb-init
 
