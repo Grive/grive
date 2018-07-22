@@ -144,6 +144,10 @@ target_link_libraries( btest
 	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
 
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing" )
+endif ( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" )
+
 if ( WIN32 )
 else ( WIN32 )
 	set_target_properties( btest

@@ -33,7 +33,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#ifdef __OpenBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <unistd.h>
 #endif
 
