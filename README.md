@@ -16,23 +16,95 @@ directory named .trash or put them in the Google Drive trash. You can always rec
 
 There are a few things that Grive does not do at the moment:
 - continously wait for changes in file system or in Google Drive to occur and upload.
-  A sync is only performed when you run Grive.
+  A sync is only performed when you run Grive (there are workarounds for almost 
+  continuous sync. See below).
 - symbolic links support.
 - support for Google documents.
 
 These may be added in the future, possibly the next release.
 
+Enjoy!
+
+## Usage
+
 When Grive is run for the first time, you should use the "-a" argument to grant
-permission to Grive to access to your Google Drive. A URL should be printed.
-Go to the link. You will need to login to your Google account if you haven't
-done so. After granting the permission to Grive, the browser will show you
-an authenication code. Copy-and-paste that to the standard input of Grive.
+permission to Grive to access to your Google Drive:
+
+```bash
+cd $HOME
+mkdir google-drive
+cd google-drive
+grive -a
+```
+
+A URL should be printed. Go to the link. You will need to login to your Google
+account if you haven't done so. After granting the permission to Grive, the
+browser will show you an authenication code. Copy-and-paste that to the
+standard input of Grive.
 
 If everything works fine, Grive will create .grive and .grive_state files in your
 current directory. It will also start downloading files from your Google Drive to
 your current directory.
 
-Enjoy!
+To resync the direcory, run `grive` in the folder.
+
+```bash
+cd $HOME/google-drive
+grive
+```
+
+### Exclude specific files and folders from sync: .griveignore
+
+Rules are similar to Git's .gitignore, but may differ slightly due to the different
+implementation.
+
+- lines that start with # are comments
+- leading and trailing spaces ignored unless escaped with \
+- non-empty lines without ! in front are treated as "exclude" patterns
+- non-empty lines with ! in front are treated as "include" patterns
+  and have a priority over all "exclude" ones
+- patterns are matched against the filenames relative to the grive root
+- a/**/b matches any number of subpaths between a and b, including 0
+- **/a matches `a` inside any directory
+- b/** matches everything inside `b`, but not b itself
+- \* matches any number of any characters except /
+- ? matches any character except /
+- .griveignore itself isn't ignored by default, but you can include it in itself to ignore
+
+
+### Scheduled syncs and syncs on file change events
+
+There are tools which you can use to enable both scheduled syncs and syncs
+when a file changes. Together these gives you an experience almost like the
+Google Drive clients on other platforms (it misses the almost instantious
+download of changed files in the google drive).
+
+Grive installs such a basic solution which uses inotify-tools together with
+systemd timer and services. You can enable it for a folder in your `$HOME`
+directory (in this case the `$HOME/google-drive`):
+
+First install the `inotify-tools` (seems to be named like that in all major distros): 
+test that it works by calling `inotifywait -h`.
+
+Prepare a Google Drive folder in your $HOME directory with `grive -a`.
+
+```bash
+# 'google-drive' is the name of your Google Drive folder in your $HOME directory
+systemctl --user enable grive-timer@google-drive.timer
+systemctl --user start grive-timer@google-drive.timer
+systemctl --user enable grive-changes@google-drive.service
+systemctl --user start grive-changes@google-drive.service
+```
+
+You can enable and start these two units for multiple folders in your `$HOME`
+directory if you need to sync with multiple google accounts.
+
+### Shared files
+
+Files and folders which are shared with you don't automatically show up in
+your folder. They need to be added explicitly to your Google Drive: go to the
+Google Drive website, right click on the file or folder and chose 'Add to My
+Drive'.
 
 ## Installation
 
@@ -87,6 +159,7 @@ Grive uses cmake to build. Basic install sequence is
 ### Grive2 v0.5.1-dev
 
 - support for .griveignore
+- automatic sync solution based on inotify-tools and systemd
 - no-remote-new and upload-only modes
 - ignore regexp does not persist anymore (note that Grive will still track it to not
   accidentally delete remote files when changing ignore regexp)
@@ -140,20 +213,3 @@ New features:
 - #86: ~~partial sync (contributed by justin at tierramedia.com)~~ that's not partial sync,
   that's only support for specifying local path on command line
 
-## .griveignore
-
-Rules are similar to Git's .gitignore, but may differ slightly due to the different
-implementation.
-
-- lines that start with # are comments
-- leading and trailing spaces ignored unless escaped with \
-- non-empty lines without ! in front are treated as "exclude" patterns
-- non-empty lines with ! in front are treated as "include" patterns
-  and have a priority over all "exclude" ones
-- patterns are matched against the filenames relative to the grive root
-- a/**/b matches any number of subpaths between a and b, including 0
-- **/a matches `a` inside any directory
-- b/** matches everything inside `b`, but not b itself
-- \* matches any number of any characters except /
-- ? matches any character except /
-- .griveignore itself isn't ignored by default, but you can include it in itself to ignore
