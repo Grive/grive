@@ -213,12 +213,12 @@ bool Syncer2::Upload( Resource *res, bool new_rev )
 
 std::unique_ptr<Feed> Syncer2::GetFolders()
 {
-	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
+	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=100000&q=trashed%3dfalse+and+mimeType%3d%27" + mime_types::folder + "%27" ) );
 }
 
 std::unique_ptr<Feed> Syncer2::GetAll()
 {
-	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=1000&q=trashed%3dfalse" ) );
+	return std::unique_ptr<Feed>( new Feed2( feeds::files + "?maxResults=999999999&q=trashed%3dfalse" ) );
 }
 
 std::string ChangesFeed( long changestamp, int maxResults = 1000 )
