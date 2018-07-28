@@ -71,6 +71,7 @@ private :
 private :
 	OAuth2&		m_auth ;
 	http::Agent*	m_agent ;
+	int		m_interval ;
 } ;
 
 } // end of namespace

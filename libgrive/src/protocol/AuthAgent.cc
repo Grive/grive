@@ -81,6 +81,7 @@ long AuthAgent::Request(
 {
 	long response;
 	Header auth;
+	m_interval = 0;
 	do
 	{
 		auth = AppendHeader( hdr );
@@ -127,7 +128,17 @@ bool AuthAgent::CheckRetry( long response )
 		os::Sleep( 5 ) ;
 		return true ;
 	}
-	
+	// HTTP 403 is the result of API rate limiting. attempt exponential backoff and try again
+	else if ( response == 429 || ( response == 403 && (
+		m_agent->LastError().find("\"reason\": \"userRateLimitExceeded\",") != std::string::npos ||
+		m_agent->LastError().find("\"reason\": \"rateLimitExceeded\",") != std::string::npos ) ) )
+	{
+		m_interval = m_interval <= 0 ? 1 : ( m_interval < 64 ? m_interval*2 : 120 );
+		Log( "request failed due to rate limiting: %1% (body: %2%). retrying in %3% seconds",
+			response, m_agent->LastError(), m_interval, log::warning ) ;
+		os::Sleep( m_interval ) ;
+		return true ;
+	}
 	// HTTP 401 Unauthorized. the auth token has been expired. refresh it
 	else if ( response == 401 )
 	{
