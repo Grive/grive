@@ -162,9 +162,7 @@ void State::FromRemote( const Entry& e )
 	std::string k = e.IsDir() ? "folder" : "file";
 
 	// common checkings
-	if ( IsIgnore( e.Name() ) )
-			Log( "file %1% is ignored by griveignore", e.Name(), log::verbose ) ;
-	else if ( !e.IsDir() && ( fn.empty() || e.ContentSrc().empty() ) )
+	if ( !e.IsDir() && ( fn.empty() || e.ContentSrc().empty() ) )
 		Log( "%1% \"%2%\" is a google document, ignored", k, e.Name(), log::verbose ) ;
 	
 	else if ( fn.find('/') != fn.npos )
