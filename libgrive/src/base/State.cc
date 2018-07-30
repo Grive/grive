@@ -28,6 +28,8 @@
 #include "util/log/Log.hh"
 #include "json/JsonParser.hh"
 
+#include <boost/algorithm/string.hpp>
+
 #include <fstream>
 
 namespace gr {
@@ -76,7 +78,7 @@ State::State( const fs::path& root, const Val& options  ) :
 	}
 
 	m_ign_changed = m_orig_ign != "" && m_orig_ign != m_ign;
-	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive$|grive_state$|trash)" : ( m_ign+"|^\\.(grive|grive_state|trash)" ) );
+	m_ign_re = boost::regex( m_ign.empty() ? "^\\.(grive$|grive_state$|trash)" : ( m_ign+"|^\\.(grive$|grive_state$|trash)" ) );
 }
 
 State::~State()
@@ -93,7 +95,7 @@ void State::FromLocal( const fs::path& p )
 
 bool State::IsIgnore( const std::string& filename )
 {
-	return regex_search( filename.c_str(), m_ign_re );
+	return regex_search( filename.c_str(), m_ign_re, boost::format_perl );
 }
 
 void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
@@ -106,7 +108,7 @@ void State::FromLocal( const fs::path& p, Resource* folder, Val& tree )
 	for ( fs::directory_iterator i( p ) ; i != fs::directory_iterator() ; ++i )
 	{
 		std::string fname = i->path().filename().string() ;
-		std::string path = folder->IsRoot() ? fname : ( folder->RelPath() / fname ).string();
+		std::string path = ( folder->IsRoot() ? fname : ( folder->RelPath() / fname ).string() );
 		
 		if ( IsIgnore( path ) )
 			Log( "file %1% is ignored by grive", path, log::verbose ) ;
@@ -317,53 +319,78 @@ void State::Read()
 	}
 }
 
+std::vector<std::string> split( const boost::regex& re, const char* str, int len )
+{
+	std::vector<std::string> vec;
+	boost::cregex_token_iterator i( str, str+len, re, -1, boost::format_perl );
+	boost::cregex_token_iterator j;
+	while ( i != j )
+	{
+		vec.push_back( *i++ );
+	}
+	return vec;
+}
+
 bool State::ParseIgnoreFile( const char* buffer, int size )
 {
-	const boost::regex re1( "/\\\\\\*\\\\\\*$" );
-	const boost::regex re2( "^\\\\\\*\\\\\\*/" );
-	const boost::regex re3( "([^\\\\](\\\\\\\\)*)/\\\\\\*\\\\\\*/" );
-	const boost::regex re4( "([^\\\\](\\\\\\\\)*|^)\\\\\\*" );
+	const boost::regex re1( "([^\\\\]|^)[\\t\\r ]+$" );
+	const boost::regex re2( "^[\\t\\r ]+" );
 	const boost::regex re5( "([^\\\\](\\\\\\\\)*|^)\\\\\\?" );
 	std::string exclude_re, include_re;
-	int prev = 0;
-	for ( int i = 0; i <= size; i++ )
+	std::vector<std::string> lines = split( boost::regex( "[\\n\\r]+" ), buffer, size );
+	for ( int i = 0; i < (int)lines.size(); i++ )
 	{
-		if ( buffer[i] == '\n' || ( i == size && i > prev ) )
+		std::string str = regex_replace( regex_replace( lines[i], re1, "$1" ), re2, "" );
+		if ( str[0] == '#' || !str.size() )
 		{
-			while ( prev < i && ( buffer[prev] == ' ' || buffer[prev] == '\t' || buffer[prev] == '\r' ) )
-				prev++;
-			if ( buffer[prev] != '#' )
+			continue;
+		}
+		bool inc = str[0] == '!';
+		if ( inc )
+		{
+			str = str.substr( 1 );
+		}
+		std::vector<std::string> parts = split( boost::regex( "/+" ), str.c_str(), str.size() );
+		for ( int j = 0; j < (int)parts.size(); j++ )
+		{
+			if ( parts[j] == "**" )
 			{
-				int j;
-				for ( j = i-1; j > prev; j-- )
-					if ( buffer[j-1] == '\\' || ( buffer[j] != ' ' && buffer[j] != '\t' && buffer[j] != '\r' ) )
-						break;
-				std::string str( buffer+prev, j+1-prev );
-				bool inc = str[0] == '!';
-				if ( inc )
-					str = str.substr( 1 );
-				str = regex_escape( str );
-				str = regex_replace( str, re1, "/.*", boost::format_perl );
-				str = regex_replace( str, re2, ".*/", boost::format_perl );
-				str = regex_replace( str, re3, "$1/(.*/)*", boost::format_perl );
-				str = regex_replace( str, re4, "$1[^/]*", boost::format_perl );
+				parts[j] = ".*";
+			}
+			else if ( parts[j] == "*" )
+			{
+				parts[j] = "[^/]*";
+			}
+			else
+			{
+				parts[j] = regex_escape( parts[j] );
 				std::string str1;
 				while (1)
 				{
-					str1 = regex_replace( str, re5, "$1[^/]", boost::format_perl );
-					if ( str1.size() == str.size() )
+					str1 = regex_replace( parts[j], re5, "$1[^/]", boost::format_perl );
+					if ( str1.size() == parts[j].size() )
 						break;
-					str = str1;
+					parts[j] = str1;
 				}
-				if ( !inc )
-					exclude_re = exclude_re + ( exclude_re.size() > 0 ? "|" : "" ) + str;
-				else
-					include_re = include_re + ( include_re.size() > 0 ? "|" : "" ) + str;
 			}
-			prev = i+1;
+		}
+		if ( !inc )
+		{
+			str = boost::algorithm::join( parts, "/" ) + "(/|$)";
+			exclude_re = exclude_re + ( exclude_re.size() > 0 ? "|" : "" ) + str;
+		}
+		else
+		{
+			str = "";
+			std::string cur;
+			for ( int j = 0; j < (int)parts.size(); j++ )
+			{
+				cur = cur.size() > 0 ? cur + "/" + parts[j] : "^" + parts[j];
+				str = ( str.size() > 0 ? str + "|" + cur : cur ) + ( j < (int)parts.size()-1 ? "$" : "(/|$)" );
+			}
+			include_re = include_re + ( include_re.size() > 0 ? "|" : "" ) + str;
 		}
 	}
-
 	if ( exclude_re.size() > 0 )
 	{
 		m_ign = "^" + ( include_re.size() > 0 ? "(?!" + include_re + ")" : std::string() ) + "(" + exclude_re + ")$";
