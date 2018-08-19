@@ -335,6 +335,7 @@ bool State::ParseIgnoreFile( const char* buffer, int size )
 {
 	const boost::regex re1( "([^\\\\]|^)[\\t\\r ]+$" );
 	const boost::regex re2( "^[\\t\\r ]+" );
+	const boost::regex re4( "([^\\\\](\\\\\\\\)*|^)\\\\\\*" );
 	const boost::regex re5( "([^\\\\](\\\\\\\\)*|^)\\\\\\?" );
 	std::string exclude_re, include_re;
 	std::vector<std::string> lines = split( boost::regex( "[\\n\\r]+" ), buffer, size );
@@ -368,6 +369,7 @@ bool State::ParseIgnoreFile( const char* buffer, int size )
 				while (1)
 				{
 					str1 = regex_replace( parts[j], re5, "$1[^/]", boost::format_perl );
+					str1 = regex_replace( str1, re4, "$1[^/]*", boost::format_perl );
 					if ( str1.size() == parts[j].size() )
 						break;
 					parts[j] = str1;
