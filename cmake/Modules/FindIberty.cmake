@@ -2,13 +2,13 @@
 # This module finds libiberty.
 #
 # It sets the following variables:
-#  IBERTY_LIBRARY     - The JSON-C library to link against.
+#  IBERTY_LIBRARY     - The library to link against.
 
 FIND_LIBRARY( IBERTY_LIBRARY NAMES iberty )
 
 IF (IBERTY_LIBRARY)
 
-	# show which JSON-C was found only if not quiet
+	# show which library was found only if not quiet
 	MESSAGE( STATUS "Found libiberty: ${IBERTY_LIBRARY}")
 	
 	SET(IBERTY_FOUND TRUE)

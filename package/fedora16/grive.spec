@@ -31,7 +31,7 @@ Source0:        https://github.com/grive/%{name}/tarball/v%{version}
 BuildRequires:  cmake
 BuildRequires:  libstdc++-devel
 BuildRequires:  libcurl-devel
-BuildRequires:  json-c-devel
+BuildRequires:  yajl-devel
 BuildRequires:  expat-devel
 BuildRequires:  openssl-devel
 BuildRequires:  boost-devel

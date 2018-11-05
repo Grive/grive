@@ -37,6 +37,7 @@ public :
 	Header() ;
 	
 	void Add( const std::string& str ) ;
+	std::string Str() const ;
 	
 	iterator begin() const ;
 	iterator end() const ;
@@ -46,5 +47,6 @@ private :
 } ;
 
 std::ostream& operator<<( std::ostream& os, const Header& h ) ;
+Header operator+( const Header& header, const std::string& str ) ;
 
 }} // end of namespace

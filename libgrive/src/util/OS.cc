@@ -39,12 +39,12 @@
 
 namespace gr { namespace os {
 
-DateTime FileCTime( const fs::path& filename )
+void Stat( const fs::path& filename, DateTime *t, off_t *size, bool *is_dir )
 {
-	return FileCTime( filename.string() ) ;
+	Stat( filename.string(), t, size, is_dir ) ;
 }
 
-DateTime FileCTime( const std::string& filename )
+void Stat( const std::string& filename, DateTime *t, off64_t *size, bool *is_dir )
 {
 	struct stat s = {} ;
 	if ( ::stat( filename.c_str(), &s ) != 0 )
@@ -57,11 +57,18 @@ DateTime FileCTime( const std::string& filename )
 		) ;
 	}
 	
+	if (t)
+	{
 #if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
-	return DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
+		*t = DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
-	return DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
+		*t = DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
 #endif
+	}
+	if ( size )
+		*size = s.st_size;
+	if ( is_dir )
+		*is_dir = S_ISDIR( s.st_mode ) ? true : false;
 }
 
 void SetFileTime( const fs::path& filename, const DateTime& t )
@@ -79,6 +86,19 @@ void SetFileTime( const std::string& filename, const DateTime& t )
 				<< boost::errinfo_errno(errno)
 				<< boost::errinfo_file_name(filename)
 		) ;
+}
+
+void Sleep( unsigned int sec )
+{
+	struct timespec ts = { sec, 0 } ;
+	
+	int result = 0 ;
+	do
+	{
+		struct timespec rem ;
+		nanosleep( &ts, &rem ) ;
+		ts = rem ;
+	} while ( result == -1 && errno == EINTR ) ;
 }
 
 } } // end of namespaces

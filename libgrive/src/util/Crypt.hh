@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "util/Exception.hh"
+
 #include <string>
 #include <memory>
 
@@ -26,17 +28,21 @@
 
 namespace gr {
 
-class StdioFile ;
+class File ;
 
 namespace crypt {
 
 class MD5
 {
 public :
+	typedef boost::error_info<struct GCryptErr,	std::string>	GCryptErr_ ;
+	typedef boost::error_info<struct GCryptApi,	std::string>	GCryptApi_ ;
+
+public :
 	MD5() ;
 	~MD5() ;
 
-	static std::string Get( StdioFile& file ) ;
+	static std::string Get( File& file ) ;
 	static std::string Get( const boost::filesystem::path& file ) ;
 	
 	void Write( const void *data, std::size_t size ) ;
@@ -44,7 +50,7 @@ public :
 
 private :
 	struct Impl ;
-	std::auto_ptr<Impl>	m_impl ;
+	std::unique_ptr<Impl>	m_impl ;
 } ;
 
 } } // end of namespace gr

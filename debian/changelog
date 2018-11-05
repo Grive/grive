@@ -1,0 +1,90 @@
+grive2 (0.5.1+git20160731) unstable; urgency=medium
+
+  * Newer dev version
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Wed, 31 Jul 2016 22:04:53 +0300
+
+grive2 (0.5+git20160114) unstable; urgency=medium
+
+  * Newer release, with support for faster sync and rename detection
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Sun, 03 Jan 2016 12:51:55 +0300
+
+grive2 (0.4.1+git20151011) unstable; urgency=medium
+
+  * Add Debian packaging scripts to the official repository
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Sun, 11 Oct 2015 15:03:55 +0300
+
+grive2 (0.4.1-1+git20151008~webupd8~wily0) wily; urgency=medium
+ 
+  * new git pull
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Thu, 08 Oct 2015 11:50:55 +0200
+
+grive2 (0.4.1-1+git20151007~webupd8~wily0) wily; urgency=medium
+ 
+  * new git pull
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Wed, 07 Oct 2015 13:46:29 +0200
+
+grive2 (0.4.1-1+git20151001~webupd8~precise0) precise; urgency=medium
+ 
+  * new git pull
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Thu, 01 Oct 2015 12:54:44 +0200
+
+grive2 (0.4.0-1+git20150928~webupd8~wily1) wily; urgency=medium
+ 
+  * new git pull
+  * build-depend on libboost-regex-dev
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Mon, 28 Sep 2015 11:36:19 +0200
+
+grive2 (0.4.0-1+git20150810~webupd8~wily0) wily; urgency=medium
+ 
+  * upload for Wily
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Sat, 04 Jul 2015 12:26:14 +0200
+
+grive2 (0.4.0-1+git20150810~webupd8~vivid0) vivid; urgency=medium
+ 
+  * new git pull
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Sat, 04 Jul 2015 12:26:14 +0200
+
+grive2 (0.4.0-1+git20150629~webupd8~vivid0) vivid; urgency=medium
+ 
+  * new git pull
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Mon, 29 Jun 2015 12:27:21 +0200
+
+grive2 (0.4.0-1~webupd8~precise3) precise; urgency=medium
+ 
+  * Initial packaging (based on grive)
+  * For Precise and Trusty only: use libgcrypt11 instead of libgcrypt20 
+    because libcurl4-openssl-dev depends on it (and for Precise, 
+    there's no libgcrypt20)
+  
+ -- Alin Andrei <webupd8@gmail.com>  Mon, 25 May 2015 15:31:24 +0200

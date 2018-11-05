@@ -178,7 +178,7 @@ public :
 
 private :
 	typedef impl::FuncImpl<Type> Impl ;
-	std::auto_ptr<Impl>	m_pimpl ;
+	std::unique_ptr<Impl>	m_pimpl ;
 } ;
 
 } // end of namespace

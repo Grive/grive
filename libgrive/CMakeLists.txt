@@ -3,14 +3,18 @@ project(libgrive)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(LibGcrypt REQUIRED)
-find_package(JSONC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(EXPAT REQUIRED)
-find_package(Boost 1.40.0 COMPONENTS filesystem system REQUIRED)
+find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework regex system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
 find_package(ZLIB)
+
+find_package(PkgConfig)
+pkg_check_modules(YAJL REQUIRED yajl)
+
+add_definitions(-Wall)
 
 # additional headers if build unit tests
 IF ( CPPUNIT_FOUND )
@@ -29,6 +33,8 @@ endif ( BFD_FOUND )
 
 if ( IBERTY_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
+else ( IBERTY_FOUND )
+  set( IBERTY_LIBRARY "" )
 endif ( IBERTY_FOUND )
 
 if ( ZLIB_FOUND )
@@ -38,12 +44,9 @@ endif ( ZLIB_FOUND )
 include_directories(
 	${libgrive_SOURCE_DIR}/src
 	${libgrive_SOURCE_DIR}/test
-	${GDBM_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
 	${OPT_INCS}
-)
-
-file(GLOB DRIVE_HEADERS
-    ${libgrive_SOURCE_DIR}/src/drive/*.hh
+	${YAJL_INCLUDE_DIRS}
 )
 
 file (GLOB PROTOCOL_HEADERS
@@ -59,16 +62,16 @@ file (GLOB XML_HEADERS
 )
 
 file (GLOB LIBGRIVE_SRC
-	src/drive/*.cc
+	src/base/*.cc
+	src/drive2/*.cc
 	src/http/*.cc
 	src/protocol/*.cc
+	src/json/*.cc
 	src/util/*.cc
 	src/util/log/*.cc
-	src/xml/*.cc
 )
 
 add_definitions(
-	-DVERSION="${GRIVE_VERSION}"
 	-DTEST_DATA="${libgrive_SOURCE_DIR}/test/data/"
 	-DSRC_DIR="${libgrive_SOURCE_DIR}/src"
 )
@@ -77,10 +80,9 @@ add_definitions(
 add_library( grive STATIC ${LIBGRIVE_SRC} ${OPT_SRC} )
 
 target_link_libraries( grive
+	${YAJL_LIBRARIES}
 	${CURL_LIBRARIES}
-	${JSONC_LIBRARY}
 	${LIBGCRYPT_LIBRARIES}
-	${GDBM_LIBRARIES}
 	${Boost_LIBRARIES}
 	${IBERTY_LIBRARY}
 	${EXPAT_LIBRARY}
@@ -112,9 +114,8 @@ IF ( CPPUNIT_FOUND )
     
     # list of test source files here
 	file(GLOB TEST_SRC
-		test/drive/*.cc
+		test/base/*.cc
 		test/util/*.cc
-		test/xml/*.cc
 	)
 
 	add_executable( unittest
@@ -125,6 +126,24 @@ IF ( CPPUNIT_FOUND )
 	target_link_libraries( unittest
 		grive
 		${CPPUNIT_LIBRARY}
+		${Boost_LIBRARIES}
 	)
         
 ENDIF ( CPPUNIT_FOUND )
+
+file(GLOB BTEST_SRC
+	test/btest/*.cc
+)
+
+add_executable( btest ${BTEST_SRC} )
+
+target_link_libraries( btest
+	grive
+	${Boost_LIBRARIES}
+)
+
+if ( WIN32 )
+else ( WIN32 )
+	set_target_properties( btest
+		PROPERTIES COMPILE_FLAGS	 -DBOOST_TEST_DYN_LINK )
+endif (WIN32)

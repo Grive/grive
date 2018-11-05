@@ -19,11 +19,11 @@
 
 #include "Crypt.hh"
 
-#include "StdioFile.hh"
+#include "File.hh"
 #include "Exception.hh"
+#include "MemMap.hh"
 
 #include <iomanip>
-#include <sstream>
 
 // dependent libraries
 #include <gcrypt.h>
@@ -31,7 +31,8 @@
 
 namespace gr { namespace crypt {
 
-const std::size_t read_size = 8 * 1024 ;
+// map 4MB of data at a time
+const u64_t read_size = 1024 * 4096 ;
 
 struct MD5::Impl
 {
@@ -43,7 +44,10 @@ MD5::MD5() : m_impl( new Impl )
 	::gcry_error_t err = ::gcry_md_open( &m_impl->hd, GCRY_MD_MD5, 0 ) ;
 	if ( err != GPG_ERR_NO_ERROR )
 	{
-		BOOST_THROW_EXCEPTION( Exception() << expt::ErrMsg( ::gcry_strerror(err) ) ) ;
+		BOOST_THROW_EXCEPTION( Exception()
+			<< GCryptErr_( ::gcry_strerror(err) )
+			<< GCryptApi_( "gcry_md_open" )
+		) ;
 	}
 }
 
@@ -74,24 +78,25 @@ std::string MD5::Get( const fs::path& file )
 {
 	try
 	{
-		StdioFile sfile( file ) ;
+		File sfile( file ) ;
 		return Get( sfile ) ;
 	}
-	catch ( StdioFile::Error& )
+	catch ( File::Error& )
 	{
 		return "" ;
 	}
 }
 
-std::string MD5::Get( StdioFile& file )
+std::string MD5::Get( File& file )
 {
-	char buf[read_size] ;
-
 	MD5 crypt ;
 	
-	std::size_t count = 0 ;
-	while ( (count = file.Read( buf, sizeof(buf) )) > 0 )
-		crypt.Write( buf, count ) ;
+	u64_t size = file.Size() ;
+	for ( u64_t i = 0 ; i < size ; i += read_size )
+	{
+		MemMap map( file, i, static_cast<std::size_t>(std::min(read_size, size-i)) ) ;
+		crypt.Write( map.Addr(), map.Length() ) ;
+	}
 
 	return crypt.Get() ;
 }

@@ -20,7 +20,6 @@
 #include "Download.hh"
 // #include "util/SignalHandler.hh"
 
-#include "Error.hh"
 #include "util/Crypt.hh"
 
 // boost headers
@@ -65,7 +64,7 @@ std::string Download::Finish() const
 	return m_crypt.get() != 0 ? m_crypt->Get() : "" ;
 }
 
-std::size_t Download::OnData( void *data, std::size_t count )
+std::size_t Download::Write( const char *data, std::size_t count )
 {
 	assert( data != 0 ) ;
 	
@@ -73,6 +72,12 @@ std::size_t Download::OnData( void *data, std::size_t count )
 		m_crypt->Write( data, count ) ;
 	
 	return m_file.Write( data, count ) ;
+}
+
+
+std::size_t Download::Read( char *data, std::size_t count )
+{
+	return count ;
 }
 
 } } // end of namespace

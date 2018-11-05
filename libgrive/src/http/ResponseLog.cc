@@ -19,6 +19,7 @@
 
 #include "ResponseLog.hh"
 
+#include "util/log/Log.hh"
 #include "util/DateTime.hh"
 
 #include <cassert>
@@ -27,28 +28,55 @@ namespace gr { namespace http {
 
 ResponseLog::ResponseLog(
 	const std::string&	prefix,
-	const std::string&	suffix,
-	Receivable			*next ) :
-	m_log( Filename(prefix, suffix).c_str() ),
-	m_next( next )
+	const std::string&	suffix )
 {
+	Reset( prefix, suffix ) ;
 }
 
-std::size_t ResponseLog::OnData( void *data, std::size_t count )
+std::size_t ResponseLog::Write( const char *data, std::size_t count )
 {
-	m_log.rdbuf()->sputn( reinterpret_cast<char*>(data), count ) ;
-	return m_next->OnData( data, count ) ;
+	if ( m_enabled )
+	{
+		assert( m_log.rdbuf() != 0 ) ;
+		m_log.rdbuf()->sputn( data, count ) ;
+		m_log.flush();
+	}
+	return count;
 }
 
-void ResponseLog::Clear()
+std::size_t ResponseLog::Read( char *data, std::size_t count )
 {
-	assert( m_next != 0 ) ;
-	m_next->Clear() ;
+	return 0 ;
 }
 
 std::string ResponseLog::Filename( const std::string& prefix, const std::string& suffix )
 {
-	return prefix + DateTime::Now().Format( "%H%M%S" ) + suffix ;
+	return prefix + DateTime::Now().Format( "%F.%H%M%S" ) + suffix ;
+}
+
+void ResponseLog::Reset( const std::string& prefix, const std::string& suffix )
+{
+	if ( m_log.is_open() )
+		m_log.close() ;
+	
+	const std::string fname = Filename( prefix, suffix ) ;
+	
+	// reset previous stream state. don't care if file can be opened
+	// successfully previously
+	m_log.clear() ;
+	
+	// re-open the file
+	m_log.open( fname.c_str() ) ;
+	if ( m_log )
+	{
+		Trace( "logging HTTP response: %1%", fname ) ;
+		m_enabled = true ;
+	}
+	else
+	{
+		Trace( "cannot open log file %1%", fname ) ;
+		m_enabled = false ;
+	}
 }
 
 }} // end of namespace

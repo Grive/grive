@@ -33,11 +33,13 @@ namespace os
 {
 	struct Error : virtual Exception {} ;
 	
-	DateTime FileCTime( const std::string& filename ) ;
-	DateTime FileCTime( const fs::path& filename ) ;
+	void Stat( const std::string& filename, DateTime *t, off64_t *size, bool *is_dir ) ;
+	void Stat( const fs::path& filename, DateTime *t, off64_t *size, bool *is_dir ) ;
 	
 	void SetFileTime( const std::string& filename, const DateTime& t ) ;
 	void SetFileTime( const fs::path& filename, const DateTime& t ) ;
+	
+	void Sleep( unsigned int sec ) ;
 }
 
 } // end of namespaces

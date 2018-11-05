@@ -33,6 +33,10 @@ NodeSet::NodeSet() :
 {
 }
 
+/**	Initialize the node set with an external list of nodes.
+	With this constructor, the list of nodes pointed by [first,last) will NOT
+	be deep copied to the node set.
+*/
 NodeSet::NodeSet( iterator first, iterator last ) :
 	m_first( first ),
 	m_last( last )
@@ -124,7 +128,7 @@ NodeSet NodeSet::operator[]( const std::string& name ) const
 Node NodeSet::front() const
 {
 	if ( empty() )
-		throw Error() << expt::ErrMsg( "empty node set" ) ;
+		BOOST_THROW_EXCEPTION( Error() << EmptyNodeSet_(0) ) ;
 		
 	return *m_first ;
 }
