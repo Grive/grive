@@ -1,6 +1,8 @@
-grive2 (0.5.1+git20160731) unstable; urgency=medium
+grive2 (0.5.2+git20210315) unstable; urgency=medium
 
   * Newer dev version
+  * Add systemd unit files and helper script for automatic syncs
+  * Add possibility to change client id and secret and save it between runs
 
  -- Vitaliy Filippov <vitalif@yourcmc.ru>  Wed, 31 Jul 2016 22:04:53 +0300
 
