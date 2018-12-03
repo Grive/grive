@@ -79,12 +79,6 @@ sync_directory() {
 	while [[ "${TIME_AT_START}" -lt "${TIME_AT_END}" ]]; do
 	    echo "Syncing "${_directory}"..." 
 	    TIME_AT_START="$(stat -c %Y "$LOCKFILE")"
-	    # exclude symlinks from sync
-	    cat "${_directory}"/.griveignore 2>/dev/null | sed '/#LINKS-EDIT_BEFORE_THIS$/,$d' > /tmp/.griveignore.base
-	    cp /tmp/.griveignore.base "${_directory}"/.griveignore
-	    rm /tmp/.griveignore.base
-	    echo "#LINKS-EDIT_BEFORE_THIS" >> "${_directory}"/.griveignore
-	    ( cd "${_directory}" && find . -type l | sed 's/^.\///g'; ) >> "${_directory}"/.griveignore
 	    grive -p "${_directory}" 2>&1 | grep -v -E "^Reading local directories$|^Reading remote server file list$|^Synchronizing files$|^Finished!$"
 	    TIME_AT_END="$(stat -c %Y "$LOCKFILE")"
 	    echo "Sync of "${_directory}" done." 
