@@ -5,6 +5,7 @@ CONFIGURE_FILE(grive-timer@.service.in grive-timer@.service @ONLY)
 
 install(
   FILES
+    grive@.service
     ${CMAKE_BINARY_DIR}/systemd/grive-changes@.service
     ${CMAKE_BINARY_DIR}/systemd/grive-timer@.service
   DESTINATION

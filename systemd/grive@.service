@@ -1,0 +1,13 @@
+[Unit]
+Description=Google drive sync (main)
+Requires=grive-timer@%i.timer grive-changes@%i.service
+
+# dummy service
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+# This service shall be considered active after start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
