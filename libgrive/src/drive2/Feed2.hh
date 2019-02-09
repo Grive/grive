@@ -31,6 +31,7 @@ class Feed2: public Feed
 {
 public :
 	Feed2( const std::string& url ) ;
+    ~Feed2() ;
 	bool GetNext( http::Agent *http ) ;
 } ;
 

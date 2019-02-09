@@ -30,6 +30,10 @@ Feed::Feed( const std::string &url ):
 {
 }
 
+Feed::~Feed()
+{
+}
+
 Feed::iterator Feed::begin() const
 {
 	return m_entries.begin() ;

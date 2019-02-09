@@ -41,6 +41,7 @@ public :
 public :
 	Feed( const std::string& url );
 	virtual bool GetNext( http::Agent *http ) = 0 ;
+    virtual ~Feed() = 0 ;
 	iterator begin() const ;
 	iterator end() const ;
 
