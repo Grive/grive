@@ -19,7 +19,7 @@ find_program(
 )
 if ( HAVE_SYSTEMD )
 	add_subdirectory( systemd )
-endif( NOT HAVE_SYSTEMD )
+endif( HAVE_SYSTEMD )
 
 add_subdirectory( libgrive )
 add_subdirectory( grive )
