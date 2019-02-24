@@ -133,6 +133,11 @@ these packages:
         libboost-all-dev libcurl4-openssl-dev libexpat1-dev libcppunit-dev binutils-dev \
         debhelper zlib1g-dev dpkg-dev pkg-config
 
+Fedora:
+
+    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost libcurl-devel expat-devel binutils zlib
+
+
 FreeBSD:
 
     pkg install git cmake boost-libs yajl libgcrypt pkgconf cppunit libbfd
