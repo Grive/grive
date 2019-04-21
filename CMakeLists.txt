@@ -7,5 +7,9 @@ set( GRIVE_VERSION "0.5.1-dev" )
 add_definitions( -DVERSION="${GRIVE_VERSION}" )
 add_definitions( -D_FILE_OFFSET_BITS=64 -std=c++0x )
 
+# Package name and version for libraries depending on autotools
+add_definitions( -DPACKAGE="grive" )
+add_definitions( -DPACKAGE_VERSION="${GRIVE_VERSION}" )
+
 add_subdirectory( libgrive )
 add_subdirectory( grive )
