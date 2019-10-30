@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+project(grive2)
 
 include(GNUInstallDirs)
 
@@ -12,4 +13,3 @@ add_definitions( -D_FILE_OFFSET_BITS=64 -std=c++0x )
 add_subdirectory( systemd )
 add_subdirectory( libgrive )
 add_subdirectory( grive )
-	
