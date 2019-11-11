@@ -1,3 +1,19 @@
+# ACHTUNG
+
+Most of Google Drive APIs are currently locked. R.I.P grive2 and other opensource
+Google Drive clients :)
+
+Details:
+
+Here https://developers.google.com/drive/api/v3/about-auth?hl=ru most APIs are marked as restricted
+
+And here https://support.google.com/cloud/answer/9110914 they say that
+
+**The following application types are examples of apps that are no longer allowed per the Permitted Application Types policy:
+Apps that store or backup data other than email messages in Gmail.**
+
+So, go tell Google they're morons and quit using google drive NOW :)
+
 # Grive2 0.5.1-dev
 
 28 Sep 2016, Vitaliy Filippov
