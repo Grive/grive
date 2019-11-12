@@ -1,30 +1,14 @@
-# ACHTUNG
+# Grive2 0.5.2-dev
 
-Most of Google Drive APIs are currently locked. R.I.P grive2 and other opensource
-Google Drive clients :)
-
-Details:
-
-Here https://developers.google.com/drive/api/v3/about-auth?hl=ru most APIs are marked as restricted
-
-And here https://support.google.com/cloud/answer/9110914 they say that
-
-**The following application types are examples of apps that are no longer allowed per the Permitted Application Types policy:
-Apps that store or backup data other than email messages in Gmail.**
-
-So, go tell Google they're morons and quit using google drive NOW :)
-
-# Grive2 0.5.1-dev
-
-28 Sep 2016, Vitaliy Filippov
+13 Nov 2019, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
 This is the fork of original "Grive" (https://github.com/Grive/grive) Google Drive client
 with the support for the new Drive REST API and partial sync.
 
-Grive can be considered still beta or pre-beta quality. It simply downloads all the files in your
-Google Drive into the current directory. After you make some changes to the local files, run
+Grive simply downloads all the files in your Google Drive into the current directory.
+After you make some changes to the local files, run
 grive again and it will upload your changes back to your Google Drive. New files created locally
 or in Google Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
 Currently Grive will NOT destroy any of your files: it will only move the files to a
@@ -32,12 +16,12 @@ directory named .trash or put them in the Google Drive trash. You can always rec
 
 There are a few things that Grive does not do at the moment:
 - continously wait for changes in file system or in Google Drive to occur and upload.
-  A sync is only performed when you run Grive (there are workarounds for almost 
+  A sync is only performed when you run Grive (there are workarounds for almost
   continuous sync. See below).
 - symbolic links support.
 - support for Google documents.
 
-These may be added in the future, possibly the next release.
+These may be added in the future.
 
 Enjoy!
 
@@ -177,17 +161,22 @@ Grive uses cmake to build. Basic install sequence is
 
 ## Version History
 
-### Grive2 v0.5.1-dev
+### Grive2 v0.5.2-dev
 
-- support for .griveignore
-- automatic sync solution based on inotify-tools and systemd
+### Grive2 v0.5.1
+
+- Support for .griveignore
+- Automatic sync solution based on inotify-tools and systemd
 - no-remote-new and upload-only modes
-- ignore regexp does not persist anymore (note that Grive will still track it to not
+- Ignore regexp does not persist anymore (note that Grive will still track it to not
   accidentally delete remote files when changing ignore regexp)
-- added options to limit upload and download speed
-- faster upload of new and changed files. now Grive uploads files without first calculating
+- Added options to limit upload and download speed
+- Faster upload of new and changed files. Now Grive uploads files without first calculating
   md5 checksum when file is created locally or when its size changes.
-- added -P/--progress-bar option to print ASCII progress bar for each processed file (pull request by @svartkanin)
+- Added -P/--progress-bar option to print ASCII progress bar for each processed file (pull request by @svartkanin)
+- Added command-line options to specify your own client_id and client_secret
+- Now grive2 skips links, sockets, fifos and other unusual files
+- Various small build fixes
 
 ### Grive2 v0.5
 

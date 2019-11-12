@@ -84,12 +84,7 @@ void OAuth2::Auth( const std::string&	auth_code )
 std::string OAuth2::MakeAuthURL()
 {
 	return "https://accounts.google.com/o/oauth2/auth"
-		"?scope=" +
-			m_agent->Escape( "https://www.googleapis.com/auth/userinfo.email" )	+ "+" + 
-			m_agent->Escape( "https://www.googleapis.com/auth/userinfo.profile" )	+ "+" +
-			m_agent->Escape( "https://docs.google.com/feeds/" )					+ "+" + 
-			m_agent->Escape( "https://docs.googleusercontent.com/" )				+ "+" + 
-			m_agent->Escape( "https://spreadsheets.google.com/feeds/" )			+
+		"?scope=" + m_agent->Escape( "https://www.googleapis.com/auth/drive" ) +
 		"&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 		"&response_type=code"
 		"&client_id=" + m_client_id ;
