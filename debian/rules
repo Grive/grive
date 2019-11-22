@@ -1,4 +1,4 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --buildsystem=cmake --parallel
+	dh $@ --buildsystem=cmake --parallel --builddirectory=build

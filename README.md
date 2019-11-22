@@ -106,6 +106,10 @@ your folder. They need to be added explicitly to your Google Drive: go to the
 Google Drive website, right click on the file or folder and chose 'Add to My
 Drive'.
 
+## Custom client id and secret
+
+You can specify them with --id and --secret arguments or edit them at grive/src/main.cpp and rebuild.
+
 ## Installation
 
 For the detailed instructions, see http://yourcmc.ru/wiki/Grive2#Installation
@@ -147,7 +151,7 @@ FreeBSD:
 On a Debian/Ubuntu/Linux Mint you can use `dpkg-buildpackage` utility from `dpkg-dev` package
 to build grive. Just clone the repository, `cd` into it and run
 
-    dpkg-buildpackage -j4
+    dpkg-buildpackage -j4 --no-sign
 
 ### Manual build
 
