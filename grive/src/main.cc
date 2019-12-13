@@ -46,8 +46,8 @@
 #include <iostream>
 #include <unistd.h>
 
-const std::string default_id            = "615557989097-i93d4d1ojpen0m0dso18ldr6orjkidgf.apps.googleusercontent.com" ;
-const std::string default_secret        = "xiM8Apu_WuRRdheNelJcNtOD" ;
+const std::string default_id            = APP_ID ;
+const std::string default_secret        = APP_SECRET ;
 
 using namespace gr ;
 namespace po = boost::program_options;
@@ -113,6 +113,7 @@ int Main( int argc, char **argv )
 		( "auth,a",		"Request authorization token" )
                 ( "id,i",               po::value<std::string>(), "Authentication ID")
                 ( "secret,e",           po::value<std::string>(), "Authentication secret")
+                ( "print-url",          "Only print url for request")
 		( "path,p",		po::value<std::string>(), "Path to working copy root")
 		( "dir,s",		po::value<std::string>(), "Single subdirectory to sync")
 		( "verbose,V",	"Verbose mode. Enable more messages than normal.")
@@ -174,22 +175,22 @@ int Main( int argc, char **argv )
 		http->SetProgressReporter( pb.get() );
 	}
 
-	std::string id = default_id;
-	std::string secret = default_secret;
-
-	if( vm.count( "id" ) )
-	{
-		id = vm["id"].as<std::string>();
-	}
-
-	if( vm.count( "secret" ) )
-	{
-		secret = vm["secret"].as<std::string>();
-	}
-
 	if ( vm.count( "auth" ) )
 	{
+		std::string id = vm.count( "id" ) > 0
+                        ? vm["id"].as<std::string>()
+                        : default_id ;
+		std::string secret = vm.count( "secret" ) > 0
+                        ? vm["secret"].as<std::string>()
+                        : default_secret ;
+
 		OAuth2 token( http.get(), id, secret ) ;
+		
+		if ( vm.count("print-url") )
+		{
+			std::cout <<  token.MakeAuthURL() << std::endl ;
+			return 0 ;
+		}
 		
 		std::cout
 			<< "-----------------------\n"
@@ -206,14 +207,20 @@ int Main( int argc, char **argv )
 		token.Auth( code ) ;
 		
 		// save to config
+		config.Set( "id", Val( id ) ) ;
+		config.Set( "secret", Val( secret ) ) ;
 		config.Set( "refresh_token", Val( token.RefreshToken() ) ) ;
 		config.Save() ;
 	}
 	
 	std::string refresh_token ;
+	std::string id ;
+	std::string secret ;
 	try
 	{
 		refresh_token = config.Get("refresh_token").Str() ;
+		id = config.Get("id").Str() ;
+		secret = config.Get("secret").Str() ;
 	}
 	catch ( Exception& e )
 	{

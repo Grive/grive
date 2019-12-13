@@ -159,6 +159,14 @@ Grive uses cmake to build. Basic install sequence is
     make -j4
     sudo make install
 
+Alternativly you can define your own client_id and client_secret during build
+
+    mkdir build
+    cd build
+    cmake .. "-DAPP_ID:STRING=<client_id>" "-DAPP_SECRET:STRING=<client_secret>"
+    make -j4
+    sudo make install
+
 ## Version History
 
 ### Grive2 v0.5.2-dev
