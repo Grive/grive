@@ -38,6 +38,10 @@ const std::string	default_root_folder = ".";
 
 Config::Config( const po::variables_map& vm )
 {
+	if ( vm.count( "id" ) > 0 )
+		m_cmd.Add( "id",	Val( vm["id"].as<std::string>() ) ) ;
+	if ( vm.count( "secret" ) > 0 )
+		m_cmd.Add( "secret",	Val( vm["secret"].as<std::string>() ) ) ;
 	m_cmd.Add( "new-rev",	Val(vm.count("new-rev") > 0) ) ;
 	m_cmd.Add( "force",		Val(vm.count("force") > 0 ) ) ;
 	m_cmd.Add( "path",		Val(vm.count("path") > 0
