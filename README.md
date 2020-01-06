@@ -106,17 +106,23 @@ your folder. They need to be added explicitly to your Google Drive: go to the
 Google Drive website, right click on the file or folder and chose 'Add to My
 Drive'.
 
-### Different OAuth2 client to workaround over quota issues
+### Different OAuth2 client to workaround over quota and google approval issues
 
-The default OAuth2 client supplied with grive is sometimes over quota and grive
-will then fail to sync. You can supply your own OAuth2 client credentials by
-following these steps:
+Google recently started to restrict access for unapproved applications:
+https://developers.google.com/drive/api/v3/about-auth?hl=ru
+
+Grive2 is currently awaiting approval but it seems it will take forever.
+Also even if they approve it the default Client ID supplied with grive may
+exceed quota and grive will then fail to sync.
+
+You can supply your own OAuth2 client credentials to work around these problems
+by following these steps:
 
 1. Go to https://console.developers.google.com/apis/api/drive.googleapis.com
-2. Chose a project (you might need to create one first)
+2. Choose a project (you might need to create one first)
 3. Go to https://console.developers.google.com/apis/library/drive.googleapis.com and
    "Enable" the Google Drive APIs
-4. Create new Credentials on the folloing screen(s)
+4. Go to https://console.cloud.google.com/apis/credentials and click "Create credentials > Help me choose"
 5. In the "Find out what credentials you need" dialog, choose:
    - Which API are you using: "Google Drive API"
    - Where will you be calling the API from: "Other UI (...CLI...)"
@@ -126,7 +132,7 @@ following these steps:
 7. The needed "Client ID" and "Client Secret" are either in the shown download
    or can later found by clicking on the created credential on
    https://console.developers.google.com/apis/credentials/
-8. When you applying grive in an existing Google Drive folder, you must first delete
+8. When you change client ID/secret in an existing Grive folder you must first delete
    the old `.grive` configuration file.
 9. Call `grive -a --id <client_id> --secret <client_secret>` and follow the steps
    to authenticate the OAuth2 client to allow it to access your drive folder.
