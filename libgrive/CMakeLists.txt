@@ -4,6 +4,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(LibGcrypt REQUIRED)
 find_package(CURL REQUIRED)
+find_package(Backtrace)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework regex system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
@@ -19,15 +20,15 @@ IF ( CPPUNIT_FOUND )
 	set( OPT_INCS		${CPPUNIT_INCLUDE_DIR} )
 ENDIF ( CPPUNIT_FOUND )
 
-# build bfd classes if libbfd is found
-if ( BFD_FOUND )
-	set( OPT_LIBS	${DL_LIBRARY} ${BFD_LIBRARY} )
+# build bfd classes if libbfd and the backtrace library is found
+if ( BFD_FOUND AND Backtrace_FOUND )
+	set( OPT_LIBS	${DL_LIBRARY} ${BFD_LIBRARY} ${Backtrace_LIBRARY} )
 	file( GLOB OPT_SRC
 		src/bfd/*.cc
 	)
 	add_definitions( -DHAVE_BFD )
 	
-endif ( BFD_FOUND )
+endif ( BFD_FOUND AND Backtrace_FOUND )
 
 if ( IBERTY_FOUND )
 	set( OPT_LIBS	${OPT_LIBS}	${IBERTY_LIBRARY} )
