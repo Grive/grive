@@ -166,7 +166,7 @@ these packages:
 
 Fedora:
 
-    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost libcurl-devel expat-devel binutils zlib
+    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost-devel libcurl-devel expat-devel binutils zlib
 
 
 FreeBSD:
