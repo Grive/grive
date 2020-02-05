@@ -4,12 +4,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(LibGcrypt REQUIRED)
 find_package(CURL REQUIRED)
-find_package(EXPAT REQUIRED)
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem unit_test_framework regex system REQUIRED)
 find_package(BFD)
 find_package(CppUnit)
 find_package(Iberty)
-find_package(ZLIB)
 
 find_package(PkgConfig)
 pkg_check_modules(YAJL REQUIRED yajl)
@@ -36,10 +34,6 @@ if ( IBERTY_FOUND )
 else ( IBERTY_FOUND )
   set( IBERTY_LIBRARY "" )
 endif ( IBERTY_FOUND )
-
-if ( ZLIB_FOUND )
-	set( OPT_LIBS	${OPT_LIBS}	${ZLIB_LIBRARIES} )
-endif ( ZLIB_FOUND )
 
 include_directories(
 	${libgrive_SOURCE_DIR}/src
@@ -88,7 +82,6 @@ target_link_libraries( grive
 	${Boost_REGEX_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 	${IBERTY_LIBRARY}
-	${EXPAT_LIBRARY}
 	${OPT_LIBS}
 )
 

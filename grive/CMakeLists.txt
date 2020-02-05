@@ -20,6 +20,17 @@ target_link_libraries( grive_executable
 	grive
 )
 
+set(DEFAULT_APP_ID "615557989097-i93d4d1ojpen0m0dso18ldr6orjkidgf.apps.googleusercontent.com")
+set(DEFAULT_APP_SECRET "xiM8Apu_WuRRdheNelJcNtOD")
+set(APP_ID ${DEFAULT_APP_ID} CACHE STRING "Application Id")
+set(APP_SECRET ${DEFAULT_APP_SECRET} CACHE STRING "Application Secret")
+
+target_compile_definitions ( grive_executable
+	PRIVATE
+		-DAPP_ID="${APP_ID}"
+		-DAPP_SECRET="${APP_SECRET}"
+)
+
 set_target_properties( grive_executable
 	PROPERTIES OUTPUT_NAME grive
 )

@@ -1,14 +1,14 @@
-# Grive2 0.5.1-dev
+# Grive2 0.5.2-dev
 
-28 Sep 2016, Vitaliy Filippov
+13 Nov 2019, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
 This is the fork of original "Grive" (https://github.com/Grive/grive) Google Drive client
 with the support for the new Drive REST API and partial sync.
 
-Grive can be considered still beta or pre-beta quality. It simply downloads all the files in your
-Google Drive into the current directory. After you make some changes to the local files, run
+Grive simply downloads all the files in your Google Drive into the current directory.
+After you make some changes to the local files, run
 grive again and it will upload your changes back to your Google Drive. New files created locally
 or in Google Drive will be uploaded or downloaded respectively. Deleted files will also be "removed".
 Currently Grive will NOT destroy any of your files: it will only move the files to a
@@ -16,12 +16,12 @@ directory named .trash or put them in the Google Drive trash. You can always rec
 
 There are a few things that Grive does not do at the moment:
 - continously wait for changes in file system or in Google Drive to occur and upload.
-  A sync is only performed when you run Grive (there are workarounds for almost 
+  A sync is only performed when you run Grive (there are workarounds for almost
   continuous sync. See below).
 - symbolic links support.
 - support for Google documents.
 
-These may be added in the future, possibly the next release.
+These may be added in the future.
 
 Enjoy!
 
@@ -90,10 +90,10 @@ Prepare a Google Drive folder in your $HOME directory with `grive -a`.
 
 ```bash
 # 'google-drive' is the name of your Google Drive folder in your $HOME directory
-systemctl --user enable grive-timer@google-drive.timer
-systemctl --user start grive-timer@google-drive.timer
-systemctl --user enable grive-changes@google-drive.service
-systemctl --user start grive-changes@google-drive.service
+systemctl --user enable grive-timer@$(systemd-escape google-drive).timer
+systemctl --user start grive-timer@$(systemd-escape google-drive).timer
+systemctl --user enable grive-changes@$(systemd-escape google-drive).service
+systemctl --user start grive-changes@$(systemd-escape google-drive).service
 ```
 
 You can enable and start these two units for multiple folders in your `$HOME`
@@ -105,6 +105,37 @@ Files and folders which are shared with you don't automatically show up in
 your folder. They need to be added explicitly to your Google Drive: go to the
 Google Drive website, right click on the file or folder and chose 'Add to My
 Drive'.
+
+### Different OAuth2 client to workaround over quota and google approval issues
+
+Google recently started to restrict access for unapproved applications:
+https://developers.google.com/drive/api/v3/about-auth?hl=ru
+
+Grive2 is currently awaiting approval but it seems it will take forever.
+Also even if they approve it the default Client ID supplied with grive may
+exceed quota and grive will then fail to sync.
+
+You can supply your own OAuth2 client credentials to work around these problems
+by following these steps:
+
+1. Go to https://console.developers.google.com/apis/api/drive.googleapis.com
+2. Choose a project (you might need to create one first)
+3. Go to https://console.developers.google.com/apis/library/drive.googleapis.com and
+   "Enable" the Google Drive APIs
+4. Go to https://console.cloud.google.com/apis/credentials and click "Create credentials > Help me choose"
+5. In the "Find out what credentials you need" dialog, choose:
+   - Which API are you using: "Google Drive API"
+   - Where will you be calling the API from: "Other UI (...CLI...)"
+   - What data will you be accessing: "User Data"
+6. In the next steps create a client id (name doesn't matter) and
+   setup the consent screen (defaults are ok, no need for any URLs)
+7. The needed "Client ID" and "Client Secret" are either in the shown download
+   or can later found by clicking on the created credential on
+   https://console.developers.google.com/apis/credentials/
+8. When you change client ID/secret in an existing Grive folder you must first delete
+   the old `.grive` configuration file.
+9. Call `grive -a --id <client_id> --secret <client_secret>` and follow the steps
+   to authenticate the OAuth2 client to allow it to access your drive folder.
 
 ## Installation
 
@@ -129,9 +160,14 @@ There are also some optional dependencies:
 On a Debian/Ubuntu/Linux Mint machine just run the following command to install all
 these packages:
 
-    sudo apt-get install git cmake build-essential libgcrypt11-dev libyajl-dev \
+    sudo apt-get install git cmake build-essential libgcrypt20-dev libyajl-dev \
         libboost-all-dev libcurl4-openssl-dev libexpat1-dev libcppunit-dev binutils-dev \
         debhelper zlib1g-dev dpkg-dev pkg-config
+
+Fedora:
+
+    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost-devel libcurl-devel expat-devel binutils zlib
+
 
 FreeBSD:
 
@@ -154,19 +190,32 @@ Grive uses cmake to build. Basic install sequence is
     make -j4
     sudo make install
 
+Alternativly you can define your own client_id and client_secret during build
+
+    mkdir build
+    cd build
+    cmake .. "-DAPP_ID:STRING=<client_id>" "-DAPP_SECRET:STRING=<client_secret>"
+    make -j4
+    sudo make install
+
 ## Version History
 
-### Grive2 v0.5.1-dev
+### Grive2 v0.5.2-dev
 
-- support for .griveignore
-- automatic sync solution based on inotify-tools and systemd
+### Grive2 v0.5.1
+
+- Support for .griveignore
+- Automatic sync solution based on inotify-tools and systemd
 - no-remote-new and upload-only modes
-- ignore regexp does not persist anymore (note that Grive will still track it to not
+- Ignore regexp does not persist anymore (note that Grive will still track it to not
   accidentally delete remote files when changing ignore regexp)
-- added options to limit upload and download speed
-- faster upload of new and changed files. now Grive uploads files without first calculating
+- Added options to limit upload and download speed
+- Faster upload of new and changed files. Now Grive uploads files without first calculating
   md5 checksum when file is created locally or when its size changes.
-- added -P/--progress-bar option to print ASCII progress bar for each processed file (pull request by @svartkanin)
+- Added -P/--progress-bar option to print ASCII progress bar for each processed file (pull request by @svartkanin)
+- Added command-line options to specify your own client_id and client_secret
+- Now grive2 skips links, sockets, fifos and other unusual files
+- Various small build fixes
 
 ### Grive2 v0.5
 

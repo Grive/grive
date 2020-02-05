@@ -23,7 +23,6 @@
 #include "Node.hh"
 #include "util/log/Log.hh"
 
-#include <expat.h>
 
 #include <cassert>
 #include <iostream>
