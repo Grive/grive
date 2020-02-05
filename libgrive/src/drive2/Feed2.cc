@@ -36,6 +36,10 @@ Feed2::Feed2( const std::string& url ):
 {
 }
 
+Feed2::~Feed2()
+{
+}
+
 bool Feed2::GetNext( http::Agent *http )
 {
 	if ( m_next.empty() )
