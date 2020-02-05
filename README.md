@@ -178,7 +178,7 @@ FreeBSD:
 On a Debian/Ubuntu/Linux Mint you can use `dpkg-buildpackage` utility from `dpkg-dev` package
 to build grive. Just clone the repository, `cd` into it and run
 
-    dpkg-buildpackage -j4
+    dpkg-buildpackage -j4 --no-sign
 
 ### Manual build
 
