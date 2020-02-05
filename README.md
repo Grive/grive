@@ -106,9 +106,36 @@ your folder. They need to be added explicitly to your Google Drive: go to the
 Google Drive website, right click on the file or folder and chose 'Add to My
 Drive'.
 
-## Custom client id and secret
+### Different OAuth2 client to workaround over quota and google approval issues
 
-You can specify them with --id and --secret arguments or edit them at grive/src/main.cpp and rebuild.
+Google recently started to restrict access for unapproved applications:
+https://developers.google.com/drive/api/v3/about-auth?hl=ru
+
+Grive2 is currently awaiting approval but it seems it will take forever.
+Also even if they approve it the default Client ID supplied with grive may
+exceed quota and grive will then fail to sync.
+
+You can supply your own OAuth2 client credentials to work around these problems
+by following these steps:
+
+1. Go to https://console.developers.google.com/apis/api/drive.googleapis.com
+2. Choose a project (you might need to create one first)
+3. Go to https://console.developers.google.com/apis/library/drive.googleapis.com and
+   "Enable" the Google Drive APIs
+4. Go to https://console.cloud.google.com/apis/credentials and click "Create credentials > Help me choose"
+5. In the "Find out what credentials you need" dialog, choose:
+   - Which API are you using: "Google Drive API"
+   - Where will you be calling the API from: "Other UI (...CLI...)"
+   - What data will you be accessing: "User Data"
+6. In the next steps create a client id (name doesn't matter) and
+   setup the consent screen (defaults are ok, no need for any URLs)
+7. The needed "Client ID" and "Client Secret" are either in the shown download
+   or can later found by clicking on the created credential on
+   https://console.developers.google.com/apis/credentials/
+8. When you change client ID/secret in an existing Grive folder you must first delete
+   the old `.grive` configuration file.
+9. Call `grive -a --id <client_id> --secret <client_secret>` and follow the steps
+   to authenticate the OAuth2 client to allow it to access your drive folder.
 
 ## Installation
 
@@ -133,13 +160,13 @@ There are also some optional dependencies:
 On a Debian/Ubuntu/Linux Mint machine just run the following command to install all
 these packages:
 
-    sudo apt-get install git cmake build-essential libgcrypt11-dev libyajl-dev \
+    sudo apt-get install git cmake build-essential libgcrypt20-dev libyajl-dev \
         libboost-all-dev libcurl4-openssl-dev libexpat1-dev libcppunit-dev binutils-dev \
         debhelper zlib1g-dev dpkg-dev pkg-config
 
 Fedora:
 
-    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost libcurl-devel expat-devel binutils zlib
+    sudo dnf install git cmake libgcrypt-devel gcc-c++ libstdc++ yajl-devel boost-devel libcurl-devel expat-devel binutils zlib
 
 
 FreeBSD:
@@ -160,6 +187,14 @@ Grive uses cmake to build. Basic install sequence is
     mkdir build
     cd build
     cmake ..
+    make -j4
+    sudo make install
+
+Alternativly you can define your own client_id and client_secret during build
+
+    mkdir build
+    cd build
+    cmake .. "-DAPP_ID:STRING=<client_id>" "-DAPP_SECRET:STRING=<client_secret>"
     make -j4
     sudo make install
 
