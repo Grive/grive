@@ -15,7 +15,7 @@ cd ~
 
 ### ARGUMENT PARSING ###
 SCRIPT="${0}"
-DIRECTORY=$(systemd-escape --unescape "$2")
+DIRECTORY=$(systemd-escape --unescape -- "$2")
 
 if [[ -z "$DIRECTORY" ]] || [[ ! -d "$DIRECTORY" ]] ; then
 	echo "Need a directory name in the current users home directory as second argument. Aborting."
