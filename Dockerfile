@@ -1,32 +1,28 @@
-FROM ubuntu:16.04
+FROM alpine:3.7 as build
 
-RUN apt-get update && \
-  apt-get install --yes --no-install-recommends g++ cmake build-essential \
-  libgcrypt11-dev libyajl-dev libboost-all-dev \
-  libcurl4-openssl-dev libexpat1-dev libcppunit-dev \
-  binutils-dev pkg-config zlib1g-dev && \
-  rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
+RUN apk add git make cmake g++ libgcrypt-dev yajl-dev yajl \
+    boost-dev curl-dev expat-dev cppunit-dev binutils-dev \
+	pkgconfig \
+	&& git clone https://github.com/vitalif/grive2.git \
+	&& mkdir grive2/build \
+	&& cd grive2/build  \
+	&& cmake ..  \
+	&& make -j4  \
+	&& make install \
+    && cd ../.. \
+	&& rm -rf grive2 \
+	&& mkdir /drive
 
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 /usr/local/bin/dumb-init
-
-RUN chmod +x /usr/local/bin/dumb-init
-
-ADD . /grive2
-
-RUN cd /grive2 && \
-  mkdir build && \
-  cd build && \
-  cmake .. && \
-  make -j4 && \
-  mv /grive2/build/grive/grive /usr/local/bin/grive && \
-  rm -rf /grive2
-
-VOLUME /data
-
-WORKDIR /data
-
-ENTRYPOINT ["dumb-init", "/usr/local/bin/grive"]
-
-
-# docker build -t grive2 .
-# docker run --name grive2 --rm -it -v $PWD:/data grive2:latest
+FROM alpine:3.7
+COPY --from=build /usr/local/bin/grive /bin/grive
+COPY ./entrypoint.sh /root/entrypoint.sh  
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 /bin/dumb-init
+RUN chmod 777 /root/entrypoint.sh /bin/dumb-init /bin/grive \
+	&& mkdir /drive \
+	&& apk add yajl-dev curl-dev libgcrypt \
+	boost-program_options boost-regex libstdc++ boost-system boost-dev binutils-dev \
+	&& apk add boost-filesystem --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
+VOLUME /drive
+WORKDIR /drive
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["/root/entrypoint.sh"]
