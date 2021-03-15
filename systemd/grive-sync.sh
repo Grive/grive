@@ -62,17 +62,19 @@ unlock()            { _lock u; }   # drop a lock
 
 sync_directory() {
 	_directory="${1}"
+
+	reset_timer_and_exit() { echo "Retriggered google drive sync" && touch -m $LOCKFILE && exit; }
+
+	exlock_now || reset_timer_and_exit
+
 	if ping -c1 -W1 -q accounts.google.com >/dev/null 2>&1; then
 	    true
 	    # pass
 	else
-	    echo "Google drive server not reachable..."
+	    echo "Google drive server not reachable, NOT syncing..."
+		unlock
 	    exit 0
 	fi
-
-	reset_timer_and_exit() { echo "Retriggered google drive sync" && touch -m "$LOCKFILE" && exit; }
-
-	exlock_now || reset_timer_and_exit
 
 	TIME_AT_START=0
 	TIME_AT_END=1
@@ -91,10 +93,11 @@ sync_directory() {
 	done
 
 	# always exit ok, so that we never go into a wrong systemd state
+	unlock
 	exit 0
 }
 
-### LISTEN TO DIRECTORY CHANGES ###
+### LISTEN TO CHANGES IN DIRECTORY ###
 
 
 listen_directory() {
