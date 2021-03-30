@@ -1,4 +1,4 @@
-SET(GRIVE_SYNC_SH_BINARY "${CMAKE_INSTALL_FULL_LIBDIR}/grive/grive-sync.sh")
+SET(GRIVE_SYNC_SH_BINARY "${CMAKE_INSTALL_FULL_LIBEXECDIR}/grive/grive-sync.sh")
 
 CONFIGURE_FILE(grive-changes@.service.in grive-changes@.service @ONLY)
 CONFIGURE_FILE(grive-timer@.service.in grive-timer@.service @ONLY)
