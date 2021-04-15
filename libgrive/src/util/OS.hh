@@ -31,6 +31,10 @@ class Path ;
 
 enum FileType { FT_FILE = 1, FT_DIR = 2, FT_UNKNOWN = 3 } ;
 
+#ifndef off64_t
+#define off64_t off_t
+#endif
+
 namespace os
 {
 	struct Error : virtual Exception {} ;
