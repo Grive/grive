@@ -59,7 +59,7 @@ void Stat( const std::string& filename, DateTime *t, off64_t *size, FileType *ft
 	
 	if ( t )
 	{
-#if defined __APPLE__ && defined __DARWIN_64_BIT_INO_T
+#if defined __NetBSD__ || ( defined __APPLE__ && defined __DARWIN_64_BIT_INO_T )
 		*t = DateTime( s.st_ctimespec.tv_sec, s.st_ctimespec.tv_nsec ) ;
 #else
 		*t = DateTime( s.st_ctim.tv_sec, s.st_ctim.tv_nsec);
