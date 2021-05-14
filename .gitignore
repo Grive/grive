@@ -23,3 +23,5 @@ debian/grive/
 debian/.debhelper
 
 obj-x86_64-linux-gnu/
+
+.idea
