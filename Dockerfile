@@ -15,14 +15,13 @@ RUN apk add git make cmake g++ libgcrypt-dev yajl-dev yajl \
 
 FROM alpine:3.7
 COPY --from=build /usr/local/bin/grive /bin/grive
-COPY ./entrypoint.sh /root/entrypoint.sh  
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 /bin/dumb-init
-RUN chmod 777 /root/entrypoint.sh /bin/dumb-init /bin/grive \
-	&& mkdir /drive \
+RUN chmod 777 /bin/dumb-init /bin/grive \
+	&& mkdir /data \
 	&& apk add yajl-dev curl-dev libgcrypt \
 	boost-program_options boost-regex libstdc++ boost-system boost-dev binutils-dev \
 	&& apk add boost-filesystem --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
-VOLUME /drive
-WORKDIR /drive
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["/root/entrypoint.sh"]
+
+VOLUME /data
+WORKDIR /data
+ENTRYPOINT ["dumb-init", "grive"]
