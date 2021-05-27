@@ -62,22 +62,24 @@ unlock()            { _lock u; }   # drop a lock
 
 sync_directory() {
 	_directory="${1}"
+
+	reset_timer_and_exit() { echo "Retriggered google drive sync ('${_directory}')" && touch -m $LOCKFILE && exit; }
+
+	exlock_now || reset_timer_and_exit
+
 	if ping -c1 -W1 -q accounts.google.com >/dev/null 2>&1; then
 	    true
 	    # pass
 	else
-	    echo "Google drive server not reachable..."
+	    echo "Google drive server not reachable, NOT syncing..."
+		unlock
 	    exit 0
 	fi
-
-	reset_timer_and_exit() { echo "Retriggered google drive sync" && touch -m "$LOCKFILE" && exit; }
-
-	exlock_now || reset_timer_and_exit
 
 	TIME_AT_START=0
 	TIME_AT_END=1
 	while [[ "${TIME_AT_START}" -lt "${TIME_AT_END}" ]]; do
-	    echo "Syncing "${_directory}"..." 
+	    echo "Syncing '${_directory}'..." 
 	    TIME_AT_START="$(stat -c %Y "$LOCKFILE")"
 	    # exclude symlinks from sync
 	    cat "${_directory}"/.griveignore 2>/dev/null | sed '/#LINKS-EDIT_BEFORE_THIS$/,$d' > /tmp/.griveignore.base
@@ -87,14 +89,15 @@ sync_directory() {
 	    ( cd "${_directory}" && find . -type l | sed 's/^.\///g'; ) >> "${_directory}"/.griveignore
 	    grive -p "${_directory}" 2>&1 | grep -v -E "^Reading local directories$|^Reading remote server file list$|^Synchronizing files$|^Finished!$"
 	    TIME_AT_END="$(stat -c %Y "$LOCKFILE")"
-	    echo "Sync of "${_directory}" done." 
+	    echo "Sync of '${_directory}' done." 
 	done
 
 	# always exit ok, so that we never go into a wrong systemd state
+	unlock
 	exit 0
 }
 
-### LISTEN TO DIRECTORY CHANGES ###
+### LISTEN TO CHANGES IN DIRECTORY ###
 
 
 listen_directory() {
@@ -102,7 +105,7 @@ listen_directory() {
 
 	type inotifywait >/dev/null 2>&1 || { echo >&2 "I require inotifywait but it's not installed. Aborting."; exit 1; }
 
-	echo "Listening for changes in ~/"${_directory}""
+	echo "Listening for changes in '${_directory}'"
 
 	while true #run indefinitely
 	do 

@@ -90,14 +90,17 @@ Prepare a Google Drive folder in your $HOME directory with `grive -a`.
 
 ```bash
 # 'google-drive' is the name of your Google Drive folder in your $HOME directory
-systemctl --user enable grive-timer@$(systemd-escape google-drive).timer
-systemctl --user start grive-timer@$(systemd-escape google-drive).timer
-systemctl --user enable grive-changes@$(systemd-escape google-drive).service
-systemctl --user start grive-changes@$(systemd-escape google-drive).service
+systemctl --user enable grive@$(systemd-escape google-drive).service
+systemctl --user start grive@$(systemd-escape google-drive).service
 ```
 
-You can enable and start these two units for multiple folders in your `$HOME`
+You can enable and start this unit for multiple folders in your `$HOME`
 directory if you need to sync with multiple google accounts.
+
+You can also only enable the time based syncing or the changes based syncing
+by only directly enabling and starting the corresponding unit:
+`grive-changes@$(systemd-escape google-drive).service` or 
+`grive-timer@$(systemd-escape google-drive).timer`.
 
 ### Shared files
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Google drive sync 
+Description=Google drive sync (executed by timer unit)
 After=network-online.target
 
 [Service]
