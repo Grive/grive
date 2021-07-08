@@ -23,5 +23,5 @@ install(
   PROGRAMS
     grive-sync.sh
   DESTINATION
-    ${CMAKE_INSTALL_FULL_LIBDIR}/grive
+    ${CMAKE_INSTALL_FULL_LIBEXECDIR}/grive
 )
