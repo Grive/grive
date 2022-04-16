@@ -1,4 +1,1 @@
-.git
-Dockerfile
-.dockerignore
-.gitignore
+*
