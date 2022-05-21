@@ -21,6 +21,7 @@
 
 #include "util/FileSystem.hh"
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <iosfwd>
