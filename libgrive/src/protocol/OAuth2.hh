@@ -41,13 +41,15 @@ public :
 		const std::string&	refresh_code,
 		const std::string&	client_id,
 		const std::string&	client_secret ) ;
+	~OAuth2( ) ;
 
 	std::string Str() const ;
 
 	std::string MakeAuthURL() ;
 
-	void Auth( const std::string& auth_code ) ;
+	bool Auth( const std::string& auth_code ) ;
 	void Refresh( ) ;
+	bool GetCode( ) ;
 
 	std::string RefreshToken( ) const ;
 	std::string AccessToken( ) const ;
@@ -59,7 +61,9 @@ private :
 	std::string m_access ;
 	std::string m_refresh ;
 	http::Agent* m_agent ;
-	
+	int m_port ;
+	int m_socket ;
+
 	const std::string	m_client_id ;
 	const std::string	m_client_secret ;
 } ;

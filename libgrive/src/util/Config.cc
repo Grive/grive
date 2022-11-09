@@ -84,7 +84,7 @@ void Config::Save( )
 
 void Config::Set( const std::string& key, const Val& value )
 {
-	m_file.Add( key, value ) ;
+	m_file.Set( key, value ) ;
 }
 
 Val Config::Get( const std::string& key ) const
