@@ -1,6 +1,6 @@
-# Grive2 0.5.2-dev
+# Grive2 0.5.3
 
-13 Nov 2019, Vitaliy Filippov
+09 Nov 2022, Vitaliy Filippov
 
 http://yourcmc.ru/wiki/Grive2
 
@@ -203,7 +203,10 @@ Alternativly you can define your own client_id and client_secret during build
 
 ## Version History
 
-### Grive2 v0.5.2-dev
+### Grive2 v0.5.3
+
+- Implement Google OAuth loopback IP redirect flow
+- Various small fixes
 
 ### Grive2 v0.5.1
 

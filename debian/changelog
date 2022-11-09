@@ -1,3 +1,10 @@
+grive2 (0.5.3) unstable; urgency=medium
+
+  * Implement Google OAuth loopback IP redirect flow
+  * Various small fixes
+
+ -- Vitaliy Filippov <vitalif@yourcmc.ru>  Wed, 09 Nov 2022 12:42:28 +0300
+
 grive2 (0.5.2+git20210315) unstable; urgency=medium
 
   * Newer dev version
